@@ -2,11 +2,13 @@
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PasswordInput from "@app/components/auth/PasswordInput";
+import GoogleSignInButton from "@app/components/button/GoogleSignInButton";
 import SubmitButton from "@app/components/button/SendButton";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
+import { Divider } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
@@ -132,6 +134,12 @@ export default function SignIn() {
           disabled={!isFormValid}
         />
       </form>
+      <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-x-2">
+        <Divider />
+        <p className="text-xs text-zinc-300">または</p>
+        <Divider />
+      </div>
+      <GoogleSignInButton />
     </>
   );
 }
