@@ -118,8 +118,8 @@ const useBattingStatistics = (battingBoxes: BattingBox[]) => {
       if (box.result === 10) totalBases += 4;
 
       if (box.result === 13 || box.result === 14) strikeOuts += 1;
-      if (box.result === 14) baseOnBalls += 1;
-      if (box.result === 15) hitByPitch += 1;
+      if (box.result === 15) baseOnBalls += 1;
+      if (box.result === 16) hitByPitch += 1;
       if (box.result === 11) sacrificeHit += 1;
       if (box.result === 12) sacrificeFly += 1;
     });
