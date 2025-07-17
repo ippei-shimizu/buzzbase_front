@@ -123,3 +123,13 @@ export const getFollowersUser = async (id: number) => {
     throw error;
   }
 };
+
+export const deleteUser = async (id: number) => {
+  try {
+    const response = await axiosInstance.delete(`/api/v1/users/${id}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
