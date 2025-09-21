@@ -3,27 +3,27 @@
 import { NextRequest } from "next/server";
 
 interface DashboardStats {
-  totalUsers: number;
-  dailyActiveUsers: number;
-  newRegistrations: number;
-  monthlyActiveUsers: number;
-  userGrowthData: Array<{
+  total_users: number;
+  daily_active_users: number;
+  new_registrations: number;
+  monthly_active_users: number;
+  user_growth_data: Array<{
     date: string;
     new_users: number;
     total_users: number;
     active_users: number;
   }>;
-  activityData: Array<{
+  activity_data: Array<{
     date: string;
     games: number;
     batting_records: number;
     pitching_records: number;
     total_posts: number;
   }>;
-  growthRates?: {
+  growth_rates?: {
     users?: number;
     dau?: number;
-    newUsers?: number;
+    new_users?: number;
   };
 }
 
