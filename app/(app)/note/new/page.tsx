@@ -97,7 +97,7 @@ export default function NoteNew() {
     <>
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
         <HeaderNote
-          onNoteSave={handleSubmit}
+          onNoteSave={() => handleSubmit({ preventDefault: () => {} })}
           isSubmitting={isSubmitting}
           hasChanges={hasChanges}
         />

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 import Header from "@app/components/header/Header";
-import NoticeBreadcrumb from "@app/notice-from-management/notice-breadcrumb";
+import NoticeBreadcrumb from "@app/(app)/notice-from-management/notice-breadcrumb";
 import { Chip, Divider } from "@nextui-org/react";
 import Logout from "@app/components/auth/Logout";
 import Image from "next/image";

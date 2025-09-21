@@ -5,7 +5,7 @@ export const metadata: Metadata = {
 };
 
 import Header from "@app/components/header/Header";
-import NoticeItems from "@app/notice-from-management/notice-item";
+import NoticeItems from "@app/(app)/notice-from-management/notice-item";
 
 export default function NoticeFromManagement() {
   const notices = [

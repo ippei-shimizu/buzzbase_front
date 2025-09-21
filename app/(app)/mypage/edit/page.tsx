@@ -433,7 +433,7 @@ export default function ProfileEdit() {
 
   return (
     <div className="buzz-dark bg-main pb-24 flex flex-col w-full min-h-screen ">
-      <HeaderSave onProfileUpdate={handleSubmit} />
+      <HeaderSave onProfileUpdate={() => handleSubmit(new Event('submit'))} />
       <div className="h-full buzz-dark">
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-12 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 ">
