@@ -21,7 +21,7 @@ export default function Group() {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [router]);
+  }, [router, isLoggedIn]);
 
   useEffect(() => {
     fetchUserIdData();

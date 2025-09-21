@@ -31,7 +31,7 @@ export default function GameResultList() {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [router]);
+  }, [router, isLoggedIn]);
 
   const fetchData = async () => {
     try {

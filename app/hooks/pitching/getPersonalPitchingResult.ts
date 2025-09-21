@@ -2,7 +2,7 @@
 import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
 
-export function getPersonalPitchingResult(userId: number) {
+export function usePersonalPitchingResult(userId: number) {
   const { data, error } = useSWR(
     userId
       ? `/api/v1/pitching_results/personal_pitching_result?user_id=${userId}`

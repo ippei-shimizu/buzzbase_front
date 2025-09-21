@@ -163,7 +163,7 @@ export default function GroupDetail({ params }: GroupDetailProps) {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [router]);
+  }, [router, isLoggedIn]);
 
   useEffect(() => {
     fetchData();

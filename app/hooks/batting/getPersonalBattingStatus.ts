@@ -2,7 +2,7 @@
 import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
 
-export function getPersonalBattingStatus(userId: number) {
+export function usePersonalBattingStatus(userId: number) {
   const { data, error } = useSWR(
     userId
       ? `/api/v1/batting_averages/personal_batting_stats?user_id=${userId}`

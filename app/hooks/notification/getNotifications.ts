@@ -3,7 +3,7 @@ import { useUser } from "@app/contexts/userContext";
 import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
 
-export function getNotifications() {
+export function useNotifications() {
   const { state } = useUser();
   const usersUserId = state.usersUserId;
   const { data, error } = useSWR(

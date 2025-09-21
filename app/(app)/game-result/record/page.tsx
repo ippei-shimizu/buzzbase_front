@@ -118,7 +118,7 @@ export default function GameRecord() {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [router]);
+  }, [router, isLoggedIn]);
 
   const fetchData = async () => {
     try {

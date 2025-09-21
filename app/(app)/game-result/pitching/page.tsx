@@ -97,7 +97,7 @@ export default function PitchingRecord() {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [router]);
+  }, [router, isLoggedIn]);
 
   const fetchData = async () => {
     try {
