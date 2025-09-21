@@ -25,7 +25,7 @@ export default function AccountDeletionPage() {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [router]);
+  }, [router, isLoggedIn]);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
