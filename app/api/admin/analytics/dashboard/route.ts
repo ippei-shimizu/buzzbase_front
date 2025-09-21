@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminUser } from "../../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../../lib/internal-jwt";
 
+export const dynamic = 'force-dynamic';
+
 const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 export async function GET(request: NextRequest) {

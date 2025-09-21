@@ -2,6 +2,8 @@ import { getDashboardStats } from "./actions";
 import StatCard from "../../_components/StatCard";
 import InteractiveDashboard from "./_components/InteractiveDashboard";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
   const overviewStats = await getDashboardStats(30, 'daily');
   const initialStats = await getDashboardStats(30, 'daily');
