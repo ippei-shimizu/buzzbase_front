@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
 interface DashboardStats {
@@ -10,19 +9,37 @@ interface DashboardStats {
   monthlyActiveUsers: number;
   userGrowthData: Array<{
     date: string;
-    users: number;
+    new_users: number;
+    total_users: number;
+    active_users: number;
   }>;
   activityData: Array<{
     date: string;
-    dailyActive: number;
-    newUsers: number;
+    games: number;
+    batting_records: number;
+    pitching_records: number;
+    total_posts: number;
   }>;
+  growthRates?: {
+    users?: number;
+    dau?: number;
+    newUsers?: number;
+  };
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(
+  period: number = 30,
+  granularity: 'daily' | 'weekly' | 'monthly' = 'daily'
+): Promise<DashboardStats> {
+  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:8000';
+
   const routeModule = await import("../../../api/admin/analytics/dashboard/route");
 
-  const request = new NextRequest('http://localhost/api/admin/analytics/dashboard', {
+  const url = new URL(`${baseUrl}/api/admin/analytics/dashboard`);
+  url.searchParams.set('period', period.toString());
+  url.searchParams.set('granularity', granularity);
+
+  const request = new NextRequest(url.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
