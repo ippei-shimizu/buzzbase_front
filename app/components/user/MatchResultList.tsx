@@ -14,7 +14,7 @@ import {
   getCurrentPlateAppearanceUserId,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type GameResult = {
   game_result_id: number;
@@ -40,21 +40,7 @@ export default function MatchResultList(props: UserId) {
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
 
-  useEffect(() => {
-    if (userId) {
-      fetchFilteredData();
-    } else {
-      fetchData();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (selectedYear && selectedMatchType) {
-      fetchFilteredData();
-    }
-  }, [selectedYear, selectedMatchType]);
-
-  const fetchFilteredData = async () => {
+  const fetchFilteredData = useCallback(async () => {
     try {
       let filteredGameResultData;
       let plateAppearanceDataLists;
@@ -123,7 +109,21 @@ export default function MatchResultList(props: UserId) {
     } catch (error) {
       console.error(`Filtered game lists fetch error:`, error);
     }
-  };
+  }, [userId, selectedYear, selectedMatchType]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchFilteredData();
+    } else {
+      fetchData();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (selectedYear && selectedMatchType) {
+      fetchFilteredData();
+    }
+  }, [selectedYear, selectedMatchType, fetchFilteredData]);
 
   const fetchData = async () => {
     try {

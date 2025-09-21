@@ -10,7 +10,7 @@ type Team = {
   prefecture_name: string;
 };
 
-export default function getMyTeams() {
+export default function useMyTeams() {
   const pathName = usePathname();
   const userId = extractUserIdFromPath(pathName);
   const { data, error } = useSWR<Team>(
