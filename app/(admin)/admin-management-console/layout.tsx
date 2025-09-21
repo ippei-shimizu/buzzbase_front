@@ -1,15 +1,18 @@
-import { adminLogout } from "./auth/actions";
+import { adminLogout, getAdminUser } from "./auth/actions";
 import Sidebar from "../_components/Sidebar";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-export default function AdminLayout({ children }: AdminLayoutProps) {
+export default async function AdminLayout({ children }: AdminLayoutProps) {
+  const adminUser = await getAdminUser();
+  const isAuthenticated = !!adminUser;
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar />
-      <div className="md:pl-64 flex flex-col flex-1">
+      {isAuthenticated && <Sidebar />}
+      <div className={`${isAuthenticated ? 'md:pl-64' : ''} flex flex-col flex-1`}>
         <nav className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
@@ -17,7 +20,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <div className="hidden md:flex items-center">
                 <h1 className="text-xl font-semibold text-gray-900">
-                  BuzzBase Admin Dashboard
+                  BUZZ BASE Admin
                 </h1>
               </div>
               <div className="flex items-center space-x-4">
