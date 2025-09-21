@@ -149,24 +149,6 @@ interface ResultsSelectBoxProps {
   selectedKeys?: string[];
 }
 
-interface HeaderSaveProps {
-  onProfileUpdate: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
-interface HeaderMatchResultsProps {
-  onMatchResultNext: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  disabled: boolean | undefined;
-  text: string;
-}
-
-interface HeaderNextProps {
-  onMatchResultSave: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
-
-interface HeaderSummaryResultProps {
-  onSummaryResult: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  text: string;
-}
-
 interface updateUserPositions {
   userId: number;
   positionIds: number[];
