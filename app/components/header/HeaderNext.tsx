@@ -4,6 +4,10 @@ import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import Image from "next/image";
 import Link from "next/link";
 
+interface HeaderNextProps {
+  onMatchResultSave: () => void;
+}
+
 export default function HeaderNext({ onMatchResultSave }: HeaderNextProps) {
   return (
     <>

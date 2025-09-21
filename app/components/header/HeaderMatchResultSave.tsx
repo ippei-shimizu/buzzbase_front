@@ -1,6 +1,12 @@
 import { BackIcon } from "@app/components/icon/BackIcon";
 import { Button } from "@nextui-org/react";
 
+interface HeaderMatchResultsProps {
+  onMatchResultNext: () => void;
+  disabled: boolean;
+  text: string;
+}
+
 export default function HeaderMatchResultNext({
   onMatchResultNext,
   disabled,
