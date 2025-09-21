@@ -5,7 +5,7 @@ export default function RegistrationConfirmation() {
     <>
       <div className="px-4 pt-32 max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <h2 className="text-lg bold mb-8">
-          BuzzBaseへご登録ありがとうございます！
+          BUZZ BASEへご登録ありがとうございます！
         </h2>
         <p className=" text-base leading-6">
           入力したメールアドレス宛にアカウント確認メールを送信しました。

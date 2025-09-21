@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "BUZZ BASE Admin Dashboard",
+    default: "BUZZ BASE Admin",
     template: "%s - BUZZ BASE Admin",
   },
   description: "BUZZ BASE管理画面 - ユーザー管理とデータ分析",

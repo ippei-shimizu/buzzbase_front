@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
             <div className="px-4 pt-24 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:px-6 lg:pb-6">
               <h2 className="text-2xl font-bold">プライバシーポリシー</h2>
               <h3 className="text-xl font-bold mt-8">はじめに</h3>
-              <p className="text-sm mt-4">BuzzBase（以下、「当社」とします）は、当社が運営するWebサービス（以下、「本サービス」とします）において、お客様のプライバシーを尊重し、お客様から提供される個人情報の保護に努めています。本プライバシーポリシーは、本サービスを利用される際に、当社がどのような情報を収集し、その情報をどのように扱うかについて説明しています。</p>
+              <p className="text-sm mt-4">BUZZ BASE（以下、「当社」とします）は、当社が運営するWebサービス（以下、「本サービス」とします）において、お客様のプライバシーを尊重し、お客様から提供される個人情報の保護に努めています。本プライバシーポリシーは、本サービスを利用される際に、当社がどのような情報を収集し、その情報をどのように扱うかについて説明しています。</p>
               <h3 className="text-xl font-bold mt-8">収集する情報</h3>
               <p className="text-sm mt-4">当社は、本サービスの提供、改善、お客様のサポートのために、以下の情報を収集することがあります。<br></br><br></br>
               ・氏名（ニックネームも含む）<br></br>

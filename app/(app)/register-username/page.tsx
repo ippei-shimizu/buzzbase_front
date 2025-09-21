@@ -101,7 +101,7 @@ export default function RegisterUserName() {
           ご登録ありがとうございます！<br></br>
           <span className="text-lg font-bold">ユーザー名</span>と
           <span className="text-lg font-bold">ユーザーID</span>
-          を登録して、BuzzBaseをはじめましょう！
+          を登録して、BUZZ BASEをはじめましょう！
         </p>
         <div className="mt-12 w-full">
           <form onSubmit={handleSubmit} className="flex flex-col gap-y-4">
