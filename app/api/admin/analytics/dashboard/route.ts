@@ -16,7 +16,15 @@ export async function GET(request: NextRequest) {
 
     const jwtToken = generateInternalJWT(adminUser.id);
 
-    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/analytics/dashboard`, {
+    const { searchParams } = new URL(request.url);
+    const period = searchParams.get('period') || '30';
+    const granularity = searchParams.get('granularity') || 'daily';
+
+    const apiUrl = new URL(`${RAILS_API_URL}/api/v1/admin/analytics/dashboard`);
+    apiUrl.searchParams.set('period', period);
+    apiUrl.searchParams.set('granularity', granularity);
+
+    const response = await fetch(apiUrl.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
