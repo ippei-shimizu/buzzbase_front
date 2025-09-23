@@ -11,31 +11,74 @@ const RAILS_API_URL = process.env.RAILS_API_URL || 'http://back:3000';
 /**
  * NOTE: サーバーサイドで管理者認証を確認
  */
-export async function getAdminUser(): Promise<AdminUser | null> {
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
-    const cookieStore = cookies();
-    const jwtToken = cookieStore.get("admin-jwt")?.value;
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": `admin-refresh-token=${refreshToken}`
+      }
+    });
 
-    if (!jwtToken) {
-      return null;
+    if (response.ok) {
+      const data = await response.json();
+      return data.access_token;
     }
+  } catch (error) {
+    console.error("Token refresh failed:", error);
+  }
+  return null;
+}
 
+async function validateAccessToken(accessToken: string): Promise<AdminUser | null> {
+  try {
     const response = await fetch(`${RAILS_API_URL}/api/v1/admin/validate`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
+        'Cookie': `admin-access-token=${accessToken}`,
       },
     });
 
-    if (!response.ok) {
-      return null;
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.user) {
+        return data.user;
+      }
+    }
+  } catch (error) {
+    console.error("Token validation failed:", error);
+  }
+  return null;
+}
+
+export async function getAdminUser(): Promise<AdminUser | null> {
+  try {
+    const cookieStore = cookies();
+    const accessToken = cookieStore.get("admin-access-token")?.value;
+    const refreshToken = cookieStore.get("admin-refresh-token")?.value;
+
+    if (accessToken) {
+      const user = await validateAccessToken(accessToken);
+      if (user) {
+        return user;
+      }
     }
 
-    const data = await response.json();
+    if (refreshToken) {
+      const newAccessToken = await refreshAccessToken(refreshToken);
+      if (newAccessToken) {
+        cookieStore.set("admin-access-token", newAccessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 60 * 15,
+          path: "/",
+        });
 
-    if (data.success && data.user) {
-      return data.user;
+        return await validateAccessToken(newAccessToken);
+      }
     }
 
     return null;

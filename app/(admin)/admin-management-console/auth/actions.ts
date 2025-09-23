@@ -4,12 +4,6 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
-interface AdminUser {
-  id: number;
-  email: string;
-  name: string;
-}
-
 export async function adminLogin(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -32,13 +26,22 @@ export async function adminLogin(formData: FormData) {
       return { error: data.error || "ログインに失敗しました" };
     }
 
-    if (data.success && data.jwt && data.user) {
+    if (data.success && data.access_token && data.refresh_token && data.user) {
       const cookieStore = cookies();
-      cookieStore.set("admin-jwt", data.jwt, {
+
+      cookieStore.set("admin-access-token", data.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: 60 * 15,
+        path: "/",
+      });
+
+      cookieStore.set("admin-refresh-token", data.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 30,
         path: "/",
       });
 
@@ -70,8 +73,8 @@ export async function adminLogout() {
     console.error("Admin logout API error:", error);
   }
 
-  // JWTクッキーを削除
-  cookieStore.delete("admin-jwt");
+  cookieStore.delete("admin-access-token");
+  cookieStore.delete("admin-refresh-token");
 
   redirect("/admin-management-console/login");
 }
