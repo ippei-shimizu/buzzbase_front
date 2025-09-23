@@ -82,6 +82,7 @@ export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
           "Content-Type": "application/json",
           Authorization: `Bearer ${jwtToken}`,
         },
+        credentials: "include",
       }
     );
 
