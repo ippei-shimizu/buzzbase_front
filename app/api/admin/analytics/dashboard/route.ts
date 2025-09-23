@@ -1,54 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUser } from "../../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../../lib/internal-jwt";
+import {
+  withAdminErrorHandler,
+  handleExternalApiCall,
+} from "../../../../../lib/admin-api-handler";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
-export async function GET(request: NextRequest) {
-  try {
-    const adminUser = await getAdminUser();
-    if (!adminUser) {
-      return NextResponse.json(
-        { error: "認証が必要です" },
-        { status: 401 }
-      );
-    }
+async function dashboardHandler(request: NextRequest) {
+  const adminUser = await getAdminUser();
+  const jwtToken = generateInternalJWT(adminUser!.id);
 
-    const jwtToken = generateInternalJWT(adminUser.id);
+  const { searchParams } = new URL(request.url);
+  const period = searchParams.get("period") || "30";
+  const granularity = searchParams.get("granularity") || "daily";
 
-    const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period') || '30';
-    const granularity = searchParams.get('granularity') || 'daily';
+  const apiUrl = new URL(`${RAILS_API_URL}/api/v1/admin/analytics/dashboard`);
+  apiUrl.searchParams.set("period", period);
+  apiUrl.searchParams.set("granularity", granularity);
 
-    const apiUrl = new URL(`${RAILS_API_URL}/api/v1/admin/analytics/dashboard`);
-    apiUrl.searchParams.set('period', period);
-    apiUrl.searchParams.set('granularity', granularity);
+  const data = await handleExternalApiCall(
+    () =>
+      fetch(apiUrl.toString(), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      }),
+    "ダッシュボードデータの取得に失敗しました"
+  );
 
-    const response = await fetch(apiUrl.toString(), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${jwtToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "データの取得に失敗しました" },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-
-  } catch (error) {
-    console.error("Dashboard analytics error:", error);
-    return NextResponse.json(
-      { error: "サーバーエラーが発生しました" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(data);
 }
+
+export const GET = withAdminErrorHandler(dashboardHandler);

@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { withAdminErrorHandler } from "../../../../../lib/admin-api-handler";
 
-export async function POST(request: NextRequest) {
-  try {
-    const cookieStore = cookies();
+async function logoutHandler(request: NextRequest) {
+  const cookieStore = cookies();
+  cookieStore.delete("admin-session");
 
-    cookieStore.delete("admin-session");
-
-    return NextResponse.json({
-      success: true,
-      message: "ログアウトしました"
-    });
-
-  } catch (error) {
-    console.error("Admin logout error:", error);
-    return NextResponse.json(
-      { success: false, error: "ログアウト処理中にエラーが発生しました" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    success: true,
+    message: "ログアウトしました",
+  });
 }
+
+export const POST = withAdminErrorHandler(logoutHandler, {
+  requireAuth: false,
+});

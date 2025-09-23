@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import {
+  withAdminErrorHandler,
+  AdminApiError,
+  validateRequestBody,
+  handleExternalApiCall
+} from "../../../../../lib/admin-api-handler";
 
 const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
@@ -15,65 +21,60 @@ interface LoginResponse {
   error?: string;
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { success: false, error: "メールアドレスとパスワードが必要です" },
-        { status: 400 }
-      );
-    }
-
-    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/sign_in`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return NextResponse.json(
-        { success: false, error: errorData.error || "ログインに失敗しました" },
-        { status: response.status }
-      );
-    }
-
-    const data: LoginResponse = await response.json();
-
-    if (data.success && data.user) {
-      const cookieStore = cookies();
-
-      cookieStore.set("admin-session", JSON.stringify({
-        user: data.user,
-        timestamp: Date.now()
-      }), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/"
-      });
-
-      return NextResponse.json({
-        success: true,
-        user: data.user
-      });
-    }
-
-    return NextResponse.json(
-      { success: false, error: "認証に失敗しました" },
-      { status: 401 }
-    );
-
-  } catch (error) {
-    console.error("Admin login error:", error);
-    return NextResponse.json(
-      { success: false, error: "サーバーエラーが発生しました" },
-      { status: 500 }
-    );
-  }
+interface LoginRequest {
+  email: string;
+  password: string;
 }
+
+async function validateLoginRequest(data: any): Promise<LoginRequest> {
+  if (!data.email || !data.password) {
+    throw new Error("メールアドレスとパスワードが必要です");
+  }
+  return { email: data.email, password: data.password };
+}
+
+async function loginHandler(request: NextRequest) {
+  const { email, password } = await validateRequestBody(
+    request,
+    validateLoginRequest
+  );
+
+  const data: LoginResponse = await handleExternalApiCall(
+    () =>
+      fetch(`${RAILS_API_URL}/api/v1/admin/sign_in`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      }),
+    "ログインに失敗しました"
+  );
+
+  if (!data.success || !data.user) {
+    throw new AdminApiError("認証に失敗しました", 401, "AUTHENTICATION_FAILED");
+  }
+
+  const cookieStore = cookies();
+  cookieStore.set(
+    "admin-session",
+    JSON.stringify({
+      user: data.user,
+      timestamp: Date.now(),
+    }),
+    {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    }
+  );
+
+  return NextResponse.json({
+    success: true,
+    user: data.user,
+  });
+}
+
+export const POST = withAdminErrorHandler(loginHandler, { requireAuth: false });
