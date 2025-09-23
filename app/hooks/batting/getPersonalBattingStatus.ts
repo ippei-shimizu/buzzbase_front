@@ -7,7 +7,7 @@ export function usePersonalBattingStatus(userId: number) {
     userId
       ? `/api/v1/batting_averages/personal_batting_stats?user_id=${userId}`
       : null,
-    fetcher
+    fetcher,
   );
   return {
     personalBattingStatus: data,

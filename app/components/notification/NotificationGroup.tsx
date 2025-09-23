@@ -114,7 +114,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
                         onPress={() =>
                           handleDeclinedGroupInvitation(
                             notice.event_id,
-                            notice.id
+                            notice.id,
                           )
                         }
                       >

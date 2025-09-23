@@ -26,7 +26,7 @@ export interface ApiHandlerOptions {
 
 type ApiHandler = (
   request: NextRequest,
-  context?: any
+  context?: any,
 ) => Promise<NextResponse>;
 
 /**
@@ -34,7 +34,7 @@ type ApiHandler = (
  */
 export function withAdminErrorHandler(
   handler: ApiHandler,
-  options: ApiHandlerOptions = {}
+  options: ApiHandlerOptions = {},
 ): ApiHandler {
   const { requireAuth = true, logErrors = true } = options;
 
@@ -72,7 +72,7 @@ function handleApiError(error: unknown, logErrors: boolean): NextResponse {
         error: error.message,
         code: error.code,
       },
-      { status: error.status }
+      { status: error.status },
     );
   }
 
@@ -86,7 +86,7 @@ function handleApiError(error: unknown, logErrors: boolean): NextResponse {
           error: error.message,
           code: "VALIDATION_ERROR",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
   }
@@ -98,7 +98,7 @@ function handleApiError(error: unknown, logErrors: boolean): NextResponse {
       error: "サーバーエラーが発生しました",
       code: "INTERNAL_SERVER_ERROR",
     },
-    { status: 500 }
+    { status: 500 },
   );
 }
 
@@ -107,7 +107,7 @@ function handleApiError(error: unknown, logErrors: boolean): NextResponse {
  */
 export async function handleExternalApiCall(
   apiCall: () => Promise<Response>,
-  errorMessage: string = "外部APIの呼び出しに失敗しました"
+  errorMessage: string = "外部APIの呼び出しに失敗しました",
 ): Promise<any> {
   try {
     const response = await apiCall();
@@ -117,7 +117,7 @@ export async function handleExternalApiCall(
       throw new AdminApiError(
         errorData.error || errorMessage,
         response.status,
-        "EXTERNAL_API_ERROR"
+        "EXTERNAL_API_ERROR",
       );
     }
 
@@ -135,7 +135,7 @@ export async function handleExternalApiCall(
  */
 export async function validateRequestBody<T>(
   request: NextRequest,
-  validator: (data: any) => T | Promise<T>
+  validator: (data: any) => T | Promise<T>,
 ): Promise<T> {
   try {
     const body = await request.json();
@@ -145,13 +145,13 @@ export async function validateRequestBody<T>(
       throw new AdminApiError(
         `リクエストデータが無効です: ${error.message}`,
         400,
-        "VALIDATION_ERROR"
+        "VALIDATION_ERROR",
       );
     }
     throw new AdminApiError(
       "リクエストデータが無効です",
       400,
-      "VALIDATION_ERROR"
+      "VALIDATION_ERROR",
     );
   }
 }

@@ -35,7 +35,7 @@ type GroupsDetailData = {
       };
       name: string;
       user_id: string;
-    }
+    },
   ];
   batting_averages: [
     {
@@ -49,14 +49,14 @@ type GroupsDetailData = {
       image: {
         url: string;
       };
-    }
+    },
   ];
   batting_stats: [
     {
       batting_average: number;
       on_base_percentage: number;
       user_id: string;
-    }
+    },
   ];
   pitching_aggregate: [
     {
@@ -64,14 +64,14 @@ type GroupsDetailData = {
       hold: number;
       saves: number;
       strikeouts: number;
-    }
+    },
   ];
   pitching_stats: [
     {
       era: number;
       win_percentage: number;
       user_id: string;
-    }
+    },
   ];
   group: {
     icon: {
@@ -148,7 +148,7 @@ const PitchingResultTitle = [
 
 export default function GroupDetail({ params }: GroupDetailProps) {
   const [groupData, setGroupData] = useState<GroupsDetailData | undefined>(
-    undefined
+    undefined,
   );
   const [acceptedUsers, setAcceptedUsers] = useState<AcceptedUsers[]>();
   const [battingAverage, setBattingAverages] = useState<BattingAverage[]>();
@@ -179,7 +179,7 @@ export default function GroupDetail({ params }: GroupDetailProps) {
         const battingStatsWithUsersData = responseGroupDetail.batting_stats.map(
           (stats: any) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id
+              (user: any) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {
@@ -190,7 +190,7 @@ export default function GroupDetail({ params }: GroupDetailProps) {
               };
             }
             return stats;
-          }
+          },
         );
         setBattingStats(battingStatsWithUsersData);
 
@@ -198,7 +198,7 @@ export default function GroupDetail({ params }: GroupDetailProps) {
           .flat()
           .map((stats: any) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id
+              (user: any) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {
@@ -215,7 +215,7 @@ export default function GroupDetail({ params }: GroupDetailProps) {
         const pitchingAggregateWithUsersData =
           responseGroupDetail.pitching_aggregate.flat().map((stats: any) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id
+              (user: any) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {
@@ -233,7 +233,7 @@ export default function GroupDetail({ params }: GroupDetailProps) {
           .filter((stats: any) => stats != null)
           .map((stats: any) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id
+              (user: any) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {

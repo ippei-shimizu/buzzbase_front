@@ -17,7 +17,7 @@ export const createGroup = async (formData: FormData) => {
 export const getGroups = async (userId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/groups/?userId=${userId}`
+      `/api/v1/groups/?userId=${userId}`,
     );
     return response.data;
   } catch (error) {
@@ -29,7 +29,7 @@ export const getGroups = async (userId: number) => {
 export const getGroupDetailUsers = async (groupId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/groups/${groupId}/show_group_user`
+      `/api/v1/groups/${groupId}/show_group_user`,
     );
     return response.data;
   } catch (error) {
@@ -52,7 +52,7 @@ export const updateGroup = async (groupId: number, formData: FormData) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/groups/${groupId}`,
-      formData
+      formData,
     );
     return response.data;
   } catch (error) {
@@ -65,7 +65,7 @@ export const updateGroupInfo = async (groupId: number, formData: FormData) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/groups/${groupId}/update_group_info`,
-      formData
+      formData,
     );
     return response.data;
   } catch (error) {
@@ -76,12 +76,12 @@ export const updateGroupInfo = async (groupId: number, formData: FormData) => {
 
 export const createInviteMembers = async (
   groupId: number,
-  formData: FormData
+  formData: FormData,
 ) => {
   try {
     const response = await axiosInstance.post(
       `/api/v1/groups/${groupId}/invite_members`,
-      formData
+      formData,
     );
     return response.data;
   } catch (error) {

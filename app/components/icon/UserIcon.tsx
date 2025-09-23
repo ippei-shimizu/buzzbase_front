@@ -4,9 +4,9 @@ export const UserIcon = ({
   fill = "",
   filled = "",
   size = "11",
-  height = "16", 
-  width = "11", 
-  label= "",
+  height = "16",
+  width = "11",
+  label = "",
   ...props
 }) => {
   return (

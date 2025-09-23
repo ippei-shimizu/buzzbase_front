@@ -93,7 +93,7 @@ export default function GroupMember({ params }: { params: { slug: string } }) {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event('submit'))}
+          onMatchResultNext={() => handleSubmit(new Event("submit"))}
           disabled={isSubmitting}
           text={"メンバー退会"}
         />

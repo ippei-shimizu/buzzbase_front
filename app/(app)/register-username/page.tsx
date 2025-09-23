@@ -37,9 +37,9 @@ export default function RegisterUserName() {
   const validateUserName = useCallback(
     (userName: string) =>
       /^[0-9A-Za-z\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF ]+$/.test(
-        userName
+        userName,
       ),
-    []
+    [],
   );
 
   const isInvalid = useMemo(() => {
@@ -49,7 +49,7 @@ export default function RegisterUserName() {
 
   const validateUserId = useCallback(
     (userId: string) => /^[A-Za-z0-9_-]+$/.test(userId),
-    []
+    [],
   );
 
   const isInvalidUserId = useMemo(() => {

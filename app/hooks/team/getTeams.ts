@@ -15,7 +15,7 @@ export default function useMyTeams() {
   const userId = extractUserIdFromPath(pathName);
   const { data, error } = useSWR<Team>(
     userId ? `/api/v1/teams/${userId}/my_team` : null,
-    fetcher
+    fetcher,
   );
   return {
     teamData: data,

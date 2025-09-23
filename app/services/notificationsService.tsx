@@ -3,7 +3,7 @@ import axiosInstance from "@app/utils/axiosInstance";
 export const getNotifications = async (user_id: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/notifications?user_id=${user_id}`
+      `/api/v1/notifications?user_id=${user_id}`,
     );
     return response.data;
   } catch (error) {
@@ -25,7 +25,7 @@ export const deleteNotification = async (id: number) => {
 export const readNotification = async (id: number) => {
   try {
     const response = await axiosInstance.patch(
-      `/api/v1/notifications/${id}/read`
+      `/api/v1/notifications/${id}/read`,
     );
     return response.data;
   } catch (error) {

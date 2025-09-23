@@ -28,10 +28,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
-    null
+    null,
   );
   const [confirmationError, setConfirmationError] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {

@@ -6,31 +6,86 @@ export interface AdminUser {
   name: string;
 }
 
-export interface AdminSession {
-  user: AdminUser;
-  timestamp: number;
-}
+const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 /**
  * NOTE: サーバーサイドで管理者認証を確認
  */
+async function refreshAccessToken(
+  refreshToken: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `admin-refresh-token=${refreshToken}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.access_token;
+    }
+  } catch (error) {
+    console.error("Token refresh failed:", error);
+  }
+  return null;
+}
+
+async function validateAccessToken(
+  accessToken: string,
+): Promise<AdminUser | null> {
+  try {
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/validate`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: `admin-access-token=${accessToken}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.user) {
+        return data.user;
+      }
+    }
+  } catch (error) {
+    console.error("Token validation failed:", error);
+  }
+  return null;
+}
+
 export async function getAdminUser(): Promise<AdminUser | null> {
   try {
     const cookieStore = cookies();
-    const sessionCookie = cookieStore.get("admin-session")?.value;
+    const accessToken = cookieStore.get("admin-access-token")?.value;
+    const refreshToken = cookieStore.get("admin-refresh-token")?.value;
 
-    if (!sessionCookie) {
-      return null;
+    if (accessToken) {
+      const user = await validateAccessToken(accessToken);
+      if (user) {
+        return user;
+      }
     }
 
-    const session: AdminSession = JSON.parse(sessionCookie);
+    if (refreshToken) {
+      const newAccessToken = await refreshAccessToken(refreshToken);
+      if (newAccessToken) {
+        cookieStore.set("admin-access-token", newAccessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 60 * 15,
+          path: "/",
+        });
 
-    const maxAge = 60 * 60 * 24 * 7 * 1000;
-    if (Date.now() - session.timestamp > maxAge) {
-      return null;
+        return await validateAccessToken(newAccessToken);
+      }
     }
 
-    return session.user;
+    return null;
   } catch (error) {
     console.error("Failed to get admin user:", error);
     return null;

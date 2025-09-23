@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     noarchive: true,
   },
   other: {
-    "googlebot": "noindex, nofollow, nosnippet, noarchive, noimageindex",
-    "bingbot": "noindex, nofollow, nosnippet, noarchive, noimageindex",
+    googlebot: "noindex, nofollow, nosnippet, noarchive, noimageindex",
+    bingbot: "noindex, nofollow, nosnippet, noarchive, noimageindex",
   },
 };
 
@@ -26,8 +26,6 @@ export default function AdminRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
-      {children}
-    </div>
+    <div className="min-h-screen bg-gray-100 text-gray-900">{children}</div>
   );
 }

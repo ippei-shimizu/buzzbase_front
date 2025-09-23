@@ -4,7 +4,7 @@ export const createAward = async (awardData: AwardData) => {
   try {
     const response = await axiosInstance.post(
       `/api/v1/users/${awardData.award.userId}/awards`,
-      awardData
+      awardData,
     );
     return response;
   } catch (error) {
@@ -26,7 +26,7 @@ export const getUserAwards = async (userId: UserAwards) => {
 export const deleteAward = async (userId: number, awardId: number) => {
   try {
     const response = await axiosInstance.delete(
-      `/api/v1/users/${userId}/awards/${awardId}`
+      `/api/v1/users/${userId}/awards/${awardId}`,
     );
     return response;
   } catch (error) {
@@ -38,12 +38,12 @@ export const deleteAward = async (userId: number, awardId: number) => {
 export const updatePutAward = async (
   userId: number,
   awardId: number,
-  data: { title: string }
+  data: { title: string },
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/users/${userId}/awards/${awardId}`,
-      { award: data }
+      { award: data },
     );
     return response;
   } catch (error) {
@@ -55,11 +55,11 @@ export const updatePutAward = async (
 export const updatePatchAward = async (
   userId: number,
   awardId: number,
-  data: { title: string }
+  data: { title: string },
 ) => {
   try {
     const response = await axiosInstance.patch(
-      `/api/v1/users/${userId}/awards/${awardId}`
+      `/api/v1/users/${userId}/awards/${awardId}`,
     );
     return response;
   } catch (error) {

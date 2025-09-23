@@ -63,7 +63,7 @@ export default function ResultsSummary() {
           opponent_team_name: opponentTeam,
           defensive_position: positionName,
         };
-      })
+      }),
     );
     setMatchResult(updateMatchResults);
     setIsDetailDataFetched(true);
@@ -89,16 +89,16 @@ export default function ResultsSummary() {
   const fetchCurrentResultData = async (localStorageGameResultId: number) => {
     try {
       const matchResultData = await getCurrentMatchResult(
-        localStorageGameResultId
+        localStorageGameResultId,
       );
       const battingAverageData = await getCurrentBattingAverage(
-        localStorageGameResultId
+        localStorageGameResultId,
       );
       const pitchingResultData = await getCurrentPitchingResult(
-        localStorageGameResultId
+        localStorageGameResultId,
       );
       const plateAppearanceData = await getCurrentPlateAppearance(
-        localStorageGameResultId
+        localStorageGameResultId,
       );
       const currentUserIdData = await getCurrentUserId();
       if (matchResultData && matchResultData.length > 0) {
@@ -141,7 +141,7 @@ export default function ResultsSummary() {
   // 打順
   const getBattingOrderTurn = (battingOrderId: string) => {
     const battingOrderTurn = battingOrder.find(
-      (order) => order.id.toString() === battingOrderId
+      (order) => order.id.toString() === battingOrderId,
     )?.turn;
     return battingOrderTurn || "";
   };
@@ -273,8 +273,8 @@ export default function ResultsSummary() {
                         {match.match_type === "regular"
                           ? "公式戦"
                           : match.match_type === "open"
-                          ? "オープン戦"
-                          : ""}
+                            ? "オープン戦"
+                            : ""}
                       </Chip>
                       <p className="text-sm font-normal">
                         {new Date(match.date_and_time).toLocaleDateString()}
@@ -327,7 +327,7 @@ export default function ResultsSummary() {
                             <li key={plate.batter_box_number}>
                               <p
                                 className={`font-bold ${getBattingResultClassName(
-                                  plate.batting_result
+                                  plate.batting_result,
                                 )}`}
                               >
                                 {plate.batting_result}

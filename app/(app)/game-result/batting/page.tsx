@@ -97,11 +97,11 @@ const useBattingStatistics = (battingBoxes: BattingBox[]) => {
     let sacrificeFly = 0;
 
     const validBoxes = battingBoxes.filter(
-      (box) => box.position !== 0 || box.result !== 0
+      (box) => box.position !== 0 || box.result !== 0,
     );
     const excludedResults = [15, 16, 11, 12, 17, 18];
     const excludedCount = battingBoxes.filter((box) =>
-      excludedResults.includes(box.result)
+      excludedResults.includes(box.result),
     ).length;
 
     const timesAtBat = validBoxes.length;
@@ -262,7 +262,7 @@ export default function BattingRecord() {
       const currentUserId = await getCurrentUserId();
       const existingBattingAverage = await checkExistingBattingAverage(
         gameResultId,
-        currentUserId
+        currentUserId,
       );
       setExistingRunsBattedIn(existingBattingAverage.runs_batted_in);
       setExistingRun(existingBattingAverage.run);
@@ -276,19 +276,18 @@ export default function BattingRecord() {
 
   const fetchExistingPlateAppearance = async (gameResultId: number) => {
     try {
-      const existingPlateAppearances = await getCurrentPlateAppearance(
-        gameResultId
-      );
+      const existingPlateAppearances =
+        await getCurrentPlateAppearance(gameResultId);
       if (existingPlateAppearances.length > 0) {
         const newBattingBoxes = existingPlateAppearances.map((plate: any) => {
           const plateId = plate.id;
           const positionId =
             battingResultsPositions.find(
-              (p) => p.id === plate.batting_position_id
+              (p) => p.id === plate.batting_position_id,
             )?.id || null;
           const positionName =
             battingResultsPositions.find(
-              (p) => p.id === plate.batting_position_id
+              (p) => p.id === plate.batting_position_id,
             )?.direction || "";
           const resultId =
             battingResultsList.find((p) => p.id === plate.plate_result_id)
@@ -331,7 +330,7 @@ export default function BattingRecord() {
   // 打席削除
   const handleDeletePlateAppearance = async (
     plateAppearanceId: number,
-    index: number
+    index: number,
   ) => {
     if (plateAppearanceId > 0) {
       setDeletedPlateAppearanceIds((prev) => [...prev, plateAppearanceId]);
@@ -388,7 +387,7 @@ export default function BattingRecord() {
   const updateBattingBox = (
     index: number,
     positionIndex: number,
-    resultIndex: number
+    resultIndex: number,
   ) => {
     const updatedBoxes = battingBoxes.map((box, i) => {
       if (i === index) {
@@ -497,12 +496,12 @@ export default function BattingRecord() {
         const existingPlateAppearance = await checkExistingPlateAppearance(
           plateAppearanceData.plate_appearance.game_result_id,
           plateAppearanceData.plate_appearance.user_id,
-          plateAppearanceData.plate_appearance.batter_box_number
+          plateAppearanceData.plate_appearance.batter_box_number,
         );
         if (existingPlateAppearance) {
           await updatePlateAppearance(
             existingPlateAppearance.id,
-            plateAppearanceData
+            plateAppearanceData,
           );
         } else {
           await createPlateAppearance(plateAppearanceData);
@@ -523,12 +522,12 @@ export default function BattingRecord() {
     try {
       const existingBattingAverage = await checkExistingBattingAverage(
         battingAverageData.batting_average.game_result_id,
-        currentUserId
+        currentUserId,
       );
       if (existingBattingAverage) {
         await updateBattingAverage(
           existingBattingAverage.id,
-          battingAverageData
+          battingAverageData,
         );
       } else {
         const response = await createBattingAverage(battingAverageData);
@@ -543,7 +542,7 @@ export default function BattingRecord() {
           };
           await updateBattingAverageId(
             localStorageGameResultId,
-            updateGameResultData
+            updateGameResultData,
           );
         }
       }
@@ -598,7 +597,7 @@ export default function BattingRecord() {
                             placeholder="方向"
                             aria-label="打球方向"
                             onSelectionChange={createHandlePositionChange(
-                              index
+                              index,
                             )}
                             selectedKeys={
                               box.position !== null

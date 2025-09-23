@@ -44,12 +44,12 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
       for (const game of gameResult) {
         if (game.match_result && game.match_result.opponent_team_id) {
           const teamName = await getTeamName(
-            game.match_result.opponent_team_id
+            game.match_result.opponent_team_id,
           );
           names[game.match_result.opponent_team_id] = teamName;
           if (game.match_result && game.match_result.tournament_id) {
             const tournamentName = await getTournamentName(
-              game.match_result.tournament_id
+              game.match_result.tournament_id,
             );
             namesTournament[game.match_result.tournament_id] = tournamentName;
           } else {
@@ -194,12 +194,12 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                       {game.match_result.match_type === "regular"
                         ? "公式戦"
                         : game.match_result.match_type === "open"
-                        ? "オープン戦"
-                        : ""}
+                          ? "オープン戦"
+                          : ""}
                     </Chip>
                     <p className="text-sm font-normal text-zinc-400">
                       {new Date(
-                        game.match_result.date_and_time
+                        game.match_result.date_and_time,
                       ).toLocaleDateString()}
                     </p>
                   </>
@@ -237,7 +237,7 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                   .flat()
                   .filter(
                     (plate: PlateAppearance) =>
-                      plate.game_result_id === game.game_result_id
+                      plate.game_result_id === game.game_result_id,
                   ).length > 0 && (
                   <p className="text-sm font-normal text-zinc-400">打撃</p>
                 )}
@@ -246,25 +246,25 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                     .flat()
                     .filter(
                       (plate: PlateAppearance) =>
-                        plate.game_result_id == game.game_result_id
+                        plate.game_result_id == game.game_result_id,
                     ).length > 0 ? (
                     plateAppearance
                       .flat()
                       .filter(
                         (plate: PlateAppearance) =>
-                          plate.game_result_id == game.game_result_id
+                          plate.game_result_id == game.game_result_id,
                       )
                       .sort(
                         (
                           a: { batter_box_number: number },
-                          b: { batter_box_number: number }
-                        ) => a.batter_box_number - b.batter_box_number
+                          b: { batter_box_number: number },
+                        ) => a.batter_box_number - b.batter_box_number,
                       )
                       .map((plate: PlateAppearance) => (
                         <li
                           key={plate.id}
                           className={`font-bold ${getBattingResultClassName(
-                            plate.batting_result
+                            plate.batting_result,
                           )}`}
                         >
                           {plate.batting_result}
@@ -289,7 +289,7 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                         <>
                           <li className="font-light">
                             {getInningPitched(
-                              game.pitching_result.innings_pitched
+                              game.pitching_result.innings_pitched,
                             )}
                           </li>
                           <li className="font-light">

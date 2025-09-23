@@ -4,7 +4,7 @@ import useSWR from "swr";
 export default function useFollowingUser(id: number | undefined) {
   const { data, error } = useSWR(
     id ? `/api/v1/users/${id}/following_users` : null,
-    fetcher
+    fetcher,
   );
   return {
     following: data,

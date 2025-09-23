@@ -62,7 +62,7 @@ export default function AllUserGameResultItem() {
               />
               <Divider className="mt-6" />
             </div>
-          )
+          ),
         )}
       </div>
     </>

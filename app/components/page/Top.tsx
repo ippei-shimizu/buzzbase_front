@@ -77,13 +77,19 @@ export default function Top() {
                   野球の個人成績の管理・共有アプリ
                 </p>
                 <Title className={`${classes.title}`}>
-                  無料で使える<br /><span className={classes.highlight}>野球の成績管理</span>アプリ<br />
+                  無料で使える
+                  <br />
+                  <span className={classes.highlight}>野球の成績管理</span>
+                  アプリ
+                  <br />
                   <span className="text-[28px]">友達とランキングで共有</span>
                 </Title>
                 <Text mt="md" className="!text-zinc-400 !text-sm !lg:text-base">
                   BUZZ
-                  BASEは、野球の個人の打撃・投手成績を記録することができる無料のアプリです。<br />
-                  自分の成績を記録するだけでなく、友達とグループを作成し「ランキング形式」で個人成績を共有・比較することもできます。<br />
+                  BASEは、野球の個人の打撃・投手成績を記録することができる無料のアプリです。
+                  <br />
+                  自分の成績を記録するだけでなく、友達とグループを作成し「ランキング形式」で個人成績を共有・比較することもできます。
+                  <br />
                 </Text>
 
                 <List
@@ -245,7 +251,8 @@ export default function Top() {
                   ポジション・所属チーム・受賞タイトルを設定
                 </Text>
                 <Text fz="sm" className="!text-zinc-400">
-                  プロフィールにポジションと所属チームを設定することで、<br />
+                  プロフィールにポジションと所属チームを設定することで、
+                  <br />
                   成績記録画面の、「守備位置」と「自チーム名」に初期値として設定されます。
                 </Text>
               </div>

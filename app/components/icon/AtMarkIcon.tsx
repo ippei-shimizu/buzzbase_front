@@ -17,7 +17,7 @@ export const AtMarkIcon = ({
         stroke={stroke}
         strokeWidth="1.5"
         strokeLinecap="round"
-        strokeLinejoin="round" 
+        strokeLinejoin="round"
       />
     </svg>
   );

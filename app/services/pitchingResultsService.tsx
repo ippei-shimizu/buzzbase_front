@@ -22,12 +22,12 @@ export const createPitchingResult = async (data: PitchingResultData) => {
 
 export const updatePitchingResult = async (
   id: number,
-  data: PitchingResultData
+  data: PitchingResultData,
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/pitching_results/${id}`,
-      data
+      data,
     );
     return response.data;
   } catch (error) {
@@ -38,11 +38,11 @@ export const updatePitchingResult = async (
 
 export const checkExistingPitchingResult = async (
   gameResultId: number | null,
-  userId: number | null
+  userId: number | null,
 ) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/pitching_search?game_result_id=${gameResultId}&user_id=${userId}`
+      `/api/v1/pitching_search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
   } catch (error: any) {
@@ -54,7 +54,7 @@ export const checkExistingPitchingResult = async (
 export const getCurrentPitchingResult = async (gameResultId: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/current_pitching_result_search?game_result_id=${gameResultId}`
+      `/api/v1/current_pitching_result_search?game_result_id=${gameResultId}`,
     );
     return response.data;
   } catch (error) {
@@ -66,7 +66,7 @@ export const getCurrentPitchingResult = async (gameResultId: number | null) => {
 export const getUserPitchingResult = async (gameResultId: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/user_pitching_result_search?game_result_id=${gameResultId}`
+      `/api/v1/user_pitching_result_search?game_result_id=${gameResultId}`,
     );
     return response.data;
   } catch (error) {
@@ -78,7 +78,7 @@ export const getUserPitchingResult = async (gameResultId: number | null) => {
 export const getPersonalPitchingResult = async (userId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/pitching_results/personal_pitching_result?user_id=${userId}`
+      `/api/v1/pitching_results/personal_pitching_result?user_id=${userId}`,
     );
     return response.data;
   } catch (error) {
@@ -90,7 +90,7 @@ export const getPersonalPitchingResult = async (userId: number) => {
 export const getPersonalPitchingResultStats = async (userId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/pitching_results/personal_pitching_stats?user_id=${userId}`
+      `/api/v1/pitching_results/personal_pitching_stats?user_id=${userId}`,
     );
     return response.data;
   } catch (error) {

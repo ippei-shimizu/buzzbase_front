@@ -1,4 +1,5 @@
-import { adminLogout, getAdminUser } from "./auth/actions";
+import { adminLogout } from "./auth/actions";
+import { getAdminUser } from "../../../lib/admin-auth";
 import Sidebar from "../_components/Sidebar";
 
 interface AdminLayoutProps {
@@ -12,12 +13,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {isAuthenticated && <Sidebar />}
-      <div className={`${isAuthenticated ? 'md:pl-64' : ''} flex flex-col flex-1`}>
+      <div
+        className={`${isAuthenticated ? "md:pl-64" : ""} flex flex-col flex-1`}
+      >
         <nav className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
-              <div className="flex items-center md:hidden">
-              </div>
+              <div className="flex items-center md:hidden"></div>
               <div className="hidden md:flex items-center">
                 <h1 className="text-xl font-semibold text-gray-900">
                   BUZZ BASE Admin
@@ -38,9 +40,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
     </div>

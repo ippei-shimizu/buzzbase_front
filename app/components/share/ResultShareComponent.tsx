@@ -30,11 +30,11 @@ export default function ResultShareComponent({
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    `${matchResult[0]?.my_team_score} 対 ${matchResult[0]?.opponent_team_score} vs ${matchResult[0]?.opponent_team_name}`
+    `${matchResult[0]?.my_team_score} 対 ${matchResult[0]?.opponent_team_score} vs ${matchResult[0]?.opponent_team_name}`,
   )}&url=https://buzzbase.jp/game-result/summary/${id}&hashtags=BUZZBASE`;
 
   const lineShareUrl = `https://line.me/R/msg/text/?${encodeURIComponent(
-    `${matchResult[0]?.my_team_score} 対 ${matchResult[0]?.opponent_team_score} vs ${matchResult[0]?.opponent_team_name} https://buzzbase.jp/game-result/summary/${id}`
+    `${matchResult[0]?.my_team_score} 対 ${matchResult[0]?.opponent_team_score} vs ${matchResult[0]?.opponent_team_name} https://buzzbase.jp/game-result/summary/${id}`,
   )}`;
 
   const handleShareMobile = () => {

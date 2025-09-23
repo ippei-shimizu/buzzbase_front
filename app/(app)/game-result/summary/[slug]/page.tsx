@@ -298,8 +298,8 @@ export default function ResultsSummary() {
                         {match.match_type === "regular"
                           ? "公式戦"
                           : match.match_type === "open"
-                          ? "オープン戦"
-                          : ""}
+                            ? "オープン戦"
+                            : ""}
                       </Chip>
                       <p className="text-sm font-normal">
                         {new Date(match.date_and_time).toLocaleDateString()}

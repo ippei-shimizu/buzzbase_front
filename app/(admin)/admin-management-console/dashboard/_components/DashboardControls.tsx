@@ -1,8 +1,8 @@
 interface DashboardControlsProps {
   period: number;
-  granularity: 'daily' | 'weekly' | 'monthly';
+  granularity: "daily" | "weekly" | "monthly";
   onPeriodChange: (period: number) => void;
-  onGranularityChange: (granularity: 'daily' | 'weekly' | 'monthly') => void;
+  onGranularityChange: (granularity: "daily" | "weekly" | "monthly") => void;
 }
 
 export default function DashboardControls({
@@ -12,16 +12,16 @@ export default function DashboardControls({
   onGranularityChange,
 }: DashboardControlsProps) {
   const periodOptions = [
-    { value: 7, label: '7日' },
-    { value: 30, label: '30日' },
-    { value: 90, label: '90日' },
-    { value: 365, label: '1年' },
+    { value: 7, label: "7日" },
+    { value: 30, label: "30日" },
+    { value: 90, label: "90日" },
+    { value: 365, label: "1年" },
   ];
 
   const granularityOptions = [
-    { value: 'daily' as const, label: '日次' },
-    { value: 'weekly' as const, label: '週次' },
-    { value: 'monthly' as const, label: '月次' },
+    { value: "daily" as const, label: "日次" },
+    { value: "weekly" as const, label: "週次" },
+    { value: "monthly" as const, label: "月次" },
   ];
 
   return (
@@ -37,8 +37,8 @@ export default function DashboardControls({
                 onClick={() => onPeriodChange(option.value)}
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
                   period === option.value
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {option.label}
@@ -57,8 +57,8 @@ export default function DashboardControls({
                 onClick={() => onGranularityChange(option.value)}
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
                   granularity === option.value
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {option.label}

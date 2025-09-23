@@ -38,7 +38,7 @@ export const updateTeam = async (
       category_id: number | undefined;
       prefecture_id: number | undefined;
     };
-  }
+  },
 ) => {
   try {
     const response = await axiosInstance.put(`/api/v1/teams/${id}`, teamData);

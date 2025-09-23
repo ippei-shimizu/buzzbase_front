@@ -6,8 +6,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-} from 'recharts';
-import BaseChart from './BaseChart';
+} from "recharts";
+import BaseChart from "./BaseChart";
 
 interface ActivityData {
   date: string;
@@ -44,52 +44,48 @@ export default function ActivityChart({
   data,
   height = 300,
   className = "",
-  visibleMetrics
+  visibleMetrics,
 }: ActivityChartProps) {
   const metrics = [
     {
-      key: 'games',
-      name: 'ゲーム数',
-      stroke: '#8B5CF6',
-      fill: '#8B5CF6'
+      key: "games",
+      name: "ゲーム数",
+      stroke: "#8B5CF6",
+      fill: "#8B5CF6",
     },
     {
-      key: 'batting_records',
-      name: '打撃記録',
-      stroke: '#06B6D4',
-      fill: '#06B6D4'
+      key: "batting_records",
+      name: "打撃記録",
+      stroke: "#06B6D4",
+      fill: "#06B6D4",
     },
     {
-      key: 'pitching_records',
-      name: '投球記録',
-      stroke: '#F97316',
-      fill: '#F97316'
+      key: "pitching_records",
+      name: "投球記録",
+      stroke: "#F97316",
+      fill: "#F97316",
     },
     {
-      key: 'total_posts',
-      name: '総投稿数',
-      stroke: '#EF4444',
-      fill: '#EF4444'
-    }
+      key: "total_posts",
+      name: "総投稿数",
+      stroke: "#EF4444",
+      fill: "#EF4444",
+    },
   ];
 
-  const visibleAreas = metrics.filter(metric =>
-    !visibleMetrics || visibleMetrics.has(metric.key)
+  const visibleAreas = metrics.filter(
+    (metric) => !visibleMetrics || visibleMetrics.has(metric.key),
   );
 
   return (
     <BaseChart height={height} className={className}>
-      <AreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <AreaChart
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        <XAxis
-          dataKey="date"
-          tick={{ fontSize: 12 }}
-          stroke="#666"
-        />
-        <YAxis
-          tick={{ fontSize: 12 }}
-          stroke="#666"
-        />
+        <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#666" />
+        <YAxis tick={{ fontSize: 12 }} stroke="#666" />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
         {visibleAreas.map((metric, index) => (

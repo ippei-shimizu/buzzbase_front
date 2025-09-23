@@ -1,6 +1,7 @@
 "use server";
 
-import { NextRequest } from "next/server";
+import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { getAdminUser } from "../../../../lib/admin-auth";
 
 interface DashboardStats {
   total_users: number;
@@ -27,54 +28,71 @@ interface DashboardStats {
   };
 }
 
+const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
+
 export async function getDashboardStats(
   period: number = 30,
-  granularity: "daily" | "weekly" | "monthly" = "daily"
+  granularity: "daily" | "weekly" | "monthly" = "daily",
 ): Promise<DashboardStats> {
-  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:8000";
+  try {
+    const adminUser = await getAdminUser();
+    if (!adminUser) {
+      throw new Error("認証が必要です");
+    }
 
-  const routeModule = await import(
-    "../../../api/admin/analytics/dashboard/route"
-  );
+    const jwtToken = generateInternalJWT(adminUser.id);
 
-  const url = new URL(`${baseUrl}/api/admin/analytics/dashboard`);
-  url.searchParams.set("period", period.toString());
-  url.searchParams.set("granularity", granularity);
+    const url = new URL(`${RAILS_API_URL}/api/v1/admin/analytics/dashboard`);
+    url.searchParams.set("period", period.toString());
+    url.searchParams.set("granularity", granularity);
 
-  const request = new NextRequest(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const response = await routeModule.GET(request);
-
-  if (!response.ok) {
-    throw new Error("データの取得に失敗しました");
-  }
-
-  return await response.json();
-}
-
-export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
-  const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
-
-  const response = await fetch(
-    `${RAILS_API_URL}/api/v1/admin/analytics/users?period=${period}`,
-    {
+    const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
       },
-      credentials: "include",
-      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("ダッシュボードデータの取得に失敗しました");
     }
-  );
 
-  if (!response.ok) {
-    throw new Error("ユーザー分析データの取得に失敗しました");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    throw error;
   }
+}
 
-  return await response.json();
+export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
+  try {
+    const adminUser = await getAdminUser();
+    if (!adminUser) {
+      throw new Error("認証が必要です");
+    }
+
+    const jwtToken = generateInternalJWT(adminUser.id);
+
+    const response = await fetch(
+      `${RAILS_API_URL}/api/v1/admin/analytics/users?period=${period}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        credentials: "include",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("ユーザー分析データの取得に失敗しました");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching user analytics:", error);
+    throw error;
+  }
 }

@@ -13,7 +13,7 @@ export const getMatchResults = async () => {
 export const getMatchResultsUserId = async (userId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/match_index_user_id?user_id=${userId}`
+      `/api/v1/match_index_user_id?user_id=${userId}`,
     );
     return response.data;
   } catch (error) {
@@ -23,12 +23,12 @@ export const getMatchResultsUserId = async (userId: number) => {
 };
 
 export const createMatchResults = async (
-  matchResultsData: MatchResultsData
+  matchResultsData: MatchResultsData,
 ) => {
   try {
     const response = await axiosInstance.post(
       "/api/v1/match_results",
-      matchResultsData
+      matchResultsData,
     );
     return response.data;
   } catch (error) {
@@ -49,12 +49,12 @@ export const getMatchResult = async (id: number) => {
 
 export const updateMatchResult = async (
   id: number,
-  matchResultsData: MatchResultsData
+  matchResultsData: MatchResultsData,
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/match_results/${id}`,
-      matchResultsData
+      matchResultsData,
     );
     return response.data;
   } catch (error) {
@@ -75,11 +75,11 @@ export const deleteMatchResult = async (id: number) => {
 
 export const checkExistingMatchResults = async (
   gameResultId: number | null,
-  userId: number | null
+  userId: number | null,
 ) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/existing_search?game_result_id=${gameResultId}&user_id=${userId}`
+      `/api/v1/existing_search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
   } catch (error: any) {
@@ -91,7 +91,7 @@ export const checkExistingMatchResults = async (
 export const getCurrentMatchResult = async (gameResultId: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/current_game_result_search?game_result_id=${gameResultId}`
+      `/api/v1/current_game_result_search?game_result_id=${gameResultId}`,
     );
     return response.data;
   } catch (error) {
@@ -103,7 +103,7 @@ export const getCurrentMatchResult = async (gameResultId: number | null) => {
 export const getUserMatchResult = async (gameResultId: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/user_game_result_search?game_result_id=${gameResultId}`
+      `/api/v1/user_game_result_search?game_result_id=${gameResultId}`,
     );
     return response.data;
   } catch (error) {
