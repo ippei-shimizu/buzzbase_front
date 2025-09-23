@@ -6,10 +6,7 @@ export interface AdminUser {
   name: string;
 }
 
-export interface AdminSession {
-  user: AdminUser;
-  timestamp: number;
-}
+const RAILS_API_URL = process.env.RAILS_API_URL || 'http://back:3000';
 
 /**
  * NOTE: サーバーサイドで管理者認証を確認
@@ -17,20 +14,31 @@ export interface AdminSession {
 export async function getAdminUser(): Promise<AdminUser | null> {
   try {
     const cookieStore = cookies();
-    const sessionCookie = cookieStore.get("admin-session")?.value;
+    const jwtToken = cookieStore.get("admin-jwt")?.value;
 
-    if (!sessionCookie) {
+    if (!jwtToken) {
       return null;
     }
 
-    const session: AdminSession = JSON.parse(sessionCookie);
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/validate`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`,
+      },
+    });
 
-    const maxAge = 60 * 60 * 24 * 7 * 1000;
-    if (Date.now() - session.timestamp > maxAge) {
+    if (!response.ok) {
       return null;
     }
 
-    return session.user;
+    const data = await response.json();
+
+    if (data.success && data.user) {
+      return data.user;
+    }
+
+    return null;
   } catch (error) {
     console.error("Failed to get admin user:", error);
     return null;

@@ -1,4 +1,5 @@
-import { adminLogout, getAdminUser } from "./auth/actions";
+import { adminLogout } from "./auth/actions";
+import { getAdminUser } from "../../../lib/admin-auth";
 import Sidebar from "../_components/Sidebar";
 
 interface AdminLayoutProps {

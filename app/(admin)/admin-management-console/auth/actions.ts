@@ -13,81 +13,66 @@ interface AdminUser {
 export async function adminLogin(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  let shouldRedirect = false;
+  const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
   try {
-    const routeModule = await import("../../../api/admin/auth/login/route");
-
-    const request = new NextRequest('http://localhost/api/admin/auth/login', {
-      method: 'POST',
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/sign_in`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password })
+      credentials: "include",
+      cache: "no-store",
+      body: JSON.stringify({ email, password }),
     });
-
-    const response = await routeModule.POST(request);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return { error: errorData.error || "ログインに失敗しました" };
-    }
 
     const data = await response.json();
 
-    if (data.success && data.user) {
-      shouldRedirect = true;
+    if (!response.ok) {
+      return { error: data.error || "ログインに失敗しました" };
+    }
+
+    if (data.success && data.jwt && data.user) {
+      const cookieStore = cookies();
+      cookieStore.set("admin-jwt", data.jwt, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      });
+
+      redirect("/admin-management-console/dashboard");
     } else {
       return { error: "ログインに失敗しました" };
     }
   } catch (error) {
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
     console.error("Admin login error:", error);
     return { error: "ログイン処理中にエラーが発生しました" };
-  }
-
-  if (shouldRedirect) {
-    redirect("/admin-management-console/dashboard");
   }
 }
 
 export async function adminLogout() {
-  const cookieStore = cookies();
-
   const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
+  const cookieStore = cookies();
 
   try {
     await fetch(`${RAILS_API_URL}/api/v1/admin/sign_out`, {
       method: "DELETE",
-      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   } catch (error) {
     console.error("Admin logout API error:", error);
   }
 
-  cookieStore.delete("admin-session");
+  // JWTクッキーを削除
+  cookieStore.delete("admin-jwt");
 
   redirect("/admin-management-console/login");
 }
 
-export async function getAdminUser(): Promise<AdminUser | null> {
-  const cookieStore = cookies();
-  const sessionCookie = cookieStore.get("admin-session")?.value;
-
-  if (!sessionCookie) {
-    return null;
-  }
-
-  try {
-    const sessionData = JSON.parse(sessionCookie);
-
-    const maxAge = 60 * 60 * 24 * 7 * 1000;
-    if (Date.now() - sessionData.timestamp > maxAge) {
-      return null;
-    }
-
-    return sessionData.user;
-  } catch (error) {
-    console.error("Failed to parse admin session:", error);
-    return null;
-  }
-}

@@ -2,23 +2,29 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 async function validateAdminAuth(request: NextRequest): Promise<boolean> {
-  const sessionCookie = request.cookies.get("admin-session")?.value;
+  const jwtToken = request.cookies.get("admin-jwt")?.value;
 
-  if (!sessionCookie) {
+  if (!jwtToken) {
     return false;
   }
 
   try {
-    const session = JSON.parse(sessionCookie);
+    const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/validate`, {
+      method: "GET",
+      headers: {
+        "Cookie": `admin-jwt=${jwtToken}`,
+      },
+    });
 
-    const maxAge = 60 * 60 * 24 * 7 * 1000;
-    if (Date.now() - session.timestamp > maxAge) {
+    if (!response.ok) {
       return false;
     }
 
-    return true;
+    const data = await response.json();
+    return data.success === true;
   } catch (error) {
-    console.error("Invalid admin session cookie:", error);
+    console.error("JWT validation error:", error);
     return false;
   }
 }
