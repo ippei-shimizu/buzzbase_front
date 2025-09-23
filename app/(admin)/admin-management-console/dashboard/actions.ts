@@ -29,21 +29,23 @@ interface DashboardStats {
 
 export async function getDashboardStats(
   period: number = 30,
-  granularity: 'daily' | 'weekly' | 'monthly' = 'daily'
+  granularity: "daily" | "weekly" | "monthly" = "daily"
 ): Promise<DashboardStats> {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:8000';
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:8000";
 
-  const routeModule = await import("../../../api/admin/analytics/dashboard/route");
+  const routeModule = await import(
+    "../../../api/admin/analytics/dashboard/route"
+  );
 
   const url = new URL(`${baseUrl}/api/admin/analytics/dashboard`);
-  url.searchParams.set('period', period.toString());
-  url.searchParams.set('granularity', granularity);
+  url.searchParams.set("period", period.toString());
+  url.searchParams.set("granularity", granularity);
 
   const request = new NextRequest(url.toString(), {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-    }
+      "Content-Type": "application/json",
+    },
   });
 
   const response = await routeModule.GET(request);
@@ -56,7 +58,6 @@ export async function getDashboardStats(
 }
 
 export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
-
   const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
   const response = await fetch(
