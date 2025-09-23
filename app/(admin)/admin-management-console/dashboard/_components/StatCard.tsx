@@ -15,8 +15,8 @@ export default function StatCard({
     trend === "up"
       ? "text-green-600"
       : trend === "down"
-      ? "text-red-600"
-      : "text-gray-600";
+        ? "text-red-600"
+        : "text-gray-600";
 
   return (
     <div className="bg-white overflow-hidden shadow rounded-lg">

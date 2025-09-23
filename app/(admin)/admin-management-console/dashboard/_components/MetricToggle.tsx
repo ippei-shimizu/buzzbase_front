@@ -21,11 +21,13 @@ export default function MetricToggle({
             onClick={() => onToggle(metric.key)}
             className={`flex items-center space-x-2 px-3 py-1 text-sm rounded-full transition-all ${
               visibleMetrics.has(metric.key)
-                ? 'bg-gray-100 border-2'
-                : 'bg-gray-50 border-2 border-transparent opacity-50'
+                ? "bg-gray-100 border-2"
+                : "bg-gray-50 border-2 border-transparent opacity-50"
             }`}
             style={{
-              borderColor: visibleMetrics.has(metric.key) ? metric.color : 'transparent',
+              borderColor: visibleMetrics.has(metric.key)
+                ? metric.color
+                : "transparent",
             }}
           >
             <div

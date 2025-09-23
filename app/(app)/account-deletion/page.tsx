@@ -41,7 +41,7 @@ export default function AccountDeletionPage() {
     } catch (error) {
       console.error("アカウント削除エラー:", error);
       alert(
-        "アカウントの削除に失敗しました。しばらく時間をおいてから再度お試しください。"
+        "アカウントの削除に失敗しました。しばらく時間をおいてから再度お試しください。",
       );
     } finally {
       setIsDeleting(false);

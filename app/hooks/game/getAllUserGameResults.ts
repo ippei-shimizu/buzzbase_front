@@ -4,7 +4,7 @@ import useSWR from "swr";
 export default function useAllUserGameResults() {
   const { data, error } = useSWR(
     "/api/v1/game_results/all_game_associated_data",
-    fetcher
+    fetcher,
   );
   return {
     allUserGameResults: data,

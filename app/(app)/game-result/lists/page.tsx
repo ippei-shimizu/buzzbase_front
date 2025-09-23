@@ -38,8 +38,8 @@ export default function GameResultList() {
       const gameResultsDataLists = await getGameResults();
       const plateAppearanceDataLists = await Promise.all(
         gameResultsDataLists.map((gameResult: GameResult) =>
-          getCurrentPlateAppearance(gameResult.game_result_id)
-        )
+          getCurrentPlateAppearance(gameResult.game_result_id),
+        ),
       );
       const currentUserIdData = await getCurrentUserId();
 

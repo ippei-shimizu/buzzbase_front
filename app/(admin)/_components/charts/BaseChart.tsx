@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { ResponsiveContainer } from 'recharts';
+import { ResponsiveContainer } from "recharts";
 
 interface BaseChartProps {
   children: React.ReactElement;
@@ -11,7 +11,7 @@ interface BaseChartProps {
 export default function BaseChart({
   children,
   height = 300,
-  className = ""
+  className = "",
 }: BaseChartProps) {
   return (
     <div className={`w-full ${className}`}>

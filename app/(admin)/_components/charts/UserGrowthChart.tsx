@@ -6,8 +6,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-} from 'recharts';
-import BaseChart from './BaseChart';
+} from "recharts";
+import BaseChart from "./BaseChart";
 
 interface UserGrowthData {
   date: string;
@@ -43,46 +43,42 @@ export default function UserGrowthChart({
   data,
   height = 300,
   className = "",
-  visibleMetrics
+  visibleMetrics,
 }: UserGrowthChartProps) {
   const metrics = [
     {
-      key: 'total_users',
-      name: '総ユーザー数',
-      stroke: '#10B981',
-      fill: '#10B981'
+      key: "total_users",
+      name: "総ユーザー数",
+      stroke: "#10B981",
+      fill: "#10B981",
     },
     {
-      key: 'active_users',
-      name: 'アクティブユーザー',
-      stroke: '#F59E0B',
-      fill: '#F59E0B'
+      key: "active_users",
+      name: "アクティブユーザー",
+      stroke: "#F59E0B",
+      fill: "#F59E0B",
     },
     {
-      key: 'new_users',
-      name: '新規登録',
-      stroke: '#3B82F6',
-      fill: '#3B82F6'
-    }
+      key: "new_users",
+      name: "新規登録",
+      stroke: "#3B82F6",
+      fill: "#3B82F6",
+    },
   ];
 
-  const visibleLines = metrics.filter(metric =>
-    !visibleMetrics || visibleMetrics.has(metric.key)
+  const visibleLines = metrics.filter(
+    (metric) => !visibleMetrics || visibleMetrics.has(metric.key)
   );
 
   return (
     <BaseChart height={height} className={className}>
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <LineChart
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        <XAxis
-          dataKey="date"
-          tick={{ fontSize: 12 }}
-          stroke="#666"
-        />
-        <YAxis
-          tick={{ fontSize: 12 }}
-          stroke="#666"
-        />
+        <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#666" />
+        <YAxis tick={{ fontSize: 12 }} stroke="#666" />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
         {visibleLines.map((metric) => (

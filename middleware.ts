@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+async function refreshAccessToken(
+  refreshToken: string
+): Promise<string | null> {
   try {
     const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
     const response = await fetch(`${RAILS_API_URL}/api/v1/admin/refresh`, {
       method: "POST",
-      headers: { "Cookie": `admin-refresh-token=${refreshToken}` }
+      headers: { Cookie: `admin-refresh-token=${refreshToken}` },
     });
 
     if (response.ok) {
@@ -25,7 +27,7 @@ async function validateToken(accessToken: string): Promise<boolean> {
     const response = await fetch(`${RAILS_API_URL}/api/v1/admin/validate`, {
       method: "GET",
       headers: {
-        "Cookie": `admin-access-token=${accessToken}`,
+        Cookie: `admin-access-token=${accessToken}`,
       },
     });
 
@@ -39,7 +41,9 @@ async function validateToken(accessToken: string): Promise<boolean> {
   return false;
 }
 
-async function validateAdminAuth(request: NextRequest): Promise<{ isValid: boolean; newAccessToken?: string }> {
+async function validateAdminAuth(
+  request: NextRequest
+): Promise<{ isValid: boolean; newAccessToken?: string }> {
   const accessToken = request.cookies.get("admin-access-token")?.value;
   const refreshToken = request.cookies.get("admin-refresh-token")?.value;
 
@@ -67,14 +71,18 @@ export async function middleware(request: NextRequest) {
     if (pathname === "/admin-management-console/login") {
       const authResult = await validateAdminAuth(request);
       if (authResult.isValid) {
-        return NextResponse.redirect(new URL("/admin-management-console/dashboard", request.url));
+        return NextResponse.redirect(
+          new URL("/admin-management-console/dashboard", request.url)
+        );
       }
       return NextResponse.next();
     }
 
     const authResult = await validateAdminAuth(request);
     if (!authResult.isValid) {
-      return NextResponse.redirect(new URL("/admin-management-console/login", request.url));
+      return NextResponse.redirect(
+        new URL("/admin-management-console/login", request.url)
+      );
     }
 
     if (authResult.newAccessToken) {

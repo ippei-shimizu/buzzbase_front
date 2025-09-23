@@ -34,7 +34,7 @@ export default function MatchResultList(props: UserId) {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [selectedYear, setSelectedYear] = useState("通算");
   const [availableMatchType, setAvailableMatchType] = useState<AvailableYear[]>(
-    []
+    [],
   );
   const [selectedMatchType, setSelectedMatchType] = useState("全て");
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
@@ -49,13 +49,13 @@ export default function MatchResultList(props: UserId) {
         filteredGameResultData = await getFilterGameResultsUserId(
           userId,
           selectedYear,
-          selectedMatchType
+          selectedMatchType,
         );
         // ユーザーごと打席結果
         plateAppearanceDataLists = await Promise.all(
           filteredGameResultData.map((gameResult: GameResult) =>
-            getCurrentPlateAppearanceUserId(userId, gameResult.game_result_id)
-          )
+            getCurrentPlateAppearanceUserId(userId, gameResult.game_result_id),
+          ),
         );
         (dateString: string) => {
           const date = new Date(dateString);
@@ -64,20 +64,20 @@ export default function MatchResultList(props: UserId) {
         // ユーザーごとシーズン
         const matchResultData = await getMatchResultsUserId(userId);
         const matchResultDate = matchResultData.map(
-          (result: any) => result.date_and_time
+          (result: any) => result.date_and_time,
         );
         const yearArray: AvailableYear[] = matchResultDate.map(
           (dateString: string) => {
             const date = new Date(dateString);
             return date.getFullYear();
-          }
+          },
         );
         const uniqueYears = Array.from(new Set(yearArray));
         uniqueYears.unshift("通算");
         setAvailableYears(uniqueYears);
         // ユーザーごと試合タイプ
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
-          (type: any) => type.match_type
+          (type: any) => type.match_type,
         );
         const uniqueMatchType = Array.from(new Set(matchTypeData));
         const uniqueMatchTypeChange = uniqueMatchType.map((type) => {
@@ -129,30 +129,30 @@ export default function MatchResultList(props: UserId) {
     try {
       const gameResultsDataLists = await getFilterGameResults(
         selectedYear,
-        selectedMatchType
+        selectedMatchType,
       );
       const plateAppearanceDataLists = await Promise.all(
         gameResultsDataLists.map((gameResult: GameResult) =>
-          getCurrentPlateAppearance(gameResult.game_result_id)
-        )
+          getCurrentPlateAppearance(gameResult.game_result_id),
+        ),
       );
       const currentUserIdData = await getCurrentUserId();
       const matchResultData = await getMatchResults();
       const matchResultDate = matchResultData.map(
-        (result: any) => result.date_and_time
+        (result: any) => result.date_and_time,
       );
       const yearArray: AvailableYear[] = matchResultDate.map(
         (dateString: string) => {
           const date = new Date(dateString);
           return date.getFullYear();
-        }
+        },
       );
       const uniqueYears = Array.from(new Set(yearArray));
       uniqueYears.unshift("通算");
       setAvailableYears(uniqueYears);
 
       const matchTypeData: AvailableMatchType[] = matchResultData.map(
-        (type: any) => type.match_type
+        (type: any) => type.match_type,
       );
       const uniqueMatchType = Array.from(new Set(matchTypeData));
       const uniqueMatchTypeChange = uniqueMatchType.map((type) => {

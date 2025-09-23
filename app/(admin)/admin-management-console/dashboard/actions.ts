@@ -32,7 +32,7 @@ const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 export async function getDashboardStats(
   period: number = 30,
-  granularity: "daily" | "weekly" | "monthly" = "daily"
+  granularity: "daily" | "weekly" | "monthly" = "daily",
 ): Promise<DashboardStats> {
   try {
     const adminUser = await getAdminUser();
@@ -83,7 +83,7 @@ export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
           Authorization: `Bearer ${jwtToken}`,
         },
         credentials: "include",
-      }
+      },
     );
 
     if (!response.ok) {

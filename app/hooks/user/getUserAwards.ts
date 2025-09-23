@@ -8,7 +8,7 @@ export default function useUserAwards() {
   const userId = extractUserIdFromPath(pathName);
   const { data, error } = useSWR<UserAwards[]>(
     userId ? `/api/v1/users/${userId}/awards/index_user_id` : null,
-    fetcher
+    fetcher,
   );
   return {
     userAwards: data,

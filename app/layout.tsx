@@ -40,7 +40,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (

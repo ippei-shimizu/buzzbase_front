@@ -104,7 +104,7 @@ export default function ProfileEdit() {
     number | undefined
   >(undefined);
   const [selectedTeamId, setSelectedTeamId] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const [deletedAwards, setDeletedAwards] = useState<number[]>([]);
   const [awards, setAwards] = useState<UserAwards[]>([]);
@@ -157,14 +157,14 @@ export default function ProfileEdit() {
       setTeams(teamsData);
 
       const positionIds = data.positions.map((position: any) =>
-        position.id.toString()
+        position.id.toString(),
       );
       setSelectedPositionIds(positionIds);
 
       // チーム初期値設定
       if (data.team_id) {
         const userTeam = teamsData.find(
-          (team: { id: any }) => team.id === data.team_id
+          (team: { id: any }) => team.id === data.team_id,
         );
         if (userTeam) {
           setTeamName(userTeam.name);
@@ -172,7 +172,7 @@ export default function ProfileEdit() {
           setSelectedCategoryId(userTeam.category_id);
           setSelectedPrefectureId(userTeam.prefecture_id);
           const category = baseballCategoryData.find(
-            (category: { id: number }) => category.id === userTeam.category_id
+            (category: { id: number }) => category.id === userTeam.category_id,
           );
           if (category) {
             setBaseballCategoryValue(category.name);
@@ -343,9 +343,9 @@ export default function ProfileEdit() {
   const validateUserName = useCallback(
     (name: string) =>
       /^[0-9A-Za-z\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF ]+$/.test(
-        name
+        name,
       ),
-    []
+    [],
   );
 
   const isInvalid = useMemo(() => {
@@ -382,10 +382,10 @@ export default function ProfileEdit() {
       setTeamName(selectedTeam.name);
       setSelectedTeamId(selectedTeam.id);
       const category = baseballCategories.find(
-        (category) => category.id === selectedTeam.category_id
+        (category) => category.id === selectedTeam.category_id,
       );
       const prefecture = prefectures.find(
-        (prefecture) => prefecture.id === selectedTeam.prefecture_id
+        (prefecture) => prefecture.id === selectedTeam.prefecture_id,
       );
       if (category) {
         setBaseballCategoryValue(category.name);
@@ -433,7 +433,7 @@ export default function ProfileEdit() {
 
   return (
     <div className="buzz-dark bg-main pb-24 flex flex-col w-full min-h-screen ">
-      <HeaderSave onProfileUpdate={() => handleSubmit(new Event('submit'))} />
+      <HeaderSave onProfileUpdate={() => handleSubmit(new Event("submit"))} />
       <div className="h-full buzz-dark">
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-12 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 ">
@@ -452,8 +452,8 @@ export default function ProfileEdit() {
                       profile.image.startsWith("blob:")
                         ? profile.image
                         : process.env.NODE_ENV === "production"
-                        ? profile.image
-                        : `${process.env.NEXT_PUBLIC_API_URL}${profile.image}`
+                          ? profile.image
+                          : `${process.env.NEXT_PUBLIC_API_URL}${profile.image}`
                     }
                     onClick={handleImageClick}
                     className="cursor-pointer mx-auto mt-6"

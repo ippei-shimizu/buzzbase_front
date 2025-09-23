@@ -1,8 +1,9 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-const SECRET_KEY = process.env.JWT_SECRET || 'fallback-secret-key-for-development';
-const ALGORITHM = 'HS256';
-const EXPIRATION_TIME = '5m';
+const SECRET_KEY =
+  process.env.JWT_SECRET || "fallback-secret-key-for-development";
+const ALGORITHM = "HS256";
+const EXPIRATION_TIME = "5m";
 
 interface JWTPayload {
   admin_user_id: number;
@@ -19,13 +20,12 @@ interface JWTPayload {
 export function generateInternalJWT(adminUserId: number): string {
   const payload = {
     admin_user_id: adminUserId,
-    iss: 'buzzbase-nextjs',
-    aud: 'buzzbase-rails'
+    iss: "buzzbase-nextjs",
+    aud: "buzzbase-rails",
   };
 
   return jwt.sign(payload, SECRET_KEY, {
     algorithm: ALGORITHM,
-    expiresIn: EXPIRATION_TIME
+    expiresIn: EXPIRATION_TIME,
   });
 }
-

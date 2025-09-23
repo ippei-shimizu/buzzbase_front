@@ -6,19 +6,21 @@ export interface AdminUser {
   name: string;
 }
 
-const RAILS_API_URL = process.env.RAILS_API_URL || 'http://back:3000';
+const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 /**
  * NOTE: サーバーサイドで管理者認証を確認
  */
-async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+async function refreshAccessToken(
+  refreshToken: string,
+): Promise<string | null> {
   try {
     const response = await fetch(`${RAILS_API_URL}/api/v1/admin/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `admin-refresh-token=${refreshToken}`
-      }
+        Cookie: `admin-refresh-token=${refreshToken}`,
+      },
     });
 
     if (response.ok) {
@@ -31,13 +33,15 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   return null;
 }
 
-async function validateAccessToken(accessToken: string): Promise<AdminUser | null> {
+async function validateAccessToken(
+  accessToken: string,
+): Promise<AdminUser | null> {
   try {
     const response = await fetch(`${RAILS_API_URL}/api/v1/admin/validate`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `admin-access-token=${accessToken}`,
+        "Content-Type": "application/json",
+        Cookie: `admin-access-token=${accessToken}`,
       },
     });
 

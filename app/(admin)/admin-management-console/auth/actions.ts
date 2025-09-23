@@ -50,7 +50,7 @@ export async function adminLogin(formData: FormData) {
       return { error: "ログインに失敗しました" };
     }
   } catch (error) {
-    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
       throw error;
     }
     console.error("Admin login error:", error);
@@ -78,4 +78,3 @@ export async function adminLogout() {
 
   redirect("/admin-management-console/login");
 }
-

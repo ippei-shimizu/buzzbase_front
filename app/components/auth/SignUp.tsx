@@ -58,7 +58,7 @@ export default function SignUp() {
 
   const validateEmail = useCallback(
     (email: string) => email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i),
-    []
+    [],
   );
 
   const isInvalid = useMemo(() => {
@@ -68,7 +68,7 @@ export default function SignUp() {
 
   const validatePassword = useCallback(
     (password: string) => /^[a-zA-Z\d]{6,}$/.test(password),
-    []
+    [],
   );
 
   const isInvalidPassword = React.useMemo(() => {

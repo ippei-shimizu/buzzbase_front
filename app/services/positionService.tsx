@@ -38,7 +38,7 @@ export const updateUserPositions = async ({
 export const getUserPositions = async ({ userId }: getUserPositions) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/${userId}/positions`
+      `/api/v1/users/${userId}/positions`,
     );
     return response.data;
   } catch (error) {

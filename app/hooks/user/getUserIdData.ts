@@ -8,7 +8,7 @@ export default function useUserIdData() {
   const userId = extractUserIdFromPath(pathName);
   const { data, error } = useSWR(
     userId ? `/api/v1/users/show_user_id_data?user_id=${userId}` : null,
-    fetcher
+    fetcher,
   );
   return {
     userData: data,
