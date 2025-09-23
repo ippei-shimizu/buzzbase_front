@@ -3,7 +3,7 @@ import useSWR from "swr";
 import { usePathname } from "next/navigation";
 import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
 
-export default function getUserIdData() {
+export default function useUserIdData() {
   const pathName = usePathname();
   const userId = extractUserIdFromPath(pathName);
   const { data, error } = useSWR(

@@ -1,13 +1,13 @@
 "use client";
 import NotificationGroup from "@app/components/notification/NotificationGroup";
-import { getNotifications } from "@app/hooks/notification/getNotifications";
+import { useNotifications } from "@app/hooks/notification/getNotifications";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { readNotification } from "@app/services/notificationsService";
 import { Avatar, Divider, Spinner } from "@nextui-org/react";
 import Link from "next/link";
 
 export default function NotificationItem() {
-  const { notifications, isError, isLoading } = getNotifications();
+  const { notifications, isError, isLoading } = useNotifications();
   useRequireAuth();
   if (isLoading) {
     return (

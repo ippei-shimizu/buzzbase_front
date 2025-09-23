@@ -1,9 +1,9 @@
 import BattingAverageTable from "@app/components/table/BattingAverageTable";
 import PitchingRecordTable from "@app/components/table/PitchingRecordTable";
-import { getPersonalBattingAverage } from "@app/hooks/batting/getPersonalBattingAverage";
-import { getPersonalBattingStatus } from "@app/hooks/batting/getPersonalBattingStatus";
-import { getPersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchingResult";
-import { getPersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
+import { usePersonalBattingAverage } from "@app/hooks/batting/getPersonalBattingAverage";
+import { usePersonalBattingStatus } from "@app/hooks/batting/getPersonalBattingStatus";
+import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchingResult";
+import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
 import { Skeleton } from "@nextui-org/react";
 import Link from "next/link";
 
@@ -71,13 +71,13 @@ type PersonalPitchingStatus = {
 export default function IndividualResultsList(props: UserId) {
   const { userId } = props;
   const { personalBattingAverages, isLoadingBA } =
-    getPersonalBattingAverage(userId);
+    usePersonalBattingAverage(userId);
   const { personalBattingStatus, isLoadingBS } =
-    getPersonalBattingStatus(userId);
+    usePersonalBattingStatus(userId);
   const { personalPitchingResults, isLoadingPR } =
-    getPersonalPitchingResult(userId);
+    usePersonalPitchingResult(userId);
   const { personalPitchingStatus, isLoadingPS } =
-    getPersonalPitchingResultStats(userId);
+    usePersonalPitchingResultStats(userId);
 
   const isLoading = isLoadingBA || isLoadingBS || isLoadingPR || isLoadingPS;
 
