@@ -69,12 +69,12 @@ jobs:
       - name: Build application
         run: yarn build
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:3000' }}
-          NEXT_PUBLIC_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000' }}
-          NEXT_PUBLIC_IMAGE_PROTOCOL: ${{ secrets.NEXT_PUBLIC_IMAGE_PROTOCOL || 'http' }}
-          NEXT_PUBLIC_IMAGE_HOSTNAME: ${{ secrets.NEXT_PUBLIC_IMAGE_HOSTNAME || 'localhost' }}
-          NEXT_PUBLIC_IMAGE_PORT: ${{ secrets.NEXT_PUBLIC_IMAGE_PORT || '3000' }}
-          NEXT_PUBLIC_IMAGE_PATHNAME: ${{ secrets.NEXT_PUBLIC_IMAGE_PATHNAME || '/**' }}
+          NEXT_PUBLIC_API_URL: http://localhost:3000
+          NEXT_PUBLIC_BACKEND_URL: http://localhost:3000
+          NEXT_PUBLIC_IMAGE_PROTOCOL: http
+          NEXT_PUBLIC_IMAGE_HOSTNAME: localhost
+          NEXT_PUBLIC_IMAGE_PORT: "3000"
+          NEXT_PUBLIC_IMAGE_PATHNAME: "/**"
 
       - name: Check build output
         run: |
