@@ -69,12 +69,20 @@ jobs:
       - name: Build application
         run: yarn build
         env:
+          NODE_ENV: development
           NEXT_PUBLIC_API_URL: http://localhost:3000
           NEXT_PUBLIC_BACKEND_URL: http://localhost:3000
           NEXT_PUBLIC_IMAGE_PROTOCOL: http
           NEXT_PUBLIC_IMAGE_HOSTNAME: localhost
           NEXT_PUBLIC_IMAGE_PORT: "3000"
           NEXT_PUBLIC_IMAGE_PATHNAME: "/**"
+          NEXT_PUBLIC_METADATA_BASE_URL: http://localhost:8000
+          NEXT_PUBLIC_CONFIRM_SUCCESS_URL: http://localhost:8000/signin
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: G-XXXXXXXXXX
+          NEXT_PUBLIC_S3_API_URL: http://localhost:3000
+          BASIC_AUTH_USER: admin
+          BASIC_AUTH_PASSWORD: test123
+          RAILS_API_URL: http://localhost:3000
 
       - name: Check build output
         run: |
