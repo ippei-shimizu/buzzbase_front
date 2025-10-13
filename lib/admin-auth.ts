@@ -1,12 +1,11 @@
 import { cookies } from "next/headers";
+import { RAILS_API_URL } from "../app/constants/api";
 
 export interface AdminUser {
   id: number;
   email: string;
   name: string;
 }
-
-const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 /**
  * NOTE: サーバーサイドで管理者認証を確認

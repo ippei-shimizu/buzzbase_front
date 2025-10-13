@@ -2,6 +2,7 @@
 
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
 import { getAdminUser } from "../../../../lib/admin-auth";
+import { RAILS_API_URL } from "../../../constants/api";
 
 interface DashboardStats {
   total_users: number;
@@ -27,8 +28,6 @@ interface DashboardStats {
     new_users?: number;
   };
 }
-
-const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 export async function getDashboardStats(
   period: number = 30,

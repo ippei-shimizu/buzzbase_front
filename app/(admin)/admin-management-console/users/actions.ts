@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
 import { getAdminUser } from "../../../../lib/admin-auth";
+import { RAILS_API_URL } from "../../../constants/api";
 import type {
   AdminUser,
   AdminUserFormData,
@@ -11,8 +12,6 @@ import type {
   AdminUserResponse,
   AdminUserSingleResponse,
 } from "../../../types/admin";
-
-const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   try {
