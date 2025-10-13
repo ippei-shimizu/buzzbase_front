@@ -16,6 +16,8 @@ export default function DashboardControls({
     { value: 30, label: "30日" },
     { value: 90, label: "90日" },
     { value: 365, label: "1年" },
+    { value: 730, label: "2年" },
+    { value: 1095, label: "3年" },
   ];
 
   const granularityOptions = [
