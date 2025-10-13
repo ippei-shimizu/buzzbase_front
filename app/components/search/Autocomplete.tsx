@@ -22,7 +22,7 @@ export default function UserAutocomplete() {
     const fetchUsers = async () => {
       setIsLoading(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/search?query=${query}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/search?query=${query}`,
       );
       const data = await response.json();
       setUsers(data);

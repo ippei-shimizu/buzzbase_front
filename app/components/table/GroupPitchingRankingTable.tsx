@@ -55,7 +55,7 @@ export default function GroupPitchingRankingTable(props: Props) {
 
   const sortedStrikeouts =
     pitchingAggregate?.sort(
-      (a, b) => (b.strikeouts ?? 0) - (a.strikeouts ?? 0)
+      (a, b) => (b.strikeouts ?? 0) - (a.strikeouts ?? 0),
     ) || [];
 
   const sortedWinPercentage =

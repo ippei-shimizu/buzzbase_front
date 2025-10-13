@@ -3,7 +3,7 @@ import axiosInstance from "@app/utils/axiosInstance";
 export const getGameResults = async () => {
   try {
     const response = await axiosInstance.get(
-      "/api/v1/game_results/game_associated_data_index"
+      "/api/v1/game_results/game_associated_data_index",
     );
     return response.data;
   } catch (error) {
@@ -15,7 +15,7 @@ export const getGameResults = async () => {
 export const getAllUserGameResults = async () => {
   try {
     const response = await axiosInstance.get(
-      "/api/v1/game_results/all_game_associated_data"
+      "/api/v1/game_results/all_game_associated_data",
     );
     return response.data;
   } catch (error) {
@@ -27,7 +27,7 @@ export const getAllUserGameResults = async () => {
 export const getGameResultsUserId = async (user_id: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/game_results/game_associated_data_index_user_id?user_id=${user_id}`
+      `/api/v1/game_results/game_associated_data_index_user_id?user_id=${user_id}`,
     );
     return response.data;
   } catch (error) {
@@ -48,12 +48,12 @@ export const createGameResult = async () => {
 
 export const updateGameResult = async (
   id: number,
-  gameResultData: GameResultData
+  gameResultData: GameResultData,
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/game_results/${id}`,
-      gameResultData
+      gameResultData,
     );
     return response.data;
   } catch (error) {
@@ -64,12 +64,12 @@ export const updateGameResult = async (
 
 export const updateBattingAverageId = async (
   id: number,
-  data: { game_result: { batting_average_id: number } }
+  data: { game_result: { batting_average_id: number } },
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/game_results/${id}/update_batting_average_id`,
-      data
+      data,
     );
     return response.data;
   } catch (error) {
@@ -80,12 +80,12 @@ export const updateBattingAverageId = async (
 
 export const updatePitchingResultId = async (
   id: number,
-  data: { game_result: { pitching_result_id: number } }
+  data: { game_result: { pitching_result_id: number } },
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/game_results/${id}/update_pitching_result_id`,
-      data
+      data,
     );
     return response.data;
   } catch (error) {
@@ -97,7 +97,7 @@ export const updatePitchingResultId = async (
 export const getFilterGameResults = async (year: any, matchType: any) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/game_results/filtered_game_associated_data?year=${year}&match_type=${matchType}`
+      `/api/v1/game_results/filtered_game_associated_data?year=${year}&match_type=${matchType}`,
     );
     return response.data;
   } catch (error) {
@@ -109,11 +109,11 @@ export const getFilterGameResults = async (year: any, matchType: any) => {
 export const getFilterGameResultsUserId = async (
   userId: number,
   year: any,
-  matchType: any
+  matchType: any,
 ) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/game_results/filtered_game_associated_data_user_id?user_id=${userId}&year=${year}&match_type=${matchType}`
+      `/api/v1/game_results/filtered_game_associated_data_user_id?user_id=${userId}&year=${year}&match_type=${matchType}`,
     );
     return response.data;
   } catch (error) {

@@ -17,7 +17,7 @@ export default function DataTable({
   visibleMetrics,
 }: DataTableProps) {
   const filteredColumns = visibleMetrics
-    ? columns.filter(col => col.key === 'date' || visibleMetrics.has(col.key))
+    ? columns.filter((col) => col.key === "date" || visibleMetrics.has(col.key))
     : columns;
 
   return (
@@ -40,20 +40,23 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.slice(-30).reverse().map((row, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                {filteredColumns.map((column) => (
-                  <td
-                    key={column.key}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                  >
-                    {typeof row[column.key] === 'number'
-                      ? row[column.key].toLocaleString()
-                      : row[column.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {data
+              .slice(-30)
+              .reverse()
+              .map((row, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  {filteredColumns.map((column) => (
+                    <td
+                      key={column.key}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      {typeof row[column.key] === "number"
+                        ? row[column.key].toLocaleString()
+                        : row[column.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

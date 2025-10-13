@@ -85,7 +85,7 @@ export default function GameRecord() {
   >(undefined);
   const [myTeamScore, setMyTeamScore] = useState<number | null>(null);
   const [opponentTeamScore, setOpponentTeamScore] = useState<number | null>(
-    null
+    null,
   );
   const [matchBattingOrder, setMatchBattingOrder] = useState("");
   const [existingMatchBattingOrder, setExistingMatchBattingOrder] =
@@ -130,7 +130,7 @@ export default function GameRecord() {
       setTeamsData(getTeamsList);
       // マイチーム名取得
       const userTeam = getTeamsList.find(
-        (team: { id: string }) => team.id === userTeamId
+        (team: { id: string }) => team.id === userTeamId,
       );
       if (userTeam) {
         setMyTeam(userTeam.name);
@@ -166,7 +166,7 @@ export default function GameRecord() {
       const currentUserId = await getCurrentUserId();
       const existingMatchResult = await checkExistingMatchResults(
         gameResultId,
-        currentUserId
+        currentUserId,
       );
       console.log(existingMatchResult);
       if (existingMatchResult) {
@@ -195,7 +195,7 @@ export default function GameRecord() {
     if (userData && positionData.length > 0) {
       const userPositionFirstId = userData.positions[0]?.id;
       const userPosition = positionData.find(
-        (position) => position.id === userPositionFirstId
+        (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
         setMyPosition(userPosition.id.toString());
@@ -386,12 +386,12 @@ export default function GameRecord() {
       // 大会保存
       let tournamentId = tournament;
       const existingTournament = tournamentData.find(
-        (t) => t.name === inputTournamentName
+        (t) => t.name === inputTournamentName,
       );
       if (existingTournament) {
         const updatedTournament = await updateTournament(
           existingTournament.id,
-          inputTournamentName
+          inputTournamentName,
         );
         if (updatedTournament) {
           tournamentId = updatedTournament.id;
@@ -419,7 +419,7 @@ export default function GameRecord() {
         opponentTeamId = newTeamResponse.data.id;
       } else {
         opponentTeamId = teamsData.find(
-          (team) => team.name === opponentTeam
+          (team) => team.name === opponentTeam,
         )?.id;
       }
       const matchResultData = {
@@ -448,7 +448,7 @@ export default function GameRecord() {
       };
       const existingMatchResults = await checkExistingMatchResults(
         matchResultData.match_result.game_result_id,
-        matchResultData.match_result.user_id
+        matchResultData.match_result.user_id,
       );
       if (existingMatchResults) {
         await updateMatchResult(existingMatchResults.id, matchResultData);
@@ -469,7 +469,7 @@ export default function GameRecord() {
           };
           await updateGameResult(
             localStorageGameResultId,
-            updateGameResultData
+            updateGameResultData,
           );
         }
       }

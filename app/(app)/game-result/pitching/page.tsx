@@ -143,11 +143,11 @@ export default function PitchingRecord() {
       const currentUserId = await getCurrentUserId();
       const existingPitchingResultData = await checkExistingPitchingResult(
         gameResultId,
-        currentUserId
+        currentUserId,
       );
       setExistingNumberOfPitches(existingPitchingResultData.number_of_pitches);
       setExistingGotToTheDistance(
-        existingPitchingResultData.got_to_the_distance
+        existingPitchingResultData.got_to_the_distance,
       );
       setExistingWin(existingPitchingResultData.win);
       setExistingTotalInnings(existingPitchingResultData.innings_pitched);
@@ -275,8 +275,8 @@ export default function PitchingRecord() {
       existingSelectedFractions == 0
         ? 0
         : existingSelectedFractions == 1
-        ? 0.33
-        : 0.66;
+          ? 0.33
+          : 0.66;
     const totalInnings = existingTotalInnings
       ? Number(existingSelectedInnings) + Number(changeExistingFractions)
       : Number(selectedInnings) + Number(selectedFractions);
@@ -312,12 +312,12 @@ export default function PitchingRecord() {
       };
       const existingPitchingResult = await checkExistingPitchingResult(
         pitchingResultData.pitching_result.game_result_id,
-        pitchingResultData.pitching_result.user_id
+        pitchingResultData.pitching_result.user_id,
       );
       if (existingPitchingResult) {
         await updatePitchingResult(
           existingPitchingResult.id,
-          pitchingResultData
+          pitchingResultData,
         );
       } else {
         const response = await createPitchingResult(pitchingResultData);
@@ -332,7 +332,7 @@ export default function PitchingRecord() {
           };
           await updatePitchingResultId(
             localStorageGameResultId,
-            updatePitchingResultData
+            updatePitchingResultData,
           );
         }
       }
@@ -383,8 +383,8 @@ export default function PitchingRecord() {
                       existingWin === 1
                         ? ["0"]
                         : existingLoss === 1
-                        ? ["1"]
-                        : ["-1"]
+                          ? ["1"]
+                          : ["-1"]
                     }
                   >
                     {winOrLoss.map((result) => (

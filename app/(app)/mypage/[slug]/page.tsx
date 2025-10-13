@@ -132,7 +132,7 @@ export default function MyPage() {
                                 </li>
                               )}
                             </React.Fragment>
-                          )
+                          ),
                         )}
                       </ul>
                     </li>

@@ -13,11 +13,7 @@ export const metadata: Metadata = {
   description: "BUZZ BASE - 野球の個人成績をランキング形式で共有できるアプリ",
 };
 
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <UserProvider>

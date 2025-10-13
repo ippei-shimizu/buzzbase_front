@@ -5,7 +5,7 @@ export const createBaseballNote = async (data: createNoteProps) => {
     const formattedData = { baseball_note: data };
     const response = await axiosInstance.post(
       "/api/v1/baseball_notes",
-      formattedData
+      formattedData,
     );
     return response.data;
   } catch (error) {
@@ -16,7 +16,7 @@ export const createBaseballNote = async (data: createNoteProps) => {
 
 export const updateBaseballNote = async (
   id: number,
-  data: { date: string; title: string; memo: string }
+  data: { date: string; title: string; memo: string },
 ) => {
   try {
     const response = await axiosInstance.put(`/api/v1/baseball_notes/${id}`, {

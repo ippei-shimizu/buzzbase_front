@@ -38,7 +38,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const { data: userId } = useSWR("/api/v1/users/current", fetcher);
   const { data: usersUserId } = useSWR(
     userId ? `/api/v1/users/${userId.id}/show_current_user_id` : null,
-    fetcher
+    fetcher,
   );
 
   React.useEffect(() => {

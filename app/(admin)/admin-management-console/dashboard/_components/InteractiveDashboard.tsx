@@ -12,41 +12,49 @@ interface InteractiveDashboardProps {
   initialStats: any;
 }
 
-export default function InteractiveDashboard({ initialStats }: InteractiveDashboardProps) {
+export default function InteractiveDashboard({
+  initialStats,
+}: InteractiveDashboardProps) {
   const [stats, setStats] = useState(initialStats);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState(30);
-  const [granularity, setGranularity] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [granularity, setGranularity] = useState<
+    "daily" | "weekly" | "monthly"
+  >("daily");
 
-  const [visibleUserMetrics, setVisibleUserMetrics] = useState(new Set(['new_users', 'total_users', 'active_users']));
-  const [visibleActivityMetrics, setVisibleActivityMetrics] = useState(new Set(['games', 'batting_records', 'pitching_records', 'total_posts']));
+  const [visibleUserMetrics, setVisibleUserMetrics] = useState(
+    new Set(["new_users", "total_users", "active_users"]),
+  );
+  const [visibleActivityMetrics, setVisibleActivityMetrics] = useState(
+    new Set(["games", "batting_records", "pitching_records", "total_posts"]),
+  );
 
   const userMetrics = [
-    { key: 'new_users', label: '新規ユーザー', color: '#3B82F6' },
-    { key: 'total_users', label: '累計ユーザー', color: '#10B981' },
-    { key: 'active_users', label: 'アクティブユーザー', color: '#F59E0B' },
+    { key: "new_users", label: "新規ユーザー", color: "#3B82F6" },
+    { key: "total_users", label: "累計ユーザー", color: "#10B981" },
+    { key: "active_users", label: "アクティブユーザー", color: "#F59E0B" },
   ];
 
   const activityMetrics = [
-    { key: 'games', label: 'ゲーム数', color: '#8B5CF6' },
-    { key: 'batting_records', label: '打撃記録', color: '#06B6D4' },
-    { key: 'pitching_records', label: '投球記録', color: '#F97316' },
-    { key: 'total_posts', label: '総投稿数', color: '#EF4444' },
+    { key: "games", label: "ゲーム数", color: "#8B5CF6" },
+    { key: "batting_records", label: "打撃記録", color: "#06B6D4" },
+    { key: "pitching_records", label: "投球記録", color: "#F97316" },
+    { key: "total_posts", label: "総投稿数", color: "#EF4444" },
   ];
 
   const userGrowthColumns = [
-    { key: 'date', label: '日付' },
-    { key: 'new_users', label: '新規ユーザー' },
-    { key: 'total_users', label: '累計ユーザー' },
-    { key: 'active_users', label: 'アクティブユーザー' },
+    { key: "date", label: "日付" },
+    { key: "new_users", label: "新規ユーザー" },
+    { key: "total_users", label: "累計ユーザー" },
+    { key: "active_users", label: "アクティブユーザー" },
   ];
 
   const activityColumns = [
-    { key: 'date', label: '日付' },
-    { key: 'games', label: 'ゲーム数' },
-    { key: 'batting_records', label: '打撃記録' },
-    { key: 'pitching_records', label: '投球記録' },
-    { key: 'total_posts', label: '総投稿数' },
+    { key: "date", label: "日付" },
+    { key: "games", label: "ゲーム数" },
+    { key: "batting_records", label: "打撃記録" },
+    { key: "pitching_records", label: "投球記録" },
+    { key: "total_posts", label: "総投稿数" },
   ];
 
   const handlePeriodChange = async (newPeriod: number) => {
@@ -54,18 +62,23 @@ export default function InteractiveDashboard({ initialStats }: InteractiveDashbo
     await fetchStats(newPeriod, granularity);
   };
 
-  const handleGranularityChange = async (newGranularity: 'daily' | 'weekly' | 'monthly') => {
+  const handleGranularityChange = async (
+    newGranularity: "daily" | "weekly" | "monthly",
+  ) => {
     setGranularity(newGranularity);
     await fetchStats(period, newGranularity);
   };
 
-  const fetchStats = async (period: number, granularity: 'daily' | 'weekly' | 'monthly') => {
+  const fetchStats = async (
+    period: number,
+    granularity: "daily" | "weekly" | "monthly",
+  ) => {
     setLoading(true);
     try {
       const data = await getDashboardStats(period, granularity);
       setStats(data);
     } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error);
+      console.error("Failed to fetch dashboard stats:", error);
     } finally {
       setLoading(false);
     }
@@ -120,7 +133,8 @@ export default function InteractiveDashboard({ initialStats }: InteractiveDashbo
                 <div className="h-64 flex items-center justify-center bg-gray-50 rounded">
                   <p className="text-gray-500">データを読み込み中...</p>
                 </div>
-              ) : stats?.user_growth_data && stats?.user_growth_data.length > 0 ? (
+              ) : stats?.user_growth_data &&
+                stats?.user_growth_data.length > 0 ? (
                 <UserGrowthChart
                   data={stats?.user_growth_data || []}
                   height={300}
@@ -141,7 +155,10 @@ export default function InteractiveDashboard({ initialStats }: InteractiveDashbo
               <div className="h-4 bg-gray-200 rounded mb-4 animate-pulse"></div>
               <div className="space-y-2">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-8 bg-gray-100 rounded animate-pulse"></div>
+                  <div
+                    key={i}
+                    className="h-8 bg-gray-100 rounded animate-pulse"
+                  ></div>
                 ))}
               </div>
             </div>
@@ -192,7 +209,10 @@ export default function InteractiveDashboard({ initialStats }: InteractiveDashbo
               <div className="h-4 bg-gray-200 rounded mb-4 animate-pulse"></div>
               <div className="space-y-2">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-8 bg-gray-100 rounded animate-pulse"></div>
+                  <div
+                    key={i}
+                    className="h-8 bg-gray-100 rounded animate-pulse"
+                  ></div>
                 ))}
               </div>
             </div>

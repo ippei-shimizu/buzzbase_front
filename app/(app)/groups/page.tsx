@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 export default function Group() {
   const [groups, setGroups] = useState<GroupsData[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();

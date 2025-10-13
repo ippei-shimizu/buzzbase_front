@@ -8,7 +8,7 @@ export function useNotifications() {
   const usersUserId = state.usersUserId;
   const { data, error } = useSWR(
     usersUserId ? `/api/v1/notifications?user_id=${usersUserId.user_id}` : null,
-    fetcher
+    fetcher,
   );
   return {
     notifications: data,

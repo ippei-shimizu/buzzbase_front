@@ -7,7 +7,7 @@ export function usePersonalPitchingResult(userId: number) {
     userId
       ? `/api/v1/pitching_results/personal_pitching_result?user_id=${userId}`
       : null,
-    fetcher
+    fetcher,
   );
   return {
     personalPitchingResults: data,

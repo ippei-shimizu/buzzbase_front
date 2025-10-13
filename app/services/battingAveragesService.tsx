@@ -22,12 +22,12 @@ export const createBattingAverage = async (data: BattingAverageData) => {
 
 export const updateBattingAverage = async (
   id: number,
-  data: BattingAverageData
+  data: BattingAverageData,
 ) => {
   try {
     const response = await axiosInstance.put(
       `/api/v1/batting_averages/${id}`,
-      data
+      data,
     );
     return response.data;
   } catch (error) {
@@ -38,11 +38,11 @@ export const updateBattingAverage = async (
 
 export const checkExistingBattingAverage = async (
   gameResultId: number | null,
-  userId: number | null
+  userId: number | null,
 ) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/search?game_result_id=${gameResultId}&user_id=${userId}`
+      `/api/v1/search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
   } catch (error: any) {
@@ -54,7 +54,7 @@ export const checkExistingBattingAverage = async (
 export const getCurrentBattingAverage = async (gameResultId: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/current_batting_average_search?game_result_id=${gameResultId}`
+      `/api/v1/current_batting_average_search?game_result_id=${gameResultId}`,
     );
     return response.data;
   } catch (error) {
@@ -66,7 +66,7 @@ export const getCurrentBattingAverage = async (gameResultId: number | null) => {
 export const getUserBattingAverage = async (gameResultId: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/user_batting_average_search?game_result_id=${gameResultId}`
+      `/api/v1/user_batting_average_search?game_result_id=${gameResultId}`,
     );
     return response.data;
   } catch (error) {
@@ -78,7 +78,7 @@ export const getUserBattingAverage = async (gameResultId: number | null) => {
 export const getPersonalBattingAverage = async (userId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/batting_averages/personal_batting_average?user_id=${userId}`
+      `/api/v1/batting_averages/personal_batting_average?user_id=${userId}`,
     );
     return response.data;
   } catch (error) {
@@ -90,7 +90,7 @@ export const getPersonalBattingAverage = async (userId: number) => {
 export const getPersonalBattingStatus = async (userId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/batting_averages/personal_batting_stats?user_id=${userId}`
+      `/api/v1/batting_averages/personal_batting_stats?user_id=${userId}`,
     );
     return response.data;
   } catch (error) {

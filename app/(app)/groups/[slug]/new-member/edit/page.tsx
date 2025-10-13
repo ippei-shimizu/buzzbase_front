@@ -52,7 +52,7 @@ export default function GroupMemberAdd({
         try {
           const response = await getFollowingUser(currentUserId);
           const filteredFollowing = response.filter(
-            (follow: FollowingUser) => !groupMemberIds.includes(follow.id)
+            (follow: FollowingUser) => !groupMemberIds.includes(follow.id),
           );
           setFollowing(filteredFollowing);
         } catch (error) {
@@ -96,7 +96,7 @@ export default function GroupMemberAdd({
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event('submit'))}
+          onMatchResultNext={() => handleSubmit(new Event("submit"))}
           disabled={isSubmitting}
           text={"招待"}
         />

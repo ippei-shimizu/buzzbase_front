@@ -51,7 +51,7 @@ export default function GroupBattingRankingTable(props: Props) {
 
   const sortedRunsBattedIn =
     battingAverage?.sort(
-      (a, b) => (b.runs_batted_in ?? 0) - (a.runs_batted_in ?? 0)
+      (a, b) => (b.runs_batted_in ?? 0) - (a.runs_batted_in ?? 0),
     ) || [];
 
   const sortedHit =
@@ -59,7 +59,7 @@ export default function GroupBattingRankingTable(props: Props) {
 
   const sortedStealingBase =
     battingAverage?.sort(
-      (a, b) => (b.stealing_base ?? 0) - (a.stealing_base ?? 0)
+      (a, b) => (b.stealing_base ?? 0) - (a.stealing_base ?? 0),
     ) || [];
 
   const sortedOnBasePercentage =
