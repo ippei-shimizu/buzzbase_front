@@ -16,7 +16,7 @@ export const updateUser = async (data: updateUser) => {
         user_id: data.user_id,
       },
     },
-    { headers }
+    { headers },
   );
   return response;
 };
@@ -34,7 +34,7 @@ export const getUserData = async () => {
 export const getUserIdData = async (user_id: string) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/show_user_id_data?user_id=${user_id}`
+      `/api/v1/users/show_user_id_data?user_id=${user_id}`,
     );
     return response.data;
   } catch (error) {
@@ -59,7 +59,7 @@ export const getCurrentUserId = async () => {
 export const getCurrentUsersUserId = async (id: number | null) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/${id}/show_current_user_id`
+      `/api/v1/users/${id}/show_current_user_id`,
     );
     return response.data.user_id;
   } catch (error) {
@@ -70,7 +70,7 @@ export const getCurrentUsersUserId = async (id: number | null) => {
 export const getUserId = async (user_id: string) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/show_by_user_id?user_id=${user_id}`
+      `/api/v1/users/show_by_user_id?user_id=${user_id}`,
     );
     return response.data;
   } catch (error) {
@@ -81,7 +81,7 @@ export const getUserId = async (user_id: string) => {
 export const userFollow = async (userId: number) => {
   try {
     const response = await axiosInstance.post(
-      `/api/v1/relationships?followed_id=${userId}`
+      `/api/v1/relationships?followed_id=${userId}`,
     );
     return response.data;
   } catch (error) {
@@ -103,7 +103,7 @@ export const userUnFollow = async (id: number) => {
 export const getFollowingUser = async (id: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/${id}/following_users`
+      `/api/v1/users/${id}/following_users`,
     );
     return response.data;
   } catch (error) {
@@ -115,7 +115,7 @@ export const getFollowingUser = async (id: number) => {
 export const getFollowersUser = async (id: number) => {
   try {
     const response = await axiosInstance.get(
-      `/api/v1/users/${id}/followers_users`
+      `/api/v1/users/${id}/followers_users`,
     );
     return response.data;
   } catch (error) {

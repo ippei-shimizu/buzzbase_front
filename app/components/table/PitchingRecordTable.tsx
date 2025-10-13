@@ -47,10 +47,10 @@ export default function PitchingRecordTable(props: Props) {
     return value.toFixed(2);
   }
 
-  const displayValue = (value: number | undefined) =>
-    value === undefined ? "-" : value.toString();
-  const displayFormattedValue = (value: number | undefined) =>
-    value === undefined ? "-" : formatNumber(value);
+  const displayValue = (value: number | undefined | null) =>
+    value == null ? "-" : value.toString();
+  const displayFormattedValue = (value: number | undefined | null) =>
+    value == null ? "-" : formatNumber(value);
 
   const styleTableBox = "grid grid-cols-2 text-center";
   const styleTableTitle =

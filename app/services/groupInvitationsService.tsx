@@ -3,7 +3,7 @@ import axiosInstance from "@app/utils/axiosInstance";
 export const acceptGroupInvitation = async (groupId: number) => {
   try {
     const response = await axiosInstance.post(
-      `/api/v1/group_invitations/${groupId}/accept_invitation`
+      `/api/v1/group_invitations/${groupId}/accept_invitation`,
     );
     response.data;
   } catch (error) {
@@ -15,7 +15,7 @@ export const acceptGroupInvitation = async (groupId: number) => {
 export const declinedGroupInvitation = async (groupId: number) => {
   try {
     const response = await axiosInstance.post(
-      `/api/v1/group_invitations/${groupId}/declined_invitation`
+      `/api/v1/group_invitations/${groupId}/declined_invitation`,
     );
     response.data;
   } catch (error) {

@@ -31,7 +31,7 @@ export default function FollowButton({
   return (
     <>
       <Button
-        onClick={handleFollow}
+        onPress={handleFollow}
         className={following ? followedButtonStyle : followingButtonStyle}
       >
         {following ? "フォロー中" : "フォローする"}

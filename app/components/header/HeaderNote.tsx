@@ -3,6 +3,12 @@ import React, { useEffect } from "react";
 import { BackIcon } from "@app/components/icon/BackIcon";
 import { Button } from "@nextui-org/react";
 
+interface HeaderNoteSaveProps {
+  onNoteSave: () => void;
+  isSubmitting: boolean;
+  hasChanges: boolean;
+}
+
 export default function HeaderNote({
   onNoteSave,
   isSubmitting,

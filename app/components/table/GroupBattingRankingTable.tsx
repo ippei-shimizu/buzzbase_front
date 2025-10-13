@@ -8,6 +8,7 @@ import {
   User,
 } from "@nextui-org/react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 type BattingAverage = {
   hit: number | null;
@@ -43,28 +44,52 @@ export default function GroupBattingRankingTable(props: Props) {
     return value.toFixed(3);
   }
 
-  const sortedBattingAverage =
-    battingStats?.sort((a, b) => b.batting_average - a.batting_average) || [];
+  const sortedBattingAverage = useMemo(
+    () =>
+      battingStats
+        ?.slice()
+        .sort((a, b) => b.batting_average - a.batting_average) || [],
+    [battingStats],
+  );
 
-  const sortedHomeRun =
-    battingAverage?.sort((a, b) => (b.home_run ?? 0) - (a.home_run ?? 0)) || [];
+  const sortedHomeRun = useMemo(
+    () =>
+      battingAverage
+        ?.slice()
+        .sort((a, b) => (b.home_run ?? 0) - (a.home_run ?? 0)) || [],
+    [battingAverage],
+  );
 
-  const sortedRunsBattedIn =
-    battingAverage?.sort(
-      (a, b) => (b.runs_batted_in ?? 0) - (a.runs_batted_in ?? 0)
-    ) || [];
+  const sortedRunsBattedIn = useMemo(
+    () =>
+      battingAverage
+        ?.slice()
+        .sort((a, b) => (b.runs_batted_in ?? 0) - (a.runs_batted_in ?? 0)) ||
+      [],
+    [battingAverage],
+  );
 
-  const sortedHit =
-    battingAverage?.sort((a, b) => (b.hit ?? 0) - (a.hit ?? 0)) || [];
+  const sortedHit = useMemo(
+    () =>
+      battingAverage?.slice().sort((a, b) => (b.hit ?? 0) - (a.hit ?? 0)) || [],
+    [battingAverage],
+  );
 
-  const sortedStealingBase =
-    battingAverage?.sort(
-      (a, b) => (b.stealing_base ?? 0) - (a.stealing_base ?? 0)
-    ) || [];
+  const sortedStealingBase = useMemo(
+    () =>
+      battingAverage
+        ?.slice()
+        .sort((a, b) => (b.stealing_base ?? 0) - (a.stealing_base ?? 0)) || [],
+    [battingAverage],
+  );
 
-  const sortedOnBasePercentage =
-    battingStats?.sort((a, b) => b.on_base_percentage - a.on_base_percentage) ||
-    [];
+  const sortedOnBasePercentage = useMemo(
+    () =>
+      battingStats
+        ?.slice()
+        .sort((a, b) => b.on_base_percentage - a.on_base_percentage) || [],
+    [battingStats],
+  );
 
   return (
     <>

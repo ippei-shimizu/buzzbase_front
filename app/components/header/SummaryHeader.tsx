@@ -1,6 +1,11 @@
 import { BackIcon } from "@app/components/icon/BackIcon";
 import { Button } from "@nextui-org/react";
 
+interface HeaderSummaryResultProps {
+  onSummaryResult: () => void;
+  text: string;
+}
+
 export default function SummaryResultHeader({
   onSummaryResult,
   text,

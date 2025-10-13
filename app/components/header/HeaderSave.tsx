@@ -3,6 +3,10 @@ import React, { useEffect } from "react";
 import { BackIcon } from "@app/components/icon/BackIcon";
 import { Button } from "@nextui-org/react";
 
+interface HeaderSaveProps {
+  onProfileUpdate: () => void;
+}
+
 export default function HeaderSave({ onProfileUpdate }: HeaderSaveProps) {
   const handleBackClick = () => {
     window.history.back();

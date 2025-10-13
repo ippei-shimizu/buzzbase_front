@@ -1,13 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Providers } from "@app/providers";
-import NavigationMenu from "@app/components/header/NavigationMenu";
-import { AuthProvider } from "@app/contexts/useAuthContext";
 import { notoSansJP } from "@app/font";
-import Footer from "@app/components/footer/Footer";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
-import { UserProvider } from "@app/contexts/userContext";
 
 const siteName = "BUZZ BASE 野球の個人成績をランキング形式で共有できるアプリ";
 const description =
@@ -45,39 +40,38 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const isProduction = process.env.NODE_ENV === "production";
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="ja" className="h-full">
       <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
       <meta name="apple-mobile-web-app-title" content="BUZZ BASE" />
       <meta name="application-name" content="BUZZ BASE" />
-      <Script
-        async
-        strategy="afterInteractive"
-        src="https://www.googletagmanager.com/gtag/js?id=G-47TWJXXWMF"
-      />
-      <Script
-        id="gtag-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-           window.dataLayer = window.dataLayer || [];
-           function gtag(){dataLayer.push(arguments);}
-           gtag('js', new Date());
- 
-           gtag('config', 'G-47TWJXXWMF');
-           `,
-        }}
-      />
+      {isProduction && gaId && (
+        <>
+          <Script
+            async
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          />
+          <Script
+            id="gtag-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+               window.dataLayer = window.dataLayer || [];
+               function gtag(){dataLayer.push(arguments);}
+               gtag('js', new Date());
+
+               gtag('config', '${gaId}');
+               `,
+            }}
+          />
+        </>
+      )}
       <body className={`${notoSansJP.className} bg-main text-white h-full`}>
-        <AuthProvider>
-          <UserProvider>
-            <Providers>
-              {children}
-              <NavigationMenu />
-              <Footer />
-            </Providers>
-          </UserProvider>
-        </AuthProvider>
+        {children}
         <Analytics />
       </body>
     </html>

@@ -10,12 +10,12 @@ type Team = {
   prefecture_name: string;
 };
 
-export default function getMyTeams() {
+export default function useMyTeams() {
   const pathName = usePathname();
   const userId = extractUserIdFromPath(pathName);
   const { data, error } = useSWR<Team>(
     userId ? `/api/v1/teams/${userId}/my_team` : null,
-    fetcher
+    fetcher,
   );
   return {
     teamData: data,
