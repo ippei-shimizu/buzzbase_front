@@ -44,27 +44,32 @@ export default function GroupBattingRankingTable(props: Props) {
   }
 
   const sortedBattingAverage =
-    battingStats?.sort((a, b) => b.batting_average - a.batting_average) || [];
+    battingStats
+      ?.slice()
+      .sort((a, b) => b.batting_average - a.batting_average) || [];
 
   const sortedHomeRun =
-    battingAverage?.sort((a, b) => (b.home_run ?? 0) - (a.home_run ?? 0)) || [];
+    battingAverage
+      ?.slice()
+      .sort((a, b) => (b.home_run ?? 0) - (a.home_run ?? 0)) || [];
 
   const sortedRunsBattedIn =
-    battingAverage?.sort(
-      (a, b) => (b.runs_batted_in ?? 0) - (a.runs_batted_in ?? 0),
-    ) || [];
+    battingAverage
+      ?.slice()
+      .sort((a, b) => (b.runs_batted_in ?? 0) - (a.runs_batted_in ?? 0)) || [];
 
   const sortedHit =
-    battingAverage?.sort((a, b) => (b.hit ?? 0) - (a.hit ?? 0)) || [];
+    battingAverage?.slice().sort((a, b) => (b.hit ?? 0) - (a.hit ?? 0)) || [];
 
   const sortedStealingBase =
-    battingAverage?.sort(
-      (a, b) => (b.stealing_base ?? 0) - (a.stealing_base ?? 0),
-    ) || [];
+    battingAverage
+      ?.slice()
+      .sort((a, b) => (b.stealing_base ?? 0) - (a.stealing_base ?? 0)) || [];
 
   const sortedOnBasePercentage =
-    battingStats?.sort((a, b) => b.on_base_percentage - a.on_base_percentage) ||
-    [];
+    battingStats
+      ?.slice()
+      .sort((a, b) => b.on_base_percentage - a.on_base_percentage) || [];
 
   return (
     <>

@@ -42,24 +42,31 @@ export default function GroupPitchingRankingTable(props: Props) {
     return value.toFixed(2);
   }
 
-  const sortedPitchingEra = pitchingStats?.sort((a, b) => b.era - a.era) || [];
+  const sortedPitchingEra =
+    pitchingStats?.slice().sort((a, b) => a.era - b.era) || [];
 
   const sortedWin =
-    pitchingAggregate?.sort((a, b) => (b.win ?? 0) - (a.win ?? 0)) || [];
+    pitchingAggregate?.slice().sort((a, b) => (b.win ?? 0) - (a.win ?? 0)) ||
+    [];
 
   const sortedSaves =
-    pitchingAggregate?.sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0)) || [];
+    pitchingAggregate
+      ?.slice()
+      .sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0)) || [];
 
   const sortedHp =
-    pitchingAggregate?.sort((a, b) => (b.hold ?? 0) - (a.hold ?? 0)) || [];
+    pitchingAggregate?.slice().sort((a, b) => (b.hold ?? 0) - (a.hold ?? 0)) ||
+    [];
 
   const sortedStrikeouts =
-    pitchingAggregate?.sort(
-      (a, b) => (b.strikeouts ?? 0) - (a.strikeouts ?? 0),
-    ) || [];
+    pitchingAggregate
+      ?.slice()
+      .sort((a, b) => (b.strikeouts ?? 0) - (a.strikeouts ?? 0)) || [];
 
   const sortedWinPercentage =
-    pitchingStats?.sort((a, b) => b.win_percentage - a.win_percentage) || [];
+    pitchingStats
+      ?.slice()
+      .sort((a, b) => b.win_percentage - a.win_percentage) || [];
 
   return (
     <>
