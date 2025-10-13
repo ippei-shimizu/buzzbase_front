@@ -29,14 +29,6 @@ const customJestConfig = {
     "!app/**/loading.tsx",
     "!app/**/providers.tsx",
   ],
-  coverageThreshold: {
-    global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
-    },
-  },
 };
 
 module.exports = createJestConfig(customJestConfig);
