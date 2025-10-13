@@ -117,7 +117,8 @@ export default function MatchResultList(props: UserId) {
     } else {
       fetchData();
     }
-  }, [userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, fetchFilteredData]);
 
   useEffect(() => {
     if (selectedYear && selectedMatchType) {

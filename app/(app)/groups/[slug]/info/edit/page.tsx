@@ -48,7 +48,8 @@ export default function GroupEdit({ params }: { params: { slug: string } }) {
       fetchGroupDetails(groupId).finally(() => setIsLoading(false));
     }
     fetchData();
-  }, [currentUserId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserId, groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
     try {

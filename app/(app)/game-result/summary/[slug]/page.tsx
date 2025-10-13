@@ -98,7 +98,8 @@ export default function ResultsSummary() {
     if (!savedGameResultId) {
       localStorage.setItem("gameResultId", JSON.stringify(id));
     }
-  }, [pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, id]);
 
   useEffect(() => {
     if (matchResult.length > 0 && !isDetailDataFetched) {
@@ -107,7 +108,8 @@ export default function ResultsSummary() {
       const isCurrentUserPage = currentUserId === battingAverage[0]?.user_id;
       setCurrentUserPage(isCurrentUserPage);
     }
-  }, [matchResult, isDetailDataFetched]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchResult, isDetailDataFetched, currentUserId, battingAverage]);
 
   // 試合データ取得
   const fetchCurrentResultData = async (localStorageGameResultId: number) => {

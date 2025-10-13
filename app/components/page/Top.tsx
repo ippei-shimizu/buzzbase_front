@@ -115,7 +115,11 @@ export default function Top() {
                 </List>
                 <LoginAndSignUp />
               </div>
-              <Image src="/images/top-kv.png" className={classes.image} />
+              <Image
+                src="/images/top-kv.png"
+                alt=""
+                className={classes.image}
+              />
             </div>
           </Container>
 

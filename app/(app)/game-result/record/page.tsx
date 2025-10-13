@@ -513,7 +513,7 @@ export default function GameRecord() {
                   variant="bordered"
                   label="試合日付"
                   labelPlacement="outside-left"
-                  className="flex justify-between items-center"
+                  className="flex justify-between items-center [&>div>div>div>input]:py-2"
                   color={isMatchDate ? "default" : "danger"}
                   value={existingGameDate ? existingGameDate : gameDate}
                   onChange={handleDateChange}
@@ -563,7 +563,7 @@ export default function GameRecord() {
                   label="自チーム"
                   labelPlacement="outside-left"
                   placeholder="自分のチーム名を入力"
-                  className="flex justify-between items-center"
+                  className="flex justify-between items-center [&>div>div>div>input]:py-2"
                   color={isMyTeamValid ? "default" : "danger"}
                   value={myTeam}
                   onChange={handleMyTeamChange}

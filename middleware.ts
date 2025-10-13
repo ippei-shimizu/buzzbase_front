@@ -2,6 +2,34 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { RAILS_API_URL } from "./app/constants/api";
 
+function checkBasicAuth(request: NextRequest): boolean {
+  const authHeader = request.headers.get("authorization");
+
+  if (!authHeader || !authHeader.startsWith("Basic ")) {
+    return false;
+  }
+
+  const base64Credentials = authHeader.split(" ")[1];
+  const credentials = Buffer.from(base64Credentials, "base64").toString(
+    "utf-8",
+  );
+  const [username, password] = credentials.split(":");
+
+  const validUsername = process.env.BASIC_AUTH_USER;
+  const validPassword = process.env.BASIC_AUTH_PASSWORD;
+
+  return username === validUsername && password === validPassword;
+}
+
+function createBasicAuthResponse(): NextResponse {
+  return new NextResponse("Authentication required", {
+    status: 401,
+    headers: {
+      "WWW-Authenticate": 'Basic realm="Admin Area"',
+    },
+  });
+}
+
 async function refreshAccessToken(
   refreshToken: string,
 ): Promise<string | null> {
@@ -67,6 +95,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin-management-console")) {
+    // NOTE: Basic認証チェック
+    if (!checkBasicAuth(request)) {
+      return createBasicAuthResponse();
+    }
+
     if (pathname === "/admin-management-console/login") {
       const authResult = await validateAdminAuth(request);
       if (authResult.isValid) {

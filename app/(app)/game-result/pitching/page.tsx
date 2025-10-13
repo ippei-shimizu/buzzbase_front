@@ -453,7 +453,7 @@ export default function PitchingRecord() {
                     label="投球数"
                     labelPlacement="outside-left"
                     placeholder="0"
-                    className="justify-between [&>div]:w-20"
+                    className="justify-between [&>div]:w-20 [&>div>div>div>input]:py-2"
                     defaultValue="0"
                     min={0}
                     onChange={handleNumberPitchesChange}
@@ -490,7 +490,7 @@ export default function PitchingRecord() {
                       label="ホールド"
                       labelPlacement="outside-left"
                       placeholder="ホールド"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleHoldChange}
@@ -507,7 +507,7 @@ export default function PitchingRecord() {
                       label="セーブ"
                       labelPlacement="outside-left"
                       placeholder="セーブ"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleSaveChange}
@@ -524,7 +524,7 @@ export default function PitchingRecord() {
                       label="失点"
                       labelPlacement="outside-left"
                       placeholder="失点"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleRunAllowedChange}
@@ -542,7 +542,7 @@ export default function PitchingRecord() {
                       labelPlacement="outside-left"
                       placeholder="自責点
                       "
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleEarnedRunChange}
@@ -559,7 +559,7 @@ export default function PitchingRecord() {
                       label="被安打"
                       labelPlacement="outside-left"
                       placeholder="被安打"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleHitsAllowedChange}
@@ -576,7 +576,7 @@ export default function PitchingRecord() {
                       label="被本塁打"
                       labelPlacement="outside-left"
                       placeholder="被本塁打"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleHomeRunsChange}
@@ -593,7 +593,7 @@ export default function PitchingRecord() {
                       label="奪三振"
                       labelPlacement="outside-left"
                       placeholder="奪三振"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleStrikeoutsChange}
@@ -610,7 +610,7 @@ export default function PitchingRecord() {
                       label="四球"
                       labelPlacement="outside-left"
                       placeholder="四球"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleBaseOnBallsChange}
@@ -627,7 +627,7 @@ export default function PitchingRecord() {
                       label="死球"
                       labelPlacement="outside-left"
                       placeholder="死球"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       defaultValue="0"
                       min={0}
                       onChange={handleHitByPitcherChange}
