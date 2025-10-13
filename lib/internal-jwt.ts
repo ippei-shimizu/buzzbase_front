@@ -1,7 +1,13 @@
 import jwt from "jsonwebtoken";
 
-const SECRET_KEY =
-  process.env.JWT_SECRET || "fallback-secret-key-for-development";
+const SECRET_KEY: string = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is required");
+  }
+  return secret;
+})();
+
 const ALGORITHM = "HS256";
 const EXPIRATION_TIME = "5m";
 
@@ -15,11 +21,11 @@ interface JWTPayload {
 
 /**
  * NOTE: 管理者ユーザー用のJWTトークンを生成
- * サーバー間通信用（Next.js → Rails）
  */
 export function generateInternalJWT(adminUserId: number): string {
   const payload = {
     admin_user_id: adminUserId,
+    token_type: "access",
     iss: "buzzbase-nextjs",
     aud: "buzzbase-rails",
   };

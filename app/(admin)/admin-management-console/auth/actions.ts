@@ -3,11 +3,11 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
+import { RAILS_API_URL } from "../../../constants/api";
 
 export async function adminLogin(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
 
   try {
     const response = await fetch(`${RAILS_API_URL}/api/v1/admin/sign_in`, {
@@ -59,7 +59,6 @@ export async function adminLogin(formData: FormData) {
 }
 
 export async function adminLogout() {
-  const RAILS_API_URL = process.env.RAILS_API_URL || "http://back:3000";
   const cookieStore = cookies();
 
   try {
