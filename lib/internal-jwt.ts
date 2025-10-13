@@ -15,11 +15,11 @@ interface JWTPayload {
 
 /**
  * NOTE: 管理者ユーザー用のJWTトークンを生成
- * サーバー間通信用（Next.js → Rails）
  */
 export function generateInternalJWT(adminUserId: number): string {
   const payload = {
     admin_user_id: adminUserId,
+    token_type: "access",
     iss: "buzzbase-nextjs",
     aud: "buzzbase-rails",
   };
