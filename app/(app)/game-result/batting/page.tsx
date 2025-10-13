@@ -672,7 +672,7 @@ export default function BattingRecord() {
                       label="打点"
                       labelPlacement="outside-left"
                       placeholder="打点"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       value={
                         existingRunsBattedIn !== undefined
                           ? existingRunsBattedIn.toString()
@@ -688,7 +688,7 @@ export default function BattingRecord() {
                       label="得点"
                       labelPlacement="outside-left"
                       placeholder="得点"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       value={
                         existingRun !== undefined ? existingRun.toString() : "0"
                       }
@@ -702,7 +702,7 @@ export default function BattingRecord() {
                       label="失策"
                       labelPlacement="outside-left"
                       placeholder="失策"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       value={
                         existingDefensiveError !== undefined
                           ? existingDefensiveError.toString()
@@ -718,7 +718,7 @@ export default function BattingRecord() {
                       label="盗塁"
                       labelPlacement="outside-left"
                       placeholder="盗塁"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       value={
                         existingStealingBase !== undefined
                           ? existingStealingBase.toString()
@@ -734,7 +734,7 @@ export default function BattingRecord() {
                       label="盗塁死"
                       labelPlacement="outside-left"
                       placeholder="盗塁死"
-                      className="[&>div]:w-20"
+                      className="[&>div]:w-20 [&>div>div>div>input]:py-2"
                       value={
                         existingCaughtStealing !== undefined
                           ? existingCaughtStealing.toString()
