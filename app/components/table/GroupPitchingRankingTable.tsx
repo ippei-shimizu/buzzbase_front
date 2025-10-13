@@ -8,6 +8,7 @@ import {
   User,
 } from "@nextui-org/react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 type PitchingAggregate = {
   win: number;
@@ -42,31 +43,49 @@ export default function GroupPitchingRankingTable(props: Props) {
     return value.toFixed(2);
   }
 
-  const sortedPitchingEra =
-    pitchingStats?.slice().sort((a, b) => a.era - b.era) || [];
+  const sortedPitchingEra = useMemo(
+    () => pitchingStats?.slice().sort((a, b) => a.era - b.era) || [],
+    [pitchingStats],
+  );
 
-  const sortedWin =
-    pitchingAggregate?.slice().sort((a, b) => (b.win ?? 0) - (a.win ?? 0)) ||
-    [];
+  const sortedWin = useMemo(
+    () =>
+      pitchingAggregate?.slice().sort((a, b) => (b.win ?? 0) - (a.win ?? 0)) ||
+      [],
+    [pitchingAggregate],
+  );
 
-  const sortedSaves =
-    pitchingAggregate
-      ?.slice()
-      .sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0)) || [];
+  const sortedSaves = useMemo(
+    () =>
+      pitchingAggregate
+        ?.slice()
+        .sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0)) || [],
+    [pitchingAggregate],
+  );
 
-  const sortedHp =
-    pitchingAggregate?.slice().sort((a, b) => (b.hold ?? 0) - (a.hold ?? 0)) ||
-    [];
+  const sortedHp = useMemo(
+    () =>
+      pitchingAggregate
+        ?.slice()
+        .sort((a, b) => (b.hold ?? 0) - (a.hold ?? 0)) || [],
+    [pitchingAggregate],
+  );
 
-  const sortedStrikeouts =
-    pitchingAggregate
-      ?.slice()
-      .sort((a, b) => (b.strikeouts ?? 0) - (a.strikeouts ?? 0)) || [];
+  const sortedStrikeouts = useMemo(
+    () =>
+      pitchingAggregate
+        ?.slice()
+        .sort((a, b) => (b.strikeouts ?? 0) - (a.strikeouts ?? 0)) || [],
+    [pitchingAggregate],
+  );
 
-  const sortedWinPercentage =
-    pitchingStats
-      ?.slice()
-      .sort((a, b) => b.win_percentage - a.win_percentage) || [];
+  const sortedWinPercentage = useMemo(
+    () =>
+      pitchingStats
+        ?.slice()
+        .sort((a, b) => b.win_percentage - a.win_percentage) || [],
+    [pitchingStats],
+  );
 
   return (
     <>
