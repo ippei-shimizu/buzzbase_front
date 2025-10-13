@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
 
-const SECRET_KEY =
-  process.env.JWT_SECRET || "fallback-secret-key-for-development";
+const SECRET_KEY = process.env.JWT_SECRET;
+if (!SECRET_KEY) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+
 const ALGORITHM = "HS256";
 const EXPIRATION_TIME = "5m";
 
