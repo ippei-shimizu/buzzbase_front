@@ -67,7 +67,7 @@ export default function UserGrowthChart({
   ];
 
   const visibleLines = metrics.filter(
-    (metric) => !visibleMetrics || visibleMetrics.has(metric.key)
+    (metric) => !visibleMetrics || visibleMetrics.has(metric.key),
   );
 
   return (
