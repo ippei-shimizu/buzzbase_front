@@ -1,9 +1,12 @@
 import jwt from "jsonwebtoken";
 
-const SECRET_KEY = process.env.JWT_SECRET;
-if (!SECRET_KEY) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
+const SECRET_KEY: string = (() => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is required");
+  }
+  return secret;
+})();
 
 const ALGORITHM = "HS256";
 const EXPIRATION_TIME = "5m";
