@@ -8,6 +8,7 @@ import {
   Legend,
 } from "recharts";
 import BaseChart from "./BaseChart";
+import { formatDateWithWeekday } from "../../_utils/dateFormat";
 
 interface ActivityData {
   date: string;
@@ -84,7 +85,12 @@ export default function ActivityChart({
         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#666" />
+        <XAxis
+          dataKey="date"
+          tick={{ fontSize: 12 }}
+          stroke="#666"
+          tickFormatter={formatDateWithWeekday}
+        />
         <YAxis tick={{ fontSize: 12 }} stroke="#666" />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
