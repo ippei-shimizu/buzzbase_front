@@ -118,7 +118,7 @@ export default function ProfileEdit() {
     if (isLoggedIn === false) {
       return router.push("/signin");
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, router]);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -194,6 +194,7 @@ export default function ProfileEdit() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
   // disabled制御

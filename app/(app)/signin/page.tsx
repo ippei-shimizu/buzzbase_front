@@ -21,7 +21,7 @@ export default function Page() {
     if (isLoggedIn === true) {
       return router.push("/");
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, router]);
 
   useEffect(() => {
     if (logoutParams === "success") {

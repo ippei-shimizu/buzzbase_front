@@ -20,7 +20,8 @@ export default function GroupMember({ params }: { params: { slug: string } }) {
     if (groupId) {
       fetchGroupDetails(groupId);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
     try {

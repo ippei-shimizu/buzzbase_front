@@ -21,6 +21,7 @@ export default function Header() {
   useEffect(() => {
     localStorage.removeItem("gameResultId");
     fetchDate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const fetchDate = async () => {
     try {
