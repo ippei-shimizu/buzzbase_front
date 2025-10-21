@@ -4,7 +4,7 @@ import { Button } from "@nextui-org/react";
 export default function PlusButton({
   className,
   type,
-  onClick,
+  onPress,
 }: PlusButtonProps) {
   return (
     <>
@@ -12,7 +12,7 @@ export default function PlusButton({
         isIconOnly
         className={`${className} p-0 h-auto w-auto min-w-max block`}
         type={type}
-        onClick={onClick}
+        onPress={onPress}
       >
         <PlusIcon width="30" height="30" fill="#C4841D" />
       </Button>

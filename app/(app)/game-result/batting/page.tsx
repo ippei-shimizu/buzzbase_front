@@ -436,8 +436,7 @@ export default function BattingRecord() {
   };
 
   // データ送信
-  const handleSubmit = async (event: any) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     if (!validateForm() || isSubmitting) {
       return;
     }
@@ -641,7 +640,7 @@ export default function BattingRecord() {
                             variant="faded"
                             size="sm"
                             isIconOnly
-                            onClick={() =>
+                            onPress={() =>
                               handleDeletePlateAppearance(box.id, index)
                             }
                             endContent={
@@ -660,7 +659,7 @@ export default function BattingRecord() {
                   <PlusButton
                     className="mt-4 ml-auto mr-0 block rounded-large"
                     type="button"
-                    onClick={addBox}
+                    onPress={addBox}
                   />
                   <Divider className="mt-8 mb-4" />
                   {/* その他結果 */}
@@ -748,11 +747,12 @@ export default function BattingRecord() {
               </div>
               <div className="mt-8">
                 <Button
+                  type="button"
                   color="primary"
                   size="md"
                   radius="sm"
                   className="ml-auto mr-0 px-6 font-bold text-base flex items-center"
-                  onClick={handleSubmit}
+                  onPress={() => handleSubmit()}
                   endContent={<NextArrowIcon stroke="#F4F4F4" />}
                   isDisabled={isSubmitting}
                 >

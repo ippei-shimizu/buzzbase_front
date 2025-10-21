@@ -84,7 +84,7 @@ export default function NoteMenu({ noteId }: { noteId: number }) {
                 >
                   キャンセル
                 </Button>
-                <Button color="danger" radius="sm" onClick={handleDeleteNote}>
+                <Button color="danger" radius="sm" onPress={handleDeleteNote}>
                   削除する
                 </Button>
               </ModalFooter>

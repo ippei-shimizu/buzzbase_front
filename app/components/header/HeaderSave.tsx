@@ -22,7 +22,7 @@ export default function HeaderSave({ onProfileUpdate }: HeaderSaveProps) {
             <BackIcon width="24" height="24" fill="" stroke="white" />
           </button>
           <Button
-            onClick={onProfileUpdate}
+            onPress={onProfileUpdate}
             color="primary"
             variant="solid"
             size="sm"

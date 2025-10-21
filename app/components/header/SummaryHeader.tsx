@@ -21,7 +21,7 @@ export default function SummaryResultHeader({
             <BackIcon width="24" height="24" fill="" stroke="white" />
           </button>
           <Button
-            onClick={onSummaryResult}
+            onPress={onSummaryResult}
             color="primary"
             variant="ghost"
             size="sm"

@@ -79,7 +79,7 @@ export default function GameResultList() {
               radius="full"
               endContent={<PlusIcon width="22" height="22" fill="#F4F4F4" />}
               className="fixed top-16 right-4 z-50 font-medium lg:absolute lg:z-10"
-              onClick={handleNewRecord}
+              onPress={handleNewRecord}
               isDisabled={isSubmitting}
             >
               新規追加

@@ -627,7 +627,7 @@ export default function ProfileEdit() {
                           variant="faded"
                           size="sm"
                           isIconOnly
-                          onClick={() => handleDeleteAward(award.id, index)}
+                          onPress={() => handleDeleteAward(award.id, index)}
                           endContent={
                             <DeleteIcon
                               width="24"
@@ -644,7 +644,7 @@ export default function ProfileEdit() {
                 <PlusButton
                   className="mt-2 ml-auto mr-1 rounded-large"
                   type="button"
-                  onClick={addAward}
+                  onPress={addAward}
                 />
               </form>
             </div>

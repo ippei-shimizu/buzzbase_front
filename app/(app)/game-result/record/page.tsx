@@ -362,8 +362,7 @@ export default function GameRecord() {
   };
 
   // フォームデータ送信
-  const handleSubmit = async (event: any) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     if (!validateForm() || isSubmitting) {
       return;
     }
@@ -711,9 +710,10 @@ export default function GameRecord() {
                 <Button
                   color="primary"
                   size="md"
+                  type="button"
                   radius="sm"
                   className="ml-auto mr-0 px-6 font-bold text-base flex items-center"
-                  onClick={handleSubmit}
+                  onPress={() => handleSubmit()}
                   endContent={<NextArrowIcon stroke="#F4F4F4" />}
                   isDisabled={isSubmitting}
                 >
