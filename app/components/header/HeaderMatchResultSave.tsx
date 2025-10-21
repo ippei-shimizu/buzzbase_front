@@ -23,7 +23,7 @@ export default function HeaderMatchResultNext({
             <BackIcon width="24" height="24" fill="" stroke="white" />
           </button>
           <Button
-            onClick={onMatchResultNext}
+            onPress={onMatchResultNext}
             color="primary"
             variant="solid"
             size="sm"

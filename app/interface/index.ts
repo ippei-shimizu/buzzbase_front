@@ -169,7 +169,7 @@ interface teamData {
 interface PlusButtonProps {
   className: string;
   type?: "submit" | "button" | "reset" | undefined;
-  onClick: any;
+  onPress: any;
 }
 
 interface AwardData {

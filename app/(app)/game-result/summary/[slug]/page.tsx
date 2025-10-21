@@ -556,7 +556,7 @@ export default function ResultsSummary() {
                         <Button
                           color="danger"
                           radius="sm"
-                          onClick={() =>
+                          onPress={() =>
                             handleDeleteGameResult(localStorageGameResultId)
                           }
                         >

@@ -34,7 +34,7 @@ export default function HeaderNote({
             <BackIcon width="24" height="24" fill="" stroke="white" />
           </button>
           <Button
-            onClick={onNoteSave}
+            onPress={onNoteSave}
             color="primary"
             variant="solid"
             size="sm"

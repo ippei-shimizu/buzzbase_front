@@ -30,7 +30,7 @@ export default function HeaderNext({ onMatchResultSave }: HeaderNextProps) {
               endContent={
                 <NextArrowIcon width="16" height="16" stroke="#F4F4F4" />
               }
-              onClick={onMatchResultSave}
+              onPress={onMatchResultSave}
             >
               次へ
             </Button>

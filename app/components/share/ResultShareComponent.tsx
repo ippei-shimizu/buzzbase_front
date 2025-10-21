@@ -56,7 +56,7 @@ export default function ResultShareComponent({
       <Button
         color="primary"
         size="md"
-        onClick={handleShareMobile}
+        onPress={handleShareMobile}
         className="mt-3"
         radius="md"
       >
