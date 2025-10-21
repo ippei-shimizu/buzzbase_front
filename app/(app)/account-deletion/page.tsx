@@ -101,7 +101,7 @@ export default function AccountDeletionPage() {
                   color="danger"
                   variant="solid"
                   size="md"
-                  onClick={onOpen}
+                  onPress={onOpen}
                   className="px-8 py-3 text-base font-semibold"
                 >
                   アカウントを削除する
@@ -133,7 +133,7 @@ export default function AccountDeletionPage() {
           <ModalFooter className="flex justify-center gap-4">
             <Button
               variant="light"
-              onClick={onClose}
+              onPress={onClose}
               disabled={isDeleting}
               className="text-white"
             >
@@ -142,7 +142,7 @@ export default function AccountDeletionPage() {
             <Button
               color="danger"
               variant="solid"
-              onClick={handleDeleteAccount}
+              onPress={handleDeleteAccount}
               disabled={isDeleting}
               isLoading={isDeleting}
             >

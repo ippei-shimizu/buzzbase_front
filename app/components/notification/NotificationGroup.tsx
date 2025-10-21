@@ -78,7 +78,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
             <Button
               size="sm"
               color="primary"
-              onClick={() =>
+              onPress={() =>
                 handleAcceptGroupInvitation(notice.event_id, notice.id)
               }
             >
