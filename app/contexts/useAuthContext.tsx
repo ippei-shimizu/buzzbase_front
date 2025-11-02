@@ -2,22 +2,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { confirmAccountApi } from "@app/services/authService";
 
 const AuthContext = createContext<{
   isLoggedIn: boolean | undefined;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   loading: boolean;
-  confirmationMessage: string | null;
-  confirmationError: string | null;
-  confirmAccount: (token: string) => Promise<void>;
 }>({
   isLoggedIn: undefined,
   setIsLoggedIn: () => {},
   loading: true,
-  confirmationMessage: null,
-  confirmationError: null,
-  confirmAccount: async () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);
@@ -27,12 +20,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
-    null,
-  );
-  const [confirmationError, setConfirmationError] = useState<string | null>(
-    null,
-  );
 
   useEffect(() => {
     const validateToken = async () => {
@@ -64,30 +51,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     validateToken();
   }, []);
 
-  const confirmAccount = async (token: string) => {
-    try {
-      const response = await confirmAccountApi(token);
-      console.log("Response data:", response.data);
-      if (response.data.redirect_url) {
-        window.location.href = response.data.redirect_url;
-      } else {
-        setConfirmationMessage(response.data.message);
-      }
-    } catch (error: any) {
-      console.error("Error:", error.response || error);
-      setConfirmationError(error.message);
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
         isLoggedIn,
         setIsLoggedIn,
         loading,
-        confirmationMessage,
-        confirmationError,
-        confirmAccount,
       }}
     >
       {children}
