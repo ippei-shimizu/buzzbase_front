@@ -36,7 +36,3 @@ export const signOut = async () => {
 
   return response;
 };
-
-export const confirmAccountApi = (token: string) => {
-  return axiosInstance.get(`/users/confirmation?confirmation_token=${token}`);
-};
