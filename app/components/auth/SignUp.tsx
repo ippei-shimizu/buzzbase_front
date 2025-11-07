@@ -6,6 +6,8 @@ import PasswordConfirmInput from "@app/components/auth/PasswordConfirmInput";
 import PasswordInput from "@app/components/auth/PasswordInput";
 import SubmitButton from "@app/components/button/SendButton";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
+import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { signUp } from "@app/services/authService";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
@@ -18,6 +20,11 @@ export default function SignUp() {
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalEmail, setModalEmail] = useState("");
+  const [showEmailInput, setShowEmailInput] = useState(true);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const router = useRouter();
 
@@ -47,13 +54,42 @@ export default function SignUp() {
       router.push("/registration-confirmation");
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.errors) {
-        setErrorsWithTimeout(error.response.data.errors.full_messages);
+        const errorData = error.response.data.errors;
+        const isEmailTakenError =
+          error.response.status === 422 &&
+          errorData.full_messages &&
+          Array.isArray(errorData.full_messages) &&
+          errorData.full_messages.some((msg: string) =>
+            msg.includes("Email has already been taken"),
+          );
+
+        if (isEmailTakenError) {
+          setModalEmail(email);
+          setShowEmailInput(false);
+          setIsModalOpen(true);
+        } else {
+          setErrorsWithTimeout(errorData.full_messages);
+        }
       } else {
         setErrorsWithTimeout(["登録に失敗しました"]);
       }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleResendLinkClick = () => {
+    setModalEmail("");
+    setShowEmailInput(true);
+    setIsModalOpen(true);
+  };
+
+  const handleResendSuccess = () => {
+    setSuccessMessage("確認メールを再送信しました。メールをご確認ください。");
+    setShowSuccessToast(true);
+    setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 5000);
   };
 
   const validateEmail = useCallback(
@@ -89,6 +125,14 @@ export default function SignUp() {
   return (
     <>
       {isLoading && <LoadingSpinner />}
+      {showSuccessToast && <ToastSuccess text={successMessage} />}
+      <ResendConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        email={modalEmail}
+        onResendSuccess={handleResendSuccess}
+        showEmailInput={showEmailInput}
+      />
       <form
         onSubmit={handleSubmit}
         className="flex flex-col justify-end gap-y-4"
@@ -144,6 +188,15 @@ export default function SignUp() {
           text="登録する"
           disabled={!isFormValid}
         />
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={handleResendLinkClick}
+            className="text-sm text-gray-400 underline"
+          >
+            新規会員登録後の確認メールが届いていない方はこちら
+          </button>
+        </div>
       </form>
     </>
   );
