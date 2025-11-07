@@ -36,3 +36,12 @@ export const signOut = async () => {
 
   return response;
 };
+
+export const resendConfirmation = async (email: string) => {
+  const response = await axiosInstance.post("/api/v1/auth/confirmation", {
+    email: email,
+    redirect_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
+  });
+
+  return response;
+};

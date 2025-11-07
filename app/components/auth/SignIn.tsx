@@ -4,6 +4,8 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PasswordInput from "@app/components/auth/PasswordInput";
 import SubmitButton from "@app/components/button/SendButton";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
+import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
@@ -16,6 +18,9 @@ export default function SignIn() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const { setIsLoggedIn } = useAuthContext();
   const router = useRouter();
@@ -47,13 +52,39 @@ export default function SignIn() {
       }
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.errors) {
-        setErrorsWithTimeout(error.response.data.errors);
+        const errorMessages = error.response.data.errors;
+        const isUnconfirmedError =
+          error.response.status === 401 &&
+          Array.isArray(errorMessages) &&
+          errorMessages.some(
+            (msg: string) =>
+              msg.includes(
+                "A confirmation email was sent to your account at",
+              ) ||
+              msg.includes(
+                "You must follow the instructions in the email before your account can be activated",
+              ),
+          );
+
+        if (isUnconfirmedError) {
+          setIsModalOpen(true);
+        } else {
+          setErrorsWithTimeout(errorMessages);
+        }
       } else {
         setErrorsWithTimeout(["ログインに失敗しました"]);
       }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleResendSuccess = () => {
+    setSuccessMessage("確認メールを再送信しました。メールをご確認ください。");
+    setShowSuccessToast(true);
+    setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 5000);
   };
 
   const validateEmail = useCallback(
@@ -88,6 +119,14 @@ export default function SignIn() {
   return (
     <>
       {isLoading && <LoadingSpinner />}
+      {showSuccessToast && <ToastSuccess text={successMessage} />}
+      <ResendConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        email={email}
+        onResendSuccess={handleResendSuccess}
+        showEmailInput={false}
+      />
       <form
         onSubmit={handleSubmit}
         className="flex flex-col justify-end gap-y-4"
