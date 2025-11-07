@@ -417,3 +417,11 @@ interface getNoteProps {
   date: string;
   memo: string[];
 }
+
+interface ResendConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  email?: string;
+  onResendSuccess: () => void;
+  showEmailInput: boolean;
+}
