@@ -67,7 +67,13 @@ function SignInContent() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="h-full flex items-center justify-center">読み込み中...</div>}>
+    <Suspense
+      fallback={
+        <div className="h-full flex items-center justify-center">
+          読み込み中...
+        </div>
+      }
+    >
       <SignInContent />
     </Suspense>
   );
