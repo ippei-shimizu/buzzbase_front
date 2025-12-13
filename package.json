@@ -52,7 +52,7 @@
     "@types/react-anchor-link-smooth-scroll": "^1.0.5",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.0",
-    "eslint": "^8",
+    "eslint": "^8.57.0",
     "eslint-config-next": "14.2.35",
     "eslint-config-prettier": "^9.1.0",
     "jest": "^30.2.0",
