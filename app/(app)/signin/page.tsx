@@ -5,9 +5,9 @@ import { useAuthContext } from "@app/contexts/useAuthContext";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
-export default function Page() {
+function SignInContent() {
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
   const [logoutSuccess, setLogoutSuccess] = useState(false);
@@ -62,5 +62,13 @@ export default function Page() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="h-full flex items-center justify-center">読み込み中...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 }
