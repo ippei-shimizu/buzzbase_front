@@ -1,10 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { getDashboardStats } from "../actions";
-import UserGrowthChart from "../../../_components/charts/UserGrowthChart";
-import ActivityChart from "../../../_components/charts/ActivityChart";
 import DashboardControls from "./DashboardControls";
+
+const UserGrowthChart = dynamic(
+  () => import("../../../_components/charts/UserGrowthChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center bg-gray-50 rounded animate-pulse">
+        <p className="text-gray-400">チャートを読み込み中...</p>
+      </div>
+    ),
+  },
+);
+
+const ActivityChart = dynamic(
+  () => import("../../../_components/charts/ActivityChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center bg-gray-50 rounded animate-pulse">
+        <p className="text-gray-400">チャートを読み込み中...</p>
+      </div>
+    ),
+  },
+);
 import MetricToggle from "./MetricToggle";
 import DataTable from "./DataTable";
 

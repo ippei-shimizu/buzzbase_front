@@ -5,6 +5,8 @@ interface StatCardProps {
   changeLabel?: string;
   icon?: React.ReactNode;
   className?: string;
+  description?: string;
+  trend?: "up" | "down" | "neutral";
 }
 
 export default function StatCard({
@@ -14,6 +16,8 @@ export default function StatCard({
   changeLabel,
   icon,
   className = "",
+  description,
+  trend,
 }: StatCardProps) {
   const formatValue = (val: string | number) => {
     if (typeof val === "number") {
@@ -80,6 +84,19 @@ export default function StatCard({
               <span className="ml-1">
                 {Math.abs(change)}% {changeLabel || "前日比"}
               </span>
+            </div>
+          )}
+          {description && (
+            <div
+              className={`text-sm mt-1 ${
+                trend === "up"
+                  ? "text-green-600"
+                  : trend === "down"
+                    ? "text-red-600"
+                    : "text-gray-600"
+              }`}
+            >
+              {description}
             </div>
           )}
         </div>
