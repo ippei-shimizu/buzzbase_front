@@ -1,5 +1,7 @@
+"use client";
+
 import { DetailLinkArrowIcon } from "@app/components/icon/DetailLinkArrowIcon";
-import { Divider } from "@nextui-org/react";
+import { Divider } from "@heroui/react";
 import Link from "next/link";
 
 interface Notice {

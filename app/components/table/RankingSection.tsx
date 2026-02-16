@@ -1,0 +1,92 @@
+"use client";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  User,
+} from "@heroui/react";
+import Link from "next/link";
+
+type RankingItem = {
+  name: string;
+  user_id: string;
+  image_url: string;
+};
+
+type RankingSectionProps = {
+  label: string;
+  id: string;
+  data: RankingItem[];
+  renderValue: (item: any, index: number) => React.ReactNode;
+  isFirst?: boolean;
+};
+
+function RankingRow({
+  item,
+  index,
+  renderValue,
+}: {
+  item: RankingItem;
+  index: number;
+  renderValue: (item: any, index: number) => React.ReactNode;
+}) {
+  return (
+    <TableRow key={index}>
+      <TableCell>
+        <div className="grid grid-cols-[1fr_auto] items-center ">
+          <Link href={`/mypage/${item.user_id}`} className="block">
+            <div className="grid grid-cols-[24px_1fr_auto] items-center">
+              <span className="text-base block mr-4">{index + 1}</span>
+              <User
+                name={item.name}
+                description={item.user_id}
+                avatarProps={{
+                  src:
+                    process.env.NODE_ENV === "production"
+                      ? item.image_url
+                      : `${process.env.NEXT_PUBLIC_API_URL}${item.image_url}`,
+                }}
+                className="justify-start"
+              />
+              <span className="text-base block font-bold">
+                {renderValue(item, index)}
+              </span>
+            </div>
+          </Link>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+export default function RankingSection({
+  label,
+  id,
+  data,
+  renderValue,
+  isFirst = false,
+}: RankingSectionProps) {
+  return (
+    <Table className={isFirst ? "" : "mt-8"} aria-label={label} id={id}>
+      <TableHeader>
+        <TableColumn className="text-base text-white font-bold text-center">
+          {label}
+        </TableColumn>
+      </TableHeader>
+      <TableBody>
+        {data.map((item, index) => (
+          <RankingRow
+            key={index}
+            item={item}
+            index={index}
+            renderValue={renderValue}
+          />
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
