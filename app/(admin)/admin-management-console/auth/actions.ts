@@ -5,7 +5,10 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { RAILS_API_URL } from "../../../constants/api";
 
-export async function adminLogin(formData: FormData) {
+export async function adminLogin(
+  prevState: { error: string } | null,
+  formData: FormData,
+) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -27,7 +30,7 @@ export async function adminLogin(formData: FormData) {
     }
 
     if (data.success && data.access_token && data.refresh_token && data.user) {
-      const cookieStore = cookies();
+      const cookieStore = await cookies();
 
       cookieStore.set("admin-access-token", data.access_token, {
         httpOnly: true,
@@ -59,7 +62,7 @@ export async function adminLogin(formData: FormData) {
 }
 
 export async function adminLogout() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   try {
     await fetch(`${RAILS_API_URL}/api/v1/admin/sign_out`, {

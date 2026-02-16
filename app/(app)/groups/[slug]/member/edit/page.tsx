@@ -3,11 +3,12 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { getGroupDetailUsers, updateGroup } from "@app/services/groupService";
-import { Avatar, Checkbox, Input, User } from "@nextui-org/react";
+import { Avatar, Checkbox, Input, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 
-export default function GroupMember({ params }: { params: { slug: string } }) {
+export default function GroupMember(props: { params: Promise<{ slug: string }> }) {
+  const params = use(props.params);
   const groupId = Number(params.slug);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<string[]>([]);

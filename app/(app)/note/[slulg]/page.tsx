@@ -1,17 +1,25 @@
 "use client";
+import dynamic from "next/dynamic";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
-import NoteEditor from "@app/components/note/NoteEditor";
 import NoteMenu from "@app/components/note/NoteMenu";
+
+const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
+  ),
+});
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import showBaseballNote from "@app/hooks/note/showBaseballNote";
 import { updateBaseballNote } from "@app/services/baseballNoteService";
-import { Input, Skeleton } from "@nextui-org/react";
+import { Input, Skeleton } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { mutate } from "swr";
 
-export default function NoteDetail({ params }: { params: { slulg: string } }) {
+export default function NoteDetail(props: { params: Promise<{ slulg: string }> }) {
+  const params = use(props.params);
   const noteId = Number(params.slulg);
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");

@@ -36,7 +36,7 @@ import {
   Select,
   SelectItem,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -516,7 +516,6 @@ export default function ProfileEdit() {
                   {positions.map((position) => (
                     <SelectItem
                       key={position.id}
-                      value={position.id}
                       textValue={position.name.toString()}
                     >
                       {position.name}
@@ -547,7 +546,6 @@ export default function ProfileEdit() {
                     ? teams.map((team) => (
                         <AutocompleteItem
                           key={team.id}
-                          value={team.id}
                           textValue={team.name}
                         >
                           {team.name}
@@ -575,7 +573,6 @@ export default function ProfileEdit() {
                   {baseballCategories.map((baseballCategory) => (
                     <AutocompleteItem
                       key={baseballCategory.id}
-                      value={baseballCategory.id}
                       textValue={`${baseballCategory.name}| ${baseballCategory.hiragana} ${baseballCategory.katakana} ${baseballCategory.alphabet}`}
                     >
                       {baseballCategory.name}
@@ -599,7 +596,6 @@ export default function ProfileEdit() {
                   {prefectures.map((prefecture) => (
                     <SelectItem
                       key={prefecture.id}
-                      value={prefecture.id.toString()}
                       textValue={prefecture.name}
                     >
                       {prefecture.name}

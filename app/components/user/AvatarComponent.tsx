@@ -1,4 +1,6 @@
-import { Avatar } from "@nextui-org/react";
+"use client";
+
+import { Avatar } from "@heroui/react";
 
 type UserData = {
   userData: {

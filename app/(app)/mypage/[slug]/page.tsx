@@ -4,7 +4,7 @@ import { CrownIcon } from "@app/components/icon/CrownIcon";
 import { GloveIcon } from "@app/components/icon/GloveIcon";
 import IndividualResultsList from "@app/components/user/IndividualResultsList";
 import MatchResultList from "@app/components/user/MatchResultList";
-import { Spinner, Tab, Tabs } from "@nextui-org/react";
+import { Spinner, Tab, Tabs } from "@heroui/react";
 import React, { useState } from "react";
 import Header from "@app/components/header/Header";
 import AvatarComponent from "@app/components/user/AvatarComponent";

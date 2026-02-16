@@ -18,7 +18,7 @@ import {
   Input,
   Select,
   SelectItem,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -389,7 +389,6 @@ export default function PitchingRecord() {
                     {winOrLoss.map((result) => (
                       <SelectItem
                         key={result.id}
-                        value={result.id.toString()}
                         textValue={result.value}
                         className="text-white"
                       >
@@ -416,7 +415,7 @@ export default function PitchingRecord() {
                         }
                       >
                         {innings.map((inning) => (
-                          <SelectItem key={inning.id} value={inning.id}>
+                          <SelectItem key={inning.id}>
                             {inning.count}
                           </SelectItem>
                         ))}
@@ -437,7 +436,7 @@ export default function PitchingRecord() {
                       }
                     >
                       {fractions.map((fraction) => (
-                        <SelectItem key={fraction.id} value={fraction.id}>
+                        <SelectItem key={fraction.id}>
                           {fraction.count}
                         </SelectItem>
                       ))}

@@ -1,14 +1,7 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  User,
-} from "@nextui-org/react";
-import Link from "next/link";
+"use client";
+
 import { useMemo } from "react";
+import RankingSection from "./RankingSection";
 
 type BattingAverage = {
   hit: number | null;
@@ -91,230 +84,57 @@ export default function GroupBattingRankingTable(props: Props) {
     [battingStats],
   );
 
+  const sections = [
+    {
+      label: "打率",
+      id: "battingAverage",
+      data: sortedBattingAverage,
+      renderValue: (item: BattingStats) => formatNumber(item.batting_average),
+    },
+    {
+      label: "本塁打",
+      id: "homeRun",
+      data: sortedHomeRun,
+      renderValue: (item: BattingAverage) => item.home_run,
+    },
+    {
+      label: "打点",
+      id: "run",
+      data: sortedRunsBattedIn,
+      renderValue: (item: BattingAverage) => item.runs_batted_in,
+    },
+    {
+      label: "安打",
+      id: "hit",
+      data: sortedHit,
+      renderValue: (item: BattingAverage) => item.hit,
+    },
+    {
+      label: "盗塁",
+      id: "stealingBase",
+      data: sortedStealingBase,
+      renderValue: (item: BattingAverage) => item.stealing_base,
+    },
+    {
+      label: "出塁率",
+      id: "onBasePercentage",
+      data: sortedOnBasePercentage,
+      renderValue: (item: BattingStats) => formatNumber(item.on_base_percentage),
+    },
+  ];
+
   return (
     <>
-      {/* 打率 */}
-      <Table aria-label="打率" id="battingAverage">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            打率
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedBattingAverage?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {formatNumber(stats.batting_average)}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 本塁打 */}
-      <Table className="mt-8" aria-label="本塁打" id="homeRun">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            本塁打
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedHomeRun?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.home_run}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 打点 */}
-      <Table className="mt-8" aria-label="打点" id="run">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            打点
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedRunsBattedIn?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.runs_batted_in}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 安打 */}
-      <Table className="mt-8" aria-label="安打" id="hit">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            安打
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedHit?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.hit}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 盗塁 */}
-      <Table className="mt-8" aria-label="盗塁" id="stealingBase">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            盗塁
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedStealingBase?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.stealing_base}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 出塁率 */}
-      <Table className="mt-8" aria-label="出塁率" id="onBasePercentage">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            出塁率
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedOnBasePercentage?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {formatNumber(stats.on_base_percentage)}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {sections.map((section, index) => (
+        <RankingSection
+          key={section.id}
+          label={section.label}
+          id={section.id}
+          data={section.data}
+          renderValue={section.renderValue}
+          isFirst={index === 0}
+        />
+      ))}
     </>
   );
 }

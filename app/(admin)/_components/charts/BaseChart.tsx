@@ -3,7 +3,7 @@
 import { ResponsiveContainer } from "recharts";
 
 interface BaseChartProps {
-  children: React.ReactElement;
+  children: React.ReactElement<any>;
   height?: number;
   className?: string;
 }

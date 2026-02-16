@@ -1,5 +1,7 @@
+"use client";
+
 import { BackIcon } from "@app/components/icon/BackIcon";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 
 interface HeaderMatchResultsProps {
   onMatchResultNext: () => void;

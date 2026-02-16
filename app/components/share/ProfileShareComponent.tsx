@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Button,
@@ -7,8 +9,7 @@ import {
   useDisclosure,
   Snippet,
   ModalHeader,
-} from "@nextui-org/react";
-import Link from "next/link";
+} from "@heroui/react";
 import { XIcon } from "@app/components/icon/XIcon";
 import Image from "next/image";
 
@@ -138,7 +139,7 @@ export default function ProfileShareComponent({
             </Snippet>
             <div className="flex justify-center gap-x-6 mt-2">
               <Button
-                as={Link}
+                as="a"
                 href={twitterShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -148,7 +149,7 @@ export default function ProfileShareComponent({
                 endContent={<XIcon fill="#F4F4F4" width="24" height="24" />}
               ></Button>
               <Button
-                as={Link}
+                as="a"
                 href={lineShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"

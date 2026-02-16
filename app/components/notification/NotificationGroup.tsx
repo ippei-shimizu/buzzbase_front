@@ -1,3 +1,5 @@
+"use client";
+
 import { GroupIcon } from "@app/components/icon/GroupIcon";
 import {
   acceptGroupInvitation,
@@ -12,7 +14,7 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

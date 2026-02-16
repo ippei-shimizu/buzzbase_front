@@ -17,11 +17,12 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, use } from "react";
 
-export default function GroupEdit({ params }: { params: { slug: string } }) {
+export default function GroupEdit(props: { params: Promise<{ slug: string }> }) {
+  const params = use(props.params);
   const [isLoading, setIsLoading] = useState(true);
   const groupId = Number(params.slug);
   const [currentUserId, setCurrentUserId] = useState(null);

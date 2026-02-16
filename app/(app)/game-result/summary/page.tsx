@@ -12,7 +12,7 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
-import { Chip, Divider } from "@nextui-org/react";
+import { Chip, Divider } from "@heroui/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -89,19 +89,19 @@ export default function ResultsSummary() {
   // 試合データ取得
   const fetchCurrentResultData = async (localStorageGameResultId: number) => {
     try {
-      const matchResultData = await getCurrentMatchResult(
-        localStorageGameResultId,
-      );
-      const battingAverageData = await getCurrentBattingAverage(
-        localStorageGameResultId,
-      );
-      const pitchingResultData = await getCurrentPitchingResult(
-        localStorageGameResultId,
-      );
-      const plateAppearanceData = await getCurrentPlateAppearance(
-        localStorageGameResultId,
-      );
-      const currentUserIdData = await getCurrentUserId();
+      const [
+        matchResultData,
+        battingAverageData,
+        pitchingResultData,
+        plateAppearanceData,
+        currentUserIdData,
+      ] = await Promise.all([
+        getCurrentMatchResult(localStorageGameResultId),
+        getCurrentBattingAverage(localStorageGameResultId),
+        getCurrentPitchingResult(localStorageGameResultId),
+        getCurrentPlateAppearance(localStorageGameResultId),
+        getCurrentUserId(),
+      ]);
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
       }

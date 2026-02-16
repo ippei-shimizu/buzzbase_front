@@ -8,14 +8,15 @@ import DeleteConfirmDialog from "./_components/DeleteConfirmDialog";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     mode?: "create" | "edit" | "delete";
     id?: string;
     error?: string;
-  };
+  }>;
 }
 
-export default async function UsersPage({ searchParams }: PageProps) {
+export default async function UsersPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const { mode, id, error } = searchParams;
 
   try {

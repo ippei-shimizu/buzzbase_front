@@ -1,7 +1,7 @@
 "use client";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
 import getAllUserGameResults from "@app/hooks/game/getAllUserGameResults";
-import { Divider, Spinner, User } from "@nextui-org/react";
+import { Divider, Spinner, User } from "@heroui/react";
 import Link from "next/link";
 
 type AllUserGameResult = {

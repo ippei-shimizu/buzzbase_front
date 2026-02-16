@@ -1,5 +1,7 @@
+"use client";
+
 import { PlusIcon } from "@app/components/icon/PlusIcon";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 
 export default function PlusButton({
   className,

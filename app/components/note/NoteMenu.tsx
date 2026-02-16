@@ -1,3 +1,5 @@
+"use client";
+
 import { DeleteDocumentIcon } from "@app/components/icon/DeleteDocumentIcon";
 import { MoreIcon } from "@app/components/icon/MoreIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -14,7 +16,7 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

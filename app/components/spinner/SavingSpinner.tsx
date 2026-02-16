@@ -1,4 +1,4 @@
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 export default function SaveSpinner({ saved }: { saved: boolean }) {

@@ -29,7 +29,7 @@ import {
   Select,
   SelectItem,
   Textarea,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { SetStateAction, useEffect, useState } from "react";
 
@@ -548,7 +548,7 @@ export default function GameRecord() {
                   }
                 >
                   {tournamentData.map((data) => (
-                    <AutocompleteItem key={data.id} value={data.name}>
+                    <AutocompleteItem key={data.id}>
                       {data.name}
                     </AutocompleteItem>
                   ))}
@@ -589,7 +589,6 @@ export default function GameRecord() {
                   {teamsData.map((data) => (
                     <AutocompleteItem
                       key={data.id}
-                      value={data.name}
                       textValue={data.name}
                     >
                       {data.name}
@@ -659,7 +658,6 @@ export default function GameRecord() {
                   {battingOrder.map((order) => (
                     <SelectItem
                       key={order.id}
-                      value={order.id.toString()}
                       textValue={order.turn}
                     >
                       {order.turn}
@@ -687,7 +685,6 @@ export default function GameRecord() {
                   {positionData.map((position) => (
                     <SelectItem
                       key={position.id}
-                      value={position.id.toString()}
                       textValue={position.name}
                       className="text-white"
                     >

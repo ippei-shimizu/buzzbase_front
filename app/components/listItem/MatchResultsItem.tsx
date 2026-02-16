@@ -1,3 +1,5 @@
+"use client";
+
 import { getTeamName } from "@app/services/teamsService";
 import { getTournamentName } from "@app/services/tournamentsService";
 import {
@@ -7,7 +9,7 @@ import {
   CardHeader,
   Chip,
   Divider,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

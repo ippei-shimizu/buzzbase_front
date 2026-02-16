@@ -1,4 +1,6 @@
-import { Badge } from "@nextui-org/react";
+"use client";
+
+import { Badge } from "@heroui/react";
 import { NotificationIcon } from "@app/components/icon/NotificationIcon";
 import { useNotificationCount } from "@app/hooks/notification/useNotificationCount";
 import Link from "next/link";

@@ -1,7 +1,7 @@
 import { UserImage } from "@app/components/user/UserImage";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
-import { Skeleton } from "@nextui-org/react";
+import { Skeleton } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

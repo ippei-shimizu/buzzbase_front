@@ -6,15 +6,16 @@ import {
   getGroupDetailUsers,
 } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { Checkbox, User } from "@nextui-org/react";
+import { Checkbox, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 
-export default function GroupMemberAdd({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default function GroupMemberAdd(
+  props: {
+    params: Promise<{ slug: string }>;
+  }
+) {
+  const params = use(props.params);
   const groupId = Number(params.slug);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [following, setFollowing] = useState<FollowingUser[]>([]);

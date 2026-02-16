@@ -1,6 +1,13 @@
 "use client";
-import NoteEditor from "@app/components/note/NoteEditor";
-import { Input } from "@nextui-org/react";
+import dynamic from "next/dynamic";
+import { Input } from "@heroui/react";
+
+const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
+  ),
+});
 import HeaderNote from "@app/components/header/HeaderNote";
 import { SetStateAction, useEffect, useState } from "react";
 import { createBaseballNote } from "@app/services/baseballNoteService";

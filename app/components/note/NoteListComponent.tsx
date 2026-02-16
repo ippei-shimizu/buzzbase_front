@@ -1,7 +1,7 @@
 "use client";
 import NoteListItem from "@app/components/note/NoteListItem";
 import getBaseballNotes from "@app/hooks/note/getBaseballNotes";
-import { Card, Spinner } from "@nextui-org/react";
+import { Card, Spinner } from "@heroui/react";
 
 export default function NoteListComponent() {
   const { notes, isLoading, isError } = getBaseballNotes();

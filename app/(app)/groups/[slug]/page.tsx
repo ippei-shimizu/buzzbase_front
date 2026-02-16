@@ -14,16 +14,16 @@ import {
   DropdownItem,
   Tab,
   Tabs,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import React from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 
 type GroupDetailProps = {
-  params: {
+  params: Promise<{
     slug: number;
-  };
+  }>;
 };
 
 type GroupsDetailData = {
@@ -146,7 +146,8 @@ const PitchingResultTitle = [
   { id: 5, title: "勝率", Link: "#winPercentage" },
 ];
 
-export default function GroupDetail({ params }: GroupDetailProps) {
+export default function GroupDetail(props: GroupDetailProps) {
+  const params = use(props.params);
   const [groupData, setGroupData] = useState<GroupsDetailData | undefined>(
     undefined,
   );

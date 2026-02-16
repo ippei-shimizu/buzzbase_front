@@ -3,7 +3,7 @@ import NotificationGroup from "@app/components/notification/NotificationGroup";
 import { useNotifications } from "@app/hooks/notification/getNotifications";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { readNotification } from "@app/services/notificationsService";
-import { Avatar, Divider, Spinner } from "@nextui-org/react";
+import { Avatar, Divider, Spinner } from "@heroui/react";
 import Link from "next/link";
 
 export default function NotificationItem() {

@@ -1,5 +1,7 @@
+"use client";
+
 import { AtMarkIcon } from "@app/components/icon/AtMarkIcon";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 
 export default function UserIdInput({
   value,

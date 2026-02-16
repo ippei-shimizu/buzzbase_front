@@ -1,5 +1,7 @@
+"use client";
+
 import { UserIcon } from "@app/components/icon/UserIcon";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 
 export default function UserNameInput({
   value,

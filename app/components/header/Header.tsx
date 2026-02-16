@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Badge } from "@nextui-org/react";
+import { Badge } from "@heroui/react";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { NotificationIcon } from "@app/components/icon/NotificationIcon";
 import { getNotificationCount } from "@app/services/notificationsService";

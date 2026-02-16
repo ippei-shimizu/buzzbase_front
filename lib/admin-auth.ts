@@ -58,7 +58,7 @@ async function validateAccessToken(
 
 export async function getAdminUser(): Promise<AdminUser | null> {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get("admin-access-token")?.value;
     const refreshToken = cookieStore.get("admin-refresh-token")?.value;
 

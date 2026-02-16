@@ -1,4 +1,6 @@
-import { Skeleton } from "@nextui-org/react";
+"use client";
+
+import { Skeleton } from "@heroui/react";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import HeaderLoginAndSignUp from "@app/components/auth/HeaderLoginAndSignUp";

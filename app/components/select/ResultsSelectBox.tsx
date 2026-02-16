@@ -1,4 +1,6 @@
-import { Select, SelectItem } from "@nextui-org/react";
+"use client";
+
+import { Select, SelectItem } from "@heroui/react";
 
 export default function ResultsSelectBox({
   radius,
@@ -29,7 +31,6 @@ export default function ResultsSelectBox({
         {(propsYears || []).map((year) => (
           <SelectItem
             key={year.toString()}
-            value={year.toString()}
             textValue={year.toString()}
           >
             {year.toString()}

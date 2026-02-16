@@ -4,7 +4,7 @@ import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave"
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { Avatar, Checkbox, Input, User } from "@nextui-org/react";
+import { Avatar, Checkbox, Input, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 

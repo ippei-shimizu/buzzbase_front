@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Suspense } from "react";
 import GroupDetail from "../page";
 
 // サービスをモック
@@ -130,16 +131,28 @@ jest.mock("react-anchor-link-smooth-scroll", () => {
   };
 });
 
-describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
-  const mockParams = { params: { slug: 1 } };
+// React 19のuse()がSuspenseなしで即座に値を返すための事前解決済みPromise
+function createResolvedPromise<T>(value: T): Promise<T> {
+  const promise = Promise.resolve(value) as Promise<T> & {
+    status: string;
+    value: T;
+  };
+  promise.status = "fulfilled";
+  promise.value = value;
+  return promise;
+}
 
+async function renderAndWaitForData() {
+  render(
+    <GroupDetail params={createResolvedPromise({ slug: 1 })} />,
+  );
+  // useEffectのデータ取得完了 + タブパネル描画を待つ
+  await screen.findByTestId("batting-ranking-table");
+}
+
+describe("GroupDetail - Tabs Component (HeroUI v2)", () => {
   it("タブが正しくレンダリングされる", async () => {
-    render(<GroupDetail {...mockParams} />);
-
-    // データ取得を待つ
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // 「打撃成績」と「投手成績」の2つのタブが表示される
     expect(screen.getByText("打撃成績")).toBeInTheDocument();
@@ -147,11 +160,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
   });
 
   it("初期状態で最初のタブ（打撃成績）のコンテンツが表示される", async () => {
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // 打撃成績タブのナビゲーションボタンが表示される
     expect(screen.getByText("打率")).toBeInTheDocument();
@@ -168,11 +177,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
 
   it("タブをクリックすると対応するコンテンツが表示される", async () => {
     const user = userEvent.setup();
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // 最初は打撃成績が表示されている
     expect(screen.getByTestId("batting-ranking-table")).toBeInTheDocument();
@@ -199,11 +204,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
 
   it("タブを切り替えるとナビゲーションボタンが変わる", async () => {
     const user = userEvent.setup();
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // 打撃成績タブのナビゲーションボタンが表示されている
     expect(screen.getByText("打率")).toBeInTheDocument();
@@ -229,11 +230,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
   });
 
   it("タブがaria-labelを持っている", async () => {
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // aria-labelが設定されている
     const tabsContainers = screen.getAllByLabelText("成績種類");
@@ -241,11 +238,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
   });
 
   it("タブの数が正しい", async () => {
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // roleがtabの要素を取得
     const tabs = screen.getAllByRole("tab");
@@ -254,11 +247,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
 
   it("選択されたタブにaria-selectedが設定される", async () => {
     const user = userEvent.setup();
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     const tabs = screen.getAllByRole("tab");
 
@@ -277,11 +266,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
 
   it("各タブにナビゲーションボタンが表示される", async () => {
     const user = userEvent.setup();
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // 打撃成績タブのナビゲーションボタン
     expect(screen.getByText("打率")).toBeInTheDocument();
@@ -306,11 +291,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
   });
 
   it("ページ全体が正しくレンダリングされる", async () => {
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // ヘッダーが表示される
     expect(screen.getByTestId("header-back-link")).toBeInTheDocument();
@@ -324,11 +305,7 @@ describe("GroupDetail - Tabs Component (NextUI v2.6.11)", () => {
   });
 
   it("データが正しくランキングテーブルに渡される", async () => {
-    render(<GroupDetail {...mockParams} />);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
-    });
+    await renderAndWaitForData();
 
     // 打撃データが正しく渡されている
     expect(screen.getByText("打撃データ数: 1")).toBeInTheDocument();

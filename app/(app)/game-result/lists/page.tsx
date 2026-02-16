@@ -11,7 +11,7 @@ import {
 } from "@app/services/gameResultsService";
 import { getCurrentPlateAppearance } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 

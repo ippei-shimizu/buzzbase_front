@@ -4,7 +4,7 @@ import FollowButton from "@app/components/button/FollowButton";
 import { useUser } from "@app/contexts/userContext";
 import useFollowersUser from "@app/hooks/user/useFollowersUser";
 import { getUserId } from "@app/services/userService";
-import { Spinner, User } from "@nextui-org/react";
+import { Spinner, User } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";

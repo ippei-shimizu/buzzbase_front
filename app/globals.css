@@ -26,3 +26,20 @@ body {
 label {
   white-space: nowrap;
 }
+
+/* HeroUI が使用する outline-solid クラスは Tailwind v3 に存在しないため、
+   ブラウザデフォルトの :focus-visible アウトラインが黒く表示される問題を修正 */
+.buzz-dark input:focus-visible,
+.buzz-dark textarea:focus-visible,
+.buzz-dark [data-slot="trigger"]:focus-visible,
+.buzz-dark [data-slot="input-wrapper"]:focus-visible {
+  outline: none;
+}
+
+/* HeroUI underlined variant の下線復元（ダークテーマ）
+   border-b-medium が Tailwind v3 で正しく解決されないため直接指定 */
+.buzz-dark [data-slot="trigger"][class*="rounded-none"],
+.buzz-dark [data-slot="input-wrapper"][class*="rounded-none"] {
+  border-bottom: 2px solid #52525b;
+}
+

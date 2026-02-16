@@ -20,7 +20,7 @@ import {
   updatePlateAppearance,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Button, Divider, Input, Select, SelectItem } from "@nextui-org/react";
+import { Button, Divider, Input, Select, SelectItem } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -605,7 +605,7 @@ export default function BattingRecord() {
                             }
                           >
                             {battingResultsPositions.map((position) => (
-                              <SelectItem key={position.id} value={position.id}>
+                              <SelectItem key={position.id}>
                                 {position.direction}
                               </SelectItem>
                             ))}
@@ -624,7 +624,7 @@ export default function BattingRecord() {
                             }
                           >
                             {battingResultsList.map((result) => (
-                              <SelectItem key={result.id} value={result.id}>
+                              <SelectItem key={result.id}>
                                 {result.result}
                               </SelectItem>
                             ))}

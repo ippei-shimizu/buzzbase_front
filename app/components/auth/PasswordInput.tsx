@@ -1,6 +1,8 @@
+"use client";
+
 import { EyeFilledIcon } from "@app/components/icon/EyeFilledIcon";
 import { EyeSlashFilledIcon } from "@app/components/icon/EyeSlashFilledIcon";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 
 export default function PasswordInput({
   value,
