@@ -1,8 +1,5 @@
 "use client";
 
-import Header from "@app/components/header/Header";
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import { deleteUser, getCurrentUserId } from "@app/services/userService";
 import {
   Button,
   Modal,
@@ -14,6 +11,9 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Header from "@app/components/header/Header";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { deleteUser, getCurrentUserId } from "@app/services/userService";
 
 export default function AccountDeletionPage() {
   const { isLoggedIn } = useAuthContext();

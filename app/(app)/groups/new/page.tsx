@@ -1,12 +1,12 @@
 "use client";
+import { Avatar, Checkbox, Input, User } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { Avatar, Checkbox, Input, User } from "@heroui/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 
 export default function GroupNew() {
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -85,7 +85,7 @@ export default function GroupNew() {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!group.name) {
       setIsGroupName(false);

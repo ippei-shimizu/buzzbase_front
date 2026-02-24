@@ -1,8 +1,8 @@
 "use client";
 
+import { Input } from "@heroui/react";
 import { EyeFilledIcon } from "@app/components/icon/EyeFilledIcon";
 import { EyeSlashFilledIcon } from "@app/components/icon/EyeSlashFilledIcon";
-import { Input } from "@heroui/react";
 
 export default function PasswordConfirmInput({
   value,

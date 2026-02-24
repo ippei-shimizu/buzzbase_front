@@ -1,8 +1,8 @@
 "use client";
-import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
-import getAllUserGameResults from "@app/hooks/game/getAllUserGameResults";
 import { Divider, Spinner, User } from "@heroui/react";
 import Link from "next/link";
+import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
+import getAllUserGameResults from "@app/hooks/game/getAllUserGameResults";
 
 type AllUserGameResult = {
   game_result_id: number;

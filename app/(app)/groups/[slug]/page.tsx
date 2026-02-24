@@ -1,11 +1,4 @@
 "use client";
-import HeaderBackLink from "@app/components/header/HeaderBackLink";
-import { MenuIcon } from "@app/components/icon/MenuIcon";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingTable";
-import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import { getGroupDetail } from "@app/services/groupService";
 import {
   Button,
   Dropdown,
@@ -16,9 +9,15 @@ import {
   Tabs,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, use } from "react";
-import React from "react";
+import React, { useEffect, useState, use } from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
+import HeaderBackLink from "@app/components/header/HeaderBackLink";
+import { MenuIcon } from "@app/components/icon/MenuIcon";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingTable";
+import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { getGroupDetail } from "@app/services/groupService";
 
 type GroupDetailProps = {
   params: Promise<{

@@ -1,11 +1,12 @@
 import { Metadata } from "next";
+
 export const metadata: Metadata = {
   title: "運営からのお知らせ",
   description: "運営より、新機能追加・不具合などのお知らせを記載しています。",
 };
 
-import Header from "@app/components/header/Header";
 import NoticeItems from "@app/(app)/notice-from-management/notice-item";
+import Header from "@app/components/header/Header";
 
 export default function NoticeFromManagement() {
   const notices = [

@@ -1,7 +1,7 @@
 "use server";
 
-import { generateInternalJWT } from "../../../../lib/internal-jwt";
 import { getAdminUser } from "../../../../lib/admin-auth";
+import { generateInternalJWT } from "../../../../lib/internal-jwt";
 import { RAILS_API_URL } from "../../../constants/api";
 
 interface DashboardStats {

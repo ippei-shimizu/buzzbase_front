@@ -1,4 +1,7 @@
 "use client";
+import { Checkbox, User } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, use } from "react";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import {
@@ -6,9 +9,6 @@ import {
   getGroupDetailUsers,
 } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { Checkbox, User } from "@heroui/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, use } from "react";
 
 export default function GroupMemberAdd(props: {
   params: Promise<{ slug: string }>;

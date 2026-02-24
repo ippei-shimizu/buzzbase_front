@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   Button,
   Modal,
@@ -10,8 +9,9 @@ import {
   Snippet,
   ModalHeader,
 } from "@heroui/react";
-import { XIcon } from "@app/components/icon/XIcon";
 import Image from "next/image";
+import React from "react";
+import { XIcon } from "@app/components/icon/XIcon";
 
 type Position = {
   id: string;

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAdminUsers } from "./actions";
-import AdminUserTable from "./_components/AdminUserTable";
 import AdminUserForm from "./_components/AdminUserForm";
+import AdminUserTable from "./_components/AdminUserTable";
 import DeleteConfirmDialog from "./_components/DeleteConfirmDialog";
+import { getAdminUsers } from "./actions";
 
 export const dynamic = "force-dynamic";
 

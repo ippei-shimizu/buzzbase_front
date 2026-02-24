@@ -1,4 +1,8 @@
 "use client";
+import { Chip, Divider } from "@heroui/react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import { getCurrentBattingAverage } from "@app/services/battingAveragesService";
@@ -12,10 +16,6 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
-import { Chip, Divider } from "@heroui/react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 const battingOrder = [
   { id: 1, turn: "1番" },

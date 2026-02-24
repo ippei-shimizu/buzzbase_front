@@ -1,7 +1,7 @@
 "use client";
 
-import { BackIcon } from "@app/components/icon/BackIcon";
 import { Button } from "@heroui/react";
+import { BackIcon } from "@app/components/icon/BackIcon";
 
 interface HeaderMatchResultsProps {
   onMatchResultNext: () => void;

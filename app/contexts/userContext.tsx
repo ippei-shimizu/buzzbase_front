@@ -1,7 +1,7 @@
 "use client";
-import { fetcher } from "@app/hooks/swrFetcher";
 import React, { createContext, useContext, ReactNode } from "react";
 import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
 
 const defaultContextValue: UserContextType = {
   state: {

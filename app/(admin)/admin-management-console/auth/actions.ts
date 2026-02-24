@@ -1,8 +1,7 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import { redirect } from "next/navigation";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function adminLogin(

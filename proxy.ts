@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { RAILS_API_URL } from "./app/constants/api";
 
 function checkBasicAuth(request: NextRequest): boolean {

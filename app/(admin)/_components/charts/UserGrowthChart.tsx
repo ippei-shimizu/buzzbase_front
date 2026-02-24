@@ -7,8 +7,8 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import BaseChart from "./BaseChart";
 import { formatDateWithWeekday } from "../../_utils/dateFormat";
+import BaseChart from "./BaseChart";
 
 interface UserGrowthData {
   date: string;

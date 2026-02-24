@@ -1,4 +1,18 @@
 "use client";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  Button,
+  Divider,
+  Input,
+  Radio,
+  RadioGroup,
+  Select,
+  SelectItem,
+  Textarea,
+} from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { SetStateAction, useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
@@ -18,20 +32,6 @@ import {
   updateTournament,
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
-import {
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-  Divider,
-  Input,
-  Radio,
-  RadioGroup,
-  Select,
-  SelectItem,
-  Textarea,
-} from "@heroui/react";
-import { usePathname, useRouter } from "next/navigation";
-import { SetStateAction, useEffect, useState } from "react";
 
 const battingOrder = [
   { id: 1, turn: "1番" },
@@ -288,7 +288,7 @@ export default function GameRecord() {
   // バリデーション
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!localStorageGameResultId) {
       setIsLocalStorageId(false);

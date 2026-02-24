@@ -1,7 +1,7 @@
 "use client";
 
-import { MailIcon } from "@app/components/icon/MailIcon";
 import { Input } from "@heroui/react";
+import { MailIcon } from "@app/components/icon/MailIcon";
 
 export default function EmailInput({
   value,

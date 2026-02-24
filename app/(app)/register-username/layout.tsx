@@ -1,5 +1,6 @@
-import HeaderLogo from "@app/components/header/HeaderLogo";
 import { Metadata } from "next";
+import HeaderLogo from "@app/components/header/HeaderLogo";
+
 export const metadata: Metadata = {
   title: "ユーザー名・ユーザーID登録",
   description: "ここでは、ユーザー名とユーザーIDの登録をお願いします。",

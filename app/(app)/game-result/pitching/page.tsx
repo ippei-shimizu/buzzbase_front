@@ -1,4 +1,14 @@
 "use client";
+import {
+  Button,
+  Checkbox,
+  Divider,
+  Input,
+  Select,
+  SelectItem,
+} from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
@@ -11,16 +21,6 @@ import {
   updatePitchingResult,
 } from "@app/services/pitchingResultsService";
 import { getCurrentUserId } from "@app/services/userService";
-import {
-  Button,
-  Checkbox,
-  Divider,
-  Input,
-  Select,
-  SelectItem,
-} from "@heroui/react";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 const winOrLoss = [
   { id: -1, value: "-" },
@@ -270,7 +270,7 @@ export default function PitchingRecord() {
       return;
     }
     setIsSubmitting(true);
-    let changeExistingFractions =
+    const changeExistingFractions =
       existingSelectedFractions == 0
         ? 0
         : existingSelectedFractions == 1

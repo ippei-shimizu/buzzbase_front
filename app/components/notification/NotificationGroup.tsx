@@ -1,11 +1,5 @@
 "use client";
 
-import { GroupIcon } from "@app/components/icon/GroupIcon";
-import {
-  acceptGroupInvitation,
-  declinedGroupInvitation,
-} from "@app/services/groupInvitationsService";
-import { deleteNotification } from "@app/services/notificationsService";
 import {
   Avatar,
   Button,
@@ -17,6 +11,12 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { GroupIcon } from "@app/components/icon/GroupIcon";
+import {
+  acceptGroupInvitation,
+  declinedGroupInvitation,
+} from "@app/services/groupInvitationsService";
+import { deleteNotification } from "@app/services/notificationsService";
 
 interface NotificationGroupProps {
   notice: Notifications;

@@ -1,13 +1,4 @@
 "use client";
-import ErrorMessages from "@app/components/auth/ErrorMessages";
-import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import {
-  deleteGroup,
-  getGroupDetailUsers,
-  updateGroupInfo,
-} from "@app/services/groupService";
-import { getCurrentUserId } from "@app/services/userService";
 import {
   Avatar,
   Button,
@@ -20,6 +11,15 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, use } from "react";
+import ErrorMessages from "@app/components/auth/ErrorMessages";
+import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import {
+  deleteGroup,
+  getGroupDetailUsers,
+  updateGroupInfo,
+} from "@app/services/groupService";
+import { getCurrentUserId } from "@app/services/userService";
 
 export default function GroupEdit(props: {
   params: Promise<{ slug: string }>;
@@ -51,7 +51,6 @@ export default function GroupEdit(props: {
       fetchGroupDetails(groupId).finally(() => setIsLoading(false));
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId, groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
@@ -108,7 +107,7 @@ export default function GroupEdit(props: {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!group.name) {
       setIsGroupName(false);

@@ -1,9 +1,5 @@
 "use client";
 
-import { DeleteDocumentIcon } from "@app/components/icon/DeleteDocumentIcon";
-import { MoreIcon } from "@app/components/icon/MoreIcon";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { deleteBaseballNote } from "@app/services/baseballNoteService";
 import {
   Button,
   Dropdown,
@@ -19,6 +15,10 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { DeleteDocumentIcon } from "@app/components/icon/DeleteDocumentIcon";
+import { MoreIcon } from "@app/components/icon/MoreIcon";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { deleteBaseballNote } from "@app/services/baseballNoteService";
 
 export default function NoteMenu({ noteId }: { noteId: number }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

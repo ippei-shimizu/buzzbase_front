@@ -1,10 +1,10 @@
 "use client";
 
-import Header from "@app/components/header/Header";
-import NoticeBreadcrumb from "@app/(app)/notice-from-management/notice-breadcrumb";
 import { Chip, Divider } from "@heroui/react";
-import Logout from "@app/components/auth/Logout";
 import Image from "next/image";
+import NoticeBreadcrumb from "@app/(app)/notice-from-management/notice-breadcrumb";
+import Logout from "@app/components/auth/Logout";
+import Header from "@app/components/header/Header";
 
 export default function NoticeContent() {
   const date = "2024.03.12";

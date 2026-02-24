@@ -1,13 +1,13 @@
 "use client";
+import { Avatar, Button, Divider } from "@heroui/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getGroups } from "@app/services/groupService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Avatar, Button, Divider } from "@heroui/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Group() {
   const [groups, setGroups] = useState<GroupsData[]>([]);

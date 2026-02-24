@@ -1,4 +1,16 @@
 "use client";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  Avatar,
+  Button,
+  Input,
+  Select,
+  SelectItem,
+  Textarea,
+} from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PlusButton from "@app/components/button/PlusButton";
 import HeaderSave from "@app/components/header/HeaderSave";
@@ -27,18 +39,6 @@ import {
   getUserData,
   updateProfile,
 } from "@app/services/userService";
-import {
-  Autocomplete,
-  AutocompleteItem,
-  Avatar,
-  Button,
-  Input,
-  Select,
-  SelectItem,
-  Textarea,
-} from "@heroui/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Position = {
   userId: string;

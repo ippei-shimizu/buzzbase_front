@@ -2,8 +2,8 @@
  * useNotificationCount hook のリグレッションテスト
  * Next.js 15 / React 19 バージョンアップ前のベースライン
  */
-import React from "react";
 import { renderHook, waitFor } from "@testing-library/react";
+import React from "react";
 import { SWRConfig } from "swr";
 import { useNotificationCount } from "../useNotificationCount";
 

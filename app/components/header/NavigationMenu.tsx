@@ -1,10 +1,10 @@
 "use client";
 import "@app/globals.css";
-import NavigationItems from "./NavigationItems";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
+import NavigationItems from "./NavigationItems";
 
 type currentUserData = {
   user_id: string;

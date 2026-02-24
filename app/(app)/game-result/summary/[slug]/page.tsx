@@ -1,4 +1,17 @@
 "use client";
+import {
+  Button,
+  Chip,
+  Divider,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
@@ -15,20 +28,6 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
-import {
-  Button,
-  Chip,
-  Divider,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-} from "@heroui/react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 const battingOrder = [
   { id: 1, turn: "1番" },
@@ -98,7 +97,6 @@ export default function ResultsSummary() {
     if (!savedGameResultId) {
       localStorage.setItem("gameResultId", JSON.stringify(id));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, id]);
 
   useEffect(() => {

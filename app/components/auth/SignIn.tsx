@@ -1,16 +1,16 @@
 "use client";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PasswordInput from "@app/components/auth/PasswordInput";
 import SubmitButton from "@app/components/button/SendButton";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");

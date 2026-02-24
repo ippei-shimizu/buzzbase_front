@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
-import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
-import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
+import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
 
 type Team = {
   id: number;

@@ -1,9 +1,9 @@
-import { UserImage } from "@app/components/user/UserImage";
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
 import { Skeleton } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserImage } from "@app/components/user/UserImage";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
 
 export default function HeaderUserMenu() {
   const { isLoggedIn } = useAuthContext();

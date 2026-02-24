@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import { getDashboardStats } from "../actions";
 import DashboardControls from "./DashboardControls";
 
@@ -28,8 +28,8 @@ const ActivityChart = dynamic(
     ),
   },
 );
-import MetricToggle from "./MetricToggle";
 import DataTable from "./DataTable";
+import MetricToggle from "./MetricToggle";
 
 interface InteractiveDashboardProps {
   initialStats: any;

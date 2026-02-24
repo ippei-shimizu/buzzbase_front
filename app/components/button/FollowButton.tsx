@@ -1,9 +1,9 @@
 "use client";
 
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import { userFollow, userUnFollow } from "@app/services/userService";
 import { Button } from "@heroui/react";
 import { useState } from "react";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { userFollow, userUnFollow } from "@app/services/userService";
 
 export default function FollowButton({
   userId,

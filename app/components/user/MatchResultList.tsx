@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
 import ResultsSelectBox from "@app/components/select/ResultsSelectBox";
 import { gameType, years } from "@app/data/TestData";
@@ -14,7 +15,6 @@ import {
   getCurrentPlateAppearanceUserId,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { useCallback, useEffect, useState } from "react";
 
 type GameResult = {
   game_result_id: number;

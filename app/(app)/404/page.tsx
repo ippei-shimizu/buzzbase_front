@@ -1,8 +1,8 @@
 "use client";
 
-import Header from "@app/components/header/Header";
 import { Button } from "@heroui/react";
 import Link from "next/link";
+import Header from "@app/components/header/Header";
 
 export default function Custom404() {
   return (

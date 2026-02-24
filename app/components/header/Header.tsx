@@ -1,14 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Badge } from "@heroui/react";
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import { NotificationIcon } from "@app/components/icon/NotificationIcon";
-import { getNotificationCount } from "@app/services/notificationsService";
 import Image from "next/image";
 import Link from "next/link";
-import HeaderLoginAndSignUp from "@app/components/auth/HeaderLoginAndSignUp";
-import UserSearch from "@app/components/user/UserSearch";
+import React, { useEffect, useState } from "react";
 import HeaderRight from "@app/components/header/HeaderRight";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { getNotificationCount } from "@app/services/notificationsService";
 
 type NotificationCount = {
   count: number;

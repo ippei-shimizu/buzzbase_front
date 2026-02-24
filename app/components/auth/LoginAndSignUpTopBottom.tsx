@@ -1,9 +1,9 @@
 "use client";
 import "@mantine/core/styles.css";
 import { Button } from "@heroui/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-import Image from "next/image";
 
 export default function LoginAndSignUpTopBottom() {
   const { isLoggedIn, loading } = useAuthContext();

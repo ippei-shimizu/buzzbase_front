@@ -1,5 +1,5 @@
-import axiosInstance from "@app/utils/axiosInstance";
 import Cookies from "js-cookie";
+import axiosInstance from "@app/utils/axiosInstance";
 
 export const updateUser = async (data: updateUser) => {
   const headers = {

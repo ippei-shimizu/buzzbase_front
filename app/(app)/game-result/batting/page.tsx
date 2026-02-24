@@ -1,4 +1,7 @@
 "use client";
+import { Button, Divider, Input, Select, SelectItem } from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PlusButton from "@app/components/button/PlusButton";
 import HeaderResult from "@app/components/header/HeaderResult";
@@ -20,9 +23,6 @@ import {
   updatePlateAppearance,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Button, Divider, Input, Select, SelectItem } from "@heroui/react";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 
 const battingResultsPositions = [
   { id: 0, direction: "-" },
@@ -418,7 +418,7 @@ export default function BattingRecord() {
   };
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!localStorageGameResultId) {
       setIsLocalStorageId(false);

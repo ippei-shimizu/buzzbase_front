@@ -1,8 +1,7 @@
 "use client";
 
-import AllUserGameResultItem from "@app/components/game/AllUserGameResultItem";
-import Header from "@app/components/header/Header";
 import { Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import Header from "@app/components/header/Header";
 
 export default function CalculationOfGrades() {
   const calculationBatting = [

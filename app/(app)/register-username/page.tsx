@@ -1,4 +1,6 @@
 "use client";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import SubmitButton from "@app/components/button/SendButton";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
@@ -6,8 +8,6 @@ import UserIdInput from "@app/components/user/UserIdInput";
 import UserNameInput from "@app/components/user/UserNameInput";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getUserData, updateUser } from "@app/services/userService";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function RegisterUserName() {
   const router = useRouter();

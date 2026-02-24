@@ -1,8 +1,8 @@
 "use client";
-import { SearchIcon } from "@app/components/icon/SearchIcon";
 import { Divider, Input, Spinner, User } from "@heroui/react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { SearchIcon } from "@app/components/icon/SearchIcon";
 
 interface User {
   id: string;

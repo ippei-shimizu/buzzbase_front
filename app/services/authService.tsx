@@ -1,5 +1,5 @@
-import axiosInstance from "@app/utils/axiosInstance";
 import Cookies from "js-cookie";
+import axiosInstance from "@app/utils/axiosInstance";
 
 export const signUp = async (data: SignUpData) => {
   const response = await axiosInstance.post("/api/v1/auth", {

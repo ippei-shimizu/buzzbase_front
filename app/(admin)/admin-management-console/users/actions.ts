@@ -1,17 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { generateInternalJWT } from "../../../../lib/internal-jwt";
-import { getAdminUser } from "../../../../lib/admin-auth";
-import { RAILS_API_URL } from "../../../constants/api";
 import type {
   AdminUser,
   AdminUserFormData,
   AdminUserUpdateData,
   AdminUserResponse,
-  AdminUserSingleResponse,
 } from "../../../types/admin";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { getAdminUser } from "../../../../lib/admin-auth";
+import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { RAILS_API_URL } from "../../../constants/api";
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   try {

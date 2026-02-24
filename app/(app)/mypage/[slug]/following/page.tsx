@@ -1,10 +1,9 @@
 "use client";
-import HeaderBack from "@app/components/header/HeaderBack";
-import FollowingUser from "@app/components/user/FollowingUser";
-import { getUserId } from "@app/services/userService";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import HeaderBack from "@app/components/header/HeaderBack";
+import FollowingUser from "@app/components/user/FollowingUser";
 
 export default function Following() {
   const [userIdName, setUserIdName] = useState("");

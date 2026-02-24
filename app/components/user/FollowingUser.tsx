@@ -1,13 +1,13 @@
 "use client";
+import { Spinner, User } from "@heroui/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import { useUser } from "@app/contexts/userContext";
 import useFollowingUser from "@app/hooks/user/useFollowingUser";
 import { getUserId } from "@app/services/userService";
-import { Spinner, User } from "@heroui/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 type UserId = {
   id: number;

@@ -1,11 +1,10 @@
 "use client";
+import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
+import React, { Suspense, useEffect, useState } from "react";
 import SignIn from "@app/components/auth/SignIn";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-import Image from "next/image";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import React, { Suspense, useEffect, useState } from "react";
 
 function SignInContent() {
   const searchParams = useSearchParams();

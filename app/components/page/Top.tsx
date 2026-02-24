@@ -14,13 +14,12 @@ import {
   Card,
   SimpleGrid,
 } from "@mantine/core";
-import classes from "../../HeroBullets.module.css";
-
-import { RecordIcon } from "@app/components/icon/RecordIcon";
-import { GroupIcon } from "@app/components/icon/GroupIcon";
-import { RankingIcon } from "@app/components/icon/RankingIcon";
 import LoginAndSignUp from "@app/components/auth/LoginAndSignUp";
 import LoginAndSignUpTopBottom from "@app/components/auth/LoginAndSignUpTopBottom";
+import { GroupIcon } from "@app/components/icon/GroupIcon";
+import { RankingIcon } from "@app/components/icon/RankingIcon";
+import { RecordIcon } from "@app/components/icon/RecordIcon";
+import classes from "../../HeroBullets.module.css";
 
 const mockdata = [
   {

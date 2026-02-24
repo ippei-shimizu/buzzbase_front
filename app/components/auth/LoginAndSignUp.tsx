@@ -1,7 +1,7 @@
 "use client";
 import "@mantine/core/styles.css";
-import { Group } from "@mantine/core";
 import { Button } from "@heroui/react";
+import { Group } from "@mantine/core";
 import Link from "next/link";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 

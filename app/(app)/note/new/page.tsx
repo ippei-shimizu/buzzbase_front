@@ -1,6 +1,6 @@
 "use client";
-import dynamic from "next/dynamic";
 import { Input } from "@heroui/react";
+import dynamic from "next/dynamic";
 
 const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
   ssr: false,
@@ -8,12 +8,12 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
     <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
   ),
 });
-import HeaderNote from "@app/components/header/HeaderNote";
-import { SetStateAction, useEffect, useState } from "react";
-import { createBaseballNote } from "@app/services/baseballNoteService";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useRouter } from "next/navigation";
+import { SetStateAction, useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
+import HeaderNote from "@app/components/header/HeaderNote";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { createBaseballNote } from "@app/services/baseballNoteService";
 
 export default function NoteNew() {
   const [title, setTitle] = useState("");
@@ -58,7 +58,7 @@ export default function NoteNew() {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!date && !memoDate) {
       isValid = false;

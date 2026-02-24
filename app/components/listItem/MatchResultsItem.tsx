@@ -1,7 +1,5 @@
 "use client";
 
-import { getTeamName } from "@app/services/teamsService";
-import { getTournamentName } from "@app/services/tournamentsService";
 import {
   Button,
   Card,
@@ -12,6 +10,8 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getTeamName } from "@app/services/teamsService";
+import { getTournamentName } from "@app/services/tournamentsService";
 
 type MatchResultsItemProps = {
   gameResult: any[];

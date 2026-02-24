@@ -7,10 +7,10 @@ import {
   ModalFooter,
   Button,
 } from "@heroui/react";
+import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import { resendConfirmation } from "@app/services/authService";
-import { useCallback, useMemo, useState } from "react";
 
 export default function ResendConfirmationModal({
   isOpen,

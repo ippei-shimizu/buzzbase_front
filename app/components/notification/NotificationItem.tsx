@@ -1,10 +1,10 @@
 "use client";
-import NotificationGroup from "@app/components/notification/NotificationGroup";
-import { useNotifications } from "@app/hooks/notification/getNotifications";
-import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import { readNotification } from "@app/services/notificationsService";
 import { Avatar, Divider, Spinner } from "@heroui/react";
 import Link from "next/link";
+import NotificationGroup from "@app/components/notification/NotificationGroup";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { useNotifications } from "@app/hooks/notification/getNotifications";
+import { readNotification } from "@app/services/notificationsService";
 
 export default function NotificationItem() {
   const { notifications, isError, isLoading } = useNotifications();

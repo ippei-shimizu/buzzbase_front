@@ -1,9 +1,9 @@
 "use client";
-import HeaderBack from "@app/components/header/HeaderBack";
-import FollowersUser from "@app/components/user/FollowersUser";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import HeaderBack from "@app/components/header/HeaderBack";
+import FollowersUser from "@app/components/user/FollowersUser";
 
 export default function Followers() {
   const [userIdName, setUserIdName] = useState("");

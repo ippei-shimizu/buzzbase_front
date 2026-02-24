@@ -1,11 +1,11 @@
 "use client";
+import { Checkbox, User } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, use } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { getGroupDetailUsers, updateGroup } from "@app/services/groupService";
-import { Avatar, Checkbox, Input, User } from "@heroui/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, use } from "react";
 
 export default function GroupMember(props: {
   params: Promise<{ slug: string }>;
@@ -23,7 +23,6 @@ export default function GroupMember(props: {
     if (groupId) {
       fetchGroupDetails(groupId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
@@ -56,7 +55,7 @@ export default function GroupMember(props: {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (selectedUserIds.length === 0) {
       setIsGroupUsers(false);

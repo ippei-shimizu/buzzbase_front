@@ -1,4 +1,5 @@
 import React from "react";
+
 export const SearchIcon = ({
   fill = "none",
   height = "22",

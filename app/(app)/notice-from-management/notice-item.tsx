@@ -1,8 +1,8 @@
 "use client";
 
-import { DetailLinkArrowIcon } from "@app/components/icon/DetailLinkArrowIcon";
 import { Divider } from "@heroui/react";
 import Link from "next/link";
+import { DetailLinkArrowIcon } from "@app/components/icon/DetailLinkArrowIcon";
 
 interface Notice {
   href: string;
