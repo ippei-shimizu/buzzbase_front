@@ -80,13 +80,32 @@ export default function GroupPitchingRankingTable(props: Props) {
     [pitchingStats],
   );
 
-  const sections = [
+  const pitchingStatsSections: {
+    label: string;
+    id: string;
+    data: PitchingStats[];
+    renderValue: (item: PitchingStats) => React.ReactNode;
+  }[] = [
     {
       label: "防御率",
       id: "era",
       data: sortedPitchingEra,
       renderValue: (item: PitchingStats) => formatNumber(item.era),
     },
+    {
+      label: "勝率",
+      id: "winPercentage",
+      data: sortedWinPercentage,
+      renderValue: (item: PitchingStats) => formatNumber(item.win_percentage),
+    },
+  ];
+
+  const pitchingAggregateSections: {
+    label: string;
+    id: string;
+    data: PitchingAggregate[];
+    renderValue: (item: PitchingAggregate) => React.ReactNode;
+  }[] = [
     {
       label: "勝利",
       id: "win",
@@ -111,17 +130,11 @@ export default function GroupPitchingRankingTable(props: Props) {
       data: sortedStrikeouts,
       renderValue: (item: PitchingAggregate) => item.strikeouts,
     },
-    {
-      label: "勝率",
-      id: "winPercentage",
-      data: sortedWinPercentage,
-      renderValue: (item: PitchingStats) => formatNumber(item.win_percentage),
-    },
   ];
 
   return (
     <>
-      {sections.map((section, index) => (
+      {pitchingStatsSections.map((section, index) => (
         <RankingSection
           key={section.id}
           label={section.label}
@@ -129,6 +142,15 @@ export default function GroupPitchingRankingTable(props: Props) {
           data={section.data}
           renderValue={section.renderValue}
           isFirst={index === 0}
+        />
+      ))}
+      {pitchingAggregateSections.map((section) => (
+        <RankingSection
+          key={section.id}
+          label={section.label}
+          id={section.id}
+          data={section.data}
+          renderValue={section.renderValue}
         />
       ))}
     </>

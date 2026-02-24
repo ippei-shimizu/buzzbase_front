@@ -35,6 +35,18 @@ import {
   getCurrentUsersUserId,
 } from "@app/services/userService";
 
+type MatchResultDisplay = MatchResult & {
+  id: number;
+  match_type: string;
+  date_and_time: string;
+  batting_order: string;
+  memo?: string | null;
+  tournament_name?: string;
+  my_team_name?: string;
+};
+
+type BattingAverageDisplay = BattingAverage;
+
 const battingOrder = [
   { id: 1, turn: "1番" },
   { id: 2, turn: "2番" },
@@ -48,7 +60,7 @@ const battingOrder = [
 ];
 
 export default function ResultsSummary() {
-  const [matchResult, setMatchResult] = useState<MatchResult[]>([]);
+  const [matchResult, setMatchResult] = useState<MatchResultDisplay[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
   >([]);
@@ -139,7 +151,7 @@ export default function ResultsSummary() {
       setPitchingResult(pitchingResultData);
       setPlateAppearance(plateAppearanceData);
       setCurrentUserId(currentUserIdData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
     }
   };
@@ -291,7 +303,7 @@ export default function ResultsSummary() {
             {/* 試合情報 */}
             <div className="mt-6 py-5 px-6 bg-bg_sub rounded-xl">
               {matchResult ? (
-                matchResult.map((match: any) => (
+                matchResult.map((match: MatchResultDisplay) => (
                   <div key={match.id}>
                     <div className="flex items-center gap-x-2">
                       <Chip
@@ -349,7 +361,7 @@ export default function ResultsSummary() {
               {/* 打撃成績 */}
               <div>
                 {battingAverage ? (
-                  battingAverage.map((batting: any) => (
+                  battingAverage.map((batting: BattingAverageDisplay) => (
                     <div key={batting.id}>
                       <p className="text-xs text-zinc-400">打撃</p>
                       <ul className="flex flex-wrap gap-2 mt-2">

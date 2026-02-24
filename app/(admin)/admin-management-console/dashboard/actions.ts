@@ -4,7 +4,7 @@ import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
 import { RAILS_API_URL } from "../../../constants/api";
 
-interface DashboardStats {
+export interface DashboardStats {
   total_users: number;
   daily_active_users: number;
   new_registrations: number;

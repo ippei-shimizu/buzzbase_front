@@ -43,11 +43,13 @@ export default function Group() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUserIdData();
   }, []);
 
   useEffect(() => {
     if (currentUserId !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchData(currentUserId);
     }
   }, [currentUserId]);

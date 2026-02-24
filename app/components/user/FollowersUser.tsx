@@ -36,6 +36,7 @@ export default function FollowersUser() {
     const pathParts = pathName.split("/");
     const userIdPart = pathParts[pathParts.length - 2];
     if (userIdPart && userIdPart !== "undefined") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchUserId(userIdPart);
     }
   }, [pathName]);

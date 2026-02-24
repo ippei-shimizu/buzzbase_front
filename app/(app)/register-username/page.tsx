@@ -1,4 +1,5 @@
 "use client";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
@@ -83,8 +84,8 @@ export default function RegisterUserName() {
         setIsLoggedIn(true);
         router.push(`/mypage/${userData.user_id}`);
       }
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         setErrorsWithTimeout(error.response.data.errors);
       } else {
         setErrorsWithTimeout(["ユーザー名とユーザーIDを入力してください"]);

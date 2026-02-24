@@ -84,13 +84,12 @@ export default function GroupBattingRankingTable(props: Props) {
     [battingStats],
   );
 
-  const sections = [
-    {
-      label: "打率",
-      id: "battingAverage",
-      data: sortedBattingAverage,
-      renderValue: (item: BattingStats) => formatNumber(item.batting_average),
-    },
+  const battingAvgSections: {
+    label: string;
+    id: string;
+    data: BattingAverage[];
+    renderValue: (item: BattingAverage) => React.ReactNode;
+  }[] = [
     {
       label: "本塁打",
       id: "homeRun",
@@ -115,6 +114,20 @@ export default function GroupBattingRankingTable(props: Props) {
       data: sortedStealingBase,
       renderValue: (item: BattingAverage) => item.stealing_base,
     },
+  ];
+
+  const battingStatsSections: {
+    label: string;
+    id: string;
+    data: BattingStats[];
+    renderValue: (item: BattingStats) => React.ReactNode;
+  }[] = [
+    {
+      label: "打率",
+      id: "battingAverage",
+      data: sortedBattingAverage,
+      renderValue: (item: BattingStats) => formatNumber(item.batting_average),
+    },
     {
       label: "出塁率",
       id: "onBasePercentage",
@@ -126,7 +139,7 @@ export default function GroupBattingRankingTable(props: Props) {
 
   return (
     <>
-      {sections.map((section, index) => (
+      {battingStatsSections.map((section, index) => (
         <RankingSection
           key={section.id}
           label={section.label}
@@ -134,6 +147,15 @@ export default function GroupBattingRankingTable(props: Props) {
           data={section.data}
           renderValue={section.renderValue}
           isFirst={index === 0}
+        />
+      ))}
+      {battingAvgSections.map((section) => (
+        <RankingSection
+          key={section.id}
+          label={section.label}
+          id={section.id}
+          data={section.data}
+          renderValue={section.renderValue}
         />
       ))}
     </>

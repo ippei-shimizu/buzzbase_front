@@ -1,3 +1,8 @@
+import type {
+  NameType,
+  Payload,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 import {
   AreaChart,
   Area,
@@ -25,14 +30,20 @@ interface ActivityChartProps {
   visibleMetrics?: Set<string>;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Payload<ValueType, NameType>[];
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
         <p className="font-medium text-gray-900">{`日付: ${label}`}</p>
-        {payload.map((item: any, index: number) => (
+        {payload.map((item, index: number) => (
           <p key={index} className="text-sm" style={{ color: item.color }}>
-            {`${item.name}: ${item.value.toLocaleString()}件`}
+            {`${item.name}: ${item.value?.toLocaleString()}件`}
           </p>
         ))}
       </div>

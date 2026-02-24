@@ -69,6 +69,7 @@ export default function GroupEdit(props: {
 
   useEffect(() => {
     if (groupId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
       fetchGroupDetails(groupId).finally(() => setIsLoading(false));
     }
@@ -79,9 +80,9 @@ export default function GroupEdit(props: {
     fileInputRef.current?.click();
   };
 
-  const handleChange = (event: any) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.name === "image") {
-      const file = event.target.files[0];
+      const file = event.target.files?.[0];
       if (file) {
         const previewFileUrl = URL.createObjectURL(file);
         setGroup((prevState) => ({
@@ -135,7 +136,7 @@ export default function GroupEdit(props: {
     } catch (_error) {}
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -159,7 +160,9 @@ export default function GroupEdit(props: {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"更新"}
         />

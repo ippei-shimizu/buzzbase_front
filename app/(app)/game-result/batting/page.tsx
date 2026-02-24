@@ -1,4 +1,5 @@
 "use client";
+import type { SharedSelection } from "@heroui/system";
 import { Button, Divider, Input, Select, SelectItem } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -250,33 +251,39 @@ export default function BattingRecord() {
       const existingPlateAppearances =
         await getCurrentPlateAppearance(gameResultId);
       if (existingPlateAppearances.length > 0) {
-        const newBattingBoxes = existingPlateAppearances.map((plate: any) => {
-          const plateId = plate.id;
-          const positionId =
-            battingResultsPositions.find(
-              (p) => p.id === plate.batting_position_id,
-            )?.id || null;
-          const positionName =
-            battingResultsPositions.find(
-              (p) => p.id === plate.batting_position_id,
-            )?.direction || "";
-          const resultId =
-            battingResultsList.find((p) => p.id === plate.plate_result_id)
-              ?.id || null;
-          const resultName =
-            battingResultsList.find((p) => p.id === plate.plate_result_id)
-              ?.result || "";
-          const shortFormResult = resultShortForms[resultName] || resultName;
-          const text = `${positionName}${shortFormResult}`;
-          return {
-            plateId,
-            positionId,
-            positionName,
-            resultId,
-            resultName,
-            text,
-          };
-        });
+        const newBattingBoxes = existingPlateAppearances.map(
+          (plate: {
+            id: number;
+            batting_position_id: number;
+            plate_result_id: number;
+          }) => {
+            const plateId = plate.id;
+            const positionId =
+              battingResultsPositions.find(
+                (p) => p.id === plate.batting_position_id,
+              )?.id || null;
+            const positionName =
+              battingResultsPositions.find(
+                (p) => p.id === plate.batting_position_id,
+              )?.direction || "";
+            const resultId =
+              battingResultsList.find((p) => p.id === plate.plate_result_id)
+                ?.id || null;
+            const resultName =
+              battingResultsList.find((p) => p.id === plate.plate_result_id)
+                ?.result || "";
+            const shortFormResult = resultShortForms[resultName] || resultName;
+            const text = `${positionName}${shortFormResult}`;
+            return {
+              plateId,
+              positionId,
+              positionName,
+              resultId,
+              resultName,
+              text,
+            };
+          },
+        );
         setExistingBattingBoxes(newBattingBoxes);
       }
     } catch (error) {
@@ -285,6 +292,7 @@ export default function BattingRecord() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
@@ -308,6 +316,7 @@ export default function BattingRecord() {
           text: box.text,
         };
       });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBattingBoxes(updatedBattingBoxes);
     }
   }, [existingBattingBoxes]);
@@ -339,48 +348,54 @@ export default function BattingRecord() {
   };
 
   // 打点
-  const handleRunsBattedInChange = (e: any) => {
+  const handleRunsBattedInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingRunsBattedIn(Number(e.target.value));
     setRunsBattedIn(Number(e.target.value));
   };
 
   // 得点
-  const handleRunChange = (e: any) => {
+  const handleRunChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingRun(Number(e.target.value));
     setRun(Number(e.target.value));
   };
 
   // 失策
-  const handleErrorChange = (e: any) => {
+  const handleErrorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingDefensiveError(Number(e.target.value));
     setDefensiveError(Number(e.target.value));
   };
 
   // 盗塁
-  const handleStealingBaseChange = (e: any) => {
+  const handleStealingBaseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingStealingBase(Number(e.target.value));
     setStealingBase(Number(e.target.value));
   };
 
   // 盗塁死
-  const handleCaughtStealingChange = (e: any) => {
+  const handleCaughtStealingChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setExistingCaughtStealing(Number(e.target.value));
     setCaughtStealing(Number(e.target.value));
   };
 
   // 打球方向
-  const createHandlePositionChange = (index: number) => (keys: any) => {
-    const newPosition = Number(keys.values().next().value);
-    setSelectedPositions([newPosition]);
-    updateBattingBox(index, newPosition, battingBoxes[index].result);
-  };
+  const createHandlePositionChange =
+    (index: number) => (keys: SharedSelection) => {
+      if (keys === "all") return;
+      const newPosition = Number(keys.values().next().value);
+      setSelectedPositions([newPosition]);
+      updateBattingBox(index, newPosition, battingBoxes[index].result);
+    };
 
   // 打球結果
-  const createHandleResultChange = (index: number) => (keys: any) => {
-    const newResult = Number(keys.values().next().value);
-    setSelectedResults([newResult]);
-    updateBattingBox(index, battingBoxes[index].position, newResult);
-  };
+  const createHandleResultChange =
+    (index: number) => (keys: SharedSelection) => {
+      if (keys === "all") return;
+      const newResult = Number(keys.values().next().value);
+      setSelectedResults([newResult]);
+      updateBattingBox(index, battingBoxes[index].position, newResult);
+    };
 
   // 打席結果
   const updateBattingBox = (

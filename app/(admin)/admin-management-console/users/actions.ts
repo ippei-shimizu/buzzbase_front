@@ -191,7 +191,7 @@ export async function updateAdminUserAction(id: number, formData: FormData) {
   const password = formData.get("password") as string;
   const passwordConfirmation = formData.get("password_confirmation") as string;
 
-  const data: any = {
+  const data: AdminUserUpdateData = {
     name: formData.get("name") as string,
     email: formData.get("email") as string,
   };

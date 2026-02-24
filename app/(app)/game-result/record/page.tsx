@@ -60,7 +60,7 @@ type Position = {
 };
 
 type userData = {
-  image: any;
+  image: { url: string };
   name: string;
   id: number;
   url: string;
@@ -175,6 +175,7 @@ export default function GameRecord() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
@@ -199,6 +200,7 @@ export default function GameRecord() {
         (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyPosition(userPosition.id.toString());
       }
     }
@@ -209,6 +211,7 @@ export default function GameRecord() {
     if (existingMyTeam) {
       const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
       if (foundTeam) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyTeam(foundTeam.name);
       }
     }
@@ -238,43 +241,47 @@ export default function GameRecord() {
   };
 
   // 自チーム名設定
-  const handleMyTeamChange = (event: any) => {
+  const handleMyTeamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setExistingMyTeam(event.target.value);
     setMyTeam(event.target.value);
   };
 
   // 相手チーム設定
-  const handleOpponentTeamChange = (teamName: any) => {
+  const handleOpponentTeamChange = (teamName: React.Key | null) => {
     setExistingOpponentTeam(Number(teamName));
-    setOpponentTeam(teamName);
+    setOpponentTeam(teamName as string);
   };
 
   const handleTournamentInputChange = (value: string) => {
     setInputTournamentName(value);
   };
-  const handleTournamentSelectionChange = (value: any) => {
-    setTournament(value);
+  const handleTournamentSelectionChange = (value: React.Key | null) => {
+    setTournament(value as number | null);
   };
 
   // 自分チーム得点
-  const handleMyScoreChange = (event: any) => {
-    setMyTeamScore(event.target.value);
+  const handleMyScoreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMyTeamScore(Number(event.target.value));
   };
 
   // 相手チーム得点
-  const handleOpponentScoreChange = (event: any) => {
-    setOpponentTeamScore(event.target.value);
+  const handleOpponentScoreChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setOpponentTeamScore(Number(event.target.value));
   };
 
   // 打順
-  const handleBattingOrderChange = (event: { target: { value: any } }) => {
+  const handleBattingOrderChange = (event: { target: { value: string } }) => {
     const order = event.target.value;
     setExistingMatchBattingOrder(order);
     setMatchBattingOrder(order);
   };
 
   // 守備位置
-  const handleDefensivePositionChange = (event: { target: { value: any } }) => {
+  const handleDefensivePositionChange = (event: {
+    target: { value: string };
+  }) => {
     const position = event.target.value;
     setExistingDefensivePosition(position);
     setDefensivePosition(position);

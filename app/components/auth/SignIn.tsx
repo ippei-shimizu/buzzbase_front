@@ -1,4 +1,5 @@
 "use client";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
@@ -50,8 +51,8 @@ export default function SignIn() {
         setIsLoggedIn(true);
         router.push("/register-username");
       }
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorMessages = error.response.data.errors;
         const isUnconfirmedError =
           error.response.status === 401 &&

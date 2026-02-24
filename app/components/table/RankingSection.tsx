@@ -17,21 +17,21 @@ type RankingItem = {
   image_url: string;
 };
 
-type RankingSectionProps = {
+type RankingSectionProps<T extends RankingItem> = {
   label: string;
   id: string;
-  data: RankingItem[];
-  renderValue: (item: any, index: number) => React.ReactNode;
+  data: T[];
+  renderValue: (item: T, index: number) => React.ReactNode;
   isFirst?: boolean;
 };
 
-export default function RankingSection({
+export default function RankingSection<T extends RankingItem>({
   label,
   id,
   data,
   renderValue,
   isFirst = false,
-}: RankingSectionProps) {
+}: RankingSectionProps<T>) {
   return (
     <Table className={isFirst ? "" : "mt-8"} aria-label={label} id={id}>
       <TableHeader>

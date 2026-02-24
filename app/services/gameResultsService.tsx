@@ -95,7 +95,10 @@ export const updatePitchingResultId = async (
   }
 };
 
-export const getFilterGameResults = async (year: any, matchType: any) => {
+export const getFilterGameResults = async (
+  year: string | number,
+  matchType: string,
+) => {
   try {
     const response = await axiosInstance.get(
       `/api/v1/game_results/filtered_game_associated_data?year=${year}&match_type=${matchType}`,
@@ -109,8 +112,8 @@ export const getFilterGameResults = async (year: any, matchType: any) => {
 
 export const getFilterGameResultsUserId = async (
   userId: number,
-  year: any,
-  matchType: any,
+  year: string | number,
+  matchType: string,
 ) => {
   try {
     const response = await axiosInstance.get(

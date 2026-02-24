@@ -78,7 +78,7 @@ export default function NoteNew() {
     setDate(e.target.value);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -99,7 +99,9 @@ export default function NoteNew() {
     <>
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
         <HeaderNote
-          onNoteSave={() => handleSubmit({ preventDefault: () => {} })}
+          onNoteSave={() =>
+            handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+          }
           isSubmitting={isSubmitting}
           hasChanges={hasChanges}
         />

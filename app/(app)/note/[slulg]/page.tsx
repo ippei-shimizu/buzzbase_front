@@ -42,6 +42,7 @@ export default function NoteDetail(props: {
 
   useEffect(() => {
     if (note) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDate(note.date);
       setTitle(note.title);
       setMemo(note.memo);

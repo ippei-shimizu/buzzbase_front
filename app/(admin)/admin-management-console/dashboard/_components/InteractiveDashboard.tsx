@@ -1,5 +1,6 @@
 "use client";
 
+import type { DashboardStats } from "../actions";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { getDashboardStats } from "../actions";
@@ -32,7 +33,7 @@ const ActivityChart = dynamic(
 );
 
 interface InteractiveDashboardProps {
-  initialStats: any;
+  initialStats: DashboardStats;
 }
 
 export default function InteractiveDashboard({

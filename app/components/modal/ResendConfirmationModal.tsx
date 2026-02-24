@@ -8,6 +8,7 @@ import {
   ModalFooter,
   Button,
 } from "@heroui/react";
+import { AxiosError } from "axios";
 import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
@@ -53,8 +54,8 @@ export default function ResendConfirmationModal({
       onResendSuccess();
       onClose();
       setEmail("");
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         setErrorsWithTimeout(error.response.data.errors);
       } else {
         setErrorsWithTimeout([

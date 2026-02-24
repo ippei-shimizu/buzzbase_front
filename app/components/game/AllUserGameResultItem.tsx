@@ -12,9 +12,26 @@ type AllUserGameResult = {
   };
   user_name: string;
   user_user_id: string;
-  match_result: any[];
-  pitching_result: any[];
-  plate_appearances: any[];
+  match_result?: {
+    match_type: string;
+    date_and_time: string;
+    opponent_team_id: number;
+    tournament_id: number | null;
+    my_team_score: number;
+    opponent_team_score: number;
+  };
+  pitching_result?: {
+    innings_pitched: number;
+    run_allowed: number;
+    win: number;
+    loss: number;
+  };
+  plate_appearances: {
+    id: number;
+    batting_result: string;
+    game_result_id: number;
+    batter_box_number: number;
+  }[];
 };
 
 export default function AllUserGameResultItem() {

@@ -13,9 +13,34 @@ import { useEffect, useState } from "react";
 import { getTeamName } from "@app/services/teamsService";
 import { getTournamentName } from "@app/services/tournamentsService";
 
+type GameResultItem = {
+  game_result_id: number;
+  match_result?: {
+    match_type: string;
+    date_and_time: string;
+    opponent_team_id: number;
+    tournament_id: number | null;
+    my_team_score: number;
+    opponent_team_score: number;
+  };
+  pitching_result?: {
+    innings_pitched: number;
+    run_allowed: number;
+    win: number;
+    loss: number;
+  };
+};
+
+type PlateAppearanceItem = {
+  id: number;
+  batting_result: string;
+  game_result_id: number;
+  batter_box_number: number;
+};
+
 type MatchResultsItemProps = {
-  gameResult: any[];
-  plateAppearance: any;
+  gameResult: GameResultItem[];
+  plateAppearance: PlateAppearanceItem[][];
 };
 
 type TeamNames = {
@@ -55,7 +80,8 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
             );
             namesTournament[game.match_result.tournament_id] = tournamentName;
           } else {
-            namesTournament[game.match_result?.tournament_id] = "";
+            namesTournament[String(game.match_result?.tournament_id ?? "")] =
+              "";
           }
         }
       }
@@ -210,11 +236,15 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                 )}
               </div>
               <p className="text-sm mt-2 text-zinc-400">
-                {tournamentNames[game.match_result?.tournament_id]}
+                {
+                  tournamentNames[
+                    String(game.match_result?.tournament_id ?? "")
+                  ]
+                }
               </p>
               <div className="flex gap-x-3 items-center mt-1">
                 <div className="flex gap-x-2 items-baseline">
-                  {renderScoreResult(game.match_result)}
+                  {game.match_result && renderScoreResult(game.match_result)}
                   <div className="flex gap-x-2 items-baseline">
                     <p className="text-lg font-bold">
                       {game.match_result?.my_team_score} -{" "}
@@ -227,7 +257,11 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                     vs.
                   </span>
                   <p className="text-base font-bold">
-                    {opponentTeamNames[game.match_result?.opponent_team_id]}
+                    {
+                      opponentTeamNames[
+                        String(game.match_result?.opponent_team_id ?? "")
+                      ]
+                    }
                   </p>
                 </div>
               </div>

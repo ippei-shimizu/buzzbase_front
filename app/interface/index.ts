@@ -144,7 +144,7 @@ export interface ResultsSelectBoxProps {
   variant?: "flat" | "faded" | "bordered" | "underlined" | undefined;
   labelPlacement?: "outside" | "outside-left" | "inside";
   size?: "sm" | "md" | "lg" | undefined;
-  onChange: any;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   propsYears: AvailableYear[];
   selectedKeys?: string[];
 }
@@ -169,7 +169,7 @@ export interface teamData {
 export interface PlusButtonProps {
   className: string;
   type?: "submit" | "button" | "reset" | undefined;
-  onPress: any;
+  onPress: () => void;
 }
 
 export interface AwardData {
@@ -374,12 +374,12 @@ export interface UserContextType {
     };
     usersUserId: { user_id: string | null };
   };
-  dispatch: React.Dispatch<any>;
+  dispatch: () => void;
 }
 
 export interface userData {
   user: {
-    image: any;
+    image: { url: string };
     name: string;
     user_id: string;
     url: string;

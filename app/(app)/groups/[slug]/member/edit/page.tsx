@@ -24,7 +24,9 @@ export default function GroupMember(props: {
     try {
       const data = await getGroupDetailUsers(groupId);
       setGroupMember(data.accepted_users);
-      const acceptedUserIds = data.accepted_users.map((user: any) => user.id);
+      const acceptedUserIds = data.accepted_users.map(
+        (user: AcceptedUsers) => user.id,
+      );
       setSelectedUserIds(acceptedUserIds);
     } catch (error) {
       console.error("グループメンバーを取得できませんでした。", error);
@@ -33,6 +35,7 @@ export default function GroupMember(props: {
 
   useEffect(() => {
     if (groupId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchGroupDetails(groupId);
     }
   }, [groupId]);
@@ -73,7 +76,7 @@ export default function GroupMember(props: {
     return isValid;
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -97,7 +100,9 @@ export default function GroupMember(props: {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"メンバー退会"}
         />

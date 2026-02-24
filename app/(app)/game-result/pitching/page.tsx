@@ -1,4 +1,5 @@
 "use client";
+import type { SharedSelection } from "@heroui/system";
 import {
   Button,
   Checkbox,
@@ -138,6 +139,7 @@ export default function PitchingRecord() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
@@ -153,6 +155,7 @@ export default function PitchingRecord() {
     inningsFraction = Number(inningsFraction.toFixed(2));
 
     if (inningInteger) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExistingSelectedInnings(inningInteger);
     }
     if (inningsFraction) {
@@ -167,7 +170,8 @@ export default function PitchingRecord() {
   }, [existingTotalInnings]);
 
   // 勝敗
-  const handleWinOrLossChange = (value: any) => {
+  const handleWinOrLossChange = (value: SharedSelection) => {
+    if (value === "all") return;
     const selectValue = Array.from(value)[0];
     if (selectValue === "0") {
       setWin(1);
@@ -188,12 +192,14 @@ export default function PitchingRecord() {
   };
 
   // 投球回数
-  const createHandleInningsChange = (value: any) => {
+  const createHandleInningsChange = (value: SharedSelection) => {
+    if (value === "all") return;
     const selectValue = Array.from(value)[0] as number;
     setSelectedInnings(selectValue);
     setExistingSelectedInnings(selectValue);
   };
-  const createHandleFractionsChange = (value: any) => {
+  const createHandleFractionsChange = (value: SharedSelection) => {
+    if (value === "all") return;
     const selectValue = Array.from(value)[0] as number;
     const fractionValue = selectValue == 0 ? 0 : selectValue == 1 ? 0.33 : 0.66;
     setSelectedFractions(fractionValue);
@@ -201,63 +207,77 @@ export default function PitchingRecord() {
   };
 
   // 投球数
-  const handleNumberPitchesChange = (event: any) => {
-    setNumberOfPitches(event.target.value);
-    setExistingNumberOfPitches(event.target.value);
+  const handleNumberPitchesChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setNumberOfPitches(Number(event.target.value));
+    setExistingNumberOfPitches(Number(event.target.value));
   };
 
   // ホールド数
-  const handleHoldChange = (event: any) => {
-    setHolds(event.target.value);
-    setExistingHolds(event.target.value);
+  const handleHoldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setHolds(Number(event.target.value));
+    setExistingHolds(Number(event.target.value));
   };
 
   // セーブ数
-  const handleSaveChange = (event: any) => {
-    setSaves(event.target.value);
-    setExistingSaves(event.target.value);
+  const handleSaveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSaves(Number(event.target.value));
+    setExistingSaves(Number(event.target.value));
   };
 
   // 失点
-  const handleRunAllowedChange = (event: any) => {
-    setRunsAllowed(event.target.value);
-    setExistingRunsAllowed(event.target.value);
+  const handleRunAllowedChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setRunsAllowed(Number(event.target.value));
+    setExistingRunsAllowed(Number(event.target.value));
   };
 
   // 自責点
-  const handleEarnedRunChange = (event: any) => {
-    setEarnedRuns(event.target.value);
-    setExistingEarnedRuns(event.target.value);
+  const handleEarnedRunChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setEarnedRuns(Number(event.target.value));
+    setExistingEarnedRuns(Number(event.target.value));
   };
 
   // 被安打
-  const handleHitsAllowedChange = (event: any) => {
-    setHitsAllowed(event.target.value);
-    setExistingHitsAllowed(event.target.value);
+  const handleHitsAllowedChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setHitsAllowed(Number(event.target.value));
+    setExistingHitsAllowed(Number(event.target.value));
   };
 
   // 被本塁打
-  const handleHomeRunsChange = (event: any) => {
-    setHomeRuns(event.target.value);
-    setExistingHomeRuns(event.target.value);
+  const handleHomeRunsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setHomeRuns(Number(event.target.value));
+    setExistingHomeRuns(Number(event.target.value));
   };
 
   // 奪三振
-  const handleStrikeoutsChange = (event: any) => {
-    setStrikeouts(event.target.value);
-    setExistingStrikeouts(event.target.value);
+  const handleStrikeoutsChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setStrikeouts(Number(event.target.value));
+    setExistingStrikeouts(Number(event.target.value));
   };
 
   // 四球
-  const handleBaseOnBallsChange = (event: any) => {
-    setBasesOnBalls(event.target.value);
-    setExistingBasesOnBalls(event.target.value);
+  const handleBaseOnBallsChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setBasesOnBalls(Number(event.target.value));
+    setExistingBasesOnBalls(Number(event.target.value));
   };
 
   // 死球
-  const handleHitByPitcherChange = (event: any) => {
-    setHitByPitches(event.target.value);
-    setExistingHitByPitches(event.target.value);
+  const handleHitByPitcherChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setHitByPitches(Number(event.target.value));
+    setExistingHitByPitches(Number(event.target.value));
   };
 
   // データ送信

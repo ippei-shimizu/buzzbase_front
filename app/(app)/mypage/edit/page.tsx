@@ -1,5 +1,6 @@
 "use client";
 import type { AwardData, UserAwards } from "@app/interface";
+import type { SharedSelection } from "@heroui/system";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -157,7 +158,7 @@ export default function ProfileEdit() {
       const teamsData = await getTeams();
       setTeams(teamsData);
 
-      const positionIds = data.positions.map((position: any) =>
+      const positionIds = data.positions.map((position: { id: number }) =>
         position.id.toString(),
       );
       setSelectedPositionIds(positionIds);
@@ -165,7 +166,7 @@ export default function ProfileEdit() {
       // チーム初期値設定
       if (data.team_id) {
         const userTeam = teamsData.find(
-          (team: { id: any }) => team.id === data.team_id,
+          (team: { id: number }) => team.id === data.team_id,
         );
         if (userTeam) {
           setTeamName(userTeam.name);
@@ -188,8 +189,12 @@ export default function ProfileEdit() {
       } else {
         setAwards([{ id: Date.now(), title: "" }]);
       }
-    } catch (error: any) {
-      setErrors(error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrors([error.message]);
+      } else {
+        setErrors(["データの取得に失敗しました"]);
+      }
     }
   };
 
@@ -204,11 +209,12 @@ export default function ProfileEdit() {
   }, [teamName]);
 
   // ポジション選択
-  const handleSelectChange = (keys: any) => {
+  const handleSelectChange = (keys: SharedSelection) => {
+    if (keys === "all") return;
     setSelectedPositionIds(Array.from(keys).map(String));
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "image") {
       const previewFileUrl =
         e.target.files && e.target.files[0]
@@ -234,7 +240,7 @@ export default function ProfileEdit() {
   };
 
   // データ送信
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isInvalid) {
       setErrorsWithTimeout(["名前が未入力、または無効です。"]);
@@ -373,8 +379,12 @@ export default function ProfileEdit() {
   };
 
   // prefecture_id set
-  const handlePrefectureChange = (event: { target: { value: any } }) => {
-    setSelectedPrefectureId(event.target.value);
+  const handlePrefectureChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedPrefectureId(
+      event.target.value ? Number(event.target.value) : undefined,
+    );
   };
 
   // 既にdbに保存されているチーム名選択時の処理
@@ -435,7 +445,11 @@ export default function ProfileEdit() {
 
   return (
     <div className="buzz-dark bg-main pb-24 flex flex-col w-full min-h-screen ">
-      <HeaderSave onProfileUpdate={() => handleSubmit(new Event("submit"))} />
+      <HeaderSave
+        onProfileUpdate={() =>
+          handleSubmit(new Event("submit") as unknown as React.FormEvent)
+        }
+      />
       <div className="h-full buzz-dark">
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-12 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 ">

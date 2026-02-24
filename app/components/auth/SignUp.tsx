@@ -1,5 +1,6 @@
 "use client";
 
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
@@ -52,8 +53,8 @@ export default function SignUp() {
         confirm_success_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
       });
       router.push("/registration-confirmation");
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorData = error.response.data.errors;
         const isEmailTakenError =
           error.response.status === 422 &&

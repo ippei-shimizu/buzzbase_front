@@ -35,7 +35,9 @@ export default function GroupMemberAdd(props: {
     const fetchGroupDetails = async () => {
       try {
         const data = await getGroupDetailUsers(groupId);
-        const acceptedUserIds = data.accepted_users.map((user: any) => user.id);
+        const acceptedUserIds = data.accepted_users.map(
+          (user: { id: number }) => user.id,
+        );
         setGroupMemberIds(acceptedUserIds);
       } catch (error) {
         console.error("グループの詳細を取得できませんでした。", error);
@@ -73,7 +75,7 @@ export default function GroupMemberAdd(props: {
     });
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isSubmitting) {
       return;
@@ -96,7 +98,9 @@ export default function GroupMemberAdd(props: {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"招待"}
         />

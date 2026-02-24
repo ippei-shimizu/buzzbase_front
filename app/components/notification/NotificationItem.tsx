@@ -1,4 +1,5 @@
 "use client";
+import type { Notifications } from "@app/interface";
 import { Avatar, Divider, Spinner } from "@heroui/react";
 import Link from "next/link";
 import NotificationGroup from "@app/components/notification/NotificationGroup";
@@ -47,7 +48,7 @@ export default function NotificationItem() {
     <>
       <div className="py-5 pb-24 grid gap-y-5 bg-main lg:pb-6">
         {notifications?.length > 0 ? (
-          notifications?.map((notice: any) => (
+          notifications?.map((notice: Notifications) => (
             <div key={notice.id}>
               {notice.event_type === "group_invitation" &&
               notice.group_invitation === "pending" ? (

@@ -12,7 +12,7 @@ export default function Logout() {
       await signOut();
       setIsLoggedIn(false);
       router.push("/signin?logout=success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
     }
   };

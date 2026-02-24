@@ -79,7 +79,10 @@ jest.mock("@app/components/table/GroupBattingRankingTable", () => {
   return function GroupBattingRankingTable({
     battingAverage,
     battingStats,
-  }: any) {
+  }: {
+    battingAverage?: unknown[];
+    battingStats?: unknown[];
+  }) {
     return (
       <div data-testid="batting-ranking-table">
         打撃成績ランキングテーブル
@@ -94,7 +97,10 @@ jest.mock("@app/components/table/GroupPitchingRankingTable", () => {
   return function GroupPitchingRankingTable({
     pitchingAggregate,
     pitchingStats,
-  }: any) {
+  }: {
+    pitchingAggregate?: unknown[];
+    pitchingStats?: unknown[];
+  }) {
     return (
       <div data-testid="pitching-ranking-table">
         投手成績ランキングテーブル
