@@ -6,12 +6,6 @@ import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
 import NavigationItems from "./NavigationItems";
 
-type currentUserData = {
-  user_id: string;
-  image: any;
-  url: string;
-};
-
 export default function NavigationMenu() {
   const pathName = usePathname();
   const navigationItems = NavigationItems();

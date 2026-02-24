@@ -1,12 +1,11 @@
 import { Metadata } from "next";
+import Link from "next/link";
+import Header from "@app/components/header/Header";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description: "「BUZZ BASE」のプライバシーポリシーになります。",
 };
-
-import Link from "next/link";
-import Header from "@app/components/header/Header";
 
 export default function PrivacyPolicy() {
   return (

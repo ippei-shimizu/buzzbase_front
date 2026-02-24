@@ -8,13 +8,15 @@ import { useAuthContext } from "@app/contexts/useAuthContext";
 
 function SignInContent() {
   const searchParams = useSearchParams();
-  const [message, setMessage] = useState("");
-  const [logoutSuccess, setLogoutSuccess] = useState(false);
+  const [toastTimedOut, setToastTimedOut] = useState(false);
   const confirmationUrl = searchParams.get("account_confirmation_success");
   const logoutParams = searchParams.get("logout");
 
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
+
+  const logoutSuccess = logoutParams === "success" && !toastTimedOut;
+  const message = logoutSuccess ? "ログアウトしました" : "";
 
   useEffect(() => {
     if (isLoggedIn === true) {
@@ -23,19 +25,12 @@ function SignInContent() {
   }, [isLoggedIn, router]);
 
   useEffect(() => {
-    if (logoutParams === "success") {
-      setSuccessToastWithTimeout();
-      setMessage("ログアウトしました");
-    }
-  }, [logoutParams]);
-
-  const setSuccessToastWithTimeout = () => {
-    setLogoutSuccess(true);
+    if (logoutParams !== "success") return;
     const timeout = setTimeout(() => {
-      setLogoutSuccess(false);
+      setToastTimedOut(true);
     }, 5000);
     return () => clearTimeout(timeout);
-  };
+  }, [logoutParams]);
 
   return (
     <>

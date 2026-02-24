@@ -169,7 +169,7 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
   };
   return (
     <>
-      {gameResult.map((game, index) => (
+      {gameResult.map((game, _index) => (
         <div key={game.game_result_id}>
           <Card className="px-4 py-3 relative">
             <Button

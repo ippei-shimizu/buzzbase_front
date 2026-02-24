@@ -17,7 +17,7 @@ export default function UserAutocomplete() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!query) return setUsers([]);
+    if (!query) return;
 
     const fetchUsers = async () => {
       setIsLoading(true);
@@ -31,6 +31,8 @@ export default function UserAutocomplete() {
 
     fetchUsers();
   }, [query]);
+
+  const displayUsers = query ? users : [];
 
   const clearInput = () => {
     setQuery("");
@@ -56,7 +58,7 @@ export default function UserAutocomplete() {
             <Spinner color="primary" />
           </li>
         ) : (
-          users.map((user) => (
+          displayUsers.map((user) => (
             <li key={user.id}>
               <Link href={`/mypage/${user.user_id}/`} className="block">
                 <User

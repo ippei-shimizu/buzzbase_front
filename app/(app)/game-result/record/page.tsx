@@ -1,4 +1,5 @@
 "use client";
+import type { TournamentData } from "@app/interface";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -105,7 +106,7 @@ export default function GameRecord() {
   const [isBattingOrderValid, setIsBattingOrderValid] = useState(true);
   const [isDefensivePositionValid, setIsDefensivePositionValid] =
     useState(true);
-  const [isLocalStorageId, setIsLocalStorageId] = useState(true);
+  const [_isLocalStorageId, setIsLocalStorageId] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
   const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
     number | null
@@ -143,23 +144,6 @@ export default function GameRecord() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchExistingMatchResult(JSON.parse(savedGameResultId));
-    }
-    if (
-      !(pathname === "/game-result/battings") &&
-      !(pathname === "/game-result/record") &&
-      savedGameResultId
-    ) {
-      localStorage.removeItem("gameResultId");
-    }
-  }, [pathname]);
-
   // 既に同じgame_result_idが存在する場合
   const fetchExistingMatchResult = async (gameResultId: number) => {
     try {
@@ -189,6 +173,23 @@ export default function GameRecord() {
       console.error("Error fetching existing match result:", error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+    // ローカルストレージからid取得
+    const savedGameResultId = localStorage.getItem("gameResultId");
+    if (savedGameResultId) {
+      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
+      fetchExistingMatchResult(JSON.parse(savedGameResultId));
+    }
+    if (
+      !(pathname === "/game-result/battings") &&
+      !(pathname === "/game-result/record") &&
+      savedGameResultId
+    ) {
+      localStorage.removeItem("gameResultId");
+    }
+  }, [pathname]);
 
   useEffect(() => {
     // 守備位置設定

@@ -1,4 +1,5 @@
 "use client";
+import type { FollowingUser } from "@app/interface";
 import { Spinner, User } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,14 +21,6 @@ export default function FollowersUser() {
   const { state } = useUser();
   const currentUserId = state.userId;
 
-  useEffect(() => {
-    const pathParts = pathName.split("/");
-    const userIdPart = pathParts[pathParts.length - 2];
-    if (userIdPart && userIdPart !== "undefined") {
-      fetchUserId(userIdPart);
-    }
-  }, [pathName]);
-
   const fetchUserId = async (userId: string) => {
     try {
       const response = await getUserId(userId);
@@ -38,6 +31,14 @@ export default function FollowersUser() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const pathParts = pathName.split("/");
+    const userIdPart = pathParts[pathParts.length - 2];
+    if (userIdPart && userIdPart !== "undefined") {
+      fetchUserId(userIdPart);
+    }
+  }, [pathName]);
 
   const { followers, isLoadingFollowers } = useFollowersUser(userId?.id);
 

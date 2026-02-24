@@ -1,4 +1,5 @@
 "use client";
+import type { FollowingUser } from "@app/interface";
 import { Checkbox, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -83,7 +84,7 @@ export default function GroupMemberAdd(props: {
       formData.append("invite_user_ids[]", userId.toString());
     });
     try {
-      const response = await createInviteMembers(groupId, formData);
+      const _response = await createInviteMembers(groupId, formData);
       router.push(`/groups/${groupId}/`);
     } catch (error) {
       console.log(error);

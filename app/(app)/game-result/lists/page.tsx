@@ -20,8 +20,8 @@ type GameResult = {
 };
 
 export default function GameResultList() {
-  const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
-  const [plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
+  const [_gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
+  const [_plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
   const [currentUserId, setCurrentUserId] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();

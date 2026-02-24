@@ -88,7 +88,7 @@ type BattingBox = {
 
 // 打撃成績計算
 const useBattingStatistics = (battingBoxes: BattingBox[]) => {
-  const calculateStatistics = () => {
+  return useMemo(() => {
     let totalBases = 0;
     let strikeOuts = 0;
     let baseOnBalls = 0;
@@ -138,8 +138,7 @@ const useBattingStatistics = (battingBoxes: BattingBox[]) => {
       sacrificeHit,
       sacrificeFly,
     };
-  };
-  return useMemo(calculateStatistics, [battingBoxes]);
+  }, [battingBoxes]);
 };
 
 export default function BattingRecord() {
@@ -155,9 +154,9 @@ export default function BattingRecord() {
   const [caughtStealing, setCaughtStealing] = useState(0);
   const [existingCaughtStealing, setExistingCaughtStealing] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
-  const [isLocalStorageId, setIsLocalStorageId] = useState(true);
-  const [selectedPositions, setSelectedPositions] = useState<number[]>([]);
-  const [selectedResults, setSelectedResults] = useState<number[]>([]);
+  const [_isLocalStorageId, setIsLocalStorageId] = useState(true);
+  const [_selectedPositions, setSelectedPositions] = useState<number[]>([]);
+  const [_selectedResults, setSelectedResults] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletedPlateAppearanceIds, setDeletedPlateAppearanceIds] = useState<
     number[]
@@ -228,34 +227,6 @@ export default function BattingRecord() {
     sacrificeFly,
   } = useBattingStatistics(battingBoxes);
 
-  useEffect(() => {
-    fetchData();
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchExistingBattingAverage(JSON.parse(savedGameResultId));
-      fetchExistingPlateAppearance(JSON.parse(savedGameResultId));
-    }
-  }, [pathname]);
-
-  useEffect(() => {
-    if (
-      existingBattingBoxes.length > 0 &&
-      existingBattingBoxes[0].positionId !== 0
-    ) {
-      const updatedBattingBoxes = existingBattingBoxes.map((box) => {
-        return {
-          id: box.plateId,
-          position: box.positionId,
-          result: box.resultId,
-          text: box.text,
-        };
-      });
-      setBattingBoxes(updatedBattingBoxes);
-    }
-  }, [existingBattingBoxes]);
-
   // 既に同じgame_result_idが存在する場合
   const fetchExistingBattingAverage = async (gameResultId: number) => {
     try {
@@ -312,6 +283,34 @@ export default function BattingRecord() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+    // ローカルストレージからid取得
+    const savedGameResultId = localStorage.getItem("gameResultId");
+    if (savedGameResultId) {
+      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
+      fetchExistingBattingAverage(JSON.parse(savedGameResultId));
+      fetchExistingPlateAppearance(JSON.parse(savedGameResultId));
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    if (
+      existingBattingBoxes.length > 0 &&
+      existingBattingBoxes[0].positionId !== 0
+    ) {
+      const updatedBattingBoxes = existingBattingBoxes.map((box) => {
+        return {
+          id: box.plateId,
+          position: box.positionId,
+          result: box.resultId,
+          text: box.text,
+        };
+      });
+      setBattingBoxes(updatedBattingBoxes);
+    }
+  }, [existingBattingBoxes]);
 
   // 打席追加
   const addBox = () => {

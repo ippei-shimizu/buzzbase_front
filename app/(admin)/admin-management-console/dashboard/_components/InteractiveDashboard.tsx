@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { getDashboardStats } from "../actions";
 import DashboardControls from "./DashboardControls";
+import DataTable from "./DataTable";
+import MetricToggle from "./MetricToggle";
 
 const UserGrowthChart = dynamic(
   () => import("../../../_components/charts/UserGrowthChart"),
@@ -28,8 +30,6 @@ const ActivityChart = dynamic(
     ),
   },
 );
-import DataTable from "./DataTable";
-import MetricToggle from "./MetricToggle";
 
 interface InteractiveDashboardProps {
   initialStats: any;

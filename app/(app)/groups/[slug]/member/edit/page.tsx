@@ -1,4 +1,5 @@
 "use client";
+import type { AcceptedUsers } from "@app/interface";
 import { Checkbox, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
@@ -14,16 +15,10 @@ export default function GroupMember(props: {
   const groupId = Number(params.slug);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
-  const [isGroupUsers, setIsGroupUsers] = useState(true);
+  const [_isGroupUsers, setIsGroupUsers] = useState(true);
   const [groupMember, setGroupMember] = useState<AcceptedUsers[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    if (groupId) {
-      fetchGroupDetails(groupId);
-    }
-  }, [groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
     try {
@@ -35,6 +30,12 @@ export default function GroupMember(props: {
       console.error("グループメンバーを取得できませんでした。", error);
     }
   };
+
+  useEffect(() => {
+    if (groupId) {
+      fetchGroupDetails(groupId);
+    }
+  }, [groupId]);
 
   const handleCheckboxChange = (userId: number, isChecked: boolean) => {
     setSelectedUserIds((prevSelectedUserIds) => {

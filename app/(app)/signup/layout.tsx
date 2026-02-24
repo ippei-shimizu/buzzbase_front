@@ -1,12 +1,11 @@
 import { Metadata } from "next";
+import Header from "@app/components/header/Header";
 
 export const metadata: Metadata = {
   title: "新規会員登録",
   description:
     "「BUZZ BASE」のに登録して、野球の打率や打点などの打撃成績や投球回数や奪三振数などの投手成績を記録して、友達とグループを作って成績をランキング形式で共有しよう！",
 };
-
-import Header from "@app/components/header/Header";
 
 export default function SignUpLayout({
   children,

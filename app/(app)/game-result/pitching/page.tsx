@@ -88,7 +88,7 @@ export default function PitchingRecord() {
   const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
     number | null
   >(null);
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors, _setErrors] = useState<string[]>([]);
   const pathname = usePathname();
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
@@ -105,6 +105,35 @@ export default function PitchingRecord() {
       setCurrentUserId(currentUserIdData);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  // 既に同じgame_result_idが存在する場合
+  const fetchExistingPitchingResult = async (gameResultId: number) => {
+    try {
+      const currentUserId = await getCurrentUserId();
+      const existingPitchingResultData = await checkExistingPitchingResult(
+        gameResultId,
+        currentUserId,
+      );
+      setExistingNumberOfPitches(existingPitchingResultData.number_of_pitches);
+      setExistingGotToTheDistance(
+        existingPitchingResultData.got_to_the_distance,
+      );
+      setExistingWin(existingPitchingResultData.win);
+      setExistingTotalInnings(existingPitchingResultData.innings_pitched);
+      setExistingLoss(existingPitchingResultData.loss);
+      setExistingHolds(existingPitchingResultData.hold);
+      setExistingSaves(existingPitchingResultData.saves);
+      setExistingRunsAllowed(existingPitchingResultData.run_allowed);
+      setExistingEarnedRuns(existingPitchingResultData.earned_run);
+      setExistingHitsAllowed(existingPitchingResultData.hits_allowed);
+      setExistingHomeRuns(existingPitchingResultData.home_runs_hit);
+      setExistingStrikeouts(existingPitchingResultData.strikeouts);
+      setExistingBasesOnBalls(existingPitchingResultData.base_on_balls);
+      setExistingHitByPitches(existingPitchingResultData.hit_by_pitch);
+    } catch (error) {
+      console.error("Error fetching existing pitting result:", error);
     }
   };
 
@@ -136,35 +165,6 @@ export default function PitchingRecord() {
       setExistingSelectedFractions(fractionId);
     }
   }, [existingTotalInnings]);
-
-  // 既に同じgame_result_idが存在する場合
-  const fetchExistingPitchingResult = async (gameResultId: number) => {
-    try {
-      const currentUserId = await getCurrentUserId();
-      const existingPitchingResultData = await checkExistingPitchingResult(
-        gameResultId,
-        currentUserId,
-      );
-      setExistingNumberOfPitches(existingPitchingResultData.number_of_pitches);
-      setExistingGotToTheDistance(
-        existingPitchingResultData.got_to_the_distance,
-      );
-      setExistingWin(existingPitchingResultData.win);
-      setExistingTotalInnings(existingPitchingResultData.innings_pitched);
-      setExistingLoss(existingPitchingResultData.loss);
-      setExistingHolds(existingPitchingResultData.hold);
-      setExistingSaves(existingPitchingResultData.saves);
-      setExistingRunsAllowed(existingPitchingResultData.run_allowed);
-      setExistingEarnedRuns(existingPitchingResultData.earned_run);
-      setExistingHitsAllowed(existingPitchingResultData.hits_allowed);
-      setExistingHomeRuns(existingPitchingResultData.home_runs_hit);
-      setExistingStrikeouts(existingPitchingResultData.strikeouts);
-      setExistingBasesOnBalls(existingPitchingResultData.base_on_balls);
-      setExistingHitByPitches(existingPitchingResultData.hit_by_pitch);
-    } catch (error) {
-      console.error("Error fetching existing pitting result:", error);
-    }
-  };
 
   // 勝敗
   const handleWinOrLossChange = (value: any) => {

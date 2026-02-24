@@ -1,4 +1,5 @@
 "use client";
+import type { FollowingUser } from "@app/interface";
 import { Avatar, Checkbox, Input, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +15,7 @@ export default function GroupNew() {
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isGroupName, setIsGroupName] = useState(true);
-  const [isGroupUsers, setIsGroupUsers] = useState(true);
+  const [_isGroupUsers, setIsGroupUsers] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [group, setGroup] = useState<{ name: string; icon: string | null }>({
     name: "",
@@ -22,13 +23,6 @@ export default function GroupNew() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    fetchData();
-    if (currentUserId) {
-      fetchFollowingUser(currentUserId);
-    }
-  }, [currentUserId]);
 
   const fetchData = async () => {
     const responseCurrentUserId = await getCurrentUserId();
@@ -43,6 +37,13 @@ export default function GroupNew() {
       console.log("フォロー中のユーザーはいません", error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+    if (currentUserId) {
+      fetchFollowingUser(currentUserId);
+    }
+  }, [currentUserId]);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();

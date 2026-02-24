@@ -12,27 +12,26 @@ import { getUserData, updateUser } from "@app/services/userService";
 export default function RegisterUserName() {
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
-  const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+  const [toastTimedOut, setToastTimedOut] = useState(false);
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const { setIsLoggedIn } = useAuthContext();
 
+  const isLoginSuccess = isLoggedIn === true && !toastTimedOut;
+
   useEffect(() => {
     if (isLoggedIn === false) {
       router.push("/signin");
-    } else if (isLoggedIn === true) {
-      setSuccessToastWithTimeout();
+      return;
+    }
+    if (isLoggedIn === true) {
+      const timeout = setTimeout(() => {
+        setToastTimedOut(true);
+      }, 5000);
+      return () => clearTimeout(timeout);
     }
   }, [isLoggedIn, router]);
-
-  const setSuccessToastWithTimeout = () => {
-    setIsLoginSuccess(true);
-    const timeout = setTimeout(() => {
-      setIsLoginSuccess(false);
-    }, 5000);
-    return () => clearTimeout(timeout);
-  };
 
   const validateUserName = useCallback(
     (userName: string) =>

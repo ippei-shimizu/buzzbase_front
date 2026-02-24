@@ -40,7 +40,7 @@ export default function NotificationItem() {
   const handleRead = async (id: number) => {
     try {
       await readNotification(id);
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   return (

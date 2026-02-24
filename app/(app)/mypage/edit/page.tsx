@@ -1,4 +1,5 @@
 "use client";
+import type { AwardData, UserAwards } from "@app/interface";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -108,8 +109,8 @@ export default function ProfileEdit() {
   );
   const [deletedAwards, setDeletedAwards] = useState<number[]>([]);
   const [awards, setAwards] = useState<UserAwards[]>([]);
-  const [updatedAwards, setUpdatedAwards] = useState<UserAwards[]>([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
+  const [_updatedAwards, setUpdatedAwards] = useState<UserAwards[]>([]);
+  const [_currentUserId, setCurrentUserId] = useState(null);
 
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();

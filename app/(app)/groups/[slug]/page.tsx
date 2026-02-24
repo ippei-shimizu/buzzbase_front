@@ -150,7 +150,7 @@ export default function GroupDetail(props: GroupDetailProps) {
   const [groupData, setGroupData] = useState<GroupsDetailData | undefined>(
     undefined,
   );
-  const [acceptedUsers, setAcceptedUsers] = useState<AcceptedUsers[]>();
+  const [_acceptedUsers, setAcceptedUsers] = useState<AcceptedUsers[]>();
   const [battingAverage, setBattingAverages] = useState<BattingAverage[]>();
   const [battingStats, setBattingStats] = useState<BattingStats[]>();
   const [pitchingAggregate, setPitchingAggregate] =

@@ -1,4 +1,5 @@
 "use client";
+import type { FollowingUser as FollowingUserData } from "@app/interface";
 import { Spinner, User } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -20,14 +21,6 @@ export default function FollowingUser() {
   const { state } = useUser();
   const currentUserId = state.userId;
 
-  useEffect(() => {
-    const pathParts = pathName.split("/");
-    const userIdPart = pathParts[pathParts.length - 2];
-    if (userIdPart && userIdPart !== "undefined") {
-      fetchUserId(userIdPart);
-    }
-  }, [pathName]);
-
   const fetchUserId = async (userId: string) => {
     try {
       const response = await getUserId(userId);
@@ -38,6 +31,14 @@ export default function FollowingUser() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const pathParts = pathName.split("/");
+    const userIdPart = pathParts[pathParts.length - 2];
+    if (userIdPart && userIdPart !== "undefined") {
+      fetchUserId(userIdPart);
+    }
+  }, [pathName]);
 
   const { following, isLoadingFollowing } = useFollowingUser(userId?.id);
 
@@ -61,7 +62,7 @@ export default function FollowingUser() {
       <ErrorMessages errors={errors} />
       <div className="px-4 py-5 pb-24 grid gap-y-5 bg-main max-w-[720px] mx-auto lg:px-6 lg:pb-10 lg:m-[0_auto_0_28%] lg:border-x-1 lg:border-zinc-500 lg:border-b-1">
         {following && following.length > 0 ? (
-          following.map((follow: FollowingUser) => (
+          following.map((follow: FollowingUserData) => (
             <div
               key={follow.id}
               className="grid grid-cols-[1fr_auto] items-center "

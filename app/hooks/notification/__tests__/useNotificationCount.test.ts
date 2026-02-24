@@ -5,6 +5,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import { SWRConfig } from "swr";
+import axiosInstance from "@app/utils/axiosInstance";
 import { useNotificationCount } from "../useNotificationCount";
 
 // axiosInstance をモック
@@ -19,8 +20,6 @@ jest.mock("@app/utils/axiosInstance", () => ({
     },
   },
 }));
-
-import axiosInstance from "@app/utils/axiosInstance";
 
 // SWR のキャッシュを無効化し、リトライしないラッパー
 function wrapper({ children }: { children: React.ReactNode }) {

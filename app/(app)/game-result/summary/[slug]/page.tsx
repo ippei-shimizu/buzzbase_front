@@ -1,4 +1,10 @@
 "use client";
+import type {
+  BattingAverage,
+  MatchResult,
+  PitchingResult,
+  PlateAppearanceSummary,
+} from "@app/interface";
 import {
   Button,
   Chip,

@@ -31,7 +31,6 @@ export default function GroupEdit(props: {
   const [errors, setErrors] = useState<string[]>([]);
   const [isGroupName, setIsGroupName] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [groupCreatorId, setGroupCreatorId] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [group, setGroup] = useState<{
     name: string;
@@ -44,14 +43,6 @@ export default function GroupEdit(props: {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    if (groupId) {
-      setIsLoading(true);
-      fetchGroupDetails(groupId).finally(() => setIsLoading(false));
-    }
-    fetchData();
-  }, [currentUserId, groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
     try {
@@ -75,6 +66,14 @@ export default function GroupEdit(props: {
     const responseCurrentUserId = await getCurrentUserId();
     setCurrentUserId(responseCurrentUserId);
   };
+
+  useEffect(() => {
+    if (groupId) {
+      setIsLoading(true);
+      fetchGroupDetails(groupId).finally(() => setIsLoading(false));
+    }
+    fetchData();
+  }, [currentUserId, groupId]);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -133,7 +132,7 @@ export default function GroupEdit(props: {
       await deleteGroup(groupId);
       onClose();
       router.push("/groups");
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   const handleSubmit = async (event: any) => {

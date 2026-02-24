@@ -1,5 +1,6 @@
 "use client";
 
+import type { Notifications } from "@app/interface";
 import {
   Avatar,
   Button,
@@ -31,7 +32,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
       await acceptGroupInvitation(groupId);
       await deleteNotification(id);
       router.push(`/groups/${groupId}`);
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   const handleDeclinedGroupInvitation = async (groupId: number, id: number) => {
@@ -40,7 +41,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
       await deleteNotification(id);
       onClose();
       window.location.reload();
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   const handleOpen = () => {

@@ -1,4 +1,5 @@
 "use client";
+import type { GroupsData } from "@app/interface";
 import { Avatar, Button, Divider } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,16 +24,6 @@ export default function Group() {
     }
   }, [router, isLoggedIn]);
 
-  useEffect(() => {
-    fetchUserIdData();
-  }, []);
-
-  useEffect(() => {
-    if (currentUserId !== undefined) {
-      fetchData(currentUserId);
-    }
-  }, [currentUserId]);
-
   const fetchUserIdData = async () => {
     try {
       const responseCurrentUserId = await getCurrentUserId();
@@ -50,6 +41,16 @@ export default function Group() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    fetchUserIdData();
+  }, []);
+
+  useEffect(() => {
+    if (currentUserId !== undefined) {
+      fetchData(currentUserId);
+    }
+  }, [currentUserId]);
 
   return (
     <>

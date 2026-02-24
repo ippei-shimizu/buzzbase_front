@@ -1,6 +1,12 @@
 "use client";
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { SetStateAction, useMemo, useState } from "react";
+import ErrorMessages from "@app/components/auth/ErrorMessages";
+import HeaderNote from "@app/components/header/HeaderNote";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { createBaseballNote } from "@app/services/baseballNoteService";
 
 const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
   ssr: false,
@@ -8,19 +14,13 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
     <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
   ),
 });
-import { useRouter } from "next/navigation";
-import { SetStateAction, useEffect, useState } from "react";
-import ErrorMessages from "@app/components/auth/ErrorMessages";
-import HeaderNote from "@app/components/header/HeaderNote";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { createBaseballNote } from "@app/services/baseballNoteService";
 
 export default function NoteNew() {
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [memoDate, setMemoDate] = useState(() => {
+  const [memoDate, _setMemoDate] = useState(() => {
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, "0");
@@ -29,19 +29,14 @@ export default function NoteNew() {
   });
   const [date, setDate] = useState(memoDate);
   const router = useRouter();
-  const [initialValues, setInitialValues] = useState({
-    date: "",
-    title: "",
-    memo: "",
-  });
-
-  useEffect(() => {
-    setInitialValues({
+  const initialValues = useMemo(
+    () => ({
       date: memoDate,
       title: "",
       memo: "",
-    });
-  }, [memoDate]);
+    }),
+    [memoDate],
+  );
 
   const hasChanges =
     date !== initialValues.date ||

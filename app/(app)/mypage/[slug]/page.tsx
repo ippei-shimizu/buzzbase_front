@@ -23,31 +23,15 @@ type Position = {
   name: string;
 };
 
-type userData = {
-  user: {
-    image: any;
-    name: string;
-    user_id: string;
-    url: string;
-    introduction: string;
-    positions: Position[];
-    team_id: number;
-    id: number;
-  };
-  isFollowing: boolean;
-
-  followers_count: number;
-  following_count: number;
-};
-
 export default function MyPage() {
   const { isLoggedIn } = useAuthContext();
   const [errors, setErrors] = useState<string[]>([]);
 
   const { userData, isLoadingUsers, isErrorUser } = getUserIdData();
-  const { teamData, isLoadingTeams } = getMyTeams();
-  const { userAwards, isLoadingAwards } = getUserAwards();
-  const { currentUserId, isLoadingCurrentUserId } = useCurrentUserId();
+  const { teamData, isLoadingTeams: _isLoadingTeams } = getMyTeams();
+  const { userAwards, isLoadingAwards: _isLoadingAwards } = getUserAwards();
+  const { currentUserId, isLoadingCurrentUserId: _isLoadingCurrentUserId } =
+    useCurrentUserId();
 
   const isLoading = isLoadingUsers;
   const isError = isErrorUser;

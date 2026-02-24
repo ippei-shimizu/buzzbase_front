@@ -11,7 +11,7 @@ type NotificationCount = {
 };
 
 export default function Header() {
-  const [notificationCount, setNotificationCount] =
+  const [_notificationCount, setNotificationCount] =
     useState<NotificationCount | null>(null);
   const { isLoggedIn } = useAuthContext();
   useEffect(() => {

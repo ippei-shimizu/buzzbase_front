@@ -1,4 +1,10 @@
 "use client";
+import type {
+  BattingAverage,
+  MatchResult,
+  PitchingResult,
+  PlateAppearanceSummary,
+} from "@app/interface";
 import { Chip, Divider } from "@heroui/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -232,7 +238,7 @@ export default function ResultsSummary() {
     return `${wholePart}回${fractionalString ? `${fractionalString}` : ""}`;
   };
 
-  const handleShare = () => {};
+  const _handleShare = () => {};
   const handleResultComplete = () => {
     router.push("/game-result/lists");
   };

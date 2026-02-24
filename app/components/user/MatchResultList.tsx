@@ -31,7 +31,7 @@ type AvailableMatchType = string;
 export default function MatchResultList(props: UserId) {
   const { userId } = props;
   const [availableYears, setAvailableYears] = useState<AvailableYear[]>([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
+  const [_currentUserId, setCurrentUserId] = useState(null);
   const [selectedYear, setSelectedYear] = useState("通算");
   const [availableMatchType, setAvailableMatchType] = useState<AvailableYear[]>(
     [],
@@ -57,10 +57,6 @@ export default function MatchResultList(props: UserId) {
             getCurrentPlateAppearanceUserId(userId, gameResult.game_result_id),
           ),
         );
-        (dateString: string) => {
-          const date = new Date(dateString);
-          return date.getFullYear();
-        };
         // ユーザーごとシーズン
         const matchResultData = await getMatchResultsUserId(userId);
         const matchResultDate = matchResultData.map(
