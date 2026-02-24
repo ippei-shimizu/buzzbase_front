@@ -1,4 +1,5 @@
 "use client";
+import type { ResendConfirmationModalProps } from "@app/interface";
 import {
   Modal,
   ModalContent,

@@ -1,3 +1,4 @@
+import type { GameResultData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getGameResults = async () => {

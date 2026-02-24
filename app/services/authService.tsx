@@ -1,3 +1,4 @@
+import type { SignInData, SignUpData } from "@app/interface";
 import Cookies from "js-cookie";
 import axiosInstance from "@app/utils/axiosInstance";
 

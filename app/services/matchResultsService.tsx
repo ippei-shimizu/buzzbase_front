@@ -1,3 +1,4 @@
+import type { MatchResultsData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getMatchResults = async () => {

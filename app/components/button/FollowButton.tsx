@@ -1,5 +1,6 @@
 "use client";
 
+import type { FollowButtonProps } from "@app/interface";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { useAuthContext } from "@app/contexts/useAuthContext";

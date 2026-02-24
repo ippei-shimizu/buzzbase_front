@@ -1,5 +1,6 @@
 "use client";
 
+import type { getNoteProps } from "@app/interface";
 import { Divider } from "@heroui/react";
 import Link from "next/link";
 

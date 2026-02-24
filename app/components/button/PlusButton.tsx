@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlusButtonProps } from "@app/interface";
 import { Button } from "@heroui/react";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 

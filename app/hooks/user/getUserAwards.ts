@@ -1,3 +1,4 @@
+import type { UserAwards } from "@app/interface";
 import { usePathname } from "next/navigation";
 import useSWR from "swr";
 import { fetcher } from "@app/hooks/swrFetcher";

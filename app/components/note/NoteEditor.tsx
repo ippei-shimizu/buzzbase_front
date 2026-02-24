@@ -1,4 +1,5 @@
 "use client";
+import type { NoteEditorProps } from "@app/interface";
 import { useState } from "react";
 import { createEditor, BaseEditor, Descendant } from "slate";
 import { Slate, Editable, withReact, ReactEditor } from "slate-react";

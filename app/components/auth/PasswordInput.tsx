@@ -1,5 +1,6 @@
 "use client";
 
+import type { PasswordInputProps } from "@app/interface";
 import { Input } from "@heroui/react";
 import { EyeFilledIcon } from "@app/components/icon/EyeFilledIcon";
 import { EyeSlashFilledIcon } from "@app/components/icon/EyeSlashFilledIcon";

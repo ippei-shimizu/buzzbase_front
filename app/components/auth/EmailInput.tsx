@@ -1,5 +1,6 @@
 "use client";
 
+import type { EmailInputProps } from "@app/interface";
 import { Input } from "@heroui/react";
 import { MailIcon } from "@app/components/icon/MailIcon";
 

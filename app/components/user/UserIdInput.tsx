@@ -1,5 +1,6 @@
 "use client";
 
+import type { UserIdInputProps } from "@app/interface";
 import { Input } from "@heroui/react";
 import { AtMarkIcon } from "@app/components/icon/AtMarkIcon";
 

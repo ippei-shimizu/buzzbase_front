@@ -1,3 +1,4 @@
+import type { BattingAverageData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getBattingAverages = async () => {

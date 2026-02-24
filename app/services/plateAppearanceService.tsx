@@ -1,3 +1,4 @@
+import type { PlateAppearance } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getPlateAppearances = async () => {

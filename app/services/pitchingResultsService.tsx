@@ -1,3 +1,4 @@
+import type { PitchingResultData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getPitchingResults = async () => {

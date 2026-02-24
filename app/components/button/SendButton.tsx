@@ -1,5 +1,6 @@
 "use client";
 
+import type { SendButtonProps } from "@app/interface";
 import { Button } from "@heroui/react";
 
 export default function SubmitButton({

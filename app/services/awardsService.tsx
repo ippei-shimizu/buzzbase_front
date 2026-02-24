@@ -1,3 +1,4 @@
+import type { AwardData, UserAwards } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const createAward = async (awardData: AwardData) => {
@@ -55,7 +56,7 @@ export const updatePutAward = async (
 export const updatePatchAward = async (
   userId: number,
   awardId: number,
-  data: { title: string },
+  _data: { title: string },
 ) => {
   try {
     const response = await axiosInstance.patch(
