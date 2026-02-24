@@ -119,7 +119,8 @@ export default function GroupBattingRankingTable(props: Props) {
       label: "出塁率",
       id: "onBasePercentage",
       data: sortedOnBasePercentage,
-      renderValue: (item: BattingStats) => formatNumber(item.on_base_percentage),
+      renderValue: (item: BattingStats) =>
+        formatNumber(item.on_base_percentage),
     },
   ];
 

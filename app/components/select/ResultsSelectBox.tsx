@@ -29,10 +29,7 @@ export default function ResultsSelectBox({
         selectedKeys={selectedKeys}
       >
         {(propsYears || []).map((year) => (
-          <SelectItem
-            key={year.toString()}
-            textValue={year.toString()}
-          >
+          <SelectItem key={year.toString()} textValue={year.toString()}>
             {year.toString()}
           </SelectItem>
         ))}

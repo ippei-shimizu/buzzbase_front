@@ -15,11 +15,7 @@ export default function Custom404() {
               <h2 className="text-4xl font-bold">404</h2>
               <p>指定されたページが見つかりません</p>
               <Link href="/">
-                <Button
-                  color="primary"
-                  radius="sm"
-                  className="px-6"
-                >
+                <Button color="primary" radius="sm" className="px-6">
                   トップへ
                 </Button>
               </Link>

@@ -7,7 +7,9 @@ import { Avatar, Checkbox, Input, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 
-export default function GroupMember(props: { params: Promise<{ slug: string }> }) {
+export default function GroupMember(props: {
+  params: Promise<{ slug: string }>;
+}) {
   const params = use(props.params);
   const groupId = Number(params.slug);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);

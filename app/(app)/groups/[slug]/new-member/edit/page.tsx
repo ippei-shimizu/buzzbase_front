@@ -10,11 +10,9 @@ import { Checkbox, User } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 
-export default function GroupMemberAdd(
-  props: {
-    params: Promise<{ slug: string }>;
-  }
-) {
+export default function GroupMemberAdd(props: {
+  params: Promise<{ slug: string }>;
+}) {
   const params = use(props.params);
   const groupId = Number(params.slug);
   const [currentUserId, setCurrentUserId] = useState(null);

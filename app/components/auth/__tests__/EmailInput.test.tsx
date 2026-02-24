@@ -52,7 +52,14 @@ describe("EmailInput", () => {
   });
 
   it("labelが指定された場合に表示される", () => {
-    render(<EmailInput value="" onChange={jest.fn()} isInvalid={false} label="メールアドレス" />);
+    render(
+      <EmailInput
+        value=""
+        onChange={jest.fn()}
+        isInvalid={false}
+        label="メールアドレス"
+      />,
+    );
 
     expect(screen.getByText("メールアドレス")).toBeInTheDocument();
   });

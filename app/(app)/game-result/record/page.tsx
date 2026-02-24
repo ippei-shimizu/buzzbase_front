@@ -587,10 +587,7 @@ export default function GameRecord() {
                   onSelectionChange={handleOpponentTeamChange}
                 >
                   {teamsData.map((data) => (
-                    <AutocompleteItem
-                      key={data.id}
-                      textValue={data.name}
-                    >
+                    <AutocompleteItem key={data.id} textValue={data.name}>
                       {data.name}
                     </AutocompleteItem>
                   ))}
@@ -656,10 +653,7 @@ export default function GameRecord() {
                   }
                 >
                   {battingOrder.map((order) => (
-                    <SelectItem
-                      key={order.id}
-                      textValue={order.turn}
-                    >
+                    <SelectItem key={order.id} textValue={order.turn}>
                       {order.turn}
                     </SelectItem>
                   ))}

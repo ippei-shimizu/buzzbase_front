@@ -18,7 +18,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import { mutate } from "swr";
 
-export default function NoteDetail(props: { params: Promise<{ slulg: string }> }) {
+export default function NoteDetail(props: {
+  params: Promise<{ slulg: string }>;
+}) {
   const params = use(props.params);
   const noteId = Number(params.slulg);
   const [date, setDate] = useState("");

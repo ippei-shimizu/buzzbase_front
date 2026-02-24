@@ -50,7 +50,7 @@ export default function NavigationMenu() {
               <li key={index}>
                 <Link
                   href={item.href}
-                  className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible fontSize10 font-medium ${
+                  className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
                     isActive(pathName, item.href)
                       ? `text-yellow-500`
                       : `text-white`

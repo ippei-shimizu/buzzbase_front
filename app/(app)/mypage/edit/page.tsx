@@ -544,10 +544,7 @@ export default function ProfileEdit() {
                 >
                   {teams
                     ? teams.map((team) => (
-                        <AutocompleteItem
-                          key={team.id}
-                          textValue={team.name}
-                        >
+                        <AutocompleteItem key={team.id} textValue={team.name}>
                           {team.name}
                         </AutocompleteItem>
                       ))
@@ -594,10 +591,7 @@ export default function ProfileEdit() {
                   }
                 >
                   {prefectures.map((prefecture) => (
-                    <SelectItem
-                      key={prefecture.id}
-                      textValue={prefecture.name}
-                    >
+                    <SelectItem key={prefecture.id} textValue={prefecture.name}>
                       {prefecture.name}
                     </SelectItem>
                   ))}

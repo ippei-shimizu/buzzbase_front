@@ -21,7 +21,9 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, use } from "react";
 
-export default function GroupEdit(props: { params: Promise<{ slug: string }> }) {
+export default function GroupEdit(props: {
+  params: Promise<{ slug: string }>;
+}) {
   const params = use(props.params);
   const [isLoading, setIsLoading] = useState(true);
   const groupId = Number(params.slug);

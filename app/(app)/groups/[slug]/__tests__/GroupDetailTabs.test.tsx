@@ -143,9 +143,7 @@ function createResolvedPromise<T>(value: T): Promise<T> {
 }
 
 async function renderAndWaitForData() {
-  render(
-    <GroupDetail params={createResolvedPromise({ slug: 1 })} />,
-  );
+  render(<GroupDetail params={createResolvedPromise({ slug: 1 })} />);
   // useEffectのデータ取得完了 + タブパネル描画を待つ
   await screen.findByTestId("batting-ranking-table");
 }
