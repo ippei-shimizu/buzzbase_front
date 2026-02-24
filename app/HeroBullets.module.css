@@ -27,6 +27,9 @@
   font-size: rem(44px);
   line-height: 1.5;
   font-weight: 900;
+  @media (max-width: 768px) {
+    font-size: rem(32px);
+  }
 }
 
 .sectionTitle {
@@ -35,7 +38,7 @@
   line-height: 1.3;
   font-weight: 900;
   @media (max-width: 768px) {
-    font-size: 28px;
+    font-size: 26px;
   }
 }
 
@@ -48,10 +51,6 @@
 .image {
   width: 100%;
   height: auto;
-
-  @media (max-width: $mantine-breakpoint-md) {
-    display: none;
-  }
 }
 
 .logo {
@@ -64,7 +63,7 @@
   position: relative;
   background-color: #e08e0a52;
   border-radius: var(--mantine-radius-sm);
-  padding: rem(4px) rem(12px);
+  padding: 0 2px;
 }
 
 .description {

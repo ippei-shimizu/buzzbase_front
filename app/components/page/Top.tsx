@@ -130,7 +130,12 @@ export default function Top() {
               </p>
             </Group>
 
-            <Title order={2} className={classes.title} ta="center" mt="sm">
+            <Title
+              order={2}
+              className={classes.sectionTitle}
+              ta="center"
+              mt="sm"
+            >
               友達と成績をランキング形式で共有しよう
             </Title>
 
