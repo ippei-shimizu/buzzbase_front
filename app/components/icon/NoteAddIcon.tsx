@@ -1,11 +1,6 @@
 import React from "react";
 
-export const NoteAddIcon = ({
-  fill = "",
-  height = "",
-  width = "",
-  ...props
-}) => {
+export const NoteAddIcon = ({ fill = "", height = "", width = "" }) => {
   return (
     <svg
       width={width}

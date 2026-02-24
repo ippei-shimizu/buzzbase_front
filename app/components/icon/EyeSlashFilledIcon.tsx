@@ -4,7 +4,7 @@ export const EyeSlashFilledIcon = ({
   focusable = false,
   height = "",
   role = "presentation",
-  viewBox = "0 0 24 24",
+  _viewBox = "0 0 24 24",
   width = "",
   ...props
 }) => {

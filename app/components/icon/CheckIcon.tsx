@@ -1,5 +1,5 @@
 export const CheckIcon = ({
-  size = "22",
+  _size = "22",
   height = "22",
   width = "22",
   fill = "",

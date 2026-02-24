@@ -5,7 +5,6 @@ export const DeleteIcon = ({
   height = "",
   width = "",
   stroke = "",
-  ...props
 }) => {
   return (
     <svg
