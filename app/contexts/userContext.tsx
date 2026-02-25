@@ -9,7 +9,6 @@ const defaultContextValue: UserContextType = {
     userId: { id: null, team_id: null, user_id: "" },
     usersUserId: { user_id: "" },
   },
-  dispatch: () => {},
 };
 
 export const UserContext = createContext(defaultContextValue);
@@ -31,9 +30,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ state, dispatch: () => {} }}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={{ state }}>{children}</UserContext.Provider>
   );
 };
 

@@ -374,7 +374,6 @@ export interface UserContextType {
     };
     usersUserId: { user_id: string | null };
   };
-  dispatch: () => void;
 }
 
 export interface userData {
