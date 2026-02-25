@@ -36,11 +36,7 @@ import {
   getTeams,
   updateTeam,
 } from "@app/services/teamsService";
-import {
-  getCurrentUserId,
-  getUserData,
-  updateProfile,
-} from "@app/services/userService";
+import { getUserData, updateProfile } from "@app/services/userService";
 
 type Position = {
   userId: string;
@@ -110,8 +106,6 @@ export default function ProfileEdit() {
   );
   const [deletedAwards, setDeletedAwards] = useState<number[]>([]);
   const [awards, setAwards] = useState<UserAwards[]>([]);
-  const [_updatedAwards, setUpdatedAwards] = useState<UserAwards[]>([]);
-  const [_currentUserId, setCurrentUserId] = useState(null);
 
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
@@ -129,10 +123,6 @@ export default function ProfileEdit() {
   // ユーザーデータ取得
   const fetchData = async () => {
     try {
-      if (isLoggedIn == true) {
-        const currentUserIdData = await getCurrentUserId();
-        setCurrentUserId(currentUserIdData);
-      }
       const data = await getUserData();
       setProfile({
         name: data.name,
@@ -200,7 +190,6 @@ export default function ProfileEdit() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
   // disabled制御
@@ -358,7 +347,8 @@ export default function ProfileEdit() {
 
   const isInvalid = useMemo(() => {
     return profile.name === "" || !validateUserName(profile.name);
-  }, [profile.name, validateUserName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.name]);
 
   // カテゴリーをフィルタリング
   const handleBaseballCategoryChange = (value: string) => {
@@ -423,10 +413,6 @@ export default function ProfileEdit() {
       return award;
     });
     setAwards(newAwards);
-    if (awards[index].id) {
-      const updatedAward = { id: awards[index].id, title: value };
-      setUpdatedAwards((prevAwards) => [...prevAwards, updatedAward]);
-    }
   };
 
   const addAward = () => {

@@ -180,7 +180,6 @@ export default function GroupDetail(props: GroupDetailProps) {
   const [groupData, setGroupData] = useState<GroupsDetailData | undefined>(
     undefined,
   );
-  const [_acceptedUsers, setAcceptedUsers] = useState<AcceptedUsers[]>();
   const [battingAverage, setBattingAverages] = useState<BattingAverage[]>();
   const [battingStats, setBattingStats] = useState<BattingStats[]>();
   const [pitchingAggregate, setPitchingAggregate] =
@@ -204,7 +203,6 @@ export default function GroupDetail(props: GroupDetailProps) {
     try {
       const responseGroupDetail = await getGroupDetail(params.slug);
       setGroupData(responseGroupDetail);
-      setAcceptedUsers(responseGroupDetail.accepted_users);
 
       if (responseGroupDetail) {
         const battingStatsWithUsersData = responseGroupDetail.batting_stats.map(

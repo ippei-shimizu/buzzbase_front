@@ -155,9 +155,6 @@ export default function BattingRecord() {
   const [caughtStealing, setCaughtStealing] = useState(0);
   const [existingCaughtStealing, setExistingCaughtStealing] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
-  const [_isLocalStorageId, setIsLocalStorageId] = useState(true);
-  const [_selectedPositions, setSelectedPositions] = useState<number[]>([]);
-  const [_selectedResults, setSelectedResults] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletedPlateAppearanceIds, setDeletedPlateAppearanceIds] = useState<
     number[]
@@ -384,7 +381,6 @@ export default function BattingRecord() {
     (index: number) => (keys: SharedSelection) => {
       if (keys === "all") return;
       const newPosition = Number(keys.values().next().value);
-      setSelectedPositions([newPosition]);
       updateBattingBox(index, newPosition, battingBoxes[index].result);
     };
 
@@ -393,7 +389,6 @@ export default function BattingRecord() {
     (index: number) => (keys: SharedSelection) => {
       if (keys === "all") return;
       const newResult = Number(keys.values().next().value);
-      setSelectedResults([newResult]);
       updateBattingBox(index, battingBoxes[index].position, newResult);
     };
 
@@ -435,11 +430,8 @@ export default function BattingRecord() {
     const newErrors = [];
 
     if (!localStorageGameResultId) {
-      setIsLocalStorageId(false);
       isValid = false;
       newErrors.push("エラーが発生しました。");
-    } else {
-      setIsLocalStorageId(true);
     }
 
     if (!isValid) {

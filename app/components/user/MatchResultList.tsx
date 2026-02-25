@@ -14,7 +14,6 @@ import {
   getCurrentPlateAppearance,
   getCurrentPlateAppearanceUserId,
 } from "@app/services/plateAppearanceService";
-import { getCurrentUserId } from "@app/services/userService";
 
 type GameResult = {
   game_result_id: number;
@@ -52,7 +51,6 @@ type AvailableMatchType = string;
 export default function MatchResultList(props: UserId) {
   const { userId } = props;
   const [availableYears, setAvailableYears] = useState<AvailableYear[]>([]);
-  const [_currentUserId, setCurrentUserId] = useState(null);
   const [selectedYear, setSelectedYear] = useState("通算");
   const [availableMatchType, setAvailableMatchType] = useState<AvailableYear[]>(
     [],
@@ -161,7 +159,6 @@ export default function MatchResultList(props: UserId) {
           getCurrentPlateAppearance(gameResult.game_result_id),
         ),
       );
-      const currentUserIdData = await getCurrentUserId();
       const matchResultData = await getMatchResults();
       const matchResultDate = matchResultData.map(
         (result: { date_and_time: string }) => result.date_and_time,
@@ -203,7 +200,6 @@ export default function MatchResultList(props: UserId) {
       setAvailableMatchType(uniqueMatchTypeChange);
       setGameResultIndex(gameResultsDataLists);
       setPlateAppearance(plateAppearanceDataLists);
-      setCurrentUserId(currentUserIdData);
     } catch (error) {
       console.log(`game lists fetch error:`, error);
     }
