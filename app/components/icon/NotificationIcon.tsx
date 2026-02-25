@@ -1,4 +1,5 @@
 import React from "react";
+
 export const NotificationIcon = ({
   size = 24,
   height = "",

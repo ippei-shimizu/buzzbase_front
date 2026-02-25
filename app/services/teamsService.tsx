@@ -1,3 +1,4 @@
+import type { teamData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getTeamName = async (id: number) => {

@@ -1,3 +1,4 @@
+import type { PitchingResultData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getPitchingResults = async () => {
@@ -45,7 +46,7 @@ export const checkExistingPitchingResult = async (
       `/api/v1/pitching_search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log(error);
     return null;
   }

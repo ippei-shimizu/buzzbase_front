@@ -1,6 +1,6 @@
 "use client";
+import { Button } from "@heroui/react";
 import React, { useState } from "react";
-import { Button } from "@nextui-org/react";
 import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 

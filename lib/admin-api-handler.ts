@@ -26,7 +26,7 @@ export interface ApiHandlerOptions {
 
 type ApiHandler = (
   request: NextRequest,
-  context?: any,
+  context?: { params: Promise<Record<string, string>> },
 ) => Promise<NextResponse>;
 
 /**
@@ -38,7 +38,10 @@ export function withAdminErrorHandler(
 ): ApiHandler {
   const { requireAuth = true, logErrors = true } = options;
 
-  return async (request: NextRequest, context?: any): Promise<NextResponse> => {
+  return async (
+    request: NextRequest,
+    context?: { params: Promise<Record<string, string>> },
+  ): Promise<NextResponse> => {
     try {
       // 認証チェック
       if (requireAuth) {
@@ -105,10 +108,10 @@ function handleApiError(error: unknown, logErrors: boolean): NextResponse {
 /**
  * 外部API呼び出し用のエラーハンドリング
  */
-export async function handleExternalApiCall(
+export async function handleExternalApiCall<T = unknown>(
   apiCall: () => Promise<Response>,
   errorMessage: string = "外部APIの呼び出しに失敗しました",
-): Promise<any> {
+): Promise<T> {
   try {
     const response = await apiCall();
 
@@ -135,7 +138,7 @@ export async function handleExternalApiCall(
  */
 export async function validateRequestBody<T>(
   request: NextRequest,
-  validator: (data: any) => T | Promise<T>,
+  validator: (data: unknown) => T | Promise<T>,
 ): Promise<T> {
   try {
     const body = await request.json();

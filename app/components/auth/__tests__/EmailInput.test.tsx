@@ -4,7 +4,7 @@ import EmailInput from "../EmailInput";
 
 describe("EmailInput", () => {
   it("入力フィールドが正しくレンダリングされる", () => {
-    render(<EmailInput value="" onChange={jest.fn()} />);
+    render(<EmailInput value="" onChange={jest.fn()} isInvalid={false} />);
 
     const input = screen.getByRole("textbox");
     expect(input).toBeInTheDocument();
@@ -14,7 +14,7 @@ describe("EmailInput", () => {
     const user = userEvent.setup();
     const mockOnChange = jest.fn();
 
-    render(<EmailInput value="" onChange={mockOnChange} />);
+    render(<EmailInput value="" onChange={mockOnChange} isInvalid={false} />);
 
     const input = screen.getByRole("textbox");
     await user.type(input, "test@example.com");
@@ -52,7 +52,14 @@ describe("EmailInput", () => {
   });
 
   it("labelが指定された場合に表示される", () => {
-    render(<EmailInput value="" onChange={jest.fn()} label="メールアドレス" />);
+    render(
+      <EmailInput
+        value=""
+        onChange={jest.fn()}
+        isInvalid={false}
+        label="メールアドレス"
+      />,
+    );
 
     expect(screen.getByText("メールアドレス")).toBeInTheDocument();
   });
@@ -62,6 +69,7 @@ describe("EmailInput", () => {
       <EmailInput
         value=""
         onChange={jest.fn()}
+        isInvalid={false}
         placeholder="example@email.com"
       />,
     );

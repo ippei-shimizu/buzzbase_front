@@ -1,3 +1,4 @@
+import type { createNoteProps } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const createBaseballNote = async (data: createNoteProps) => {

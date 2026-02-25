@@ -1,71 +1,16 @@
+"use client";
+
+import { Skeleton } from "@heroui/react";
+import Link from "next/link";
 import BattingAverageTable from "@app/components/table/BattingAverageTable";
 import PitchingRecordTable from "@app/components/table/PitchingRecordTable";
 import { usePersonalBattingAverage } from "@app/hooks/batting/getPersonalBattingAverage";
 import { usePersonalBattingStatus } from "@app/hooks/batting/getPersonalBattingStatus";
 import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchingResult";
 import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
-import { Skeleton } from "@nextui-org/react";
-import Link from "next/link";
 
 type UserId = {
   userId: number;
-};
-
-type PersonalBattingAverages = {
-  number_of_matches: number;
-  base_on_balls: number;
-  caught_stealing: number;
-  error: number;
-  hit: number;
-  hit_by_pitch: number;
-  home_run: number;
-  id: number;
-  run: number;
-  runs_batted_in: number;
-  sacrifice_hit: number;
-  stealing_base: number;
-  strike_out: number;
-  three_base_hit: number;
-  times_at_bat: number;
-  total_bases: number;
-  two_base_hit: number;
-  at_bats: number;
-};
-
-type PersonalBattingStatus = {
-  batting_average: number;
-  bb_per_k: number;
-  iso: number;
-  isod: number;
-  on_base_percentage: number;
-  ops: number;
-};
-
-type PersonalPitchingResults = {
-  number_of_appearances: number;
-  win: number;
-  loss: number;
-  hold: number;
-  saves: number;
-  innings_pitched: number;
-  hits_allowed: number;
-  home_runs_hit: number;
-  strikeouts: number;
-  base_on_balls: number;
-  hit_by_pitch: number;
-  run_allowed: number;
-  earned_run: number;
-};
-
-type PersonalPitchingStatus = {
-  bb_per_nine: number;
-  complete_games: number;
-  era: number;
-  k_bb: number;
-  k_per_nine: number;
-  shutouts: number;
-  whip: number;
-  win_percentage: number;
 };
 
 export default function IndividualResultsList(props: UserId) {

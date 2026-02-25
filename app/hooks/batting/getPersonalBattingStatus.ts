@@ -1,6 +1,6 @@
 "use client";
-import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
 
 export function usePersonalBattingStatus(userId: number) {
   const { data, error } = useSWR(

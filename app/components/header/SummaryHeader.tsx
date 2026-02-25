@@ -1,5 +1,7 @@
+"use client";
+
+import { Button } from "@heroui/react";
 import { BackIcon } from "@app/components/icon/BackIcon";
-import { Button } from "@nextui-org/react";
 
 interface HeaderSummaryResultProps {
   onSummaryResult: () => void;

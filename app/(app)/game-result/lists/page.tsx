@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -11,17 +14,14 @@ import {
 } from "@app/services/gameResultsService";
 import { getCurrentPlateAppearance } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Button } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 type GameResult = {
   game_result_id: number;
 };
 
 export default function GameResultList() {
-  const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
-  const [plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
+  const [_gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
+  const [_plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
   const [currentUserId, setCurrentUserId] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -52,6 +52,7 @@ export default function GameResultList() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, []);
 

@@ -2,7 +2,7 @@ export const XIcon = ({
   width = "16",
   height = "16",
   fill = "none",
-  stroke = "",
+  _stroke = "",
 }) => {
   return (
     <svg

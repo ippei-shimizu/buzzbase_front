@@ -1,5 +1,5 @@
-import { SearchIcon } from "@app/components/icon/SearchIcon";
 import Link from "next/link";
+import { SearchIcon } from "@app/components/icon/SearchIcon";
 
 export default function UserSearch() {
   return (

@@ -1,13 +1,4 @@
 "use client";
-import ErrorMessages from "@app/components/auth/ErrorMessages";
-import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import {
-  deleteGroup,
-  getGroupDetailUsers,
-  updateGroupInfo,
-} from "@app/services/groupService";
-import { getCurrentUserId } from "@app/services/userService";
 import {
   Avatar,
   Button,
@@ -17,18 +8,29 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, use } from "react";
+import ErrorMessages from "@app/components/auth/ErrorMessages";
+import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import {
+  deleteGroup,
+  getGroupDetailUsers,
+  updateGroupInfo,
+} from "@app/services/groupService";
+import { getCurrentUserId } from "@app/services/userService";
 
-export default function GroupEdit({ params }: { params: { slug: string } }) {
+export default function GroupEdit(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = use(props.params);
   const [isLoading, setIsLoading] = useState(true);
   const groupId = Number(params.slug);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [isGroupName, setIsGroupName] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [groupCreatorId, setGroupCreatorId] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [group, setGroup] = useState<{
     name: string;
@@ -41,15 +43,6 @@ export default function GroupEdit({ params }: { params: { slug: string } }) {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    if (groupId) {
-      setIsLoading(true);
-      fetchGroupDetails(groupId).finally(() => setIsLoading(false));
-    }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUserId, groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
     try {
@@ -74,13 +67,22 @@ export default function GroupEdit({ params }: { params: { slug: string } }) {
     setCurrentUserId(responseCurrentUserId);
   };
 
+  useEffect(() => {
+    if (groupId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsLoading(true);
+      fetchGroupDetails(groupId).finally(() => setIsLoading(false));
+    }
+    fetchData();
+  }, [currentUserId, groupId]);
+
   const handleImageClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleChange = (event: any) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.name === "image") {
-      const file = event.target.files[0];
+      const file = event.target.files?.[0];
       if (file) {
         const previewFileUrl = URL.createObjectURL(file);
         setGroup((prevState) => ({
@@ -105,7 +107,7 @@ export default function GroupEdit({ params }: { params: { slug: string } }) {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!group.name) {
       setIsGroupName(false);
@@ -131,10 +133,10 @@ export default function GroupEdit({ params }: { params: { slug: string } }) {
       await deleteGroup(groupId);
       onClose();
       router.push("/groups");
-    } catch (error) {}
+    } catch (_error) {}
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -158,7 +160,9 @@ export default function GroupEdit({ params }: { params: { slug: string } }) {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"更新"}
         />

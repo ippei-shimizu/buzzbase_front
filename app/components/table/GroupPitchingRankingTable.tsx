@@ -1,14 +1,7 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  User,
-} from "@nextui-org/react";
-import Link from "next/link";
+"use client";
+
 import { useMemo } from "react";
+import RankingSection from "./RankingSection";
 
 type PitchingAggregate = {
   win: number;
@@ -87,230 +80,79 @@ export default function GroupPitchingRankingTable(props: Props) {
     [pitchingStats],
   );
 
+  const pitchingStatsSections: {
+    label: string;
+    id: string;
+    data: PitchingStats[];
+    renderValue: (item: PitchingStats) => React.ReactNode;
+  }[] = [
+    {
+      label: "防御率",
+      id: "era",
+      data: sortedPitchingEra,
+      renderValue: (item: PitchingStats) => formatNumber(item.era),
+    },
+    {
+      label: "勝率",
+      id: "winPercentage",
+      data: sortedWinPercentage,
+      renderValue: (item: PitchingStats) => formatNumber(item.win_percentage),
+    },
+  ];
+
+  const pitchingAggregateSections: {
+    label: string;
+    id: string;
+    data: PitchingAggregate[];
+    renderValue: (item: PitchingAggregate) => React.ReactNode;
+  }[] = [
+    {
+      label: "勝利",
+      id: "win",
+      data: sortedWin,
+      renderValue: (item: PitchingAggregate) => item.win,
+    },
+    {
+      label: "セーブ",
+      id: "saves",
+      data: sortedSaves,
+      renderValue: (item: PitchingAggregate) => item.saves,
+    },
+    {
+      label: "HP",
+      id: "hp",
+      data: sortedHp,
+      renderValue: (item: PitchingAggregate) => item.hold,
+    },
+    {
+      label: "奪三振",
+      id: "strikeouts",
+      data: sortedStrikeouts,
+      renderValue: (item: PitchingAggregate) => item.strikeouts,
+    },
+  ];
+
   return (
     <>
-      {/* 防御率 */}
-      <Table aria-label="防御率" id="era">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            防御率
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedPitchingEra?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {formatNumber(stats.era)}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 勝利 */}
-      <Table className="mt-8" aria-label="勝利" id="win">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            勝利
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedWin?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.win}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* セーブ */}
-      <Table className="mt-8" aria-label="セーブ" id="saves">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            セーブ
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedSaves?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.saves}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* HP */}
-      <Table className="mt-8" aria-label="HP" id="hp">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            HP
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedHp?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.hold}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 奪三振 */}
-      <Table className="mt-8" aria-label="奪三振" id="strikeouts">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            奪三振
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedStrikeouts?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {stats.strikeouts}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* 勝率 */}
-      <Table className="mt-8" aria-label="勝率" id="winPercentage">
-        <TableHeader>
-          <TableColumn className="text-base text-white font-bold text-center">
-            勝率
-          </TableColumn>
-        </TableHeader>
-        <TableBody>
-          {sortedWinPercentage?.map((stats, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="grid grid-cols-[1fr_auto] items-center ">
-                  <Link href={`/mypage/${stats.user_id}`} className="block">
-                    <div className="grid grid-cols-[24px_1fr_auto] items-center">
-                      <span className="text-base block mr-4">{index + 1}</span>
-                      <User
-                        name={stats.name}
-                        description={stats.user_id}
-                        avatarProps={{
-                          src:
-                            process.env.NODE_ENV === "production"
-                              ? stats.image_url
-                              : `${process.env.NEXT_PUBLIC_API_URL}${stats.image_url}`,
-                        }}
-                        className="justify-start"
-                      />
-                      <span className="text-base block font-bold">
-                        {formatNumber(stats.win_percentage)}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {pitchingStatsSections.map((section, index) => (
+        <RankingSection
+          key={section.id}
+          label={section.label}
+          id={section.id}
+          data={section.data}
+          renderValue={section.renderValue}
+          isFirst={index === 0}
+        />
+      ))}
+      {pitchingAggregateSections.map((section) => (
+        <RankingSection
+          key={section.id}
+          label={section.label}
+          id={section.id}
+          data={section.data}
+          renderValue={section.renderValue}
+        />
+      ))}
     </>
   );
 }

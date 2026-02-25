@@ -1,7 +1,9 @@
-import { Badge } from "@nextui-org/react";
+"use client";
+
+import { Badge } from "@heroui/react";
+import Link from "next/link";
 import { NotificationIcon } from "@app/components/icon/NotificationIcon";
 import { useNotificationCount } from "@app/hooks/notification/useNotificationCount";
-import Link from "next/link";
 
 export default function NotificationBadge() {
   const { notificationCount, isLoading, isError } = useNotificationCount();

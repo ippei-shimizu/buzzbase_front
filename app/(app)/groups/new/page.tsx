@@ -1,12 +1,13 @@
 "use client";
+import type { FollowingUser } from "@app/interface";
+import { Avatar, Checkbox, Input, User } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { Avatar, Checkbox, Input, User } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 
 export default function GroupNew() {
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -14,7 +15,7 @@ export default function GroupNew() {
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [isGroupName, setIsGroupName] = useState(true);
-  const [isGroupUsers, setIsGroupUsers] = useState(true);
+  const [_isGroupUsers, setIsGroupUsers] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [group, setGroup] = useState<{ name: string; icon: string | null }>({
     name: "",
@@ -22,13 +23,6 @@ export default function GroupNew() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    fetchData();
-    if (currentUserId) {
-      fetchFollowingUser(currentUserId);
-    }
-  }, [currentUserId]);
 
   const fetchData = async () => {
     const responseCurrentUserId = await getCurrentUserId();
@@ -44,13 +38,21 @@ export default function GroupNew() {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+    if (currentUserId) {
+      fetchFollowingUser(currentUserId);
+    }
+  }, [currentUserId]);
+
   const handleImageClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleChange = (event: any) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.name === "image") {
-      const file = event.target.files[0];
+      const file = event.target.files?.[0];
       if (file) {
         const previewFileUrl = URL.createObjectURL(file);
         setGroup((prevState) => ({
@@ -85,7 +87,7 @@ export default function GroupNew() {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!group.name) {
       setIsGroupName(false);
@@ -110,7 +112,7 @@ export default function GroupNew() {
     return isValid;
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -138,7 +140,9 @@ export default function GroupNew() {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"作成"}
         />

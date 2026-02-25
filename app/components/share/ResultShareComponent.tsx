@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import {
   Button,
   Modal,
@@ -7,10 +8,10 @@ import {
   useDisclosure,
   Snippet,
   ModalHeader,
-} from "@nextui-org/react";
-import Link from "next/link";
-import { XIcon } from "@app/components/icon/XIcon";
+} from "@heroui/react";
 import Image from "next/image";
+import React from "react";
+import { XIcon } from "@app/components/icon/XIcon";
 
 type MatchResult = {
   my_team_score: number;
@@ -85,7 +86,7 @@ export default function ResultShareComponent({
             </Snippet>
             <div className="flex justify-center gap-x-6 mt-2">
               <Button
-                as={Link}
+                as="a"
                 href={twitterShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -95,7 +96,7 @@ export default function ResultShareComponent({
                 endContent={<XIcon fill="#F4F4F4" width="24" height="24" />}
               ></Button>
               <Button
-                as={Link}
+                as="a"
                 href={lineShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"

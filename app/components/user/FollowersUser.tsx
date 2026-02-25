@@ -1,13 +1,14 @@
 "use client";
+import type { FollowingUser } from "@app/interface";
+import { Spinner, User } from "@heroui/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import { useUser } from "@app/contexts/userContext";
 import useFollowersUser from "@app/hooks/user/useFollowersUser";
 import { getUserId } from "@app/services/userService";
-import { Spinner, User } from "@nextui-org/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 type UserId = {
   id: number;
@@ -20,14 +21,6 @@ export default function FollowersUser() {
   const { state } = useUser();
   const currentUserId = state.userId;
 
-  useEffect(() => {
-    const pathParts = pathName.split("/");
-    const userIdPart = pathParts[pathParts.length - 2];
-    if (userIdPart && userIdPart !== "undefined") {
-      fetchUserId(userIdPart);
-    }
-  }, [pathName]);
-
   const fetchUserId = async (userId: string) => {
     try {
       const response = await getUserId(userId);
@@ -38,6 +31,15 @@ export default function FollowersUser() {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const pathParts = pathName.split("/");
+    const userIdPart = pathParts[pathParts.length - 2];
+    if (userIdPart && userIdPart !== "undefined") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchUserId(userIdPart);
+    }
+  }, [pathName]);
 
   const { followers, isLoadingFollowers } = useFollowersUser(userId?.id);
 

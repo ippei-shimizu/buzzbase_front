@@ -1,19 +1,26 @@
 "use client";
-import NoteEditor from "@app/components/note/NoteEditor";
-import { Input } from "@nextui-org/react";
-import HeaderNote from "@app/components/header/HeaderNote";
-import { SetStateAction, useEffect, useState } from "react";
-import { createBaseballNote } from "@app/services/baseballNoteService";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { Input } from "@heroui/react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { SetStateAction, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
+import HeaderNote from "@app/components/header/HeaderNote";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { createBaseballNote } from "@app/services/baseballNoteService";
+
+const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
+  ),
+});
 
 export default function NoteNew() {
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [memoDate, setMemoDate] = useState(() => {
+  const [memoDate, _setMemoDate] = useState(() => {
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, "0");
@@ -22,19 +29,14 @@ export default function NoteNew() {
   });
   const [date, setDate] = useState(memoDate);
   const router = useRouter();
-  const [initialValues, setInitialValues] = useState({
-    date: "",
-    title: "",
-    memo: "",
-  });
-
-  useEffect(() => {
-    setInitialValues({
+  const initialValues = useMemo(
+    () => ({
       date: memoDate,
       title: "",
       memo: "",
-    });
-  }, [memoDate]);
+    }),
+    [memoDate],
+  );
 
   const hasChanges =
     date !== initialValues.date ||
@@ -51,7 +53,7 @@ export default function NoteNew() {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!date && !memoDate) {
       isValid = false;
@@ -76,7 +78,7 @@ export default function NoteNew() {
     setDate(e.target.value);
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -97,7 +99,9 @@ export default function NoteNew() {
     <>
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
         <HeaderNote
-          onNoteSave={() => handleSubmit({ preventDefault: () => {} })}
+          onNoteSave={() =>
+            handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+          }
           isSubmitting={isSubmitting}
           hasChanges={hasChanges}
         />

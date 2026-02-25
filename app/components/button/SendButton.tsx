@@ -1,4 +1,7 @@
-import { Button } from "@nextui-org/react";
+"use client";
+
+import type { SendButtonProps } from "@app/interface";
+import { Button } from "@heroui/react";
 
 export default function SubmitButton({
   className,

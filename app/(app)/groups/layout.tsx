@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+
 export const metadata: Metadata = {
   title: "グループ一覧",
   description:

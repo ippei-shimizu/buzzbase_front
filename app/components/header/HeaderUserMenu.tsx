@@ -1,9 +1,9 @@
+import { Skeleton } from "@heroui/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserImage } from "@app/components/user/UserImage";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
-import { Skeleton } from "@nextui-org/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 export default function HeaderUserMenu() {
   const { isLoggedIn } = useAuthContext();
@@ -37,7 +37,7 @@ export default function HeaderUserMenu() {
     <>
       <Link
         href={myPageLink}
-        className={`flex items-center flex-col gap-y-1 min-w-[50px] font-medium px-0 bg-transparent isIconOnly overflow-visible fontSize10 ${
+        className={`flex items-center flex-col gap-y-1 min-w-[50px] font-medium px-0 bg-transparent isIconOnly overflow-visible text-[10px] ${
           pathName.includes("/mypage") ? `text-yellow-500` : `text-white`
         } lg:flex-row lg:text-base lg:w-fit lg:font-bold lg:gap-x-5`}
       >

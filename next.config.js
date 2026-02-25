@@ -9,6 +9,8 @@ const nextConfig = {
         pathname: `${process.env.NEXT_PUBLIC_IMAGE_PATHNAME}`,
       },
     ],
+    qualities: [75],
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
   },
   async headers() {
     return [

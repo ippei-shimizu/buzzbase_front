@@ -1,4 +1,7 @@
 "use client";
+import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import SubmitButton from "@app/components/button/SendButton";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
@@ -6,33 +9,30 @@ import UserIdInput from "@app/components/user/UserIdInput";
 import UserNameInput from "@app/components/user/UserNameInput";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getUserData, updateUser } from "@app/services/userService";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function RegisterUserName() {
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
-  const [isLoginSuccess, setIsLoginSuccess] = useState(false);
+  const [toastTimedOut, setToastTimedOut] = useState(false);
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const { setIsLoggedIn } = useAuthContext();
 
+  const isLoginSuccess = isLoggedIn === true && !toastTimedOut;
+
   useEffect(() => {
     if (isLoggedIn === false) {
       router.push("/signin");
-    } else if (isLoggedIn === true) {
-      setSuccessToastWithTimeout();
+      return;
+    }
+    if (isLoggedIn === true) {
+      const timeout = setTimeout(() => {
+        setToastTimedOut(true);
+      }, 5000);
+      return () => clearTimeout(timeout);
     }
   }, [isLoggedIn, router]);
-
-  const setSuccessToastWithTimeout = () => {
-    setIsLoginSuccess(true);
-    const timeout = setTimeout(() => {
-      setIsLoginSuccess(false);
-    }, 5000);
-    return () => clearTimeout(timeout);
-  };
 
   const validateUserName = useCallback(
     (userName: string) =>
@@ -84,8 +84,8 @@ export default function RegisterUserName() {
         setIsLoggedIn(true);
         router.push(`/mypage/${userData.user_id}`);
       }
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         setErrorsWithTimeout(error.response.data.errors);
       } else {
         setErrorsWithTimeout(["ユーザー名とユーザーIDを入力してください"]);

@@ -1,5 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { userFollow, userUnFollow } from "@app/services/userService";
 import FollowButton from "../FollowButton";
 
 // Mock dependencies
@@ -11,9 +13,6 @@ jest.mock("@app/services/userService", () => ({
   userFollow: jest.fn(),
   userUnFollow: jest.fn(),
 }));
-
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import { userFollow, userUnFollow } from "@app/services/userService";
 
 describe("FollowButton", () => {
   const mockSetErrorsWithTimeout = jest.fn();

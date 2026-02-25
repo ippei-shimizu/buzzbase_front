@@ -1,9 +1,6 @@
-import { GroupIcon } from "@app/components/icon/GroupIcon";
-import {
-  acceptGroupInvitation,
-  declinedGroupInvitation,
-} from "@app/services/groupInvitationsService";
-import { deleteNotification } from "@app/services/notificationsService";
+"use client";
+
+import type { Notifications } from "@app/interface";
 import {
   Avatar,
   Button,
@@ -12,9 +9,15 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { GroupIcon } from "@app/components/icon/GroupIcon";
+import {
+  acceptGroupInvitation,
+  declinedGroupInvitation,
+} from "@app/services/groupInvitationsService";
+import { deleteNotification } from "@app/services/notificationsService";
 
 interface NotificationGroupProps {
   notice: Notifications;
@@ -29,7 +32,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
       await acceptGroupInvitation(groupId);
       await deleteNotification(id);
       router.push(`/groups/${groupId}`);
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   const handleDeclinedGroupInvitation = async (groupId: number, id: number) => {
@@ -38,7 +41,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
       await deleteNotification(id);
       onClose();
       window.location.reload();
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   const handleOpen = () => {

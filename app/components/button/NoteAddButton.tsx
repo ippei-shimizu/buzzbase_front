@@ -1,7 +1,7 @@
 "use client";
-import { NoteAddIcon } from "@app/components/icon/NoteAddIcon";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { NoteAddIcon } from "@app/components/icon/NoteAddIcon";
 
 export default function NoteAddButton() {
   const router = useRouter();

@@ -7,7 +7,7 @@ type UserImageProps = {
   height: number;
   alt: string;
   active: boolean;
-  className: any;
+  className: string;
 };
 
 export const UserImage = ({

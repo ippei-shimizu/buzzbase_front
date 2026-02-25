@@ -1,16 +1,17 @@
 "use client";
 
+import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PasswordConfirmInput from "@app/components/auth/PasswordConfirmInput";
 import PasswordInput from "@app/components/auth/PasswordInput";
 import SubmitButton from "@app/components/button/SendButton";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { signUp } from "@app/services/authService";
-import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo, useState } from "react";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -52,8 +53,8 @@ export default function SignUp() {
         confirm_success_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
       });
       router.push("/registration-confirmation");
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorData = error.response.data.errors;
         const isEmailTakenError =
           error.response.status === 422 &&

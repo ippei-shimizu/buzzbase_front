@@ -1,6 +1,7 @@
-import AllUserGameResultItem from "@app/components/game/AllUserGameResultItem";
+"use client";
+
+import { Card, CardBody, CardHeader, Divider } from "@heroui/react";
 import Header from "@app/components/header/Header";
-import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 
 export default function CalculationOfGrades() {
   const calculationBatting = [

@@ -3,7 +3,6 @@ export const CrownIcon = ({
   width = "",
   fill = "",
   className = "",
-  ...props
 }) => {
   return (
     <svg

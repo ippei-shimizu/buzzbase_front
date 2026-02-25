@@ -1,7 +1,7 @@
 "use client";
+import useSWR from "swr";
 import { useUser } from "@app/contexts/userContext";
 import { fetcher } from "@app/hooks/swrFetcher";
-import useSWR from "swr";
 
 export function useNotifications() {
   const { state } = useUser();

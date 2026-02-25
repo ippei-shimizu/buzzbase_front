@@ -1,7 +1,10 @@
+"use client";
+
+import type { FollowButtonProps } from "@app/interface";
+import { Button } from "@heroui/react";
+import { useState } from "react";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { userFollow, userUnFollow } from "@app/services/userService";
-import { Button } from "@nextui-org/react";
-import { useState } from "react";
 
 export default function FollowButton({
   userId,

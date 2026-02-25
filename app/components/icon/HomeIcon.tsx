@@ -1,7 +1,7 @@
 export const HomeIcon = ({
   fill = "none",
-  filled = "",
-  size = "22",
+  _filled = "",
+  _size = "22",
   height = "22",
   width = "22",
   label = "",

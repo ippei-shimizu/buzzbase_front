@@ -1,10 +1,11 @@
 "use client";
-import NotificationGroup from "@app/components/notification/NotificationGroup";
-import { useNotifications } from "@app/hooks/notification/getNotifications";
-import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import { readNotification } from "@app/services/notificationsService";
-import { Avatar, Divider, Spinner } from "@nextui-org/react";
+import type { Notifications } from "@app/interface";
+import { Avatar, Divider, Spinner } from "@heroui/react";
 import Link from "next/link";
+import NotificationGroup from "@app/components/notification/NotificationGroup";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { useNotifications } from "@app/hooks/notification/getNotifications";
+import { readNotification } from "@app/services/notificationsService";
 
 export default function NotificationItem() {
   const { notifications, isError, isLoading } = useNotifications();
@@ -40,14 +41,14 @@ export default function NotificationItem() {
   const handleRead = async (id: number) => {
     try {
       await readNotification(id);
-    } catch (error) {}
+    } catch (_error) {}
   };
 
   return (
     <>
       <div className="py-5 pb-24 grid gap-y-5 bg-main lg:pb-6">
         {notifications?.length > 0 ? (
-          notifications?.map((notice: any) => (
+          notifications?.map((notice: Notifications) => (
             <div key={notice.id}>
               {notice.event_type === "group_invitation" &&
               notice.group_invitation === "pending" ? (

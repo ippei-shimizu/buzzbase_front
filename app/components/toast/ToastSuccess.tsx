@@ -1,3 +1,4 @@
+import type { ToastSuccessProps } from "@app/interface";
 import { CheckIcon } from "@app/components/icon/CheckIcon";
 
 export default function ToastSuccess({ text }: ToastSuccessProps) {

@@ -1,7 +1,7 @@
 "use client";
+import { Button } from "@heroui/react";
 import React, { useEffect } from "react";
 import { BackIcon } from "@app/components/icon/BackIcon";
-import { Button } from "@nextui-org/react";
 
 interface HeaderSaveProps {
   onProfileUpdate: () => void;

@@ -1,9 +1,10 @@
 import React from "react";
+
 export const SearchIcon = ({
   fill = "none",
   height = "22",
   width = "22",
-  label = "",
+  _label = "",
   stroke = "",
   ...props
 }) => (

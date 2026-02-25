@@ -1,17 +1,27 @@
 "use client";
+import { Input, Skeleton } from "@heroui/react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState, use } from "react";
+import { mutate } from "swr";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
-import NoteEditor from "@app/components/note/NoteEditor";
 import NoteMenu from "@app/components/note/NoteMenu";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import showBaseballNote from "@app/hooks/note/showBaseballNote";
 import { updateBaseballNote } from "@app/services/baseballNoteService";
-import { Input, Skeleton } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { mutate } from "swr";
 
-export default function NoteDetail({ params }: { params: { slulg: string } }) {
+const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
+  ),
+});
+
+export default function NoteDetail(props: {
+  params: Promise<{ slulg: string }>;
+}) {
+  const params = use(props.params);
   const noteId = Number(params.slulg);
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
@@ -19,24 +29,23 @@ export default function NoteDetail({ params }: { params: { slulg: string } }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
-  const [initialValues, setInitialValues] = useState({
-    date: "",
-    title: "",
-    memo: "",
-  });
-
   const { note, isLoading, isError } = showBaseballNote(noteId);
+
+  const initialValues = useMemo(
+    () => ({
+      date: note?.date ?? "",
+      title: note?.title ?? "",
+      memo: note?.memo ?? "",
+    }),
+    [note],
+  );
 
   useEffect(() => {
     if (note) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDate(note.date);
       setTitle(note.title);
       setMemo(note.memo);
-      setInitialValues({
-        date: note.date,
-        title: note.title,
-        memo: note.memo,
-      });
     }
   }, [note]);
 

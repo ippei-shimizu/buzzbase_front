@@ -1,9 +1,9 @@
 "use client";
 import "@mantine/core/styles.css";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-import Image from "next/image";
 
 export default function LoginAndSignUpTopBottom() {
   const { isLoggedIn, loading } = useAuthContext();
@@ -29,26 +29,26 @@ export default function LoginAndSignUpTopBottom() {
             BUZZ BASEをはじめる
           </p>
           <div className="flex gap-x-8 justify-center mt-4">
-            <Button
-              color="default"
-              size="lg"
-              radius="sm"
-              as={Link}
-              href="/signin"
-              className="py-2 px-10 bg-white text-zinc-800 font-medium lg:py-3 lg:px-16"
-            >
-              ログイン
-            </Button>
-            <Button
-              color="primary"
-              size="lg"
-              radius="sm"
-              as={Link}
-              href="/signup"
-              className="py-2 px-10 font-medium lg:py-3 lg:px-16"
-            >
-              新規登録
-            </Button>
+            <Link href="/signin">
+              <Button
+                color="default"
+                size="lg"
+                radius="sm"
+                className="py-2 px-10 bg-white text-zinc-800 font-medium lg:py-3 lg:px-16"
+              >
+                ログイン
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button
+                color="primary"
+                size="lg"
+                radius="sm"
+                className="py-2 px-10 font-medium lg:py-3 lg:px-16"
+              >
+                新規登録
+              </Button>
+            </Link>
           </div>
         </>
       )}

@@ -1,6 +1,6 @@
-import { getDashboardStats } from "./actions";
 import StatCard from "../../_components/StatCard";
 import InteractiveDashboard from "./_components/InteractiveDashboard";
+import { getDashboardStats } from "./actions";
 
 export const dynamic = "force-dynamic";
 

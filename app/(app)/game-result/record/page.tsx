@@ -1,4 +1,19 @@
 "use client";
+import type { TournamentData } from "@app/interface";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  Button,
+  Divider,
+  Input,
+  Radio,
+  RadioGroup,
+  Select,
+  SelectItem,
+  Textarea,
+} from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { SetStateAction, useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
@@ -18,20 +33,6 @@ import {
   updateTournament,
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
-import {
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-  Divider,
-  Input,
-  Radio,
-  RadioGroup,
-  Select,
-  SelectItem,
-  Textarea,
-} from "@nextui-org/react";
-import { usePathname, useRouter } from "next/navigation";
-import { SetStateAction, useEffect, useState } from "react";
 
 const battingOrder = [
   { id: 1, turn: "1番" },
@@ -59,7 +60,7 @@ type Position = {
 };
 
 type userData = {
-  image: any;
+  image: { url: string };
   name: string;
   id: number;
   url: string;
@@ -105,7 +106,6 @@ export default function GameRecord() {
   const [isBattingOrderValid, setIsBattingOrderValid] = useState(true);
   const [isDefensivePositionValid, setIsDefensivePositionValid] =
     useState(true);
-  const [isLocalStorageId, setIsLocalStorageId] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
   const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
     number | null
@@ -143,23 +143,6 @@ export default function GameRecord() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchExistingMatchResult(JSON.parse(savedGameResultId));
-    }
-    if (
-      !(pathname === "/game-result/battings") &&
-      !(pathname === "/game-result/record") &&
-      savedGameResultId
-    ) {
-      localStorage.removeItem("gameResultId");
-    }
-  }, [pathname]);
-
   // 既に同じgame_result_idが存在する場合
   const fetchExistingMatchResult = async (gameResultId: number) => {
     try {
@@ -191,6 +174,24 @@ export default function GameRecord() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+    // ローカルストレージからid取得
+    const savedGameResultId = localStorage.getItem("gameResultId");
+    if (savedGameResultId) {
+      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
+      fetchExistingMatchResult(JSON.parse(savedGameResultId));
+    }
+    if (
+      !(pathname === "/game-result/battings") &&
+      !(pathname === "/game-result/record") &&
+      savedGameResultId
+    ) {
+      localStorage.removeItem("gameResultId");
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     // 守備位置設定
     if (userData && positionData.length > 0) {
       const userPositionFirstId = userData.positions[0]?.id;
@@ -198,6 +199,7 @@ export default function GameRecord() {
         (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyPosition(userPosition.id.toString());
       }
     }
@@ -208,6 +210,7 @@ export default function GameRecord() {
     if (existingMyTeam) {
       const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
       if (foundTeam) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyTeam(foundTeam.name);
       }
     }
@@ -237,43 +240,47 @@ export default function GameRecord() {
   };
 
   // 自チーム名設定
-  const handleMyTeamChange = (event: any) => {
+  const handleMyTeamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setExistingMyTeam(event.target.value);
     setMyTeam(event.target.value);
   };
 
   // 相手チーム設定
-  const handleOpponentTeamChange = (teamName: any) => {
+  const handleOpponentTeamChange = (teamName: React.Key | null) => {
     setExistingOpponentTeam(Number(teamName));
-    setOpponentTeam(teamName);
+    setOpponentTeam(teamName as string);
   };
 
   const handleTournamentInputChange = (value: string) => {
     setInputTournamentName(value);
   };
-  const handleTournamentSelectionChange = (value: any) => {
-    setTournament(value);
+  const handleTournamentSelectionChange = (value: React.Key | null) => {
+    setTournament(value as number | null);
   };
 
   // 自分チーム得点
-  const handleMyScoreChange = (event: any) => {
-    setMyTeamScore(event.target.value);
+  const handleMyScoreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMyTeamScore(Number(event.target.value));
   };
 
   // 相手チーム得点
-  const handleOpponentScoreChange = (event: any) => {
-    setOpponentTeamScore(event.target.value);
+  const handleOpponentScoreChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setOpponentTeamScore(Number(event.target.value));
   };
 
   // 打順
-  const handleBattingOrderChange = (event: { target: { value: any } }) => {
+  const handleBattingOrderChange = (event: { target: { value: string } }) => {
     const order = event.target.value;
     setExistingMatchBattingOrder(order);
     setMatchBattingOrder(order);
   };
 
   // 守備位置
-  const handleDefensivePositionChange = (event: { target: { value: any } }) => {
+  const handleDefensivePositionChange = (event: {
+    target: { value: string };
+  }) => {
     const position = event.target.value;
     setExistingDefensivePosition(position);
     setDefensivePosition(position);
@@ -288,14 +295,11 @@ export default function GameRecord() {
   // バリデーション
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!localStorageGameResultId) {
-      setIsLocalStorageId(false);
       isValid = false;
       newErrors.push("エラーが発生しました。");
-    } else {
-      setIsLocalStorageId(true);
     }
 
     if (!gameDate) {
@@ -548,7 +552,7 @@ export default function GameRecord() {
                   }
                 >
                   {tournamentData.map((data) => (
-                    <AutocompleteItem key={data.id} value={data.name}>
+                    <AutocompleteItem key={data.id}>
                       {data.name}
                     </AutocompleteItem>
                   ))}
@@ -587,11 +591,7 @@ export default function GameRecord() {
                   onSelectionChange={handleOpponentTeamChange}
                 >
                   {teamsData.map((data) => (
-                    <AutocompleteItem
-                      key={data.id}
-                      value={data.name}
-                      textValue={data.name}
-                    >
+                    <AutocompleteItem key={data.id} textValue={data.name}>
                       {data.name}
                     </AutocompleteItem>
                   ))}
@@ -657,11 +657,7 @@ export default function GameRecord() {
                   }
                 >
                   {battingOrder.map((order) => (
-                    <SelectItem
-                      key={order.id}
-                      value={order.id.toString()}
-                      textValue={order.turn}
-                    >
+                    <SelectItem key={order.id} textValue={order.turn}>
                       {order.turn}
                     </SelectItem>
                   ))}
@@ -687,7 +683,6 @@ export default function GameRecord() {
                   {positionData.map((position) => (
                     <SelectItem
                       key={position.id}
-                      value={position.id.toString()}
                       textValue={position.name}
                       className="text-white"
                     >

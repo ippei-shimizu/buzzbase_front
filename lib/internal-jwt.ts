@@ -11,14 +11,6 @@ const SECRET_KEY: string = (() => {
 const ALGORITHM = "HS256";
 const EXPIRATION_TIME = "5m";
 
-interface JWTPayload {
-  admin_user_id: number;
-  iat: number;
-  exp: number;
-  iss: string;
-  aud: string;
-}
-
 /**
  * NOTE: 管理者ユーザー用のJWTトークンを生成
  */

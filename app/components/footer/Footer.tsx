@@ -1,10 +1,10 @@
 "use client";
-import Logout from "@app/components/auth/Logout";
-import { XIcon } from "@app/components/icon/XIcon";
-import { useAuthContext } from "@app/contexts/useAuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logout from "@app/components/auth/Logout";
+import { XIcon } from "@app/components/icon/XIcon";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function Footer() {
   const { isLoggedIn } = useAuthContext();

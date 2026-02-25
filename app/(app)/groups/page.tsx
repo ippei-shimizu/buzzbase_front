@@ -1,13 +1,14 @@
 "use client";
+import type { GroupsData } from "@app/interface";
+import { Avatar, Button, Divider } from "@heroui/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getGroups } from "@app/services/groupService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Avatar, Button, Divider } from "@nextui-org/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Group() {
   const [groups, setGroups] = useState<GroupsData[]>([]);
@@ -22,16 +23,6 @@ export default function Group() {
       return router.push("/signin");
     }
   }, [router, isLoggedIn]);
-
-  useEffect(() => {
-    fetchUserIdData();
-  }, []);
-
-  useEffect(() => {
-    if (currentUserId !== undefined) {
-      fetchData(currentUserId);
-    }
-  }, [currentUserId]);
 
   const fetchUserIdData = async () => {
     try {
@@ -51,6 +42,18 @@ export default function Group() {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchUserIdData();
+  }, []);
+
+  useEffect(() => {
+    if (currentUserId !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchData(currentUserId);
+    }
+  }, [currentUserId]);
+
   return (
     <>
       <div className="buzz-dark flex flex-col w-full min-h-screen">
@@ -65,19 +68,19 @@ export default function Group() {
                 グループ機能は、フォローしているユーザーを招待して成績をランキング形式で共有することができます。
               </p>
               <div className="flex justify-center mt-4">
-                <Button
-                  href="/groups/new"
-                  as={Link}
-                  color="primary"
-                  variant="solid"
-                  radius="full"
-                  endContent={
-                    <PlusIcon width="22" height="22" fill="#F4F4F4" />
-                  }
-                  className="font-medium"
-                >
-                  グループ作成
-                </Button>
+                <Link href="/groups/new">
+                  <Button
+                    color="primary"
+                    variant="solid"
+                    radius="full"
+                    endContent={
+                      <PlusIcon width="22" height="22" fill="#F4F4F4" />
+                    }
+                    className="font-medium"
+                  >
+                    グループ作成
+                  </Button>
+                </Link>
               </div>
               <Divider className="mt-8" />
               <div className="mt-7">

@@ -1,3 +1,4 @@
+import type { ErrorMessagesProps } from "@app/interface";
 import { DangerIcon } from "@app/components/icon/DangerIcon";
 
 export default function ErrorMessages({ errors }: ErrorMessagesProps) {

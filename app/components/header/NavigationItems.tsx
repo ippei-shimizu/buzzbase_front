@@ -1,8 +1,8 @@
-import { HomeIcon } from "@app/components/icon/HomeIcon";
-import { RecordIcon } from "@app/components/icon/RecordIcon";
 import { GroupIcon } from "@app/components/icon/GroupIcon";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import { HomeIcon } from "@app/components/icon/HomeIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
+import { RecordIcon } from "@app/components/icon/RecordIcon";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 
 const NavigationItems = () => {
   const { isLoggedIn } = useAuthContext();
