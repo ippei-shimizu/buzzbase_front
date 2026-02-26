@@ -7,34 +7,22 @@ import {
   CalculatorOutput,
 } from "@app/data/baseball-stats/types";
 
+type ResultItem = {
+  label: string;
+  value: string;
+};
+
 type Props = {
   fields: CalculatorField[];
   outputs: CalculatorOutput[];
-  calculate: (values: Record<string, number>) => number | null;
-  multipleOutputs?: {
-    calculate: (
-      values: Record<string, number>,
-    ) => Record<string, number | null>;
-    outputs: {
-      key: string;
-      label: string;
-      format: (value: number) => string;
-    }[];
-  };
+  calculate: (
+    values: Record<string, number>,
+  ) => number | Record<string, number | null> | null;
 };
 
-export default function CalculatorForm({
-  fields,
-  outputs,
-  calculate,
-  multipleOutputs,
-}: Props) {
+export default function CalculatorForm({ fields, outputs, calculate }: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
-  const [result, setResult] = useState<string | null>(null);
-  const [multiResults, setMultiResults] = useState<Record<
-    string,
-    string
-  > | null>(null);
+  const [results, setResults] = useState<ResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = useCallback((name: string, value: string) => {
@@ -43,8 +31,7 @@ export default function CalculatorForm({
 
   const handleCalculate = useCallback(() => {
     setError(null);
-    setResult(null);
-    setMultiResults(null);
+    setResults([]);
 
     const numericValues: Record<string, number> = {};
     for (const field of fields) {
@@ -61,37 +48,34 @@ export default function CalculatorForm({
       numericValues[field.name] = num;
     }
 
-    if (multipleOutputs) {
-      const results = multipleOutputs.calculate(numericValues);
-      const formatted: Record<string, string> = {};
-      let hasNull = false;
-      for (const out of multipleOutputs.outputs) {
-        const val = results[out.key];
-        if (val === null || val === undefined) {
-          hasNull = true;
-          break;
-        }
-        formatted[out.label] = out.format(val);
-      }
-      if (hasNull) {
-        setError("入力値が正しくありません。値を確認してください。");
-        return;
-      }
-      setMultiResults(formatted);
-    } else {
-      const calculated = calculate(numericValues);
-      if (calculated === null) {
-        setError("入力値が正しくありません。値を確認してください。");
-        return;
-      }
-      setResult(outputs[0].format(calculated));
+    const calculated = calculate(numericValues);
+    if (calculated === null) {
+      setError("入力値が正しくありません。値を確認してください。");
+      return;
     }
-  }, [values, fields, outputs, calculate, multipleOutputs]);
+
+    if (typeof calculated === "number") {
+      setResults([
+        { label: outputs[0].label, value: outputs[0].format(calculated) },
+      ]);
+    } else {
+      const formatted: ResultItem[] = [];
+      for (const out of outputs) {
+        const key = out.key ?? out.label;
+        const val = calculated[key];
+        if (val === null || val === undefined) {
+          setError("入力値が正しくありません。値を確認してください。");
+          return;
+        }
+        formatted.push({ label: out.label, value: out.format(val) });
+      }
+      setResults(formatted);
+    }
+  }, [values, fields, outputs, calculate]);
 
   const handleReset = useCallback(() => {
     setValues({});
-    setResult(null);
-    setMultiResults(null);
+    setResults([]);
     setError(null);
   }, []);
 
@@ -132,32 +116,27 @@ export default function CalculatorForm({
         </Button>
       </div>
 
-      {error && (
+      {error ? (
         <div className="mt-4 rounded-lg bg-red-900/30 border border-red-700 px-4 py-3">
           <p className="text-sm text-red-400">{error}</p>
         </div>
-      )}
+      ) : null}
 
-      {result && (
-        <div className="mt-4 rounded-lg bg-yellow-900/20 border border-yellow-700/50 px-4 py-4">
-          <p className="text-sm text-zinc-400">{outputs[0].label}</p>
-          <p className="text-3xl font-bold text-yellow-500 mt-1">{result}</p>
-        </div>
-      )}
-
-      {multiResults && (
+      {results.length > 0 ? (
         <div className="mt-4 grid gap-3">
-          {Object.entries(multiResults).map(([label, value]) => (
+          {results.map((item) => (
             <div
-              key={label}
+              key={item.label}
               className="rounded-lg bg-yellow-900/20 border border-yellow-700/50 px-4 py-3"
             >
-              <p className="text-sm text-zinc-400">{label}</p>
-              <p className="text-2xl font-bold text-yellow-500 mt-1">{value}</p>
+              <p className="text-sm text-zinc-400">{item.label}</p>
+              <p className="text-2xl font-bold text-yellow-500 mt-1">
+                {item.value}
+              </p>
             </div>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -6,12 +6,12 @@ export default function BattingStatsSection() {
     <section id="batting">
       <h2 className="text-lg font-bold mb-3">打撃成績</h2>
       <div className="grid gap-y-6">
-        {battingStats.map((item, index) => (
+        {battingStats.map((item) => (
           <StatCard
-            key={index}
+            key={item.title}
             title={item.title}
             equation={item.equation}
-            description={item.description}
+            descriptions={item.descriptions}
             slug={item.slug}
           />
         ))}

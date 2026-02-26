@@ -199,18 +199,23 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     outputs: [
       {
         label: "出塁率",
+        key: "obp",
         format: (value: number) => value.toFixed(3).replace(/^0/, ""),
       },
       {
         label: "長打率",
+        key: "slg",
         format: (value: number) => value.toFixed(3).replace(/^0/, ""),
       },
       {
         label: "OPS",
+        key: "ops",
         format: (value: number) => value.toFixed(3).replace(/^0/, ""),
       },
     ],
-    calculate: (values: Record<string, number>) => {
+    calculate: (
+      values: Record<string, number>,
+    ): Record<string, number | null> | null => {
       const { hits, atBats, walks, hitByPitch, sacrificeFlies, totalBases } =
         values;
       const obpDenominator = atBats + walks + hitByPitch + sacrificeFlies;
@@ -218,7 +223,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       if (!atBats || atBats === 0) return null;
       const obp = (hits + walks + hitByPitch) / obpDenominator;
       const slg = totalBases / atBats;
-      return obp + slg;
+      return { obp, slg, ops: obp + slg };
     },
     faq: [
       {

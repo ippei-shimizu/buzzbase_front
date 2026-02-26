@@ -6,14 +6,12 @@ export default function PitchingStatsSection() {
     <section id="pitching" className="mt-12">
       <h2 className="text-lg font-bold mb-3">投手成績</h2>
       <div className="grid gap-y-6">
-        {pitchingStats.map((item, index) => (
+        {pitchingStats.map((item) => (
           <StatCard
-            key={index}
+            key={item.title}
             title={item.title}
             equation={item.equation}
-            description={item.description}
-            description2={item.description2}
-            description3={item.description3}
+            descriptions={item.descriptions}
             slug={item.slug}
           />
         ))}

@@ -1,16 +1,14 @@
 export type BattingStat = {
   title: string;
   equation: string;
-  description: string;
+  descriptions: string[];
   slug?: string;
 };
 
 export type PitchingStat = {
   title: string;
   equation: string;
-  description: string;
-  description2: string;
-  description3: string;
+  descriptions: string[];
   slug?: string;
 };
 
@@ -24,6 +22,7 @@ export type CalculatorField = {
 
 export type CalculatorOutput = {
   label: string;
+  key?: string;
   format: (value: number) => string;
 };
 
@@ -45,7 +44,9 @@ export type CalculatorDefinition = {
   guide: { label: string; description: string }[];
   fields: CalculatorField[];
   outputs: CalculatorOutput[];
-  calculate: (values: Record<string, number>) => number | null;
+  calculate: (
+    values: Record<string, number>,
+  ) => number | Record<string, number | null> | null;
   faq: FaqItem[];
   relatedSlugs: string[];
 };
