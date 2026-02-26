@@ -17,7 +17,7 @@ export default function RegistrationConfirmationLayout({
   return (
     <>
       <Header />
-      <div className="h-full buzz-dark flex flex-col w-full min-h-screen">
+      <div className="h-full buzz-dark flex flex-col w-full min-h-screen bg-main">
         <main className="h-full">{children}</main>
       </div>
     </>

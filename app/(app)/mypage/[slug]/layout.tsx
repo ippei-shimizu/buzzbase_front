@@ -3,7 +3,7 @@ interface MyPageLayoutProps {
 }
 
 const MyPageLayout = ({ children }: MyPageLayoutProps) => {
-  return <>{children}</>;
+  return <div className="bg-main min-h-screen">{children}</div>;
 };
 
 export default MyPageLayout;

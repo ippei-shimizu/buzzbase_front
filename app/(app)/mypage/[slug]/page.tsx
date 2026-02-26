@@ -38,7 +38,7 @@ export default function MyPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center pb-12 buzz-dark flex-col w-full min-h-screen lg:max-w-[720px] lg:m-[0_auto_0_28%]">
+      <div className="flex justify-center pb-12 buzz-dark flex-col w-full min-h-screen bg-main lg:max-w-[720px] lg:m-[0_auto_0_28%]">
         <Spinner color="primary" />
       </div>
     );

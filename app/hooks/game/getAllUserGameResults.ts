@@ -3,7 +3,7 @@ import { fetcher } from "@app/hooks/swrFetcher";
 
 export default function useAllUserGameResults() {
   const { data, error } = useSWR(
-    "/api/v1/game_results/all_game_associated_data",
+    "/api/v2/game_results/all",
     fetcher,
   );
   return {

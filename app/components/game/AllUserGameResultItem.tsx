@@ -16,7 +16,9 @@ type AllUserGameResult = {
     match_type: string;
     date_and_time: string;
     opponent_team_id: number;
+    opponent_team_name?: string;
     tournament_id: number | null;
+    tournament_name?: string;
     my_team_score: number;
     opponent_team_score: number;
   };
@@ -26,7 +28,7 @@ type AllUserGameResult = {
     win: number;
     loss: number;
   };
-  plate_appearances: {
+  plate_appearances?: {
     id: number;
     batting_result: string;
     game_result_id: number;
@@ -73,10 +75,7 @@ export default function AllUserGameResultItem() {
                   />
                 </Link>
               </div>
-              <MatchResultsItem
-                gameResult={[gameResult]}
-                plateAppearance={[gameResult.plate_appearances]}
-              />
+              <MatchResultsItem gameResult={[gameResult]} />
               <Divider className="mt-6" />
             </div>
           ),
