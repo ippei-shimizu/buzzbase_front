@@ -260,7 +260,7 @@ export interface MatchResult {
   my_team_id: number;
   opponent_team_id: number;
   defensive_position: string;
-  user_id: string;
+  user_id: number;
   game_result_id: number;
   opponent_team_name: string;
   my_team_score: number;
