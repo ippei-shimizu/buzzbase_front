@@ -3,17 +3,13 @@ import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
 import ResultsSelectBox from "@app/components/select/ResultsSelectBox";
 import { gameType, years } from "@app/data/TestData";
 import {
-  getFilterGameResults,
-  getFilterGameResultsUserId,
+  getFilterGameResultsV2,
+  getFilterGameResultsUserIdV2,
 } from "@app/services/gameResultsService";
 import {
   getMatchResults,
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
-import {
-  getCurrentPlateAppearance,
-  getCurrentPlateAppearanceUserId,
-} from "@app/services/plateAppearanceService";
 
 type GameResult = {
   game_result_id: number;
@@ -21,23 +17,24 @@ type GameResult = {
     match_type: string;
     date_and_time: string;
     opponent_team_id: number;
+    opponent_team_name?: string;
     tournament_id: number | null;
+    tournament_name?: string;
     my_team_score: number;
     opponent_team_score: number;
   };
+  plate_appearances?: {
+    id: number;
+    batting_result: string;
+    game_result_id: number;
+    batter_box_number: number;
+  }[];
   pitching_result?: {
     innings_pitched: number;
     run_allowed: number;
     win: number;
     loss: number;
   };
-};
-
-type PlateAppearanceData = {
-  id: number;
-  batting_result: string;
-  game_result_id: number;
-  batter_box_number: number;
 };
 
 type UserId = {
@@ -57,26 +54,16 @@ export default function MatchResultList(props: UserId) {
   );
   const [selectedMatchType, setSelectedMatchType] = useState("全て");
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
-  const [plateAppearance, setPlateAppearance] = useState<
-    PlateAppearanceData[][]
-  >([]);
 
   const fetchFilteredData = useCallback(async () => {
     try {
       let filteredGameResultData;
-      let plateAppearanceDataLists;
       if (userId) {
-        // ユーザーごと試合一覧
-        filteredGameResultData = await getFilterGameResultsUserId(
+        // v2: plate_appearances included in response
+        filteredGameResultData = await getFilterGameResultsUserIdV2(
           userId,
           selectedYear,
           selectedMatchType,
-        );
-        // ユーザーごと打席結果
-        plateAppearanceDataLists = await Promise.all(
-          filteredGameResultData.map((gameResult: GameResult) =>
-            getCurrentPlateAppearanceUserId(userId, gameResult.game_result_id),
-          ),
         );
         // ユーザーごとシーズン
         const matchResultData = await getMatchResultsUserId(userId);
@@ -121,12 +108,10 @@ export default function MatchResultList(props: UserId) {
           },
         );
       }
-      if (filteredGameResultData && plateAppearanceDataLists) {
+      if (filteredGameResultData) {
         setGameResultIndex(filteredGameResultData);
-        setPlateAppearance(plateAppearanceDataLists);
       } else {
         setGameResultIndex([]);
-        setPlateAppearance([]);
       }
     } catch (error) {
       console.error(`Filtered game lists fetch error:`, error);
@@ -150,14 +135,10 @@ export default function MatchResultList(props: UserId) {
 
   const fetchData = async () => {
     try {
-      const gameResultsDataLists = await getFilterGameResults(
+      // v2: plate_appearances included in response
+      const gameResultsDataLists = await getFilterGameResultsV2(
         selectedYear,
         selectedMatchType,
-      );
-      const plateAppearanceDataLists = await Promise.all(
-        gameResultsDataLists.map((gameResult: GameResult) =>
-          getCurrentPlateAppearance(gameResult.game_result_id),
-        ),
       );
       const matchResultData = await getMatchResults();
       const matchResultDate = matchResultData.map(
@@ -199,7 +180,6 @@ export default function MatchResultList(props: UserId) {
       uniqueMatchTypeChange.unshift("全て");
       setAvailableMatchType(uniqueMatchTypeChange);
       setGameResultIndex(gameResultsDataLists);
-      setPlateAppearance(plateAppearanceDataLists);
     } catch (error) {
       console.log(`game lists fetch error:`, error);
     }
@@ -251,10 +231,7 @@ export default function MatchResultList(props: UserId) {
           <div className="mt-8 grid gap-y-5">
             {gameResultIndex.length > 0 ? (
               <>
-                <MatchResultsItem
-                  gameResult={gameResultIndex}
-                  plateAppearance={plateAppearance}
-                />
+                <MatchResultsItem gameResult={gameResultIndex} />
               </>
             ) : (
               <>

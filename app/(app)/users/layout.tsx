@@ -15,7 +15,7 @@ export default function UserSearchLayout({
   return (
     <>
       <Header />
-      <div className="buzz-dark flex flex-col w-full min-h-screen">
+      <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
         <main className="h-full">{children}</main>
       </div>
     </>

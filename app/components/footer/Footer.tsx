@@ -43,6 +43,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/tools/batting-average" className="text-sm">
+                  計算ツール
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-sm">
                   お問い合わせ
                 </Link>
