@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { calculatorDefinitions } from "@app/data/baseball-stats/calculator-definitions";
+import { CalculatorDefinition } from "@app/data/baseball-stats/types";
 
 type Props = {
   slugs: string[];
@@ -8,7 +9,7 @@ type Props = {
 export default function RelatedTools({ slugs }: Props) {
   const tools = slugs
     .map((slug) => calculatorDefinitions[slug])
-    .filter(Boolean);
+    .filter((t): t is CalculatorDefinition => Boolean(t));
 
   if (tools.length === 0) return null;
 

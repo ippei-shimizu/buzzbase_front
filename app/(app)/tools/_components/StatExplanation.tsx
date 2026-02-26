@@ -28,7 +28,7 @@ export default function StatExplanation({
         <p className="text-sm text-zinc-300 leading-7">{explanation}</p>
       </section>
 
-      {guide.length > 0 && (
+      {guide.length > 0 ? (
         <section>
           <h2 className="text-xl font-bold mb-3">目安</h2>
           <div className="grid gap-2">
@@ -47,7 +47,7 @@ export default function StatExplanation({
             ))}
           </div>
         </section>
-      )}
+      ) : null}
     </div>
   );
 }

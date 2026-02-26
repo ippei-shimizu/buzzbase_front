@@ -1,6 +1,6 @@
 import { CalculatorDefinition } from "@app/data/baseball-stats/types";
+import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "./Breadcrumbs";
-import CtaBanner from "./CtaBanner";
 import JsonLd from "./JsonLd";
 import RelatedTools from "./RelatedTools";
 import StatExplanation from "./StatExplanation";
@@ -56,13 +56,13 @@ export default function CalculatorPageContent({
         guide={definition.guide}
       />
 
-      {definition.faq.length > 0 && (
+      {definition.faq.length > 0 ? (
         <section className="mt-10">
           <h2 className="text-xl font-bold mb-3">よくある質問</h2>
           <div className="space-y-4">
-            {definition.faq.map((item, index) => (
+            {definition.faq.map((item) => (
               <details
-                key={index}
+                key={item.question}
                 className="rounded-lg border border-zinc-700 bg-zinc-800/50"
               >
                 <summary className="px-4 py-3 cursor-pointer text-sm font-bold hover:text-yellow-500 transition-colors">
@@ -75,9 +75,12 @@ export default function CalculatorPageContent({
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
-      <CtaBanner />
+      <CtaBanner
+        heading="もっと詳しく成績を管理するなら"
+        body="BUZZ BASEなら試合結果を入力するだけで、打率・防御率・OPSなど全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。"
+      />
 
       <RelatedTools slugs={definition.relatedSlugs} />
     </>

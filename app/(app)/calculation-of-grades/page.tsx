@@ -1,6 +1,6 @@
 import Header from "@app/components/header/Header";
+import CtaBanner from "../_components/CtaBanner";
 import BattingStatsSection from "./_components/BattingStatsSection";
-import CtaBanner from "./_components/CtaBanner";
 import PitchingStatsSection from "./_components/PitchingStatsSection";
 import TableOfContents from "./_components/TableOfContents";
 
@@ -21,7 +21,10 @@ export default function CalculationOfGrades() {
               <TableOfContents />
               <div className="mt-6">
                 <BattingStatsSection />
-                <CtaBanner />
+                <CtaBanner
+                  className="my-10"
+                  body="BUZZ BASEなら試合結果を入力するだけで、上記の全指標を自動算出。チームメイトとランキング形式で成績を共有できます。"
+                />
                 <PitchingStatsSection />
               </div>
             </div>

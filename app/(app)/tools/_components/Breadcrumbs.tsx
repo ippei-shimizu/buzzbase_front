@@ -14,8 +14,8 @@ export default function Breadcrumbs({ items }: Props) {
     <nav aria-label="パンくずリスト" className="mb-4">
       <ol className="flex items-center gap-1.5 text-xs text-zinc-400 flex-wrap">
         {items.map((item, index) => (
-          <li key={index} className="flex items-center gap-1.5">
-            {index > 0 && <span aria-hidden="true">&gt;</span>}
+          <li key={item.label} className="flex items-center gap-1.5">
+            {index > 0 ? <span aria-hidden="true">&gt;</span> : null}
             {item.href ? (
               <Link
                 href={item.href}
