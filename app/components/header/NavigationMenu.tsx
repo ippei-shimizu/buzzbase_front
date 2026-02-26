@@ -3,9 +3,9 @@ import "@app/globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { toast } from "sonner";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 import NavigationItems from "./NavigationItems";
 
 export default function NavigationMenu() {
@@ -15,9 +15,7 @@ export default function NavigationMenu() {
 
   const handleAuthRequiredClick = () => {
     if (!isLoggedIn) {
-      toast.info("この機能を使うには会員登録（無料）が必要です", {
-        id: "auth-required",
-      });
+      showAuthRequiredToast();
     }
   };
 
@@ -56,9 +54,7 @@ export default function NavigationMenu() {
                 <Link
                   href={item.href}
                   onClick={
-                    item.href.includes("auth_required")
-                      ? handleAuthRequiredClick
-                      : undefined
+                    item.authRequired ? handleAuthRequiredClick : undefined
                   }
                   className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
                     isActive(pathName, item.href)

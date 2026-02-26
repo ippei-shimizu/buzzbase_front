@@ -1,10 +1,10 @@
 import { Skeleton } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { toast } from "sonner";
 import { UserImage } from "@app/components/user/UserImage";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
+import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 
 export default function HeaderUserMenu() {
   const { isLoggedIn } = useAuthContext();
@@ -29,9 +29,7 @@ export default function HeaderUserMenu() {
 
   const handleClick = () => {
     if (!isLoggedIn) {
-      toast.info("この機能を使うには会員登録（無料）が必要です", {
-        id: "auth-required",
-      });
+      showAuthRequiredToast();
     }
   };
 

@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect } from "react";
-import { toast } from "sonner";
 import SignUp from "@app/components/auth/SignUp";
+import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 
 function SignUpContent() {
   const searchParams = useSearchParams();
@@ -12,9 +12,7 @@ function SignUpContent() {
 
   useEffect(() => {
     if (authRequired === "true") {
-      toast.info("この機能を使うには会員登録（無料）が必要です", {
-        id: "auth-required",
-      });
+      showAuthRequiredToast();
     }
   }, [authRequired]);
 
