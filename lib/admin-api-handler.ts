@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUser } from "./admin-auth";
 
@@ -65,6 +66,7 @@ export function withAdminErrorHandler(
 function handleApiError(error: unknown, logErrors: boolean): NextResponse {
   if (logErrors) {
     console.error("Admin API Error:", error);
+    Sentry.captureException(error);
   }
 
   // AdminApiErrorの場合
