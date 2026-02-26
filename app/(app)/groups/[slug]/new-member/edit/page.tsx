@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, use } from "react";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 import {
   createInviteMembers,
   getGroupDetailUsers,
@@ -22,6 +23,13 @@ export default function GroupMemberAdd(props: {
   const [groupMemberIds, setGroupMemberIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { isLoggedIn } = useAuthContext();
+
+  useEffect(() => {
+    if (isLoggedIn === false) {
+      return router.push("/signup?auth_required=true");
+    }
+  }, [isLoggedIn, router]);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
 
@@ -23,6 +24,13 @@ export default function GroupNew() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const { isLoggedIn } = useAuthContext();
+
+  useEffect(() => {
+    if (isLoggedIn === false) {
+      return router.push("/signup?auth_required=true");
+    }
+  }, [isLoggedIn, router]);
 
   const fetchData = async () => {
     const responseCurrentUserId = await getCurrentUserId();

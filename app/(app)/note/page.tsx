@@ -1,8 +1,14 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import NoteAddButton from "@app/components/button/NoteAddButton";
 import Header from "@app/components/header/Header";
 import NoteListComponent from "@app/components/note/NoteListComponent";
 
-export default function NoteList() {
+export default async function NoteList() {
+  const cookieStore = await cookies();
+  if (!cookieStore.get("access-token")) {
+    redirect("/signup?auth_required=true");
+  }
   return (
     <>
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">

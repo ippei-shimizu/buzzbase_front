@@ -2,10 +2,11 @@
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { SetStateAction, useMemo, useState } from "react";
+import { SetStateAction, useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 import { createBaseballNote } from "@app/services/baseballNoteService";
 
 const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
@@ -16,6 +17,15 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
 });
 
 export default function NoteNew() {
+  const router = useRouter();
+  const { isLoggedIn } = useAuthContext();
+
+  useEffect(() => {
+    if (isLoggedIn === false) {
+      return router.push("/signup?auth_required=true");
+    }
+  }, [isLoggedIn, router]);
+
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +38,6 @@ export default function NoteNew() {
     return `${year}-${month}-${day}`;
   });
   const [date, setDate] = useState(memoDate);
-  const router = useRouter();
   const initialValues = useMemo(
     () => ({
       date: memoDate,
