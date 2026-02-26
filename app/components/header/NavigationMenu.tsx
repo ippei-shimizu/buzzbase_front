@@ -3,15 +3,26 @@ import "@app/globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 import NavigationItems from "./NavigationItems";
 
 export default function NavigationMenu() {
   const pathName = usePathname();
+  const { isLoggedIn } = useAuthContext();
   const navigationItems = NavigationItems();
 
+  const handleAuthRequiredClick = () => {
+    if (!isLoggedIn) {
+      toast.info("この機能を使うには会員登録（無料）が必要です", {
+        id: "auth-required",
+      });
+    }
+  };
+
   const isActive = (path: string, itemHref: string) => {
-    if (path === "/signin") {
+    if (path === "/signin" || path === "/signup") {
       return false;
     }
     const basePath = ["/note", "/game-result", "/groups"];
@@ -44,6 +55,11 @@ export default function NavigationMenu() {
               <li key={index}>
                 <Link
                   href={item.href}
+                  onClick={
+                    item.href.includes("auth_required")
+                      ? handleAuthRequiredClick
+                      : undefined
+                  }
                   className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
                     isActive(pathName, item.href)
                       ? `text-yellow-500`

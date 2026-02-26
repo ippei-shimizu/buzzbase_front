@@ -10,17 +10,17 @@ const NavigationItems = () => {
   return [
     { href: "/", label: "トップ", icon: HomeIcon },
     {
-      href: isLoggedIn ? "/note" : "/signin",
+      href: isLoggedIn ? "/note" : "/signup?auth_required=true",
       label: "野球ノート",
       icon: NoteIcon,
     },
     {
-      href: isLoggedIn ? "/game-result/lists" : "/signin",
+      href: isLoggedIn ? "/game-result/lists" : "/signup?auth_required=true",
       label: "記録",
       icon: RecordIcon,
     },
     {
-      href: isLoggedIn ? "/groups" : "/signin",
+      href: isLoggedIn ? "/groups" : "/signup?auth_required=true",
       label: "グループ",
       icon: GroupIcon,
     },

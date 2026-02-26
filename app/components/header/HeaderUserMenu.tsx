@@ -1,6 +1,7 @@
 import { Skeleton } from "@heroui/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { UserImage } from "@app/components/user/UserImage";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
@@ -24,7 +25,15 @@ export default function HeaderUserMenu() {
 
   const myPageLink = isLoggedIn
     ? `/mypage/${currentUserData?.user_id}`
-    : "/signin";
+    : "/signup?auth_required=true";
+
+  const handleClick = () => {
+    if (!isLoggedIn) {
+      toast.info("この機能を使うには会員登録（無料）が必要です", {
+        id: "auth-required",
+      });
+    }
+  };
 
   const imageUrl =
     currentUserData && currentUserData.image
@@ -37,6 +46,7 @@ export default function HeaderUserMenu() {
     <>
       <Link
         href={myPageLink}
+        onClick={handleClick}
         className={`flex items-center flex-col gap-y-1 min-w-[50px] font-medium px-0 bg-transparent isIconOnly overflow-visible text-[10px] ${
           pathName.includes("/mypage") ? `text-yellow-500` : `text-white`
         } lg:flex-row lg:text-base lg:w-fit lg:font-bold lg:gap-x-5`}
