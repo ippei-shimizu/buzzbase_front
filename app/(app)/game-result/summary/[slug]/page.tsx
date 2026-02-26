@@ -121,11 +121,9 @@ export default function ResultsSummary() {
     if (matchResult.length > 0 && !isDetailDataFetched) {
       fetchMatchResultDetailData();
       currentUsersUserIdData(currentUserId);
-      const isCurrentUserPage = currentUserId === battingAverage[0]?.user_id;
-      setCurrentUserPage(isCurrentUserPage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchResult, isDetailDataFetched, currentUserId, battingAverage]);
+  }, [matchResult, isDetailDataFetched, currentUserId]);
 
   // 試合データ取得
   const fetchCurrentResultData = async (localStorageGameResultId: number) => {
@@ -151,6 +149,14 @@ export default function ResultsSummary() {
       setPitchingResult(pitchingResultData);
       setPlateAppearance(plateAppearanceData);
       setCurrentUserId(currentUserIdData);
+      if (
+        currentUserIdData != null &&
+        matchResultData &&
+        matchResultData.length > 0
+      ) {
+        const matchUserId = Number(matchResultData[0].user_id);
+        setCurrentUserPage(currentUserIdData === matchUserId);
+      }
     } catch (error: unknown) {
       console.error(error);
     }
