@@ -8,20 +8,10 @@ import { PlusIcon } from "@app/components/icon/PlusIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import MatchResultList from "@app/components/user/MatchResultList";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-import {
-  createGameResult,
-  getGameResults,
-} from "@app/services/gameResultsService";
-import { getCurrentPlateAppearance } from "@app/services/plateAppearanceService";
+import { createGameResult } from "@app/services/gameResultsService";
 import { getCurrentUserId } from "@app/services/userService";
 
-type GameResult = {
-  game_result_id: number;
-};
-
 export default function GameResultList() {
-  const [_gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
-  const [_plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
   const [currentUserId, setCurrentUserId] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -35,16 +25,7 @@ export default function GameResultList() {
 
   const fetchData = async () => {
     try {
-      const gameResultsDataLists = await getGameResults();
-      const plateAppearanceDataLists = await Promise.all(
-        gameResultsDataLists.map((gameResult: GameResult) =>
-          getCurrentPlateAppearance(gameResult.game_result_id),
-        ),
-      );
       const currentUserIdData = await getCurrentUserId();
-
-      setGameResultIndex(gameResultsDataLists);
-      setPlateAppearance(plateAppearanceDataLists);
       setCurrentUserId(currentUserIdData);
     } catch (error) {
       console.log(`game lists fetch error:`, error);

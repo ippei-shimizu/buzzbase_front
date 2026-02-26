@@ -9,9 +9,6 @@ import {
   Divider,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getTeamName } from "@app/services/teamsService";
-import { getTournamentName } from "@app/services/tournamentsService";
 
 type GameResultItem = {
   game_result_id: number;
@@ -19,10 +16,13 @@ type GameResultItem = {
     match_type: string;
     date_and_time: string;
     opponent_team_id: number;
+    opponent_team_name?: string;
     tournament_id: number | null;
+    tournament_name?: string;
     my_team_score: number;
     opponent_team_score: number;
   };
+  plate_appearances?: PlateAppearance[];
   pitching_result?: {
     innings_pitched: number;
     run_allowed: number;
@@ -31,67 +31,20 @@ type GameResultItem = {
   };
 };
 
-type PlateAppearanceItem = {
-  id: number;
-  batting_result: string;
-  game_result_id: number;
-  batter_box_number: number;
-};
-
-type MatchResultsItemProps = {
-  gameResult: GameResultItem[];
-  plateAppearance: PlateAppearanceItem[][];
-};
-
-type TeamNames = {
-  [key: string]: string;
-};
-
-type TournamentNames = {
-  [key: string]: string;
-};
-
 type PlateAppearance = {
   id: number;
   batting_result: string;
   game_result_id: number;
+  batter_box_number?: number;
+};
+
+type MatchResultsItemProps = {
+  gameResult: GameResultItem[];
 };
 
 export default function MatchResultsItem(props: MatchResultsItemProps) {
-  const { gameResult, plateAppearance } = props;
-  const [opponentTeamNames, setOpponentTeamNames] = useState<TeamNames>({});
-  const [tournamentNames, setTournamentNames] = useState<TournamentNames>({});
+  const { gameResult } = props;
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchTeamNames = async () => {
-      const names: TeamNames = {};
-      const namesTournament: TournamentNames = {};
-
-      for (const game of gameResult) {
-        if (game.match_result && game.match_result.opponent_team_id) {
-          const teamName = await getTeamName(
-            game.match_result.opponent_team_id,
-          );
-          names[game.match_result.opponent_team_id] = teamName;
-          if (game.match_result && game.match_result.tournament_id) {
-            const tournamentName = await getTournamentName(
-              game.match_result.tournament_id,
-            );
-            namesTournament[game.match_result.tournament_id] = tournamentName;
-          } else {
-            namesTournament[String(game.match_result?.tournament_id ?? "")] =
-              "";
-          }
-        }
-      }
-
-      setOpponentTeamNames(names);
-      setTournamentNames(namesTournament);
-    };
-
-    fetchTeamNames();
-  }, [gameResult]);
 
   const renderScoreResult = (match: {
     my_team_score: number;
@@ -236,11 +189,7 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                 )}
               </div>
               <p className="text-sm mt-2 text-zinc-400">
-                {
-                  tournamentNames[
-                    String(game.match_result?.tournament_id ?? "")
-                  ]
-                }
+                {game.match_result?.tournament_name || ""}
               </p>
               <div className="flex gap-x-3 items-center mt-1">
                 <div className="flex gap-x-2 items-baseline">
@@ -257,11 +206,7 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                     vs.
                   </span>
                   <p className="text-base font-bold">
-                    {
-                      opponentTeamNames[
-                        String(game.match_result?.opponent_team_id ?? "")
-                      ]
-                    }
+                    {game.match_result?.opponent_team_name || ""}
                   </p>
                 </div>
               </div>
@@ -269,32 +214,19 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
             <Divider className="my-3" />
             <CardBody className="p-0 table-column-group gap-y-1">
               <div>
-                {plateAppearance
-                  .flat()
-                  .filter(
-                    (plate: PlateAppearance) =>
-                      plate.game_result_id === game.game_result_id,
-                  ).length > 0 && (
+                {(game.plate_appearances ?? []).length > 0 && (
                   <p className="text-sm font-normal text-zinc-400">打撃</p>
                 )}
                 <ul className="flex flex-wrap gap-2 ">
-                  {plateAppearance
-                    .flat()
-                    .filter(
-                      (plate: PlateAppearance) =>
-                        plate.game_result_id == game.game_result_id,
-                    ).length > 0 ? (
-                    plateAppearance
-                      .flat()
-                      .filter(
-                        (plate: PlateAppearance) =>
-                          plate.game_result_id == game.game_result_id,
-                      )
+                  {(game.plate_appearances ?? []).length > 0 ? (
+                    [...(game.plate_appearances ?? [])]
                       .sort(
                         (
-                          a: { batter_box_number: number },
-                          b: { batter_box_number: number },
-                        ) => a.batter_box_number - b.batter_box_number,
+                          a: { batter_box_number?: number },
+                          b: { batter_box_number?: number },
+                        ) =>
+                          (a.batter_box_number ?? 0) -
+                          (b.batter_box_number ?? 0),
                       )
                       .map((plate: PlateAppearance) => (
                         <li
