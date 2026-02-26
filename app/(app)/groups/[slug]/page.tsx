@@ -17,7 +17,7 @@ import { MenuIcon } from "@app/components/icon/MenuIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingTable";
 import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroupDetail } from "@app/services/groupService";
 
 type GroupDetailProps = {
@@ -186,13 +186,7 @@ export default function GroupDetail(props: GroupDetailProps) {
     useState<PitchingAggregate[]>();
   const [pitchingStats, setPitchingStats] = useState<PitchingStats[]>();
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signup?auth_required=true");
-    }
-  }, [router, isLoggedIn]);
+  useRequireAuth();
 
   useEffect(() => {
     fetchData();

@@ -9,7 +9,7 @@ import HeaderResult from "@app/components/header/HeaderResult";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   checkExistingBattingAverage,
   createBattingAverage,
@@ -193,13 +193,7 @@ export default function BattingRecord() {
   >(null);
   const pathname = usePathname();
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signup?auth_required=true");
-    }
-  }, [router, isLoggedIn]);
+  useRequireAuth();
 
   const fetchData = async () => {
     try {

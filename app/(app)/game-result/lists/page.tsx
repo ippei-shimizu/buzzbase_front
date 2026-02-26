@@ -7,7 +7,7 @@ import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import MatchResultList from "@app/components/user/MatchResultList";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { createGameResult } from "@app/services/gameResultsService";
 import { getCurrentUserId } from "@app/services/userService";
 
@@ -15,13 +15,7 @@ export default function GameResultList() {
   const [currentUserId, setCurrentUserId] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signup?auth_required=true");
-    }
-  }, [router, isLoggedIn]);
+  useRequireAuth();
 
   const fetchData = async () => {
     try {

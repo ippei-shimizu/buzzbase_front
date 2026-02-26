@@ -2,11 +2,10 @@
 import type { GroupsData } from "@app/interface";
 import { Avatar, Button, Divider } from "@heroui/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroups } from "@app/services/groupService";
 import { getCurrentUserId } from "@app/services/userService";
 
@@ -15,14 +14,7 @@ export default function Group() {
   const [currentUserId, setCurrentUserId] = useState<number | undefined>(
     undefined,
   );
-  const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signup?auth_required=true");
-    }
-  }, [router, isLoggedIn]);
+  useRequireAuth();
 
   const fetchUserIdData = async () => {
     try {

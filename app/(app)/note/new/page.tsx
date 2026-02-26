@@ -2,11 +2,11 @@
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { SetStateAction, useEffect, useMemo, useState } from "react";
+import { SetStateAction, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { createBaseballNote } from "@app/services/baseballNoteService";
 
 const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
@@ -18,13 +18,7 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
 
 export default function NoteNew() {
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signup?auth_required=true");
-    }
-  }, [isLoggedIn, router]);
+  useRequireAuth();
 
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
