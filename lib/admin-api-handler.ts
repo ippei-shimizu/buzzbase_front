@@ -66,7 +66,13 @@ export function withAdminErrorHandler(
 function handleApiError(error: unknown, logErrors: boolean): NextResponse {
   if (logErrors) {
     console.error("Admin API Error:", error);
-    Sentry.captureException(error);
+
+    // 予期されるエラー（認証エラー、権限エラー等）はSentryに送信しない
+    const isExpectedError =
+      error instanceof AdminApiError && error.status < 500;
+    if (!isExpectedError) {
+      Sentry.captureException(error);
+    }
   }
 
   // AdminApiErrorの場合

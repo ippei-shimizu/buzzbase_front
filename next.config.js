@@ -42,4 +42,7 @@ const nextConfig = {
 module.exports = withSentryConfig(nextConfig, {
   silent: true,
   hideSourceMaps: true,
+  // NOTE: ソースマップのSentryへのアップロードは未設定
+  // 有効にするには org, project, authToken の設定が必要
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/#configure-source-maps
 });
