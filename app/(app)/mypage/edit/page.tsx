@@ -18,7 +18,7 @@ import PlusButton from "@app/components/button/PlusButton";
 import HeaderSave from "@app/components/header/HeaderSave";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import SaveSpinner from "@app/components/spinner/SavingSpinner";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   createAward,
   deleteAward,
@@ -108,13 +108,7 @@ export default function ProfileEdit() {
   const [awards, setAwards] = useState<UserAwards[]>([]);
 
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signin");
-    }
-  }, [isLoggedIn, router]);
+  const isLoggedIn = useRequireAuth();
 
   const handleImageClick = () => {
     fileInputRef.current?.click();

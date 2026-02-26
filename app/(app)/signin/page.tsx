@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import React, { Suspense, useEffect, useState } from "react";
 import SignIn from "@app/components/auth/SignIn";
@@ -11,7 +12,6 @@ function SignInContent() {
   const [toastTimedOut, setToastTimedOut] = useState(false);
   const confirmationUrl = searchParams.get("account_confirmation_success");
   const logoutParams = searchParams.get("logout");
-
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
 
@@ -53,6 +53,12 @@ function SignInContent() {
           )}
           <h2 className="text-2xl font-bold mb-9">ログイン</h2>
           <SignIn />
+          <p className="text-sm text-zinc-400 mt-8 text-center">
+            まだ登録していない方は
+            <Link href="/signup" className="text-yellow-500 ml-1">
+              新規会員登録（無料）
+            </Link>
+          </p>
         </div>
       </div>
     </>

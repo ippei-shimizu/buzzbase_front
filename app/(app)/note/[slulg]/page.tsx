@@ -8,6 +8,7 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import NoteMenu from "@app/components/note/NoteMenu";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import showBaseballNote from "@app/hooks/note/showBaseballNote";
 import { updateBaseballNote } from "@app/services/baseballNoteService";
 
@@ -29,6 +30,7 @@ export default function NoteDetail(props: {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const router = useRouter();
+  useRequireAuth();
   const { note, isLoading, isError } = showBaseballNote(noteId);
 
   const initialValues = useMemo(
