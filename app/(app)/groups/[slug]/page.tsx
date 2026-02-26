@@ -190,7 +190,7 @@ export default function GroupDetail(props: GroupDetailProps) {
 
   useEffect(() => {
     if (isLoggedIn === false) {
-      return router.push("/signin");
+      return router.push("/signup?auth_required=true");
     }
   }, [router, isLoggedIn]);
 
