@@ -1,9 +1,8 @@
 export const UserRecordIcon = ({
   fill = "#f4f4f4",
-  size = "22",
+  _size = "22",
   height = "22",
   width = "22",
-  ...props
 }) => {
   return (
     <svg

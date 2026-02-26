@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { notoSansJP } from "@app/font";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
+import { notoSansJP } from "@app/font";
 
 const siteName = "BUZZ BASE 野球の個人成績をランキング形式で共有できるアプリ";
 const description =

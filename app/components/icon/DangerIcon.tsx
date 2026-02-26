@@ -1,7 +1,7 @@
 export const DangerIcon = ({
   fill = "",
-  filled = "",
-  size = "22",
+  _filled = "",
+  _size = "22",
   height = "22",
   width = "22",
   label = "",

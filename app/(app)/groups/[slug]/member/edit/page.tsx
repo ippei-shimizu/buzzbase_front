@@ -1,38 +1,44 @@
 "use client";
+import type { AcceptedUsers } from "@app/interface";
+import { Checkbox, User } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, use } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { getGroupDetailUsers, updateGroup } from "@app/services/groupService";
-import { Avatar, Checkbox, Input, User } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
-export default function GroupMember({ params }: { params: { slug: string } }) {
+export default function GroupMember(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = use(props.params);
   const groupId = Number(params.slug);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
-  const [isGroupUsers, setIsGroupUsers] = useState(true);
+  const [_isGroupUsers, setIsGroupUsers] = useState(true);
   const [groupMember, setGroupMember] = useState<AcceptedUsers[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    if (groupId) {
-      fetchGroupDetails(groupId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupId]);
 
   const fetchGroupDetails = async (groupId: number) => {
     try {
       const data = await getGroupDetailUsers(groupId);
       setGroupMember(data.accepted_users);
-      const acceptedUserIds = data.accepted_users.map((user: any) => user.id);
+      const acceptedUserIds = data.accepted_users.map(
+        (user: AcceptedUsers) => user.id,
+      );
       setSelectedUserIds(acceptedUserIds);
     } catch (error) {
       console.error("グループメンバーを取得できませんでした。", error);
     }
   };
+
+  useEffect(() => {
+    if (groupId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchGroupDetails(groupId);
+    }
+  }, [groupId]);
 
   const handleCheckboxChange = (userId: number, isChecked: boolean) => {
     setSelectedUserIds((prevSelectedUserIds) => {
@@ -53,7 +59,7 @@ export default function GroupMember({ params }: { params: { slug: string } }) {
 
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (selectedUserIds.length === 0) {
       setIsGroupUsers(false);
@@ -70,7 +76,7 @@ export default function GroupMember({ params }: { params: { slug: string } }) {
     return isValid;
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!validateForm() || isSubmitting) {
       return;
@@ -94,7 +100,9 @@ export default function GroupMember({ params }: { params: { slug: string } }) {
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"メンバー退会"}
         />

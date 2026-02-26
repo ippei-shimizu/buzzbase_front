@@ -1,8 +1,10 @@
-import { Skeleton } from "@nextui-org/react";
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import NotificationBadge from "@app/components/notification/NotificationBadge";
+"use client";
+
+import { Skeleton } from "@heroui/react";
 import HeaderLoginAndSignUp from "@app/components/auth/HeaderLoginAndSignUp";
+import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function HeaderRight() {
   const { isLoggedIn, loading } = useAuthContext();

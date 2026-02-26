@@ -1,9 +1,8 @@
 export const MenuIcon = ({
-  size = "22",
+  _size = "22",
   height = "22",
   width = "22",
   fill = "",
-  ...props
 }) => {
   return (
     <svg

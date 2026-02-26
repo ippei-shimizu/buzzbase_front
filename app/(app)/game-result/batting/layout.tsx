@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+
 export const metadata: Metadata = {
   title: "打撃成績を記録",
   description:

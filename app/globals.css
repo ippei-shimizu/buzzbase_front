@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 html {
   background-color: #2e2e2e !important;
@@ -8,6 +7,9 @@ html {
 
 body {
   font-weight: 400;
+  color: #f4f4f4;
+  --mantine-color-text: #f4f4f4;
+  --mantine-color-body: #f4f4f4;
 }
 
 [data-overlay-container="true"] {
@@ -25,4 +27,24 @@ body {
 
 label {
   white-space: nowrap;
+}
+
+/* HeroUI + Tailwind v4 のフォーカスリング非表示
+   v4 では outline-focus カスタムユーティリティが解決されず
+   outline-color が currentColor（白）にフォールバックする問題を修正 */
+.buzz-dark :focus-visible,
+.buzz-dark [data-focus-visible="true"] {
+  outline-color: transparent !important;
+}
+
+/* HeroUI underlined variant の下線復元（ダークテーマ）
+   border-b-medium が Tailwind v3 で正しく解決されないため直接指定 */
+.buzz-dark [data-slot="trigger"][class*="rounded-none"],
+.buzz-dark [data-slot="input-wrapper"][class*="rounded-none"] {
+  border-bottom: 2px solid #52525b;
+}
+
+/* flex-col min-h-screen コンテナ内のコンテンツが画面いっぱいに伸びるように */
+.flex.flex-col.min-h-screen > .bg-main {
+  flex-grow: 1;
 }

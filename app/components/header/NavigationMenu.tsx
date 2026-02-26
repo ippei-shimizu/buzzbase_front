@@ -1,16 +1,10 @@
 "use client";
 import "@app/globals.css";
-import NavigationItems from "./NavigationItems";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
-
-type currentUserData = {
-  user_id: string;
-  image: any;
-  url: string;
-};
+import NavigationItems from "./NavigationItems";
 
 export default function NavigationMenu() {
   const pathName = usePathname();
@@ -50,7 +44,7 @@ export default function NavigationMenu() {
               <li key={index}>
                 <Link
                   href={item.href}
-                  className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible fontSize10 font-medium ${
+                  className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
                     isActive(pathName, item.href)
                       ? `text-yellow-500`
                       : `text-white`

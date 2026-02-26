@@ -1,82 +1,29 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getAdminUsers } from "./actions";
-import AdminUserTable from "./_components/AdminUserTable";
 import AdminUserForm from "./_components/AdminUserForm";
+import AdminUserTable from "./_components/AdminUserTable";
 import DeleteConfirmDialog from "./_components/DeleteConfirmDialog";
+import { getAdminUsers } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     mode?: "create" | "edit" | "delete";
     id?: string;
     error?: string;
-  };
+  }>;
 }
 
-export default async function UsersPage({ searchParams }: PageProps) {
+export default async function UsersPage(props: PageProps) {
+  const searchParams = await props.searchParams;
   const { mode, id, error } = searchParams;
 
+  let users;
   try {
-    const users = await getAdminUsers();
-    const editingUser = id
-      ? users.find((user) => user.id === parseInt(id))
-      : null;
-
-    if (mode === "edit" && id && !editingUser) {
-      redirect("/admin-management-console/users");
-    }
-
-    return (
-      <div className="px-4 py-6 sm:px-0">
-        <div className="border-4 border-dashed border-gray-200 rounded-lg p-6">
-          <div className="sm:flex sm:items-center sm:justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                管理者ユーザー管理
-              </h2>
-              <p className="mt-2 text-sm text-gray-700">
-                管理者ユーザーの作成・編集・削除を行えます。
-              </p>
-            </div>
-            {!mode && (
-              <div className="mt-4 sm:mt-0">
-                <Link
-                  href="/admin-management-console/users?mode=create"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                  新規作成
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {mode === "create" || mode === "edit" ? (
-            <AdminUserForm user={editingUser} error={error} />
-          ) : mode === "delete" && editingUser ? (
-            <DeleteConfirmDialog user={editingUser} />
-          ) : (
-            <AdminUserTable users={users} />
-          )}
-        </div>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error loading users:", error);
+    users = await getAdminUsers();
+  } catch (_error) {
+    console.error("Error loading users:", _error);
 
     return (
       <div className="px-4 py-6 sm:px-0">
@@ -112,4 +59,60 @@ export default async function UsersPage({ searchParams }: PageProps) {
       </div>
     );
   }
+
+  const editingUser = id
+    ? users.find((user) => user.id === parseInt(id))
+    : null;
+
+  if (mode === "edit" && id && !editingUser) {
+    redirect("/admin-management-console/users");
+  }
+
+  return (
+    <div className="px-4 py-6 sm:px-0">
+      <div className="border-4 border-dashed border-gray-200 rounded-lg p-6">
+        <div className="sm:flex sm:items-center sm:justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              管理者ユーザー管理
+            </h2>
+            <p className="mt-2 text-sm text-gray-700">
+              管理者ユーザーの作成・編集・削除を行えます。
+            </p>
+          </div>
+          {!mode && (
+            <div className="mt-4 sm:mt-0">
+              <Link
+                href="/admin-management-console/users?mode=create"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                新規作成
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {mode === "create" || mode === "edit" ? (
+          <AdminUserForm user={editingUser} error={error} />
+        ) : mode === "delete" && editingUser ? (
+          <DeleteConfirmDialog user={editingUser} />
+        ) : (
+          <AdminUserTable users={users} />
+        )}
+      </div>
+    </div>
+  );
 }

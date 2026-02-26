@@ -1,7 +1,8 @@
-import { fetcher } from "@app/hooks/swrFetcher";
-import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
+import type { UserAwards } from "@app/interface";
 import { usePathname } from "next/navigation";
 import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
+import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
 
 export default function useUserAwards() {
   const pathName = usePathname();

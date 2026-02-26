@@ -1,6 +1,6 @@
-import { adminLogout } from "./auth/actions";
 import { getAdminUser } from "../../../lib/admin-auth";
 import Sidebar from "../_components/Sidebar";
+import { adminLogout } from "./auth/actions";
 
 interface AdminLayoutProps {
   children: React.ReactNode;

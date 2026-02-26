@@ -1,20 +1,17 @@
 "use client";
-import HeaderBack from "@app/components/header/HeaderBack";
-import FollowersUser from "@app/components/user/FollowersUser";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import HeaderBack from "@app/components/header/HeaderBack";
+import FollowersUser from "@app/components/user/FollowersUser";
 
 export default function Followers() {
-  const [userIdName, setUserIdName] = useState("");
   const pathName = usePathname();
 
-  useEffect(() => {
+  const userIdName = useMemo(() => {
     const pathParts = pathName.split("/");
     const userIdPart = pathParts[pathParts.length - 2];
-    if (userIdPart && userIdPart !== "undefined") {
-      setUserIdName(userIdPart);
-    }
+    return userIdPart && userIdPart !== "undefined" ? userIdPart : "";
   }, [pathName]);
 
   return (

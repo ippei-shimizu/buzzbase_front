@@ -1,9 +1,11 @@
-import { Avatar } from "@nextui-org/react";
+"use client";
+
+import { Avatar } from "@heroui/react";
 
 type UserData = {
   userData: {
     user: {
-      image: any;
+      image: { url: string };
       name: string;
       user_id: string;
       url: string;

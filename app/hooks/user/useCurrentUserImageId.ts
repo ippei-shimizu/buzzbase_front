@@ -1,5 +1,5 @@
-import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
 
 export default function useCurrentUserImageId() {
   const { data, error } = useSWR(

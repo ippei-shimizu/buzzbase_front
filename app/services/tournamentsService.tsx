@@ -1,3 +1,4 @@
+import type { TournamentData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getTournamentName = async (id: number | null) => {

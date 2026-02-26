@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
+import { useRouter } from "next/navigation";
+import { deleteBaseballNote } from "@app/services/baseballNoteService";
 import NoteMenu from "../NoteMenu";
 
 // Mock dependencies
@@ -19,12 +20,9 @@ jest.mock("next/navigation", () => ({
   })),
 }));
 
-import { deleteBaseballNote } from "@app/services/baseballNoteService";
-import { useRouter } from "next/navigation";
-
 describe("NoteMenu", () => {
   const mockPush = jest.fn();
-  const mockDeleteBaseballNote = deleteBaseballNote as jest.Mock;
+  const _mockDeleteBaseballNote = deleteBaseballNote as jest.Mock;
   const mockUseRouter = useRouter as jest.Mock;
 
   beforeEach(() => {

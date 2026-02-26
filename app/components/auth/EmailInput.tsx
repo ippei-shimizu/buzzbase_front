@@ -1,5 +1,8 @@
+"use client";
+
+import type { EmailInputProps } from "@app/interface";
+import { Input } from "@heroui/react";
 import { MailIcon } from "@app/components/icon/MailIcon";
-import { Input } from "@nextui-org/react";
 
 export default function EmailInput({
   value,

@@ -1,6 +1,6 @@
 "use client";
-import { fetcher } from "@app/hooks/swrFetcher";
 import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
 
 export function usePersonalPitchingResult(userId: number) {
   const { data, error } = useSWR(

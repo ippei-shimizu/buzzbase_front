@@ -1,8 +1,8 @@
 "use client";
+import type { NoteEditorProps } from "@app/interface";
 import { useState } from "react";
 import { createEditor, BaseEditor, Descendant } from "slate";
-import { Slate, Editable, withReact } from "slate-react";
-import { ReactEditor } from "slate-react";
+import { Slate, Editable, withReact, ReactEditor } from "slate-react";
 
 type CustomElement = { type: "paragraph"; children: CustomText[] };
 type CustomText = { text: string };

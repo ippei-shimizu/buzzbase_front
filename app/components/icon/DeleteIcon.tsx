@@ -1,10 +1,10 @@
 import React from "react";
+
 export const DeleteIcon = ({
   fill = "",
   height = "",
   width = "",
   stroke = "",
-  ...props
 }) => {
   return (
     <svg

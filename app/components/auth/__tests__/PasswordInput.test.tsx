@@ -83,7 +83,7 @@ describe("PasswordInput", () => {
   });
 
   it("isInvalidがtrueの時、colorがdangerになる", () => {
-    const { container } = render(
+    const { container: _container } = render(
       <PasswordInput
         {...defaultProps}
         isInvalid={true}

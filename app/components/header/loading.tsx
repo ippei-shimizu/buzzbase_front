@@ -1,4 +1,6 @@
-import { Skeleton } from "@nextui-org/react";
+"use client";
+
+import { Skeleton } from "@heroui/react";
 
 export default function Loading() {
   return (

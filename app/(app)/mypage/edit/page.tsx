@@ -1,4 +1,18 @@
 "use client";
+import type { AwardData, UserAwards } from "@app/interface";
+import type { SharedSelection } from "@heroui/system";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  Avatar,
+  Button,
+  Input,
+  Select,
+  SelectItem,
+  Textarea,
+} from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PlusButton from "@app/components/button/PlusButton";
 import HeaderSave from "@app/components/header/HeaderSave";
@@ -22,23 +36,7 @@ import {
   getTeams,
   updateTeam,
 } from "@app/services/teamsService";
-import {
-  getCurrentUserId,
-  getUserData,
-  updateProfile,
-} from "@app/services/userService";
-import {
-  Autocomplete,
-  AutocompleteItem,
-  Avatar,
-  Button,
-  Input,
-  Select,
-  SelectItem,
-  Textarea,
-} from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getUserData, updateProfile } from "@app/services/userService";
 
 type Position = {
   userId: string;
@@ -108,8 +106,6 @@ export default function ProfileEdit() {
   );
   const [deletedAwards, setDeletedAwards] = useState<number[]>([]);
   const [awards, setAwards] = useState<UserAwards[]>([]);
-  const [updatedAwards, setUpdatedAwards] = useState<UserAwards[]>([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
 
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
@@ -127,10 +123,6 @@ export default function ProfileEdit() {
   // ユーザーデータ取得
   const fetchData = async () => {
     try {
-      if (isLoggedIn == true) {
-        const currentUserIdData = await getCurrentUserId();
-        setCurrentUserId(currentUserIdData);
-      }
       const data = await getUserData();
       setProfile({
         name: data.name,
@@ -156,7 +148,7 @@ export default function ProfileEdit() {
       const teamsData = await getTeams();
       setTeams(teamsData);
 
-      const positionIds = data.positions.map((position: any) =>
+      const positionIds = data.positions.map((position: { id: number }) =>
         position.id.toString(),
       );
       setSelectedPositionIds(positionIds);
@@ -164,7 +156,7 @@ export default function ProfileEdit() {
       // チーム初期値設定
       if (data.team_id) {
         const userTeam = teamsData.find(
-          (team: { id: any }) => team.id === data.team_id,
+          (team: { id: number }) => team.id === data.team_id,
         );
         if (userTeam) {
           setTeamName(userTeam.name);
@@ -187,14 +179,17 @@ export default function ProfileEdit() {
       } else {
         setAwards([{ id: Date.now(), title: "" }]);
       }
-    } catch (error: any) {
-      setErrors(error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrors([error.message]);
+      } else {
+        setErrors(["データの取得に失敗しました"]);
+      }
     }
   };
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
   // disabled制御
@@ -203,11 +198,12 @@ export default function ProfileEdit() {
   }, [teamName]);
 
   // ポジション選択
-  const handleSelectChange = (keys: any) => {
+  const handleSelectChange = (keys: SharedSelection) => {
+    if (keys === "all") return;
     setSelectedPositionIds(Array.from(keys).map(String));
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "image") {
       const previewFileUrl =
         e.target.files && e.target.files[0]
@@ -233,7 +229,7 @@ export default function ProfileEdit() {
   };
 
   // データ送信
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isInvalid) {
       setErrorsWithTimeout(["名前が未入力、または無効です。"]);
@@ -351,7 +347,8 @@ export default function ProfileEdit() {
 
   const isInvalid = useMemo(() => {
     return profile.name === "" || !validateUserName(profile.name);
-  }, [profile.name, validateUserName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.name]);
 
   // カテゴリーをフィルタリング
   const handleBaseballCategoryChange = (value: string) => {
@@ -372,8 +369,12 @@ export default function ProfileEdit() {
   };
 
   // prefecture_id set
-  const handlePrefectureChange = (event: { target: { value: any } }) => {
-    setSelectedPrefectureId(event.target.value);
+  const handlePrefectureChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedPrefectureId(
+      event.target.value ? Number(event.target.value) : undefined,
+    );
   };
 
   // 既にdbに保存されているチーム名選択時の処理
@@ -412,10 +413,6 @@ export default function ProfileEdit() {
       return award;
     });
     setAwards(newAwards);
-    if (awards[index].id) {
-      const updatedAward = { id: awards[index].id, title: value };
-      setUpdatedAwards((prevAwards) => [...prevAwards, updatedAward]);
-    }
   };
 
   const addAward = () => {
@@ -434,7 +431,11 @@ export default function ProfileEdit() {
 
   return (
     <div className="buzz-dark bg-main pb-24 flex flex-col w-full min-h-screen ">
-      <HeaderSave onProfileUpdate={() => handleSubmit(new Event("submit"))} />
+      <HeaderSave
+        onProfileUpdate={() =>
+          handleSubmit(new Event("submit") as unknown as React.FormEvent)
+        }
+      />
       <div className="h-full buzz-dark">
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-12 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 ">
@@ -516,7 +517,6 @@ export default function ProfileEdit() {
                   {positions.map((position) => (
                     <SelectItem
                       key={position.id}
-                      value={position.id}
                       textValue={position.name.toString()}
                     >
                       {position.name}
@@ -545,11 +545,7 @@ export default function ProfileEdit() {
                 >
                   {teams
                     ? teams.map((team) => (
-                        <AutocompleteItem
-                          key={team.id}
-                          value={team.id}
-                          textValue={team.name}
-                        >
+                        <AutocompleteItem key={team.id} textValue={team.name}>
                           {team.name}
                         </AutocompleteItem>
                       ))
@@ -575,7 +571,6 @@ export default function ProfileEdit() {
                   {baseballCategories.map((baseballCategory) => (
                     <AutocompleteItem
                       key={baseballCategory.id}
-                      value={baseballCategory.id}
                       textValue={`${baseballCategory.name}| ${baseballCategory.hiragana} ${baseballCategory.katakana} ${baseballCategory.alphabet}`}
                     >
                       {baseballCategory.name}
@@ -597,11 +592,7 @@ export default function ProfileEdit() {
                   }
                 >
                   {prefectures.map((prefecture) => (
-                    <SelectItem
-                      key={prefecture.id}
-                      value={prefecture.id.toString()}
-                      textValue={prefecture.name}
-                    >
+                    <SelectItem key={prefecture.id} textValue={prefecture.name}>
                       {prefecture.name}
                     </SelectItem>
                   ))}

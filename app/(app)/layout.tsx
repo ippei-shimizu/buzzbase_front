@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Providers } from "@app/providers";
+import Footer from "@app/components/footer/Footer";
+import NavigationMenu from "@app/components/header/NavigationMenu";
 import { AuthProvider } from "@app/contexts/useAuthContext";
 import { UserProvider } from "@app/contexts/userContext";
-import NavigationMenu from "@app/components/header/NavigationMenu";
-import Footer from "@app/components/footer/Footer";
+import { Providers } from "@app/providers";
 
 export const metadata: Metadata = {
   title: {

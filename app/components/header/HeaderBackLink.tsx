@@ -1,6 +1,8 @@
-import { BackIcon } from "@app/components/icon/BackIcon";
-import { Avatar } from "@nextui-org/react";
+"use client";
+
+import { Avatar } from "@heroui/react";
 import Link from "next/link";
+import { BackIcon } from "@app/components/icon/BackIcon";
 
 type Props = {
   backLink: string;

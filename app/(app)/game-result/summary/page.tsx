@@ -1,4 +1,14 @@
 "use client";
+import type {
+  BattingAverage,
+  MatchResult,
+  PitchingResult,
+  PlateAppearanceSummary,
+} from "@app/interface";
+import { Chip, Divider } from "@heroui/react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import { getCurrentBattingAverage } from "@app/services/battingAveragesService";
@@ -12,10 +22,18 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
-import { Chip, Divider } from "@nextui-org/react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+
+type MatchResultDisplay = MatchResult & {
+  id: number;
+  match_type: string;
+  date_and_time: string;
+  batting_order: string;
+  memo?: string | null;
+  tournament_name?: string;
+  my_team_name?: string;
+};
+
+type BattingAverageDisplay = BattingAverage;
 
 const battingOrder = [
   { id: 1, turn: "1番" },
@@ -30,7 +48,7 @@ const battingOrder = [
 ];
 
 export default function ResultsSummary() {
-  const [matchResult, setMatchResult] = useState<MatchResult[]>([]);
+  const [matchResult, setMatchResult] = useState<MatchResultDisplay[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
   >([]);
@@ -89,19 +107,19 @@ export default function ResultsSummary() {
   // 試合データ取得
   const fetchCurrentResultData = async (localStorageGameResultId: number) => {
     try {
-      const matchResultData = await getCurrentMatchResult(
-        localStorageGameResultId,
-      );
-      const battingAverageData = await getCurrentBattingAverage(
-        localStorageGameResultId,
-      );
-      const pitchingResultData = await getCurrentPitchingResult(
-        localStorageGameResultId,
-      );
-      const plateAppearanceData = await getCurrentPlateAppearance(
-        localStorageGameResultId,
-      );
-      const currentUserIdData = await getCurrentUserId();
+      const [
+        matchResultData,
+        battingAverageData,
+        pitchingResultData,
+        plateAppearanceData,
+        currentUserIdData,
+      ] = await Promise.all([
+        getCurrentMatchResult(localStorageGameResultId),
+        getCurrentBattingAverage(localStorageGameResultId),
+        getCurrentPitchingResult(localStorageGameResultId),
+        getCurrentPlateAppearance(localStorageGameResultId),
+        getCurrentUserId(),
+      ]);
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
       }
@@ -232,7 +250,7 @@ export default function ResultsSummary() {
     return `${wholePart}回${fractionalString ? `${fractionalString}` : ""}`;
   };
 
-  const handleShare = () => {};
+  const _handleShare = () => {};
   const handleResultComplete = () => {
     router.push("/game-result/lists");
   };
@@ -261,7 +279,7 @@ export default function ResultsSummary() {
             {/* 試合情報 */}
             <div className="mt-6 py-5 px-6 bg-bg_sub rounded-xl">
               {matchResult ? (
-                matchResult.map((match: any) => (
+                matchResult.map((match: MatchResultDisplay) => (
                   <div key={match.id}>
                     <div className="flex items-center gap-x-2">
                       <Chip
@@ -319,7 +337,7 @@ export default function ResultsSummary() {
               {/* 打撃成績 */}
               <div>
                 {battingAverage ? (
-                  battingAverage.map((batting: any) => (
+                  battingAverage.map((batting: BattingAverageDisplay) => (
                     <div key={batting.id}>
                       <p className="text-xs text-zinc-400">打撃</p>
                       <ul className="flex flex-wrap gap-2 mt-2">
@@ -478,7 +496,7 @@ export default function ResultsSummary() {
                 <div className="mt-2 border-1 border-zinc-500 rounded-lg p-3">
                   {memo
                     ?.split("\n")
-                    .map((line: any, index: any, array: any) => (
+                    .map((line: string, index: number, array: string[]) => (
                       <p key={index} className="text-sm text-zinc-200">
                         {line}
                         {index < array.length - 1 && <br />}

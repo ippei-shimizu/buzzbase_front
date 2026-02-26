@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
 import ResultsSelectBox from "@app/components/select/ResultsSelectBox";
 import { gameType, years } from "@app/data/TestData";
@@ -13,11 +14,30 @@ import {
   getCurrentPlateAppearance,
   getCurrentPlateAppearanceUserId,
 } from "@app/services/plateAppearanceService";
-import { getCurrentUserId } from "@app/services/userService";
-import { useCallback, useEffect, useState } from "react";
 
 type GameResult = {
   game_result_id: number;
+  match_result?: {
+    match_type: string;
+    date_and_time: string;
+    opponent_team_id: number;
+    tournament_id: number | null;
+    my_team_score: number;
+    opponent_team_score: number;
+  };
+  pitching_result?: {
+    innings_pitched: number;
+    run_allowed: number;
+    win: number;
+    loss: number;
+  };
+};
+
+type PlateAppearanceData = {
+  id: number;
+  batting_result: string;
+  game_result_id: number;
+  batter_box_number: number;
 };
 
 type UserId = {
@@ -31,14 +51,15 @@ type AvailableMatchType = string;
 export default function MatchResultList(props: UserId) {
   const { userId } = props;
   const [availableYears, setAvailableYears] = useState<AvailableYear[]>([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [selectedYear, setSelectedYear] = useState("通算");
   const [availableMatchType, setAvailableMatchType] = useState<AvailableYear[]>(
     [],
   );
   const [selectedMatchType, setSelectedMatchType] = useState("全て");
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
-  const [plateAppearance, setPlateAppearance] = useState<GameResult[]>([]);
+  const [plateAppearance, setPlateAppearance] = useState<
+    PlateAppearanceData[][]
+  >([]);
 
   const fetchFilteredData = useCallback(async () => {
     try {
@@ -57,14 +78,10 @@ export default function MatchResultList(props: UserId) {
             getCurrentPlateAppearanceUserId(userId, gameResult.game_result_id),
           ),
         );
-        (dateString: string) => {
-          const date = new Date(dateString);
-          return date.getFullYear();
-        };
         // ユーザーごとシーズン
         const matchResultData = await getMatchResultsUserId(userId);
         const matchResultDate = matchResultData.map(
-          (result: any) => result.date_and_time,
+          (result: { date_and_time: string }) => result.date_and_time,
         );
         const yearArray: AvailableYear[] = matchResultDate.map(
           (dateString: string) => {
@@ -77,7 +94,7 @@ export default function MatchResultList(props: UserId) {
         setAvailableYears(uniqueYears);
         // ユーザーごと試合タイプ
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
-          (type: any) => type.match_type,
+          (type: { match_type: string }) => type.match_type,
         );
         const uniqueMatchType = Array.from(new Set(matchTypeData));
         const uniqueMatchTypeChange = uniqueMatchType.map((type) => {
@@ -93,11 +110,16 @@ export default function MatchResultList(props: UserId) {
         setAvailableMatchType(uniqueMatchTypeChange);
       }
       if (filteredGameResultData && filteredGameResultData.length > 0) {
-        filteredGameResultData.sort((a: any, b: any) => {
-          const dateA = new Date(a.match_result.date_and_time).getTime();
-          const dateB = new Date(b.match_result.date_and_time).getTime();
-          return dateB - dateA;
-        });
+        filteredGameResultData.sort(
+          (
+            a: { match_result: { date_and_time: string } },
+            b: { match_result: { date_and_time: string } },
+          ) => {
+            const dateA = new Date(a.match_result.date_and_time).getTime();
+            const dateB = new Date(b.match_result.date_and_time).getTime();
+            return dateB - dateA;
+          },
+        );
       }
       if (filteredGameResultData && plateAppearanceDataLists) {
         setGameResultIndex(filteredGameResultData);
@@ -137,10 +159,9 @@ export default function MatchResultList(props: UserId) {
           getCurrentPlateAppearance(gameResult.game_result_id),
         ),
       );
-      const currentUserIdData = await getCurrentUserId();
       const matchResultData = await getMatchResults();
       const matchResultDate = matchResultData.map(
-        (result: any) => result.date_and_time,
+        (result: { date_and_time: string }) => result.date_and_time,
       );
       const yearArray: AvailableYear[] = matchResultDate.map(
         (dateString: string) => {
@@ -153,7 +174,7 @@ export default function MatchResultList(props: UserId) {
       setAvailableYears(uniqueYears);
 
       const matchTypeData: AvailableMatchType[] = matchResultData.map(
-        (type: any) => type.match_type,
+        (type: { match_type: string }) => type.match_type,
       );
       const uniqueMatchType = Array.from(new Set(matchTypeData));
       const uniqueMatchTypeChange = uniqueMatchType.map((type) => {
@@ -165,26 +186,32 @@ export default function MatchResultList(props: UserId) {
           return type;
         }
       });
-      gameResultsDataLists.sort((a: any, b: any) => {
-        const dateA = new Date(a.match_result.date_and_time).getTime();
-        const dateB = new Date(b.match_result.date_and_time).getTime();
-        return dateB - dateA;
-      });
+      gameResultsDataLists.sort(
+        (
+          a: { match_result: { date_and_time: string } },
+          b: { match_result: { date_and_time: string } },
+        ) => {
+          const dateA = new Date(a.match_result.date_and_time).getTime();
+          const dateB = new Date(b.match_result.date_and_time).getTime();
+          return dateB - dateA;
+        },
+      );
       uniqueMatchTypeChange.unshift("全て");
       setAvailableMatchType(uniqueMatchTypeChange);
       setGameResultIndex(gameResultsDataLists);
       setPlateAppearance(plateAppearanceDataLists);
-      setCurrentUserId(currentUserIdData);
     } catch (error) {
       console.log(`game lists fetch error:`, error);
     }
   };
 
-  const handleYearChange = (event: any) => {
+  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(event.target.value);
   };
 
-  const handleMatchTypeChange = (event: any) => {
+  const handleMatchTypeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     setSelectedMatchType(event.target.value);
   };
   return (

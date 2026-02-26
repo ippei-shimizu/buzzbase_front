@@ -1,7 +1,8 @@
-import axiosInstance from "@app/utils/axiosInstance";
+import type { updateUser as UpdateUserData } from "@app/interface";
 import Cookies from "js-cookie";
+import axiosInstance from "@app/utils/axiosInstance";
 
-export const updateUser = async (data: updateUser) => {
+export const updateUser = async (data: UpdateUserData) => {
   const headers = {
     "access-token": Cookies.get("access-token"),
     client: Cookies.get("client"),

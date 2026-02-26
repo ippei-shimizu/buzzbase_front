@@ -1,10 +1,10 @@
 export const GroupIcon = ({
   fill = "",
-  filled = "",
-  size = "26",
+  _filled = "",
+  _size = "26",
   height = "26",
   width = "26",
-  label = "",
+  _label = "",
   ...props
 }) => {
   return (

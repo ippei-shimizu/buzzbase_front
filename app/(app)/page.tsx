@@ -1,5 +1,14 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import HeaderTop from "@app/components/header/HeaderTop";
-import Top from "@app/components/page/Top";
+
+// NOTE: Top コンポーネントは Mantine UI を使用しており、
+// SSR 時の hydration エラーを回避するためクライアントサイドのみでレンダリングする
+const Top = dynamic(() => import("@app/components/page/Top"), {
+  ssr: false,
+  loading: () => <div className="w-full min-h-screen animate-pulse" />,
+});
 
 export default function Home() {
   return (

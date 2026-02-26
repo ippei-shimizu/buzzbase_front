@@ -1,11 +1,4 @@
 "use client";
-import HeaderBackLink from "@app/components/header/HeaderBackLink";
-import { MenuIcon } from "@app/components/icon/MenuIcon";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingTable";
-import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
-import { useAuthContext } from "@app/contexts/useAuthContext";
-import { getGroupDetail } from "@app/services/groupService";
 import {
   Button,
   Dropdown,
@@ -14,16 +7,23 @@ import {
   DropdownItem,
   Tab,
   Tabs,
-} from "@nextui-org/react";
+} from "@heroui/react";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import React from "react";
+import React, { useEffect, useState, use } from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
+import HeaderBackLink from "@app/components/header/HeaderBackLink";
+import { MenuIcon } from "@app/components/icon/MenuIcon";
+import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingTable";
+import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { getGroupDetail } from "@app/services/groupService";
 
 type GroupDetailProps = {
-  params: {
+  params: Promise<{
     slug: number;
-  };
+  }>;
 };
 
 type GroupsDetailData = {
@@ -146,11 +146,40 @@ const PitchingResultTitle = [
   { id: 5, title: "勝率", Link: "#winPercentage" },
 ];
 
-export default function GroupDetail({ params }: GroupDetailProps) {
+type BattingStatsAPI = {
+  batting_average: number;
+  on_base_percentage: number;
+  user_id: number;
+};
+
+type BattingAverageAPI = {
+  hit: number | null;
+  home_run: number | null;
+  id: number | null;
+  runs_batted_in: number | null;
+  stealing_base: number | null;
+  user_id: number;
+};
+
+type PitchingAggregateAPI = {
+  win: number;
+  hold: number;
+  saves: number;
+  strikeouts: number;
+  user_id: number;
+};
+
+type PitchingStatsAPI = {
+  era: number;
+  win_percentage: number;
+  user_id: number;
+};
+
+export default function GroupDetail(props: GroupDetailProps) {
+  const params = use(props.params);
   const [groupData, setGroupData] = useState<GroupsDetailData | undefined>(
     undefined,
   );
-  const [acceptedUsers, setAcceptedUsers] = useState<AcceptedUsers[]>();
   const [battingAverage, setBattingAverages] = useState<BattingAverage[]>();
   const [battingStats, setBattingStats] = useState<BattingStats[]>();
   const [pitchingAggregate, setPitchingAggregate] =
@@ -174,13 +203,12 @@ export default function GroupDetail({ params }: GroupDetailProps) {
     try {
       const responseGroupDetail = await getGroupDetail(params.slug);
       setGroupData(responseGroupDetail);
-      setAcceptedUsers(responseGroupDetail.accepted_users);
 
       if (responseGroupDetail) {
         const battingStatsWithUsersData = responseGroupDetail.batting_stats.map(
-          (stats: any) => {
+          (stats: BattingStatsAPI) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id,
+              (user: AcceptedUsers) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {
@@ -197,9 +225,9 @@ export default function GroupDetail({ params }: GroupDetailProps) {
 
         const battingAverageWithUsersData = responseGroupDetail.batting_averages
           .flat()
-          .map((stats: any) => {
+          .map((stats: BattingAverageAPI) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id,
+              (user: AcceptedUsers) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {
@@ -214,27 +242,29 @@ export default function GroupDetail({ params }: GroupDetailProps) {
         setBattingAverages(battingAverageWithUsersData);
 
         const pitchingAggregateWithUsersData =
-          responseGroupDetail.pitching_aggregate.flat().map((stats: any) => {
-            const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id,
-            );
-            if (userInfo) {
-              return {
-                ...stats,
-                name: userInfo.name,
-                user_id: userInfo.user_id,
-                image_url: userInfo.image.url,
-              };
-            }
-            return stats;
-          });
+          responseGroupDetail.pitching_aggregate
+            .flat()
+            .map((stats: PitchingAggregateAPI) => {
+              const userInfo = responseGroupDetail.accepted_users.find(
+                (user: AcceptedUsers) => user.id === stats.user_id,
+              );
+              if (userInfo) {
+                return {
+                  ...stats,
+                  name: userInfo.name,
+                  user_id: userInfo.user_id,
+                  image_url: userInfo.image.url,
+                };
+              }
+              return stats;
+            });
         setPitchingAggregate(pitchingAggregateWithUsersData);
 
         const pitchingStatsWithUsersData = responseGroupDetail.pitching_stats
-          .filter((stats: any) => stats != null)
-          .map((stats: any) => {
+          .filter((stats: PitchingStatsAPI | null) => stats != null)
+          .map((stats: PitchingStatsAPI) => {
             const userInfo = responseGroupDetail.accepted_users.find(
-              (user: any) => user.id === stats.user_id,
+              (user: AcceptedUsers) => user.id === stats.user_id,
             );
             if (userInfo) {
               return {
@@ -248,8 +278,8 @@ export default function GroupDetail({ params }: GroupDetailProps) {
           });
         setPitchingStats(pitchingStatsWithUsersData);
       }
-    } catch (error: any) {
-      if (error.response && error.response.status === 403) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 403) {
         router.push("/404");
       } else {
         console.error(error);

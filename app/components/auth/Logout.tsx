@@ -1,7 +1,7 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { signOut } from "@app/services/authService";
-import { useRouter } from "next/navigation";
 
 export default function Logout() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function Logout() {
       await signOut();
       setIsLoggedIn(false);
       router.push("/signin?logout=success");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log(error);
     }
   };

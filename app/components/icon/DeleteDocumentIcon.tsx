@@ -1,10 +1,6 @@
 import React from "react";
-export const DeleteDocumentIcon = ({
-  width = "",
-  height = "",
-  fill = "",
-  ...props
-}) => (
+
+export const DeleteDocumentIcon = ({ width = "", height = "", fill = "" }) => (
   <svg
     aria-hidden="true"
     fill={fill}

@@ -1,16 +1,16 @@
-interface SignUpData {
+export interface SignUpData {
   email: string;
   password: string;
   passwordConfirmation: string;
   confirm_success_url: string | undefined;
 }
 
-interface SignInData {
+export interface SignInData {
   email: string;
   password: string;
 }
 
-interface EmailInputProps {
+export interface EmailInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
@@ -30,7 +30,7 @@ interface EmailInputProps {
   variant?: "flat" | "faded" | "bordered" | "underlined" | undefined;
 }
 
-interface PasswordInputProps {
+export interface PasswordInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className: string;
@@ -52,7 +52,7 @@ interface PasswordInputProps {
   variant?: "flat" | "faded" | "bordered" | "underlined" | undefined;
 }
 
-interface PasswordConfirmationInputProps {
+export interface PasswordConfirmationInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className: string;
@@ -65,22 +65,22 @@ interface PasswordConfirmationInputProps {
   variant?: "flat" | "faded" | "bordered" | "underlined" | undefined;
 }
 
-interface ErrorMessagesProps {
+export interface ErrorMessagesProps {
   errors: string[];
 }
 
-interface SendButtonProps {
+export interface SendButtonProps {
   className: string;
   type?: "submit" | "button" | "reset" | undefined;
   text: string;
   disabled: boolean;
 }
 
-interface ToastSuccessProps {
+export interface ToastSuccessProps {
   text: string;
 }
 
-interface UserNameInputProps {
+export interface UserNameInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
@@ -101,7 +101,7 @@ interface UserNameInputProps {
   isRequired: boolean;
 }
 
-interface UserIdInputProps {
+export interface UserIdInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
@@ -122,14 +122,14 @@ interface UserIdInputProps {
   isRequired: boolean;
 }
 
-interface updateUser {
+export interface updateUser {
   name: string;
   user_id: string;
 }
 
-type AvailableYear = number | string;
+export type AvailableYear = number | string;
 
-interface ResultsSelectBoxProps {
+export interface ResultsSelectBoxProps {
   radius?: "none" | "sm" | "md" | "lg" | "full" | undefined;
   className?: string;
   data: { label: string }[];
@@ -144,21 +144,21 @@ interface ResultsSelectBoxProps {
   variant?: "flat" | "faded" | "bordered" | "underlined" | undefined;
   labelPlacement?: "outside" | "outside-left" | "inside";
   size?: "sm" | "md" | "lg" | undefined;
-  onChange: any;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   propsYears: AvailableYear[];
   selectedKeys?: string[];
 }
 
-interface updateUserPositions {
+export interface updateUserPositions {
   userId: number;
   positionIds: number[];
 }
 
-interface getUserPositions {
+export interface getUserPositions {
   userId: string;
 }
 
-interface teamData {
+export interface teamData {
   team: {
     name: string;
     category_id: number | undefined;
@@ -166,30 +166,30 @@ interface teamData {
   };
 }
 
-interface PlusButtonProps {
+export interface PlusButtonProps {
   className: string;
   type?: "submit" | "button" | "reset" | undefined;
-  onPress: any;
+  onPress: () => void;
 }
 
-interface AwardData {
+export interface AwardData {
   award: {
     title: string;
     userId: string;
   };
 }
 
-interface UserAwards {
+export interface UserAwards {
   id: number;
   title: string;
 }
 
-interface TournamentData {
+export interface TournamentData {
   id: number;
   name: string;
 }
 
-interface GameResultData {
+export interface GameResultData {
   game_result: {
     user_id: number;
     match_result_id: number | null;
@@ -198,7 +198,7 @@ interface GameResultData {
   };
 }
 
-interface MatchResultsData {
+export interface MatchResultsData {
   match_result: {
     game_result_id: number | null;
     user_id: number;
@@ -215,7 +215,7 @@ interface MatchResultsData {
   };
 }
 
-interface BattingAverageData {
+export interface BattingAverageData {
   batting_average: {
     runs_batted_in: number;
     run: number;
@@ -225,7 +225,7 @@ interface BattingAverageData {
   };
 }
 
-interface PlateAppearance {
+export interface PlateAppearance {
   plate_appearance: {
     game_result_id: number;
     user_id: number;
@@ -234,7 +234,7 @@ interface PlateAppearance {
   };
 }
 
-interface PitchingResultData {
+export interface PitchingResultData {
   pitching_result: {
     game_result_id: number | null;
     user_id: number | null;
@@ -255,7 +255,7 @@ interface PitchingResultData {
   };
 }
 
-interface MatchResult {
+export interface MatchResult {
   tournament_id: number | null;
   my_team_id: number;
   opponent_team_id: number;
@@ -267,7 +267,7 @@ interface MatchResult {
   opponent_team_score: number;
 }
 
-interface BattingAverage {
+export interface BattingAverage {
   base_on_balls: number | null;
   caught_stealing: number | null;
   error: number | null;
@@ -291,14 +291,14 @@ interface BattingAverage {
   user_id: number;
 }
 
-interface PlateAppearanceSummary {
+export interface PlateAppearanceSummary {
   game_result_id: number;
   user_id: number;
   batter_box_number: number | null;
   batting_result: string;
 }
 
-interface PitchingResult {
+export interface PitchingResult {
   base_on_balls: number;
   earned_run: number;
   game_result_id: number;
@@ -317,13 +317,13 @@ interface PitchingResult {
   win: number;
 }
 
-interface FollowButtonProps {
+export interface FollowButtonProps {
   userId: number;
   isFollowing: boolean;
   setErrorsWithTimeout: (errors: string[]) => void;
 }
 
-interface FollowingUser {
+export interface FollowingUser {
   id: number;
   image: {
     url: string;
@@ -333,7 +333,7 @@ interface FollowingUser {
   isFollowing: boolean;
 }
 
-interface GroupsData {
+export interface GroupsData {
   icon: {
     url: string;
   };
@@ -341,7 +341,7 @@ interface GroupsData {
   name: string;
 }
 
-interface Notifications {
+export interface Notifications {
   id: number;
   actor_user_id: number;
   actor_name: string;
@@ -356,7 +356,7 @@ interface Notifications {
   group_invitation: string;
 }
 
-interface AcceptedUsers {
+export interface AcceptedUsers {
   id: number;
   name: string;
   user_id: string;
@@ -365,7 +365,7 @@ interface AcceptedUsers {
   };
 }
 
-interface UserContextType {
+export interface UserContextType {
   state: {
     userId: {
       id: number | null;
@@ -374,12 +374,11 @@ interface UserContextType {
     };
     usersUserId: { user_id: string | null };
   };
-  dispatch: React.Dispatch<any>;
 }
 
-interface userData {
+export interface userData {
   user: {
-    image: any;
+    image: { url: string };
     name: string;
     user_id: string;
     url: string;
@@ -394,31 +393,31 @@ interface userData {
   following_count: number;
 }
 
-interface HeaderNoteSaveProps {
+export interface HeaderNoteSaveProps {
   onNoteSave: (e: React.MouseEvent<HTMLButtonElement>) => void;
   isSubmitting: boolean;
   hasChanges: boolean;
 }
 
-interface createNoteProps {
+export interface createNoteProps {
   date: string;
   title: string;
   memo: string;
 }
 
-interface NoteEditorProps {
+export interface NoteEditorProps {
   memo: string;
   setMemo: (memo: string) => void;
 }
 
-interface getNoteProps {
+export interface getNoteProps {
   id: number;
   title: string;
   date: string;
   memo: string[];
 }
 
-interface ResendConfirmationModalProps {
+export interface ResendConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   email?: string;

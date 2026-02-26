@@ -1,21 +1,21 @@
 "use client";
+import { Spinner, Tab, Tabs } from "@heroui/react";
+import Link from "next/link";
+import React, { useState } from "react";
+import ErrorMessages from "@app/components/auth/ErrorMessages";
+import FollowButton from "@app/components/button/FollowButton";
+import Header from "@app/components/header/Header";
 import { BallIcon } from "@app/components/icon/BallIcon";
 import { CrownIcon } from "@app/components/icon/CrownIcon";
 import { GloveIcon } from "@app/components/icon/GloveIcon";
+import ProfileShareComponent from "@app/components/share/ProfileShareComponent";
+import AvatarComponent from "@app/components/user/AvatarComponent";
 import IndividualResultsList from "@app/components/user/IndividualResultsList";
 import MatchResultList from "@app/components/user/MatchResultList";
-import { Spinner, Tab, Tabs } from "@nextui-org/react";
-import React, { useState } from "react";
-import Header from "@app/components/header/Header";
-import AvatarComponent from "@app/components/user/AvatarComponent";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-import FollowButton from "@app/components/button/FollowButton";
-import ErrorMessages from "@app/components/auth/ErrorMessages";
-import ProfileShareComponent from "@app/components/share/ProfileShareComponent";
-import Link from "next/link";
-import getUserIdData from "@app/hooks/user/getUserIdData";
-import getUserAwards from "@app/hooks/user/getUserAwards";
 import getMyTeams from "@app/hooks/team/getTeams";
+import getUserAwards from "@app/hooks/user/getUserAwards";
+import getUserIdData from "@app/hooks/user/getUserIdData";
 import useCurrentUserId from "@app/hooks/user/useCurrentUserId";
 
 type Position = {
@@ -23,31 +23,15 @@ type Position = {
   name: string;
 };
 
-type userData = {
-  user: {
-    image: any;
-    name: string;
-    user_id: string;
-    url: string;
-    introduction: string;
-    positions: Position[];
-    team_id: number;
-    id: number;
-  };
-  isFollowing: boolean;
-
-  followers_count: number;
-  following_count: number;
-};
-
 export default function MyPage() {
   const { isLoggedIn } = useAuthContext();
   const [errors, setErrors] = useState<string[]>([]);
 
   const { userData, isLoadingUsers, isErrorUser } = getUserIdData();
-  const { teamData, isLoadingTeams } = getMyTeams();
-  const { userAwards, isLoadingAwards } = getUserAwards();
-  const { currentUserId, isLoadingCurrentUserId } = useCurrentUserId();
+  const { teamData, isLoadingTeams: _isLoadingTeams } = getMyTeams();
+  const { userAwards, isLoadingAwards: _isLoadingAwards } = getUserAwards();
+  const { currentUserId, isLoadingCurrentUserId: _isLoadingCurrentUserId } =
+    useCurrentUserId();
 
   const isLoading = isLoadingUsers;
   const isError = isErrorUser;

@@ -1,3 +1,7 @@
+import type {
+  getUserPositions as GetUserPositionsData,
+  updateUserPositions as UpdateUserPositionsData,
+} from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getPositionName = async (id: number | null) => {
@@ -23,7 +27,7 @@ export const getPositions = async () => {
 export const updateUserPositions = async ({
   userId,
   positionIds,
-}: updateUserPositions) => {
+}: UpdateUserPositionsData) => {
   try {
     await axiosInstance.post("/api/v1/user_positions", {
       user_id: userId,
@@ -35,7 +39,7 @@ export const updateUserPositions = async ({
   }
 };
 
-export const getUserPositions = async ({ userId }: getUserPositions) => {
+export const getUserPositions = async ({ userId }: GetUserPositionsData) => {
   try {
     const response = await axiosInstance.get(
       `/api/v1/users/${userId}/positions`,

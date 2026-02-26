@@ -1,6 +1,6 @@
-import { fetcher } from "@app/hooks/swrFetcher";
-import useSWR from "swr";
 import { usePathname } from "next/navigation";
+import useSWR from "swr";
+import { fetcher } from "@app/hooks/swrFetcher";
 import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
 
 export default function useUserIdData() {

@@ -1,4 +1,8 @@
 "use client";
+import type { SharedSelection } from "@heroui/system";
+import { Button, Divider, Input, Select, SelectItem } from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PlusButton from "@app/components/button/PlusButton";
 import HeaderResult from "@app/components/header/HeaderResult";
@@ -20,9 +24,6 @@ import {
   updatePlateAppearance,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
-import { Button, Divider, Input, Select, SelectItem } from "@nextui-org/react";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 
 const battingResultsPositions = [
   { id: 0, direction: "-" },
@@ -88,7 +89,7 @@ type BattingBox = {
 
 // 打撃成績計算
 const useBattingStatistics = (battingBoxes: BattingBox[]) => {
-  const calculateStatistics = () => {
+  return useMemo(() => {
     let totalBases = 0;
     let strikeOuts = 0;
     let baseOnBalls = 0;
@@ -138,8 +139,7 @@ const useBattingStatistics = (battingBoxes: BattingBox[]) => {
       sacrificeHit,
       sacrificeFly,
     };
-  };
-  return useMemo(calculateStatistics, [battingBoxes]);
+  }, [battingBoxes]);
 };
 
 export default function BattingRecord() {
@@ -155,9 +155,6 @@ export default function BattingRecord() {
   const [caughtStealing, setCaughtStealing] = useState(0);
   const [existingCaughtStealing, setExistingCaughtStealing] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
-  const [isLocalStorageId, setIsLocalStorageId] = useState(true);
-  const [selectedPositions, setSelectedPositions] = useState<number[]>([]);
-  const [selectedResults, setSelectedResults] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletedPlateAppearanceIds, setDeletedPlateAppearanceIds] = useState<
     number[]
@@ -228,34 +225,6 @@ export default function BattingRecord() {
     sacrificeFly,
   } = useBattingStatistics(battingBoxes);
 
-  useEffect(() => {
-    fetchData();
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchExistingBattingAverage(JSON.parse(savedGameResultId));
-      fetchExistingPlateAppearance(JSON.parse(savedGameResultId));
-    }
-  }, [pathname]);
-
-  useEffect(() => {
-    if (
-      existingBattingBoxes.length > 0 &&
-      existingBattingBoxes[0].positionId !== 0
-    ) {
-      const updatedBattingBoxes = existingBattingBoxes.map((box) => {
-        return {
-          id: box.plateId,
-          position: box.positionId,
-          result: box.resultId,
-          text: box.text,
-        };
-      });
-      setBattingBoxes(updatedBattingBoxes);
-    }
-  }, [existingBattingBoxes]);
-
   // 既に同じgame_result_idが存在する場合
   const fetchExistingBattingAverage = async (gameResultId: number) => {
     try {
@@ -279,39 +248,75 @@ export default function BattingRecord() {
       const existingPlateAppearances =
         await getCurrentPlateAppearance(gameResultId);
       if (existingPlateAppearances.length > 0) {
-        const newBattingBoxes = existingPlateAppearances.map((plate: any) => {
-          const plateId = plate.id;
-          const positionId =
-            battingResultsPositions.find(
-              (p) => p.id === plate.batting_position_id,
-            )?.id || null;
-          const positionName =
-            battingResultsPositions.find(
-              (p) => p.id === plate.batting_position_id,
-            )?.direction || "";
-          const resultId =
-            battingResultsList.find((p) => p.id === plate.plate_result_id)
-              ?.id || null;
-          const resultName =
-            battingResultsList.find((p) => p.id === plate.plate_result_id)
-              ?.result || "";
-          const shortFormResult = resultShortForms[resultName] || resultName;
-          const text = `${positionName}${shortFormResult}`;
-          return {
-            plateId,
-            positionId,
-            positionName,
-            resultId,
-            resultName,
-            text,
-          };
-        });
+        const newBattingBoxes = existingPlateAppearances.map(
+          (plate: {
+            id: number;
+            batting_position_id: number;
+            plate_result_id: number;
+          }) => {
+            const plateId = plate.id;
+            const positionId =
+              battingResultsPositions.find(
+                (p) => p.id === plate.batting_position_id,
+              )?.id || null;
+            const positionName =
+              battingResultsPositions.find(
+                (p) => p.id === plate.batting_position_id,
+              )?.direction || "";
+            const resultId =
+              battingResultsList.find((p) => p.id === plate.plate_result_id)
+                ?.id || null;
+            const resultName =
+              battingResultsList.find((p) => p.id === plate.plate_result_id)
+                ?.result || "";
+            const shortFormResult = resultShortForms[resultName] || resultName;
+            const text = `${positionName}${shortFormResult}`;
+            return {
+              plateId,
+              positionId,
+              positionName,
+              resultId,
+              resultName,
+              text,
+            };
+          },
+        );
         setExistingBattingBoxes(newBattingBoxes);
       }
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchData();
+    // ローカルストレージからid取得
+    const savedGameResultId = localStorage.getItem("gameResultId");
+    if (savedGameResultId) {
+      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
+      fetchExistingBattingAverage(JSON.parse(savedGameResultId));
+      fetchExistingPlateAppearance(JSON.parse(savedGameResultId));
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    if (
+      existingBattingBoxes.length > 0 &&
+      existingBattingBoxes[0].positionId !== 0
+    ) {
+      const updatedBattingBoxes = existingBattingBoxes.map((box) => {
+        return {
+          id: box.plateId,
+          position: box.positionId,
+          result: box.resultId,
+          text: box.text,
+        };
+      });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBattingBoxes(updatedBattingBoxes);
+    }
+  }, [existingBattingBoxes]);
 
   // 打席追加
   const addBox = () => {
@@ -340,48 +345,52 @@ export default function BattingRecord() {
   };
 
   // 打点
-  const handleRunsBattedInChange = (e: any) => {
+  const handleRunsBattedInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingRunsBattedIn(Number(e.target.value));
     setRunsBattedIn(Number(e.target.value));
   };
 
   // 得点
-  const handleRunChange = (e: any) => {
+  const handleRunChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingRun(Number(e.target.value));
     setRun(Number(e.target.value));
   };
 
   // 失策
-  const handleErrorChange = (e: any) => {
+  const handleErrorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingDefensiveError(Number(e.target.value));
     setDefensiveError(Number(e.target.value));
   };
 
   // 盗塁
-  const handleStealingBaseChange = (e: any) => {
+  const handleStealingBaseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setExistingStealingBase(Number(e.target.value));
     setStealingBase(Number(e.target.value));
   };
 
   // 盗塁死
-  const handleCaughtStealingChange = (e: any) => {
+  const handleCaughtStealingChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setExistingCaughtStealing(Number(e.target.value));
     setCaughtStealing(Number(e.target.value));
   };
 
   // 打球方向
-  const createHandlePositionChange = (index: number) => (keys: any) => {
-    const newPosition = Number(keys.values().next().value);
-    setSelectedPositions([newPosition]);
-    updateBattingBox(index, newPosition, battingBoxes[index].result);
-  };
+  const createHandlePositionChange =
+    (index: number) => (keys: SharedSelection) => {
+      if (keys === "all") return;
+      const newPosition = Number(keys.values().next().value);
+      updateBattingBox(index, newPosition, battingBoxes[index].result);
+    };
 
   // 打球結果
-  const createHandleResultChange = (index: number) => (keys: any) => {
-    const newResult = Number(keys.values().next().value);
-    setSelectedResults([newResult]);
-    updateBattingBox(index, battingBoxes[index].position, newResult);
-  };
+  const createHandleResultChange =
+    (index: number) => (keys: SharedSelection) => {
+      if (keys === "all") return;
+      const newResult = Number(keys.values().next().value);
+      updateBattingBox(index, battingBoxes[index].position, newResult);
+    };
 
   // 打席結果
   const updateBattingBox = (
@@ -418,14 +427,11 @@ export default function BattingRecord() {
   };
   const validateForm = () => {
     let isValid = true;
-    let newErrors = [];
+    const newErrors = [];
 
     if (!localStorageGameResultId) {
-      setIsLocalStorageId(false);
       isValid = false;
       newErrors.push("エラーが発生しました。");
-    } else {
-      setIsLocalStorageId(true);
     }
 
     if (!isValid) {
@@ -605,7 +611,7 @@ export default function BattingRecord() {
                             }
                           >
                             {battingResultsPositions.map((position) => (
-                              <SelectItem key={position.id} value={position.id}>
+                              <SelectItem key={position.id}>
                                 {position.direction}
                               </SelectItem>
                             ))}
@@ -624,7 +630,7 @@ export default function BattingRecord() {
                             }
                           >
                             {battingResultsList.map((result) => (
-                              <SelectItem key={result.id} value={result.id}>
+                              <SelectItem key={result.id}>
                                 {result.result}
                               </SelectItem>
                             ))}

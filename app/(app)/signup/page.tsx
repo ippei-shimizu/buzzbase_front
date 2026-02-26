@@ -1,6 +1,6 @@
-import SignUp from "@app/components/auth/SignUp";
 import Image from "next/image";
 import React from "react";
+import SignUp from "@app/components/auth/SignUp";
 
 export default function Page() {
   return (

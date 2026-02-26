@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { RAILS_API_URL } from "./app/constants/api";
 
 function checkBasicAuth(request: NextRequest): boolean {
@@ -91,7 +91,7 @@ async function validateAdminAuth(
   return { isValid: false };
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin-management-console")) {

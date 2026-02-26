@@ -1,3 +1,4 @@
+import type { PlateAppearance } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getPlateAppearances = async () => {
@@ -61,7 +62,7 @@ export const checkExistingPlateAppearance = async (
       `/api/v1/plate_search?game_result_id=${gameResultId}&user_id=${userId}&batter_box_number=${batterBoxNumber}`,
     );
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log(error);
     return null;
   }

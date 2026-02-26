@@ -1,6 +1,13 @@
 // Testing Libraryのカスタムマッチャーを追加
 import "@testing-library/jest-dom";
 
+// ResizeObserverのモック（HeroUI Tabsコンポーネント用）
+global.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
 // Framer Motionのアニメーションを無効化（テスト高速化）
 jest.mock("framer-motion", () => ({
   ...jest.requireActual("framer-motion"),
@@ -17,8 +24,8 @@ jest.mock("framer-motion", () => ({
   },
 }));
 
-// NextUIのRippleエフェクトをモック（動的インポートエラー回避）
-jest.mock("@nextui-org/ripple", () => ({
+// HeroUIのRippleエフェクトをモック（動的インポートエラー回避）
+jest.mock("@heroui/ripple", () => ({
   Ripple: ({ children }) => children,
   useRipple: () => ({
     ripples: [],
@@ -31,9 +38,9 @@ jest.mock("@nextui-org/ripple", () => ({
   }),
 }));
 
-// NextUI Popoverのアニメーションモック（Select用）
-jest.mock("@nextui-org/popover", () => {
-  const actual = jest.requireActual("@nextui-org/popover");
+// HeroUI Popoverのアニメーションモック（Select用）
+jest.mock("@heroui/popover", () => {
+  const actual = jest.requireActual("@heroui/popover");
   return {
     ...actual,
   };

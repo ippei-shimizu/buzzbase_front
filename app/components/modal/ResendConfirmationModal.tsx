@@ -1,4 +1,5 @@
 "use client";
+import type { ResendConfirmationModalProps } from "@app/interface";
 import {
   Modal,
   ModalContent,
@@ -6,11 +7,12 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
+import { AxiosError } from "axios";
+import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import { resendConfirmation } from "@app/services/authService";
-import { useCallback, useMemo, useState } from "react";
 
 export default function ResendConfirmationModal({
   isOpen,
@@ -52,8 +54,8 @@ export default function ResendConfirmationModal({
       onResendSuccess();
       onClose();
       setEmail("");
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.errors) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.data?.errors) {
         setErrorsWithTimeout(error.response.data.errors);
       } else {
         setErrorsWithTimeout([

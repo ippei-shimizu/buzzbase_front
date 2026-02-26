@@ -1,4 +1,8 @@
 "use client";
+import type { FollowingUser } from "@app/interface";
+import { Checkbox, User } from "@heroui/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, use } from "react";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import {
@@ -6,15 +10,11 @@ import {
   getGroupDetailUsers,
 } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { Checkbox, User } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
-export default function GroupMemberAdd({
-  params,
-}: {
-  params: { slug: string };
+export default function GroupMemberAdd(props: {
+  params: Promise<{ slug: string }>;
 }) {
+  const params = use(props.params);
   const groupId = Number(params.slug);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [following, setFollowing] = useState<FollowingUser[]>([]);
@@ -35,7 +35,9 @@ export default function GroupMemberAdd({
     const fetchGroupDetails = async () => {
       try {
         const data = await getGroupDetailUsers(groupId);
-        const acceptedUserIds = data.accepted_users.map((user: any) => user.id);
+        const acceptedUserIds = data.accepted_users.map(
+          (user: { id: number }) => user.id,
+        );
         setGroupMemberIds(acceptedUserIds);
       } catch (error) {
         console.error("グループの詳細を取得できませんでした。", error);
@@ -73,7 +75,7 @@ export default function GroupMemberAdd({
     });
   };
 
-  const handleSubmit = async (event: any) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isSubmitting) {
       return;
@@ -84,7 +86,7 @@ export default function GroupMemberAdd({
       formData.append("invite_user_ids[]", userId.toString());
     });
     try {
-      const response = await createInviteMembers(groupId, formData);
+      const _response = await createInviteMembers(groupId, formData);
       router.push(`/groups/${groupId}/`);
     } catch (error) {
       console.log(error);
@@ -96,7 +98,9 @@ export default function GroupMemberAdd({
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         {isSubmitting && <LoadingSpinner />}
         <HeaderMatchResultNext
-          onMatchResultNext={() => handleSubmit(new Event("submit"))}
+          onMatchResultNext={() =>
+            handleSubmit(new Event("submit") as unknown as React.FormEvent)
+          }
           disabled={isSubmitting}
           text={"招待"}
         />

@@ -1,17 +1,17 @@
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 export default function SaveSpinner({ saved }: { saved: boolean }) {
-  const [showSpinner, setShowSpinner] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   useEffect(() => {
-    if (saved) {
-      setShowSpinner(true);
-      const timer = setTimeout(() => {
-        setShowSpinner(false);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
+    if (!saved) return;
+    const timer = setTimeout(() => setTimedOut(true), 1500);
+    return () => {
+      clearTimeout(timer);
+      setTimedOut(false);
+    };
   }, [saved]);
+  const showSpinner = saved && !timedOut;
   return (
     <>
       {showSpinner ? (

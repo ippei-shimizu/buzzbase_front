@@ -1,2 +1,4 @@
-FROM node:19.4.0
+FROM node:22-slim
 WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
