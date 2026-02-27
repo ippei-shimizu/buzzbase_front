@@ -95,7 +95,8 @@ export default function FollowersUser() {
                   <FollowButton
                     userId={follow.id}
                     initialFollowStatus={
-                      follow.follow_status ?? (follow.isFollowing ? "following" : "none")
+                      follow.follow_status ??
+                      (follow.isFollowing ? "following" : "none")
                     }
                     setErrorsWithTimeout={setErrorsWithTimeout}
                   />
