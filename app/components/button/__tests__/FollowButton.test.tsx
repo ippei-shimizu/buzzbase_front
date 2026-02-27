@@ -22,13 +22,12 @@ describe("FollowButton", () => {
 
   const defaultProps = {
     userId: 1,
-    isFollowing: false,
+    initialFollowStatus: "none" as const,
     setErrorsWithTimeout: mockSetErrorsWithTimeout,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // デフォルトでログイン状態にする
     mockUseAuthContext.mockReturnValue({
       isLoggedIn: true,
     });
@@ -42,15 +41,25 @@ describe("FollowButton", () => {
   });
 
   it("フォローしている時、「フォロー中」ボタンが表示される", () => {
-    render(<FollowButton {...defaultProps} isFollowing={true} />);
+    render(
+      <FollowButton {...defaultProps} initialFollowStatus="following" />
+    );
 
     expect(screen.getByText("フォロー中")).toBeInTheDocument();
     expect(screen.queryByText("フォローする")).not.toBeInTheDocument();
   });
 
+  it("リクエスト済みの時、「リクエスト済み」ボタンが表示される", () => {
+    render(
+      <FollowButton {...defaultProps} initialFollowStatus="pending" />
+    );
+
+    expect(screen.getByText("リクエスト済み")).toBeInTheDocument();
+  });
+
   it("「フォローする」ボタンをクリックするとフォロー処理が実行される", async () => {
     const user = userEvent.setup();
-    mockUserFollow.mockResolvedValue({});
+    mockUserFollow.mockResolvedValue({ follow_status: "following" });
 
     render(<FollowButton {...defaultProps} />);
 
@@ -63,13 +72,47 @@ describe("FollowButton", () => {
     });
   });
 
+  it("非公開アカウントへのフォローでリクエスト済みになる", async () => {
+    const user = userEvent.setup();
+    mockUserFollow.mockResolvedValue({ follow_status: "pending" });
+
+    render(<FollowButton {...defaultProps} isPrivate={true} />);
+
+    const button = screen.getByText("フォローする");
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(mockUserFollow).toHaveBeenCalledWith(1);
+      expect(screen.getByText("リクエスト済み")).toBeInTheDocument();
+    });
+  });
+
   it("「フォロー中」ボタンをクリックするとフォロー解除処理が実行される", async () => {
     const user = userEvent.setup();
     mockUserUnFollow.mockResolvedValue({});
 
-    render(<FollowButton {...defaultProps} isFollowing={true} />);
+    render(
+      <FollowButton {...defaultProps} initialFollowStatus="following" />
+    );
 
     const button = screen.getByText("フォロー中");
+    await user.click(button);
+
+    await waitFor(() => {
+      expect(mockUserUnFollow).toHaveBeenCalledWith(1);
+      expect(screen.getByText("フォローする")).toBeInTheDocument();
+    });
+  });
+
+  it("「リクエスト済み」ボタンをクリックするとリクエスト取消が実行される", async () => {
+    const user = userEvent.setup();
+    mockUserUnFollow.mockResolvedValue({});
+
+    render(
+      <FollowButton {...defaultProps} initialFollowStatus="pending" />
+    );
+
+    const button = screen.getByText("リクエスト済み");
     await user.click(button);
 
     await waitFor(() => {
@@ -99,7 +142,7 @@ describe("FollowButton", () => {
 
   it("フォロー/フォロー解除を繰り返すことができる", async () => {
     const user = userEvent.setup();
-    mockUserFollow.mockResolvedValue({});
+    mockUserFollow.mockResolvedValue({ follow_status: "following" });
     mockUserUnFollow.mockResolvedValue({});
 
     render(<FollowButton {...defaultProps} />);
@@ -129,10 +172,9 @@ describe("FollowButton", () => {
     });
   });
 
-  it("ボタンにNextUIのButtonコンポーネントが使用されている", () => {
+  it("ボタンにHeroUIのButtonコンポーネントが使用されている", () => {
     const { container } = render(<FollowButton {...defaultProps} />);
 
-    // Buttonコンポーネントが存在することを確認
     const button = container.querySelector("button");
     expect(button).toBeInTheDocument();
   });
