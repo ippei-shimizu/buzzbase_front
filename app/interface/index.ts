@@ -317,9 +317,12 @@ export interface PitchingResult {
   win: number;
 }
 
+export type FollowStatus = "self" | "following" | "pending" | "none";
+
 export interface FollowButtonProps {
   userId: number;
-  isFollowing: boolean;
+  initialFollowStatus: FollowStatus;
+  isPrivate?: boolean;
   setErrorsWithTimeout: (errors: string[]) => void;
 }
 
@@ -331,6 +334,7 @@ export interface FollowingUser {
   name: string;
   user_id: string;
   isFollowing: boolean;
+  is_private?: boolean;
 }
 
 export interface GroupsData {
@@ -354,6 +358,7 @@ export interface Notifications {
   };
   group_name: string;
   group_invitation: string;
+  follow_request_id?: number;
 }
 
 export interface AcceptedUsers {
@@ -388,9 +393,10 @@ export interface userData {
     id: number;
   };
   isFollowing: boolean;
-
-  followers_count: number;
-  following_count: number;
+  follow_status: FollowStatus;
+  is_private: boolean;
+  followers_count: number | null;
+  following_count: number | null;
 }
 
 export interface HeaderNoteSaveProps {

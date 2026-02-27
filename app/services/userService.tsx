@@ -134,3 +134,27 @@ export const deleteUser = async (id: number) => {
     throw error;
   }
 };
+
+export const acceptFollowRequest = async (relationshipId: number) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/v1/relationships/${relationshipId}/accept_follow_request`,
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const rejectFollowRequest = async (relationshipId: number) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/v1/relationships/${relationshipId}/reject_follow_request`,
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

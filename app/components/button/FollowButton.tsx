@@ -1,6 +1,6 @@
 "use client";
 
-import type { FollowButtonProps } from "@app/interface";
+import type { FollowButtonProps, FollowStatus } from "@app/interface";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -8,10 +8,12 @@ import { userFollow, userUnFollow } from "@app/services/userService";
 
 export default function FollowButton({
   userId,
-  isFollowing,
+  initialFollowStatus,
+  isPrivate,
   setErrorsWithTimeout,
 }: FollowButtonProps) {
-  const [following, setFollowing] = useState(isFollowing);
+  const [followStatus, setFollowStatus] =
+    useState<FollowStatus>(initialFollowStatus);
   const { isLoggedIn } = useAuthContext();
 
   const handleFollow = async () => {
@@ -19,26 +21,44 @@ export default function FollowButton({
       setErrorsWithTimeout(["ログインしてください"]);
       return;
     }
-    if (following) {
+    if (followStatus === "following" || followStatus === "pending") {
       await userUnFollow(userId);
+      setFollowStatus("none");
     } else {
-      await userFollow(userId);
+      const response = await userFollow(userId);
+      if (isPrivate || response?.follow_status === "pending") {
+        setFollowStatus("pending");
+      } else {
+        setFollowStatus("following");
+      }
     }
-    setFollowing(!following);
   };
 
-  const followingButtonStyle =
-    "text-main bg-zinc-200 rounded-full text-xs border-1 border-zinc-400 w-full h-auto p-1.5 font-bold flex-1";
-  const followedButtonStyle =
-    "text-zinc-300 bg-transparent rounded-full text-xs border-1 border-zinc-400 w-full h-auto p-1.5 font-bold flex-1";
+  const buttonLabel = () => {
+    switch (followStatus) {
+      case "following":
+        return "フォロー中";
+      case "pending":
+        return "リクエスト済み";
+      default:
+        return "フォローする";
+    }
+  };
+
+  const buttonStyle = () => {
+    switch (followStatus) {
+      case "following":
+        return "text-zinc-300 bg-transparent rounded-full text-xs border-1 border-zinc-400 w-full h-auto p-1.5 font-bold flex-1";
+      case "pending":
+        return "text-zinc-300 bg-transparent rounded-full text-xs border-1 border-yellow-500 w-full h-auto p-1.5 font-bold flex-1";
+      default:
+        return "text-main bg-zinc-200 rounded-full text-xs border-1 border-zinc-400 w-full h-auto p-1.5 font-bold flex-1";
+    }
+  };
+
   return (
-    <>
-      <Button
-        onPress={handleFollow}
-        className={following ? followedButtonStyle : followingButtonStyle}
-      >
-        {following ? "フォロー中" : "フォローする"}
-      </Button>
-    </>
+    <Button onPress={handleFollow} className={buttonStyle()}>
+      {buttonLabel()}
+    </Button>
   );
 }

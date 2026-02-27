@@ -2,6 +2,7 @@
 import type { Notifications } from "@app/interface";
 import { Avatar, Divider, Spinner } from "@heroui/react";
 import Link from "next/link";
+import NotificationFollowRequest from "@app/components/notification/NotificationFollowRequest";
 import NotificationGroup from "@app/components/notification/NotificationGroup";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { useNotifications } from "@app/hooks/notification/getNotifications";
@@ -56,7 +57,13 @@ export default function NotificationItem() {
                   <NotificationGroup notice={notice} />
                   <Divider className="mt-3" />
                 </>
-              ) : notice.event_type === "followed" ? (
+              ) : notice.event_type === "follow_request" ? (
+                <>
+                  <NotificationFollowRequest notice={notice} />
+                  <Divider className="mt-3" />
+                </>
+              ) : notice.event_type === "followed" ||
+                notice.event_type === "follow_request_accepted" ? (
                 <>
                   <div
                     className={`grid grid-cols-[28px_1fr] gap-x-3 ${
@@ -91,7 +98,9 @@ export default function NotificationItem() {
                         <span className="text-base text-white font-bold">
                           {notice.group_name}
                         </span>
-                        フォローされました
+                        {notice.event_type === "follow_request_accepted"
+                          ? "フォローリクエストが承認されました"
+                          : "フォローされました"}
                       </p>
                     </div>
                   </div>

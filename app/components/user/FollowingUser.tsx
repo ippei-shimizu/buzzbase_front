@@ -41,12 +41,22 @@ export default function FollowingUser() {
     }
   }, [pathName]);
 
-  const { following, isLoadingFollowing } = useFollowingUser(userId?.id);
+  const { following, isLoadingFollowing, isErrorFollowing } = useFollowingUser(
+    userId?.id,
+  );
 
   if (isLoadingFollowing) {
     return (
       <div className="flex pt-12 pb-12 buzz-dark flex-col w-full min-h-screen lg:max-w-[720px] lg:m-[0_auto_0_28%]">
         <Spinner color="primary" />
+      </div>
+    );
+  }
+
+  if (isErrorFollowing) {
+    return (
+      <div className="px-4 py-10 text-center max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
+        <p className="text-sm text-zinc-400">このアカウントは非公開です</p>
       </div>
     );
   }
@@ -84,7 +94,10 @@ export default function FollowingUser() {
                 {follow.id !== currentUserId.id && (
                   <FollowButton
                     userId={follow.id}
-                    isFollowing={follow.isFollowing}
+                    initialFollowStatus={
+                      follow.isFollowing ? "following" : "none"
+                    }
+                    isPrivate={follow.is_private}
                     setErrorsWithTimeout={setErrorsWithTimeout}
                   />
                 )}
