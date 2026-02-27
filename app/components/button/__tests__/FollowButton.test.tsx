@@ -41,18 +41,14 @@ describe("FollowButton", () => {
   });
 
   it("フォローしている時、「フォロー中」ボタンが表示される", () => {
-    render(
-      <FollowButton {...defaultProps} initialFollowStatus="following" />
-    );
+    render(<FollowButton {...defaultProps} initialFollowStatus="following" />);
 
     expect(screen.getByText("フォロー中")).toBeInTheDocument();
     expect(screen.queryByText("フォローする")).not.toBeInTheDocument();
   });
 
   it("リクエスト済みの時、「リクエスト済み」ボタンが表示される", () => {
-    render(
-      <FollowButton {...defaultProps} initialFollowStatus="pending" />
-    );
+    render(<FollowButton {...defaultProps} initialFollowStatus="pending" />);
 
     expect(screen.getByText("リクエスト済み")).toBeInTheDocument();
   });
@@ -91,9 +87,7 @@ describe("FollowButton", () => {
     const user = userEvent.setup();
     mockUserUnFollow.mockResolvedValue({});
 
-    render(
-      <FollowButton {...defaultProps} initialFollowStatus="following" />
-    );
+    render(<FollowButton {...defaultProps} initialFollowStatus="following" />);
 
     const button = screen.getByText("フォロー中");
     await user.click(button);
@@ -108,9 +102,7 @@ describe("FollowButton", () => {
     const user = userEvent.setup();
     mockUserUnFollow.mockResolvedValue({});
 
-    render(
-      <FollowButton {...defaultProps} initialFollowStatus="pending" />
-    );
+    render(<FollowButton {...defaultProps} initialFollowStatus="pending" />);
 
     const button = screen.getByText("リクエスト済み");
     await user.click(button);
