@@ -4,14 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
+import { useAuthContext } from "@app/contexts/useAuthContext";
+import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 import NavigationItems from "./NavigationItems";
 
 export default function NavigationMenu() {
   const pathName = usePathname();
+  const { isLoggedIn } = useAuthContext();
   const navigationItems = NavigationItems();
 
+  const handleAuthRequiredClick = () => {
+    if (!isLoggedIn) {
+      showAuthRequiredToast();
+    }
+  };
+
   const isActive = (path: string, itemHref: string) => {
-    if (path === "/signin") {
+    if (path === "/signin" || path === "/signup") {
       return false;
     }
     const basePath = ["/note", "/game-result", "/groups"];
@@ -44,6 +53,9 @@ export default function NavigationMenu() {
               <li key={index}>
                 <Link
                   href={item.href}
+                  onClick={
+                    item.authRequired ? handleAuthRequiredClick : undefined
+                  }
                   className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
                     isActive(pathName, item.href)
                       ? `text-yellow-500`

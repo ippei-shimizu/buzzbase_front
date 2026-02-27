@@ -35,3 +35,61 @@ export interface AdminUserCreateRequest {
 export interface AdminUserUpdateRequest {
   admin_user: AdminUserUpdateData;
 }
+
+// App User Management types
+export type AccountStatus = "active" | "suspended" | "deleted";
+export type ActivityStatus = "active" | "recent" | "inactive";
+
+export interface AppUser {
+  id: number;
+  name: string;
+  email: string;
+  user_id: string | null;
+  image_url: string | null;
+  created_at: string;
+  last_login_at: string | null;
+  account_status: AccountStatus;
+  activity_status: ActivityStatus;
+  game_results_count: number;
+  followers_count: number;
+  following_count: number;
+}
+
+export interface AppUserDetail extends AppUser {
+  introduction: string | null;
+  suspended_at: string | null;
+  suspended_reason: string | null;
+  deleted_at: string | null;
+  batting_averages_count: number;
+  pitching_results_count: number;
+  baseball_notes_count: number;
+  groups_count: number;
+  team_name: string | null;
+}
+
+export interface PaginationInfo {
+  current_page: number;
+  per_page: number;
+  total_count: number;
+  total_pages: number;
+}
+
+export interface AppUsersResponse {
+  users: AppUser[];
+  pagination: PaginationInfo;
+}
+
+export interface AppUserDetailResponse {
+  user: AppUserDetail;
+}
+
+export interface UserSearchParams {
+  page?: string;
+  per_page?: string;
+  search?: string;
+  sort_by?: string;
+  sort_order?: string;
+  status?: string;
+  date_from?: string;
+  date_to?: string;
+}

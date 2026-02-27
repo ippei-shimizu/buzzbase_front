@@ -6,6 +6,7 @@ import { useEffect, useState, use } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroupDetailUsers, updateGroup } from "@app/services/groupService";
 
 export default function GroupMember(props: {
@@ -19,6 +20,7 @@ export default function GroupMember(props: {
   const [groupMember, setGroupMember] = useState<AcceptedUsers[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  useRequireAuth();
 
   const fetchGroupDetails = async (groupId: number) => {
     try {

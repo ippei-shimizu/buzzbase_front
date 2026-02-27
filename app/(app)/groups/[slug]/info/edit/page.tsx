@@ -14,6 +14,7 @@ import { useEffect, useRef, useState, use } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   deleteGroup,
   getGroupDetailUsers,
@@ -43,6 +44,7 @@ export default function GroupEdit(props: {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  useRequireAuth();
 
   const fetchGroupDetails = async (groupId: number) => {
     try {

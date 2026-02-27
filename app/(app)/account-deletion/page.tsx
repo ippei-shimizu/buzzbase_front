@@ -10,22 +10,16 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "@app/components/header/Header";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { deleteUser, getCurrentUserId } from "@app/services/userService";
 
 export default function AccountDeletionPage() {
-  const { isLoggedIn } = useAuthContext();
   const router = useRouter();
+  useRequireAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signin");
-    }
-  }, [router, isLoggedIn]);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);

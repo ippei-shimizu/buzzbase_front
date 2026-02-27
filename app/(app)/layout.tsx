@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import Footer from "@app/components/footer/Footer";
 import NavigationMenu from "@app/components/header/NavigationMenu";
 import { AuthProvider } from "@app/contexts/useAuthContext";
@@ -21,6 +22,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
           <NavigationMenu />
           <Footer />
+          <Toaster position="top-right" richColors />
         </Providers>
       </UserProvider>
     </AuthProvider>

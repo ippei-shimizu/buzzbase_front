@@ -18,7 +18,7 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { useAuthContext } from "@app/contexts/useAuthContext";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { updateGameResult } from "@app/services/gameResultsService";
 import {
   checkExistingMatchResults,
@@ -112,13 +112,7 @@ export default function GameRecord() {
   >(null);
   const pathname = usePathname();
   const router = useRouter();
-  const { isLoggedIn } = useAuthContext();
-
-  useEffect(() => {
-    if (isLoggedIn === false) {
-      return router.push("/signin");
-    }
-  }, [router, isLoggedIn]);
+  useRequireAuth();
 
   const fetchData = async () => {
     try {

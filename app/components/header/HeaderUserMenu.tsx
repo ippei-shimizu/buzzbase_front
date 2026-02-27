@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { UserImage } from "@app/components/user/UserImage";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
+import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 
 export default function HeaderUserMenu() {
   const { isLoggedIn } = useAuthContext();
@@ -24,7 +25,13 @@ export default function HeaderUserMenu() {
 
   const myPageLink = isLoggedIn
     ? `/mypage/${currentUserData?.user_id}`
-    : "/signin";
+    : "/signup?auth_required=true";
+
+  const handleClick = () => {
+    if (!isLoggedIn) {
+      showAuthRequiredToast();
+    }
+  };
 
   const imageUrl =
     currentUserData && currentUserData.image
@@ -37,6 +44,7 @@ export default function HeaderUserMenu() {
     <>
       <Link
         href={myPageLink}
+        onClick={handleClick}
         className={`flex items-center flex-col gap-y-1 min-w-[50px] font-medium px-0 bg-transparent isIconOnly overflow-visible text-[10px] ${
           pathName.includes("/mypage") ? `text-yellow-500` : `text-white`
         } lg:flex-row lg:text-base lg:w-fit lg:font-bold lg:gap-x-5`}

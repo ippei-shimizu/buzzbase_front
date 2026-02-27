@@ -9,7 +9,7 @@ export default function useRequireAuth() {
 
   useEffect(() => {
     if (isLoggedIn === false) {
-      router.push("/signin");
+      router.push("/signup?auth_required=true");
     }
   }, [isLoggedIn, router]);
 

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
 
@@ -23,6 +24,7 @@ export default function GroupNew() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  useRequireAuth();
 
   const fetchData = async () => {
     const responseCurrentUserId = await getCurrentUserId();
