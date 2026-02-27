@@ -72,7 +72,7 @@ describe("FollowButton", () => {
     const user = userEvent.setup();
     mockUserFollow.mockResolvedValue({ follow_status: "pending" });
 
-    render(<FollowButton {...defaultProps} isPrivate={true} />);
+    render(<FollowButton {...defaultProps} />);
 
     const button = screen.getByText("フォローする");
     await user.click(button);

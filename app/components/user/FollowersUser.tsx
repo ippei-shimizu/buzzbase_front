@@ -95,9 +95,8 @@ export default function FollowersUser() {
                   <FollowButton
                     userId={follow.id}
                     initialFollowStatus={
-                      follow.isFollowing ? "following" : "none"
+                      follow.follow_status ?? (follow.isFollowing ? "following" : "none")
                     }
-                    isPrivate={follow.is_private}
                     setErrorsWithTimeout={setErrorsWithTimeout}
                   />
                 )}

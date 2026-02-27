@@ -9,7 +9,6 @@ import { userFollow, userUnFollow } from "@app/services/userService";
 export default function FollowButton({
   userId,
   initialFollowStatus,
-  isPrivate,
   setErrorsWithTimeout,
 }: FollowButtonProps) {
   const [followStatus, setFollowStatus] =
@@ -26,11 +25,7 @@ export default function FollowButton({
       setFollowStatus("none");
     } else {
       const response = await userFollow(userId);
-      if (isPrivate || response?.follow_status === "pending") {
-        setFollowStatus("pending");
-      } else {
-        setFollowStatus("following");
-      }
+      setFollowStatus(response?.follow_status ?? "following");
     }
   };
 

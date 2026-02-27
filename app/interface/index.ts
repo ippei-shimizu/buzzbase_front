@@ -322,7 +322,6 @@ export type FollowStatus = "self" | "following" | "pending" | "none";
 export interface FollowButtonProps {
   userId: number;
   initialFollowStatus: FollowStatus;
-  isPrivate?: boolean;
   setErrorsWithTimeout: (errors: string[]) => void;
 }
 
@@ -334,6 +333,7 @@ export interface FollowingUser {
   name: string;
   user_id: string;
   isFollowing: boolean;
+  follow_status?: FollowStatus;
   is_private?: boolean;
 }
 

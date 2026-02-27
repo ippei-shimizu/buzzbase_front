@@ -1,12 +1,13 @@
 "use client";
 import type { Notifications } from "@app/interface";
-import { Avatar, Divider, Spinner } from "@heroui/react";
-import Link from "next/link";
+import { Divider, Spinner } from "@heroui/react";
 import NotificationFollowRequest from "@app/components/notification/NotificationFollowRequest";
+import NotificationFollowed from "@app/components/notification/NotificationFollowed";
 import NotificationGroup from "@app/components/notification/NotificationGroup";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { useNotifications } from "@app/hooks/notification/getNotifications";
 import { readNotification } from "@app/services/notificationsService";
+import Link from "next/link";
 
 export default function NotificationItem() {
   const { notifications, isError, isLoading } = useNotifications();
@@ -45,72 +46,39 @@ export default function NotificationItem() {
     } catch (_error) {}
   };
 
+  const renderNotification = (notice: Notifications) => {
+    if (
+      notice.event_type === "group_invitation" &&
+      notice.group_invitation === "pending"
+    ) {
+      return <NotificationGroup notice={notice} />;
+    }
+    if (notice.event_type === "follow_request") {
+      return <NotificationFollowRequest notice={notice} />;
+    }
+    if (
+      notice.event_type === "followed" ||
+      notice.event_type === "follow_request_accepted"
+    ) {
+      return <NotificationFollowed notice={notice} onRead={handleRead} />;
+    }
+    return null;
+  };
+
   return (
     <>
       <div className="py-5 pb-24 grid gap-y-5 bg-main lg:pb-6">
         {notifications?.length > 0 ? (
-          notifications?.map((notice: Notifications) => (
-            <div key={notice.id}>
-              {notice.event_type === "group_invitation" &&
-              notice.group_invitation === "pending" ? (
-                <>
-                  <NotificationGroup notice={notice} />
-                  <Divider className="mt-3" />
-                </>
-              ) : notice.event_type === "follow_request" ? (
-                <>
-                  <NotificationFollowRequest notice={notice} />
-                  <Divider className="mt-3" />
-                </>
-              ) : notice.event_type === "followed" ||
-                notice.event_type === "follow_request_accepted" ? (
-                <>
-                  <div
-                    className={`grid grid-cols-[28px_1fr] gap-x-3 ${
-                      notice.read_at ? "opacity-30" : ""
-                    }`}
-                  >
-                    <Link
-                      href={`/mypage/${notice.actor_user_id}`}
-                      onClick={() => handleRead(notice.id)}
-                    >
-                      <Avatar
-                        src={
-                          process.env.NODE_ENV === "production"
-                            ? `${notice.actor_icon.url}`
-                            : `${process.env.NEXT_PUBLIC_API_URL}${notice.actor_icon.url}`
-                        }
-                        size="sm"
-                        isBordered
-                        className="min-w-[28px] max-w-[28px] min-h-[28px] max-h-[28px]"
-                      />
-                    </Link>
-                    <div className="flex flex-col items-start gap-y-1">
-                      <p className="text-sm text-zinc-400">
-                        <Link
-                          href={`/mypage/${notice.actor_user_id}`}
-                          className="text-base text-white font-bold"
-                          onClick={() => handleRead(notice.id)}
-                        >
-                          {notice.actor_name}
-                        </Link>
-                        さんから
-                        <span className="text-base text-white font-bold">
-                          {notice.group_name}
-                        </span>
-                        {notice.event_type === "follow_request_accepted"
-                          ? "フォローリクエストが承認されました"
-                          : "フォローされました"}
-                      </p>
-                    </div>
-                  </div>
-                  <Divider className="mt-3" />
-                </>
-              ) : (
-                <></>
-              )}
-            </div>
-          ))
+          notifications?.map((notice: Notifications) => {
+            const content = renderNotification(notice);
+            if (!content) return null;
+            return (
+              <div key={notice.id}>
+                {content}
+                <Divider className="mt-3" />
+              </div>
+            );
+          })
         ) : (
           <>
             <p className="text-zinc-400 text-center pt-2 text-sm">

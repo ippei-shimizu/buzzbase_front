@@ -227,7 +227,6 @@ export default function MyPage() {
                         <FollowButton
                           userId={userData.user.id}
                           initialFollowStatus={userData.follow_status || "none"}
-                          isPrivate={userData.is_private}
                           setErrorsWithTimeout={setErrorsWithTimeout}
                         />
                       </>
