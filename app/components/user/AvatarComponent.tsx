@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar } from "@heroui/react";
+import { LockIcon } from "@app/components/icon/LockIcon";
 
 type UserData = {
   userData: {
@@ -10,6 +11,7 @@ type UserData = {
       user_id: string;
       url: string;
     };
+    is_private?: boolean;
   };
 };
 
@@ -24,9 +26,14 @@ export default function AvatarComponent(props: UserData) {
     <div className="flex gap-5">
       <Avatar size="lg" isBordered src={imageUrl} />
       <div className="flex flex-col gap-1.5 items-start justify-center">
-        <h1 className="text-lg font-semibold leading-none">
-          {userData.user.name}
-        </h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-lg font-semibold leading-none">
+            {userData.user.name}
+          </h1>
+          {userData.is_private && (
+            <LockIcon fill="#a1a1aa" width="14" height="14" />
+          )}
+        </div>
         <p className="text-sm tracking-tight text-zinc-400">
           @{userData.user.user_id}
         </p>
