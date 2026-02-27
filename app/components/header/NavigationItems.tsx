@@ -15,7 +15,7 @@ const NavigationItems = (): NavigationItem[] => {
   const { isLoggedIn } = useAuthContext();
 
   return [
-    { href: "/", label: "トップ", icon: HomeIcon, authRequired: false },
+    { href: isLoggedIn ? "/dashboard" : "/", label: isLoggedIn ? "ダッシュボード" : "トップ", icon: HomeIcon, authRequired: false },
     {
       href: isLoggedIn ? "/note" : "/signup?auth_required=true",
       label: "野球ノート",
