@@ -1,5 +1,4 @@
 "use client";
-import "@mantine/core/styles.css";
 import {
   Image,
   Container,
