@@ -9,6 +9,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Switch,
   Textarea,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
@@ -106,6 +107,7 @@ export default function ProfileEdit() {
   );
   const [deletedAwards, setDeletedAwards] = useState<number[]>([]);
   const [awards, setAwards] = useState<UserAwards[]>([]);
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const router = useRouter();
   const isLoggedIn = useRequireAuth();
@@ -125,6 +127,8 @@ export default function ProfileEdit() {
         user_id: data.user_id,
         id: data.id,
       });
+
+      setIsPrivate(data.is_private || false);
 
       // ポジション一覧取得
       const positionsData = await getPositions();
@@ -249,6 +253,7 @@ export default function ProfileEdit() {
     formData.append("user[name]", profile.name);
     formData.append("user[introduction]", profile.introduction);
     formData.append("user[user_id]", profile.user_id.toString());
+    formData.append("user[is_private]", isPrivate.toString());
     const file = fileInputRef.current?.files?.[0];
     if (profile.image && profile.image.startsWith("blob:") && file) {
       formData.append("user[image]", file);
@@ -440,6 +445,22 @@ export default function ProfileEdit() {
                 プロフィール編集
               </h2>
               <form>
+                {/* 非公開アカウント */}
+                <p className="text-lg font-bold mt-6">プライバシー</p>
+                <div className="flex items-center justify-between mt-3">
+                  <div className="flex flex-col">
+                    <p className="text-sm text-white">非公開アカウント</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      承認したフォロワーのみが成績やプロフィールを閲覧できます
+                    </p>
+                  </div>
+                  <Switch
+                    isSelected={isPrivate}
+                    onValueChange={setIsPrivate}
+                    size="sm"
+                    color="primary"
+                  />
+                </div>
                 {profile.image && (
                   <Avatar
                     size="lg"

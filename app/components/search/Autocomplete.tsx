@@ -2,18 +2,20 @@
 import { Divider, Input, Spinner, User } from "@heroui/react";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { LockIcon } from "@app/components/icon/LockIcon";
 import { SearchIcon } from "@app/components/icon/SearchIcon";
 
-interface User {
+interface UserResult {
   id: string;
   name: string;
   user_id: string;
   image: { url: string };
+  is_private?: boolean;
 }
 
 export default function UserAutocomplete() {
   const [query, setQuery] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -61,16 +63,25 @@ export default function UserAutocomplete() {
           displayUsers.map((user) => (
             <li key={user.id}>
               <Link href={`/mypage/${user.user_id}/`} className="block">
-                <User
-                  name={user.name}
-                  description={`@${user.user_id}`}
-                  avatarProps={{
-                    src:
-                      process.env.NODE_ENV === "production"
-                        ? user.image.url
-                        : `${process.env.NEXT_PUBLIC_API_URL}${user.image.url}`,
-                  }}
-                />
+                <div className="flex items-center gap-x-1">
+                  <User
+                    name={
+                      <span className="flex items-center gap-1">
+                        {user.name}
+                        {user.is_private && (
+                          <LockIcon fill="#a1a1aa" width="12" height="12" />
+                        )}
+                      </span>
+                    }
+                    description={`@${user.user_id}`}
+                    avatarProps={{
+                      src:
+                        process.env.NODE_ENV === "production"
+                          ? user.image.url
+                          : `${process.env.NEXT_PUBLIC_API_URL}${user.image.url}`,
+                    }}
+                  />
+                </div>
               </Link>
               <Divider className="mt-2" />
             </li>
