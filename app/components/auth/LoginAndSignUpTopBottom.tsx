@@ -1,5 +1,4 @@
 "use client";
-import "@mantine/core/styles.css";
 import { Button } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
