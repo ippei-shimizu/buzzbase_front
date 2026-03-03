@@ -1,5 +1,6 @@
-import { Avatar } from "@heroui/react";
 import type { GroupRanking, RankingEntry } from "../actions";
+import { Avatar } from "@heroui/react";
+import Link from "next/link";
 
 interface GroupRankingsProps {
   rankings: GroupRanking[];
@@ -15,9 +16,10 @@ function RankBadge({ rank }: { rank: number }) {
 
   return (
     <span
-      className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${colorClass}`}
+      className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0 ${colorClass}`}
     >
       {rank}
+      <span className="text-[9px]">位</span>
     </span>
   );
 }
@@ -27,9 +29,7 @@ function ChangeIndicator({ change }: { change: number | null }) {
 
   if (change > 0) {
     return (
-      <span className="text-green-400 text-xs font-semibold">
-        ↑{change}
-      </span>
+      <span className="text-green-400 text-xs font-semibold">↑{change}</span>
     );
   }
   if (change < 0) {
@@ -39,16 +39,29 @@ function ChangeIndicator({ change }: { change: number | null }) {
       </span>
     );
   }
-  return (
-    <span className="text-zinc-500 text-xs font-semibold">→</span>
-  );
+  return <span className="text-zinc-500 text-xs font-semibold">→</span>;
+}
+
+function rankRowBg(rank: number): string {
+  switch (rank) {
+    case 1:
+      return "bg-yellow-500/10";
+    case 2:
+      return "bg-zinc-300/8";
+    case 3:
+      return "bg-amber-700/8";
+    default:
+      return "";
+  }
 }
 
 function RankingRow({ entry }: { entry: RankingEntry }) {
   if (entry.current_rank === null) return null;
 
   return (
-    <div className="flex items-center justify-between py-2">
+    <div
+      className={`flex items-center justify-between py-2 px-2 -mx-2 rounded-md ${rankRowBg(entry.current_rank)}`}
+    >
       <div className="flex items-center gap-2">
         <RankBadge rank={entry.current_rank} />
         <span className="text-sm text-zinc-300">{entry.label}</span>
@@ -92,7 +105,10 @@ export default function GroupRankings({ rankings }: GroupRankingsProps) {
                 key={group.group_id}
                 className="rounded-lg border border-zinc-700 p-4"
               >
-                <div className="flex items-center gap-3 mb-3">
+                <Link
+                  href={`/groups/${group.group_id}`}
+                  className="flex items-center gap-3 mb-3 transition-opacity hover:opacity-80"
+                >
                   <Avatar
                     src={
                       group.group_icon
@@ -104,13 +120,14 @@ export default function GroupRankings({ rankings }: GroupRankingsProps) {
                     size="sm"
                     isBordered
                   />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-semibold">{group.group_name}</p>
                     <p className="text-xs text-zinc-500">
                       {group.total_members}人
                     </p>
                   </div>
-                </div>
+                  <span className="text-zinc-400 text-3xl">›</span>
+                </Link>
 
                 {!hasEntries ? (
                   <p className="text-sm text-zinc-500 text-center py-2">
@@ -125,10 +142,7 @@ export default function GroupRankings({ rankings }: GroupRankingsProps) {
                         </h5>
                         <div className="divide-y divide-zinc-800">
                           {battingEntries.map((entry) => (
-                            <RankingRow
-                              key={entry.stat_type}
-                              entry={entry}
-                            />
+                            <RankingRow key={entry.stat_type} entry={entry} />
                           ))}
                         </div>
                       </div>
@@ -141,10 +155,7 @@ export default function GroupRankings({ rankings }: GroupRankingsProps) {
                         </h5>
                         <div className="divide-y divide-zinc-800">
                           {pitchingEntries.map((entry) => (
-                            <RankingRow
-                              key={entry.stat_type}
-                              entry={entry}
-                            />
+                            <RankingRow key={entry.stat_type} entry={entry} />
                           ))}
                         </div>
                       </div>
