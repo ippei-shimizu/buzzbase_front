@@ -19,7 +19,10 @@ import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import { updateGameResult } from "@app/services/gameResultsService";
+import {
+  createGameResult,
+  updateGameResult,
+} from "@app/services/gameResultsService";
 import {
   checkExistingMatchResults,
   createMatchResults,
@@ -175,6 +178,21 @@ export default function GameRecord() {
     if (savedGameResultId) {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
       fetchExistingMatchResult(JSON.parse(savedGameResultId));
+    } else if (pathname === "/game-result/record") {
+      // gameResultId がない場合は自動作成
+      const createNew = async () => {
+        try {
+          const newGameResult = await createGameResult();
+          localStorage.setItem(
+            "gameResultId",
+            JSON.stringify(newGameResult.id),
+          );
+          setLocalStorageGameResultId(newGameResult.id);
+        } catch (error) {
+          console.error("GameResultの自動作成に失敗しました", error);
+        }
+      };
+      createNew();
     }
     if (
       !(pathname === "/game-result/battings") &&
