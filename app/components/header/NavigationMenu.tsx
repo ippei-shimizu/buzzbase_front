@@ -23,7 +23,7 @@ export default function NavigationMenu() {
     if (path === "/signin" || path === "/signup") {
       return false;
     }
-    const basePath = ["/note", "/game-result", "/groups"];
+    const basePath = ["/game-result/lists", "/game-result/record", "/groups"];
     const isBasePath = basePath.some((base) => itemHref.startsWith(base));
 
     if (isBasePath) {
@@ -39,7 +39,10 @@ export default function NavigationMenu() {
     <>
       {!shouldHideNavigationMenu && (
         <nav className="fixed bottom-0 w-full bg-main pt-2.5 pb-1.5 border-t border-t-zinc-500 z-100 lg:w-56 lg:bottom-0 lg:left-0 lg:top-0 lg:h-full lg:border-t-0 lg:pl-6 lg:pt-16 lg:border-r-1 lg:border-r-zinc-500 lg:z-50">
-          <Link href="/" className="hidden lg:block">
+          <Link
+            href={isLoggedIn ? "/dashboard" : "/"}
+            className="hidden lg:block"
+          >
             <Image
               src="/images/buzz-logo-v2.png"
               width="164"
