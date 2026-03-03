@@ -28,13 +28,22 @@ export interface BattingStats {
   aggregate: {
     number_of_matches: number;
     hit: number;
+    two_base_hit: number;
+    three_base_hit: number;
     home_run: number;
+    total_bases: number;
     runs_batted_in: number;
+    run: number;
     stealing_base: number;
+    caught_stealing: number;
     times_at_bat: number;
     at_bats: number;
     base_on_balls: number;
+    hit_by_pitch: number;
+    sacrifice_hit: number;
+    sacrifice_fly: number;
     strike_out: number;
+    error: number;
   } | null;
   calculated: {
     batting_average: number;
@@ -43,6 +52,7 @@ export interface BattingStats {
     ops: number;
     iso: number;
     bb_per_k: number;
+    isod: number;
   } | null;
 }
 
@@ -51,10 +61,17 @@ export interface PitchingStats {
     number_of_appearances: number;
     win: number;
     loss: number;
+    complete_games: number;
+    shutouts: number;
     saves: number;
     hold: number;
     innings_pitched: number;
+    hits_allowed: number;
+    home_runs_hit: number;
     strikeouts: number;
+    base_on_balls: number;
+    hit_by_pitch: number;
+    run_allowed: number;
     earned_run: number;
   } | null;
   calculated: {
@@ -90,9 +107,13 @@ export interface DashboardData {
   batting_stats: BattingStats;
   pitching_stats: PitchingStats;
   group_rankings: GroupRanking[];
+  available_years: number[];
 }
 
-export async function getDashboardData(): Promise<DashboardData | null> {
+export async function getDashboardData(
+  year?: string,
+  matchType?: string,
+): Promise<DashboardData | null> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access-token")?.value;
@@ -103,7 +124,14 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       return null;
     }
 
-    const response = await fetch(`${RAILS_API_URL}/api/v2/dashboard`, {
+    const params = new URLSearchParams();
+    if (year && year !== "通算") params.append("year", year);
+    if (matchType && matchType !== "全て")
+      params.append("match_type", matchType);
+    const query = params.toString();
+    const url = `${RAILS_API_URL}/api/v2/dashboard${query ? `?${query}` : ""}`;
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

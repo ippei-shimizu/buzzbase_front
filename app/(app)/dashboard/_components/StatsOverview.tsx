@@ -1,53 +1,513 @@
+"use client";
+
 import type { BattingStats, PitchingStats } from "../actions";
+import type { SharedSelection } from "@heroui/system";
+import { Select, SelectItem } from "@heroui/react";
+import { useState } from "react";
+import {
+  normalizeBattingStats,
+  normalizePitchingStats,
+} from "./radarChartUtils";
+import StatsRadarChart from "./StatsRadarChart";
 
 interface StatsOverviewProps {
   battingStats: BattingStats | null;
   pitchingStats: PitchingStats | null;
+  hasBattingRecord: boolean;
+  hasPitchingRecord: boolean;
+  availableYears: number[];
+  onBattingFilterChange: (year: string, matchType: string) => void;
+  onPitchingFilterChange: (year: string, matchType: string) => void;
 }
 
-interface StatItem {
-  label: string;
-  value: string | number;
+const MATCH_TYPE_OPTIONS = [
+  { key: "全て", label: "全て" },
+  { key: "regular", label: "公式戦" },
+  { key: "open", label: "オープン戦" },
+];
+
+function formatNumber(value: number): string {
+  if (value < 1 && value > -1) {
+    return value.toFixed(3).replace("0", "");
+  }
+  return value.toFixed(3);
 }
 
-function formatStat(value: number | undefined, decimals: number = 3): string {
-  if (value === undefined || value === null) return "-";
-  return value.toFixed(decimals);
+function formatNumber2(value: number): string {
+  if (value < 1 && value > -1) {
+    return value.toFixed(3).replace("0", "");
+  }
+  return value.toFixed(2);
+}
+
+const displayValue = (value: number | undefined | null) =>
+  value == null ? "-" : value.toString();
+const displayFormattedValue = (value: number | undefined | null) =>
+  value == null ? "-" : formatNumber(value);
+const displayFormattedValue2 = (value: number | undefined | null) =>
+  value == null ? "-" : formatNumber2(value);
+
+const styleTableBox = "grid grid-cols-2 text-center";
+const styleTableTitle =
+  "border-r-1 border-b-1 border-r-zinc-500 border-b-zinc-500 text-sm py-2.5 font-normal text-zinc-300";
+const styleTableData =
+  "bg-sub text-sm py-2.5 font-medium border-b-1 border-b-zinc-500";
+
+interface FilterProps {
+  availableYears: { key: string; label: string }[];
+  selectedYear: string;
+  selectedMatchType: string;
+  onYearChange: (keys: SharedSelection) => void;
+  onMatchTypeChange: (keys: SharedSelection) => void;
+}
+
+function StatsFilter({
+  availableYears,
+  selectedYear,
+  selectedMatchType,
+  onYearChange,
+  onMatchTypeChange,
+}: FilterProps) {
+  return (
+    <div className="flex gap-2">
+      <Select
+        size="sm"
+        variant="bordered"
+        aria-label="年度"
+        className="w-28"
+        selectedKeys={[selectedYear]}
+        onSelectionChange={onYearChange}
+      >
+        {availableYears.map((opt) => (
+          <SelectItem key={opt.key}>{opt.label}</SelectItem>
+        ))}
+      </Select>
+      <Select
+        size="sm"
+        variant="bordered"
+        aria-label="試合種別"
+        className="w-32"
+        selectedKeys={[selectedMatchType]}
+        onSelectionChange={onMatchTypeChange}
+      >
+        {MATCH_TYPE_OPTIONS.map((opt) => (
+          <SelectItem key={opt.key}>{opt.label}</SelectItem>
+        ))}
+      </Select>
+    </div>
+  );
+}
+
+function BattingSummary({ battingStats }: { battingStats: BattingStats }) {
+  const agg = battingStats.aggregate;
+  const calc = battingStats.calculated;
+  const matches = agg?.number_of_matches ?? 0;
+  const avg = calc?.batting_average ?? 0;
+  const timesAtBat = agg?.times_at_bat ?? 0;
+  const atBats = agg?.at_bats ?? 0;
+  const totalHits =
+    (agg?.hit ?? 0) +
+    (agg?.two_base_hit ?? 0) +
+    (agg?.three_base_hit ?? 0) +
+    (agg?.home_run ?? 0);
+  const rbi = agg?.runs_batted_in ?? 0;
+  const hr = agg?.home_run ?? 0;
+
+  return (
+    <div className="mb-2 py-2">
+      <p>
+        <span className="text-sm text-zinc-200">打率</span>
+        <span className="text-xl font-bold ml-1" style={{ color: "#d08000" }}>
+          {formatNumber(avg)}
+        </span>
+        <span className="text-sm text-zinc-200 ml-3">{matches}試合</span>
+      </p>
+      <p className="text-sm text-zinc-300 mt-0.5">
+        {timesAtBat}打席 {atBats}打数 {totalHits}安打 / {rbi}打点 {hr}本塁打
+      </p>
+    </div>
+  );
+}
+
+function PitchingSummary({ pitchingStats }: { pitchingStats: PitchingStats }) {
+  const agg = pitchingStats.aggregate;
+  const calc = pitchingStats.calculated;
+  const appearances = agg?.number_of_appearances ?? 0;
+  const era = calc?.era ?? 0;
+  const ip = agg?.innings_pitched ?? 0;
+  const wins = agg?.win ?? 0;
+  const losses = agg?.loss ?? 0;
+  const strikeouts = agg?.strikeouts ?? 0;
+
+  return (
+    <div className="mb-2 py-2">
+      <p>
+        <span className="text-sm text-zinc-200">防御率</span>
+        <span className="text-xl font-bold ml-1" style={{ color: "#338EF7" }}>
+          {formatNumber2(era)}
+        </span>
+        <span className="text-sm text-zinc-200 ml-3">{appearances}登板</span>
+      </p>
+      <p className="text-sm text-zinc-300 mt-0.5">
+        {ip}回 {wins}勝{losses}敗 / {strikeouts}奪三振
+      </p>
+    </div>
+  );
+}
+
+function BattingTable({ battingStats }: { battingStats: BattingStats }) {
+  const agg = battingStats.aggregate;
+  const calc = battingStats.calculated;
+  const totalHits = calc
+    ? (agg?.hit ?? 0) +
+      (agg?.two_base_hit ?? 0) +
+      (agg?.three_base_hit ?? 0) +
+      (agg?.home_run ?? 0)
+    : null;
+
+  return (
+    <div className="border-x-1 border-t-1 border-zinc-500 rounded-md overflow-hidden">
+      <div className="grid grid-cols-2">
+        <div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>打率</p>
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.batting_average)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>打席</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.times_at_bat)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>安打</p>
+            <span className={styleTableData}>{displayValue(totalHits)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>三塁打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.three_base_hit)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>塁打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.total_bases)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>得点</p>
+            <span className={styleTableData}>{displayValue(agg?.run)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>四球</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.base_on_balls)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>犠打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.sacrifice_hit)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>盗塁</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.stealing_base)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>出塁率</p>
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.on_base_percentage)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>OPS</p>
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.ops)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={`${styleTableTitle} rounded-bl-md`}>ISOD</p>
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.isod)}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>試合</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.number_of_matches)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>打数</p>
+            <span className={styleTableData}>{displayValue(agg?.at_bats)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>二塁打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.two_base_hit)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>本塁打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.home_run)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>打点</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.runs_batted_in)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>三振</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.strike_out)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>死球</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.hit_by_pitch)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>犠飛</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.sacrifice_fly)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>盗塁死</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.caught_stealing)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>長打率</p>
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.slugging_percentage)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>ISO</p>
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.iso)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>BB/K</p>
+            <span className={`${styleTableData} rounded-br-md`}>
+              {displayFormattedValue(calc?.bb_per_k)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
+  const agg = pitchingStats.aggregate;
+  const calc = pitchingStats.calculated;
+
+  return (
+    <div className="border-x-1 border-t-1 border-zinc-500 rounded-md overflow-hidden">
+      <div className="grid grid-cols-2">
+        <div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>防御率</p>
+            <span className={styleTableData}>
+              {displayFormattedValue2(calc?.era)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>勝利</p>
+            <span className={styleTableData}>{displayValue(agg?.win)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>ホールド</p>
+            <span className={styleTableData}>{displayValue(agg?.hold)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>完投</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.complete_games)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>勝率</p>
+            <span className={styleTableData}>
+              {displayFormattedValue2(calc?.win_percentage)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>失点</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.run_allowed)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>被安打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.hits_allowed)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>奪三振</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.strikeouts)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>与四球</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.base_on_balls)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>BB/9</p>
+            <span className={styleTableData}>
+              {displayFormattedValue2(calc?.bb_per_nine)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={`${styleTableTitle} rounded-bl-md`}>WHIP</p>
+            <span className={styleTableData}>
+              {displayFormattedValue2(calc?.whip)}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>登板</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.number_of_appearances)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>敗戦</p>
+            <span className={styleTableData}>{displayValue(agg?.loss)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>セーブ</p>
+            <span className={styleTableData}>{displayValue(agg?.saves)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>完封</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.shutouts)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>投球回</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.innings_pitched)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>自責点</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.earned_run)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>被本塁打</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.home_runs_hit)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>与死球</p>
+            <span className={styleTableData}>
+              {displayValue(agg?.hit_by_pitch)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>K/9</p>
+            <span className={styleTableData}>
+              {displayFormattedValue2(calc?.k_per_nine)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>K/BB</p>
+            <span className={styleTableData}>{displayValue(calc?.k_bb)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>---</p>
+            <span className={`${styleTableData} rounded-br-md`}>---</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function StatsOverview({
   battingStats,
   pitchingStats,
+  hasBattingRecord,
+  hasPitchingRecord,
+  availableYears,
+  onBattingFilterChange,
+  onPitchingFilterChange,
 }: StatsOverviewProps) {
-  const battingItems: StatItem[] =
-    battingStats?.calculated
-      ? [
-          { label: "打率", value: formatStat(battingStats.calculated.batting_average) },
-          { label: "本塁打", value: battingStats.aggregate?.home_run ?? 0 },
-          { label: "打点", value: battingStats.aggregate?.runs_batted_in ?? 0 },
-          { label: "安打", value: battingStats.aggregate?.hit ?? 0 },
-          { label: "盗塁", value: battingStats.aggregate?.stealing_base ?? 0 },
-          { label: "出塁率", value: formatStat(battingStats.calculated.on_base_percentage) },
-        ]
-      : [];
+  const [battingYear, setBattingYear] = useState("通算");
+  const [battingMatchType, setBattingMatchType] = useState("全て");
+  const [pitchingYear, setPitchingYear] = useState("通算");
+  const [pitchingMatchType, setPitchingMatchType] = useState("全て");
 
-  const pitchingItems: StatItem[] =
-    pitchingStats?.calculated
-      ? [
-          { label: "防御率", value: formatStat(pitchingStats.calculated.era, 2) },
-          { label: "勝利", value: pitchingStats.aggregate?.win ?? 0 },
-          { label: "セーブ", value: pitchingStats.aggregate?.saves ?? 0 },
-          { label: "HP", value: pitchingStats.aggregate?.hold ?? 0 },
-          { label: "奪三振", value: pitchingStats.aggregate?.strikeouts ?? 0 },
-          { label: "勝率", value: formatStat(pitchingStats.calculated.win_percentage) },
-        ]
-      : [];
+  const yearOptions = [
+    { key: "通算", label: "通算" },
+    ...availableYears.map((y) => ({ key: String(y), label: `${y}年` })),
+  ];
+
+  const handleBattingYearChange = (keys: SharedSelection) => {
+    if (keys === "all") return;
+    const year = Array.from(keys)[0]?.toString() ?? "通算";
+    setBattingYear(year);
+    onBattingFilterChange(year, battingMatchType);
+  };
+
+  const handleBattingMatchTypeChange = (keys: SharedSelection) => {
+    if (keys === "all") return;
+    const matchType = Array.from(keys)[0]?.toString() ?? "全て";
+    setBattingMatchType(matchType);
+    onBattingFilterChange(battingYear, matchType);
+  };
+
+  const handlePitchingYearChange = (keys: SharedSelection) => {
+    if (keys === "all") return;
+    const year = Array.from(keys)[0]?.toString() ?? "通算";
+    setPitchingYear(year);
+    onPitchingFilterChange(year, pitchingMatchType);
+  };
+
+  const handlePitchingMatchTypeChange = (keys: SharedSelection) => {
+    if (keys === "all") return;
+    const matchType = Array.from(keys)[0]?.toString() ?? "全て";
+    setPitchingMatchType(matchType);
+    onPitchingFilterChange(pitchingYear, matchType);
+  };
+
+  const hasBattingData = !!battingStats?.calculated;
+  const hasPitchingData = !!pitchingStats?.calculated;
+  const hasStats = hasBattingRecord || hasPitchingRecord;
 
   return (
     <section>
-      <h3 className="text-lg font-bold mb-3">通算成績</h3>
+      <h3 className="text-lg font-bold mb-3">成績</h3>
 
-      {battingItems.length === 0 && pitchingItems.length === 0 ? (
+      {!hasStats ? (
         <div className="rounded-lg border border-zinc-700 p-6 text-center">
           <p className="text-zinc-400">成績がありません</p>
           <p className="text-zinc-500 text-sm mt-1">
@@ -55,38 +515,76 @@ export default function StatsOverview({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {battingItems.length > 0 && (
+        <div className="flex flex-col gap-8">
+          {hasBattingRecord && (
             <div>
-              <h4 className="text-sm font-semibold text-zinc-400 mb-2">打撃成績</h4>
-              <div className="grid grid-cols-3 gap-2">
-                {battingItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-lg border border-zinc-700 p-3 text-center"
-                  >
-                    <p className="text-xs text-zinc-400">{item.label}</p>
-                    <p className="text-lg font-bold mt-1">{item.value}</p>
-                  </div>
-                ))}
+              {hasBattingData && battingStats && (
+                <div className="flex justify-center">
+                  <StatsRadarChart
+                    data={normalizeBattingStats(battingStats)}
+                    color="#d08000"
+                    title="打撃"
+                  />
+                </div>
+              )}
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-zinc-400">
+                  打撃成績
+                </h4>
+                <StatsFilter
+                  availableYears={yearOptions}
+                  selectedYear={battingYear}
+                  selectedMatchType={battingMatchType}
+                  onYearChange={handleBattingYearChange}
+                  onMatchTypeChange={handleBattingMatchTypeChange}
+                />
               </div>
+              {hasBattingData && battingStats && (
+                <BattingSummary battingStats={battingStats} />
+              )}
+              {hasBattingData && battingStats ? (
+                <BattingTable battingStats={battingStats} />
+              ) : (
+                <p className="text-sm text-zinc-500 text-center py-4">
+                  該当する打撃成績がありません
+                </p>
+              )}
             </div>
           )}
 
-          {pitchingItems.length > 0 && (
+          {hasPitchingRecord && (
             <div>
-              <h4 className="text-sm font-semibold text-zinc-400 mb-2">投手成績</h4>
-              <div className="grid grid-cols-3 gap-2">
-                {pitchingItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-lg border border-zinc-700 p-3 text-center"
-                  >
-                    <p className="text-xs text-zinc-400">{item.label}</p>
-                    <p className="text-lg font-bold mt-1">{item.value}</p>
-                  </div>
-                ))}
+              {hasPitchingData && pitchingStats && (
+                <div className="flex justify-center">
+                  <StatsRadarChart
+                    data={normalizePitchingStats(pitchingStats)}
+                    color="#338EF7"
+                    title="投手"
+                  />
+                </div>
+              )}
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-zinc-400">
+                  投手成績
+                </h4>
+                <StatsFilter
+                  availableYears={yearOptions}
+                  selectedYear={pitchingYear}
+                  selectedMatchType={pitchingMatchType}
+                  onYearChange={handlePitchingYearChange}
+                  onMatchTypeChange={handlePitchingMatchTypeChange}
+                />
               </div>
+              {hasPitchingData && pitchingStats && (
+                <PitchingSummary pitchingStats={pitchingStats} />
+              )}
+              {hasPitchingData && pitchingStats ? (
+                <PitchingTable pitchingStats={pitchingStats} />
+              ) : (
+                <p className="text-sm text-zinc-500 text-center py-4">
+                  該当する投手成績がありません
+                </p>
+              )}
             </div>
           )}
         </div>

@@ -44,9 +44,10 @@ export default function RecentGameResults({ results }: RecentGameResultsProps) {
       ) : (
         <div className="flex flex-col gap-3">
           {results.map((result) => (
-            <div
+            <Link
               key={result.id}
-              className="rounded-lg border border-zinc-700 p-4"
+              href={`/game-result/summary/${result.id}`}
+              className="block rounded-lg border border-zinc-700 p-3 transition-colors hover:border-zinc-500"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -62,7 +63,7 @@ export default function RecentGameResults({ results }: RecentGameResultsProps) {
                 </span>
               </div>
 
-              <div className="flex items-center justify-center gap-3 mb-3">
+              <div className="flex items-center justify-center gap-3 mb-2">
                 <span
                   className={`text-2xl font-bold ${
                     result.my_team_score > result.opponent_team_score
@@ -84,7 +85,8 @@ export default function RecentGameResults({ results }: RecentGameResultsProps) {
                 {result.batting_average && (
                   <div className="flex gap-3 text-zinc-300">
                     <span>
-                      {result.batting_average.hit}/{result.batting_average.at_bats}
+                      {result.batting_average.hit}/
+                      {result.batting_average.at_bats}
                     </span>
                     {result.batting_average.home_run > 0 && (
                       <span>HR {result.batting_average.home_run}</span>
@@ -102,7 +104,7 @@ export default function RecentGameResults({ results }: RecentGameResultsProps) {
                   </div>
                 )}
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
