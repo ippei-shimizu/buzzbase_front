@@ -17,7 +17,7 @@ export default function Footer() {
         <footer className="border-t border-t-zinc-500 pt-12 px-4 pb-24 bg-main lg:pb-12 lg:relative lg:z-100 lg:pl-[8%] lg:pr-auto">
           <div className="lg:max-w-[900px] lg:mx-auto lg:flex lg:items-center lg:gap-x-8 lg:justify-center">
             <div className="max-w-[692px] mx-auto mb-6 lg:mb-0 lg:mx-0 lg:m-[0_0_0_32%] lg:max-w-full">
-              <Link href="/">
+              <Link href={isLoggedIn ? "/dashboard" : "/"}>
                 <Image
                   src="/images/buzz-logo-v2.png"
                   width="184"
