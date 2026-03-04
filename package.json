@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "postbuild": "next-sitemap",
     "test": "jest",
     "test:watch": "jest --watch",

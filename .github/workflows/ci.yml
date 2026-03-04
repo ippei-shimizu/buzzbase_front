@@ -29,7 +29,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: TypeScript type check
-        run: yarn check
+        run: yarn typecheck
 
       - name: ESLint check
         run: yarn lint
