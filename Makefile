@@ -1,4 +1,4 @@
-.PHONY: dev build start lint lint-fix format format-check check postbuild install test test-watch test-coverage test-ci help
+.PHONY: dev build start lint lint-fix format format-check typecheck postbuild install test test-watch test-coverage test-ci help
 
 help:
 	@echo "使用可能なコマンド:"
@@ -9,7 +9,7 @@ help:
 	@echo "  make lint-fix        - ESLintでコードをチェック&自動修正"
 	@echo "  make format          - Prettierでコードフォーマット"
 	@echo "  make format-check    - Prettierでコードフォーマットチェック"
-	@echo "  make check           - TypeScriptの型チェックを実行"
+	@echo "  make typecheck       - TypeScriptの型チェックを実行"
 	@echo "  make postbuild       - next-sitemapを実行"
 	@echo "  make install         - 依存関係をインストール"
 	@echo "  make test            - 全テストを実行"
@@ -38,8 +38,8 @@ format:
 format-check:
 	yarn format:check
 
-check:
-	yarn check
+typecheck:
+	yarn typecheck
 
 postbuild:
 	yarn postbuild
