@@ -189,12 +189,18 @@ export interface TournamentData {
   name: string;
 }
 
+export interface SeasonData {
+  id: number;
+  name: string;
+}
+
 export interface GameResultData {
   game_result: {
     user_id: number;
     match_result_id: number | null;
     batting_average_id: number | null;
     pitching_result_id: number | null;
+    season_id?: number | null;
   };
 }
 
