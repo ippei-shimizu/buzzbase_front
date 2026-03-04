@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect } from "react";
 import HeaderRight from "@app/components/header/HeaderRight";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function HeaderTop() {
+  const { isLoggedIn } = useAuthContext();
   useEffect(() => {
     localStorage.removeItem("gameResultId");
   }, []);
@@ -13,7 +15,7 @@ export default function HeaderTop() {
     <>
       <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-0 w-full bg-main z-50 lg:pl-[22%]">
         <div className="flex items-center justify-between h-full relative lg:max-w-[1108px] mx-auto lg:mr-auto lg:ml-[14px]">
-          <Link href="/">
+          <Link href={isLoggedIn ? "/dashboard" : "/"}>
             <Image
               src="/images/buzz-logo-v2.png"
               width="120"

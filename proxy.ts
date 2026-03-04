@@ -94,6 +94,22 @@ async function validateAdminAuth(
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // NOTE: ログイン済みユーザーがトップページにアクセスした場合、ダッシュボードにリダイレクト
+  if (pathname === "/") {
+    const accessToken = request.cookies.get("access-token")?.value;
+    if (accessToken) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  // NOTE: 未ログインユーザーがダッシュボードにアクセスした場合、トップページにリダイレクト
+  if (pathname === "/dashboard") {
+    const accessToken = request.cookies.get("access-token")?.value;
+    if (!accessToken) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   if (pathname.startsWith("/admin-management-console")) {
     // NOTE: Basic認証チェック
     if (!checkBasicAuth(request)) {
@@ -134,5 +150,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin-management-console/:path*"],
+  matcher: ["/", "/dashboard", "/admin-management-console/:path*"],
 };

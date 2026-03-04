@@ -47,8 +47,8 @@ export default function Top() {
       key={feature.title}
       shadow="md"
       radius="md"
-      className={classes.card}
-      padding="xl"
+      className={`${classes.card} !p-[18px]`}
+      padding={18}
     >
       <feature.icon
         style={{ width: rem(50), height: rem(50) }}
@@ -67,7 +67,7 @@ export default function Top() {
   return (
     <>
       <MantineProvider>
-        <div className="h-full lg:m-[0_auto_0_22%]">
+        <div className="h-full px-[18px] lg:m-[0_auto_0_22%]">
           <Container size="lg">
             <div className={classes.inner}>
               <div className={classes.content}>
