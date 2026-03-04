@@ -40,6 +40,15 @@ function formatNumber2(value: number): string {
   return value.toFixed(2);
 }
 
+function calcTotalHits(agg: BattingStats["aggregate"]): number {
+  return (
+    (agg?.hit ?? 0) +
+    (agg?.two_base_hit ?? 0) +
+    (agg?.three_base_hit ?? 0) +
+    (agg?.home_run ?? 0)
+  );
+}
+
 const displayValue = (value: number | undefined | null) =>
   value == null ? "-" : value.toString();
 const displayFormattedValue = (value: number | undefined | null) =>
@@ -105,11 +114,7 @@ function BattingSummary({ battingStats }: { battingStats: BattingStats }) {
   const avg = calc?.batting_average ?? 0;
   const timesAtBat = agg?.times_at_bat ?? 0;
   const atBats = agg?.at_bats ?? 0;
-  const totalHits =
-    (agg?.hit ?? 0) +
-    (agg?.two_base_hit ?? 0) +
-    (agg?.three_base_hit ?? 0) +
-    (agg?.home_run ?? 0);
+  const totalHits = calcTotalHits(agg);
   const rbi = agg?.runs_batted_in ?? 0;
   const hr = agg?.home_run ?? 0;
 
@@ -158,12 +163,7 @@ function PitchingSummary({ pitchingStats }: { pitchingStats: PitchingStats }) {
 function BattingTable({ battingStats }: { battingStats: BattingStats }) {
   const agg = battingStats.aggregate;
   const calc = battingStats.calculated;
-  const totalHits = calc
-    ? (agg?.hit ?? 0) +
-      (agg?.two_base_hit ?? 0) +
-      (agg?.three_base_hit ?? 0) +
-      (agg?.home_run ?? 0)
-    : null;
+  const totalHits = calc ? calcTotalHits(agg) : null;
 
   return (
     <div className="border-x-1 border-t-1 border-zinc-500 rounded-md overflow-hidden">
@@ -440,11 +440,9 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
           </div>
           <div className={styleTableBox}>
             <p className={styleTableTitle}>K/BB</p>
-            <span className={styleTableData}>{displayValue(calc?.k_bb)}</span>
-          </div>
-          <div className={styleTableBox}>
-            <p className={styleTableTitle}>---</p>
-            <span className={`${styleTableData} rounded-br-md`}>---</span>
+            <span className={`${styleTableData} rounded-br-md`}>
+              {displayValue(calc?.k_bb)}
+            </span>
           </div>
         </div>
       </div>

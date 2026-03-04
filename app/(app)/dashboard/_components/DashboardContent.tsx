@@ -2,7 +2,7 @@
 
 import type { BattingStats, DashboardData, PitchingStats } from "../actions";
 import { useState } from "react";
-import { getDashboardData } from "../actions";
+import { getFilteredBattingStats, getFilteredPitchingStats } from "../actions";
 import GroupRankings from "./GroupRankings";
 import RecentGameResults from "./RecentGameResults";
 import RecordGameButton from "./RecordGameButton";
@@ -21,9 +21,9 @@ export default function DashboardContent({ data }: DashboardContentProps) {
   );
 
   const handleBattingFilterChange = async (year: string, matchType: string) => {
-    const filtered = await getDashboardData(year, matchType);
+    const filtered = await getFilteredBattingStats(year, matchType);
     if (filtered) {
-      setBattingStats(filtered.batting_stats);
+      setBattingStats(filtered);
     }
   };
 
@@ -31,9 +31,9 @@ export default function DashboardContent({ data }: DashboardContentProps) {
     year: string,
     matchType: string,
   ) => {
-    const filtered = await getDashboardData(year, matchType);
+    const filtered = await getFilteredPitchingStats(year, matchType);
     if (filtered) {
-      setPitchingStats(filtered.pitching_stats);
+      setPitchingStats(filtered);
     }
   };
 

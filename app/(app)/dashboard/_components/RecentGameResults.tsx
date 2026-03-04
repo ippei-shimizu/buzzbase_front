@@ -6,8 +6,9 @@ interface RecentGameResultsProps {
 }
 
 function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return `${date.getMonth() + 1}/${date.getDate()}`;
+  const datePart = dateStr.split("T")[0];
+  const [, month, day] = datePart.split("-");
+  return `${parseInt(month)}/${parseInt(day)}`;
 }
 
 function matchTypeLabel(matchType: string): string {
