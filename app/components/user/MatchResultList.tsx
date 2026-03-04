@@ -1,3 +1,4 @@
+import type { SeasonData } from "@app/interface";
 import { useCallback, useEffect, useState } from "react";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
 import ResultsSelectBox from "@app/components/select/ResultsSelectBox";
@@ -10,6 +11,7 @@ import {
   getMatchResults,
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
+import { getSeasons } from "@app/services/seasonsService";
 
 type GameResult = {
   game_result_id: number;
@@ -53,10 +55,29 @@ export default function MatchResultList(props: UserId) {
     [],
   );
   const [selectedMatchType, setSelectedMatchType] = useState("全て");
+  const [seasonsData, setSeasonsData] = useState<SeasonData[]>([]);
+  const [availableSeasons, setAvailableSeasons] = useState<
+    (string | number)[]
+  >([]);
+  const [selectedSeason, setSelectedSeason] = useState("全て");
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
 
   const fetchFilteredData = useCallback(async () => {
     try {
+      // シーズン一覧取得
+      const seasonsList = await getSeasons(userId);
+      setSeasonsData(seasonsList);
+      const seasonNames: (string | number)[] = seasonsList.map(
+        (s: SeasonData) => s.name,
+      );
+      seasonNames.unshift("全て");
+      setAvailableSeasons(seasonNames);
+
+      const seasonId =
+        selectedSeason !== "全て"
+          ? seasonsData.find((s) => s.name === selectedSeason)?.id
+          : undefined;
+
       let filteredGameResultData;
       if (userId) {
         // v2: plate_appearances included in response
@@ -64,6 +85,7 @@ export default function MatchResultList(props: UserId) {
           userId,
           selectedYear,
           selectedMatchType,
+          seasonId,
         );
         // ユーザーごとシーズン
         const matchResultData = await getMatchResultsUserId(userId);
@@ -116,7 +138,7 @@ export default function MatchResultList(props: UserId) {
     } catch (error) {
       console.error(`Filtered game lists fetch error:`, error);
     }
-  }, [userId, selectedYear, selectedMatchType]);
+  }, [userId, selectedYear, selectedMatchType, selectedSeason, seasonsData]);
 
   useEffect(() => {
     if (userId) {
@@ -131,14 +153,19 @@ export default function MatchResultList(props: UserId) {
     if (selectedYear && selectedMatchType) {
       fetchFilteredData();
     }
-  }, [selectedYear, selectedMatchType, fetchFilteredData]);
+  }, [selectedYear, selectedMatchType, selectedSeason, fetchFilteredData]);
 
   const fetchData = async () => {
     try {
+      const seasonId =
+        selectedSeason !== "全て"
+          ? seasonsData.find((s) => s.name === selectedSeason)?.id
+          : undefined;
       // v2: plate_appearances included in response
       const gameResultsDataLists = await getFilterGameResultsV2(
         selectedYear,
         selectedMatchType,
+        seasonId,
       );
       const matchResultData = await getMatchResults();
       const matchResultDate = matchResultData.map(
@@ -194,6 +221,12 @@ export default function MatchResultList(props: UserId) {
   ) => {
     setSelectedMatchType(event.target.value);
   };
+
+  const handleSeasonChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setSelectedSeason(event.target.value);
+  };
   return (
     <>
       <div className="bg-bg_sub p-4 rounded-xl lg:p-6">
@@ -224,6 +257,21 @@ export default function MatchResultList(props: UserId) {
             propsYears={availableMatchType}
             selectedKeys={
               selectedMatchType ? [selectedMatchType.toString()] : []
+            }
+          />
+          <ResultsSelectBox
+            radius="full"
+            className="bg-transparent rounded-full text-xs border-zinc-400 max-w-xs"
+            data={years}
+            variant="faded"
+            color="primary"
+            ariaLabel="シーズンを選択"
+            labelPlacement="outside"
+            size="sm"
+            onChange={handleSeasonChange}
+            propsYears={availableSeasons}
+            selectedKeys={
+              selectedSeason ? [selectedSeason.toString()] : []
             }
           />
         </div>
