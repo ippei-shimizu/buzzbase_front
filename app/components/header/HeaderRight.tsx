@@ -54,6 +54,13 @@ export default function HeaderRight() {
                   野球ノート
                 </DropdownItem>
                 <DropdownItem
+                  key="seasons"
+                  as={Link}
+                  href="/seasons"
+                >
+                  シーズン管理
+                </DropdownItem>
+                <DropdownItem
                   key="contact"
                   as={Link}
                   href="/contact"
