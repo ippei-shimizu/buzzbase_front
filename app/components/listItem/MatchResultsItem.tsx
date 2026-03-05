@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 type GameResultItem = {
   game_result_id: number;
+  season_name?: string | null;
   match_result?: {
     match_type: string;
     date_and_time: string;
@@ -188,6 +189,11 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                   ""
                 )}
               </div>
+              {game.season_name && (
+                <p className="text-xs text-zinc-400 mt-1.5">
+                  シーズン: {game.season_name}
+                </p>
+              )}
               <p className="text-sm mt-2 text-zinc-400">
                 {game.match_result?.tournament_name || ""}
               </p>

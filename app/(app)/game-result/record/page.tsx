@@ -29,10 +29,7 @@ import {
   updateMatchResult,
 } from "@app/services/matchResultsService";
 import { getPositions } from "@app/services/positionService";
-import {
-  createSeason,
-  getSeasons,
-} from "@app/services/seasonsService";
+import { createSeason, getSeasons } from "@app/services/seasonsService";
 import { createOrUpdateTeam, getTeams } from "@app/services/teamsService";
 import {
   createTournament,
@@ -494,7 +491,6 @@ export default function GameRecord() {
             ? existingDefensivePosition
             : myPosition,
           tournament_id: tournamentId,
-          season_id: seasonId,
           memo: matchMemo,
         },
       };
@@ -504,6 +500,12 @@ export default function GameRecord() {
       );
       if (existingMatchResults) {
         await updateMatchResult(existingMatchResults.id, matchResultData);
+        // season_idをgame_resultに保存
+        if (localStorageGameResultId !== null) {
+          await updateGameResult(localStorageGameResultId, {
+            game_result: { season_id: seasonId },
+          });
+        }
       } else {
         const response = await createMatchResults(matchResultData);
         console.log(response);
@@ -517,6 +519,7 @@ export default function GameRecord() {
               match_result_id: response.id,
               batting_average_id: null,
               pitching_result_id: null,
+              season_id: seasonId,
             },
           };
           await updateGameResult(
