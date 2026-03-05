@@ -15,6 +15,7 @@ export default function ResultsSelectBox({
   onChange,
   propsYears,
   selectedKeys,
+  placeholder,
 }: ResultsSelectBoxProps) {
   return (
     <>
@@ -28,6 +29,7 @@ export default function ResultsSelectBox({
         size={size}
         onChange={onChange}
         selectedKeys={selectedKeys}
+        placeholder={placeholder}
       >
         {(propsYears || []).map((year) => (
           <SelectItem key={year.toString()} textValue={year.toString()}>
