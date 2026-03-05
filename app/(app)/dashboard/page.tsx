@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Header from "@app/components/header/Header";
 import DashboardContent from "./_components/DashboardContent";
-import { getDashboardData } from "./actions";
+import { getAvailableSeasons, getDashboardData } from "./actions";
 
 export const metadata = {
   title: "ダッシュボード",
@@ -14,7 +14,10 @@ export default async function DashboardPage() {
     redirect("/signup?auth_required=true");
   }
 
-  const data = await getDashboardData();
+  const [data, seasons] = await Promise.all([
+    getDashboardData(),
+    getAvailableSeasons(),
+  ]);
 
   return (
     <>
@@ -25,7 +28,7 @@ export default async function DashboardPage() {
             <div className="pt-20 px-4 lg:px-6">
               <h2 className="text-2xl font-bold">ダッシュボード</h2>
               <div className="my-6">
-                <DashboardContent data={data} />
+                <DashboardContent data={data} seasons={seasons} />
               </div>
             </div>
           </div>

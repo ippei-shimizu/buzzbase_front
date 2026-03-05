@@ -1,9 +1,9 @@
 "use client";
 
-import type { BattingStats, PitchingStats } from "../actions";
-import type { SharedSelection } from "@heroui/system";
-import { Select, SelectItem } from "@heroui/react";
+import type { BattingStats, PitchingStats, SeasonOption } from "../actions";
 import { useState } from "react";
+import FilterChip from "@app/components/filter/FilterChip";
+import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
@@ -16,8 +16,17 @@ interface StatsOverviewProps {
   hasBattingRecord: boolean;
   hasPitchingRecord: boolean;
   availableYears: number[];
-  onBattingFilterChange: (year: string, matchType: string) => void;
-  onPitchingFilterChange: (year: string, matchType: string) => void;
+  availableSeasons: SeasonOption[];
+  onBattingFilterChange: (
+    year: string,
+    matchType: string,
+    seasonId?: string,
+  ) => void;
+  onPitchingFilterChange: (
+    year: string,
+    matchType: string,
+    seasonId?: string,
+  ) => void;
 }
 
 const MATCH_TYPE_OPTIONS = [
@@ -64,46 +73,51 @@ const styleTableData =
 
 interface FilterProps {
   availableYears: { key: string; label: string }[];
+  availableSeasons: { key: string; label: string }[];
   selectedYear: string;
   selectedMatchType: string;
-  onYearChange: (keys: SharedSelection) => void;
-  onMatchTypeChange: (keys: SharedSelection) => void;
+  selectedSeason: string;
+  onYearChange: (key: string) => void;
+  onMatchTypeChange: (key: string) => void;
+  onSeasonChange: (key: string) => void;
 }
 
 function StatsFilter({
   availableYears,
+  availableSeasons,
   selectedYear,
   selectedMatchType,
+  selectedSeason,
   onYearChange,
   onMatchTypeChange,
+  onSeasonChange,
 }: FilterProps) {
   return (
-    <div className="flex gap-2">
-      <Select
-        size="sm"
-        variant="bordered"
-        aria-label="年度"
-        className="w-28"
-        selectedKeys={[selectedYear]}
-        onSelectionChange={onYearChange}
-      >
-        {availableYears.map((opt) => (
-          <SelectItem key={opt.key}>{opt.label}</SelectItem>
-        ))}
-      </Select>
-      <Select
-        size="sm"
-        variant="bordered"
-        aria-label="試合種別"
-        className="w-32"
-        selectedKeys={[selectedMatchType]}
-        onSelectionChange={onMatchTypeChange}
-      >
-        {MATCH_TYPE_OPTIONS.map((opt) => (
-          <SelectItem key={opt.key}>{opt.label}</SelectItem>
-        ))}
-      </Select>
-    </div>
+    <FilterChipGroup>
+      <FilterChip
+        label="年度"
+        value={selectedYear}
+        defaultValue="通算"
+        options={availableYears}
+        onChange={onYearChange}
+      />
+      <FilterChip
+        label="種別"
+        value={selectedMatchType}
+        defaultValue="全て"
+        options={MATCH_TYPE_OPTIONS}
+        onChange={onMatchTypeChange}
+      />
+      {availableSeasons.length > 1 && (
+        <FilterChip
+          label="シーズン"
+          value={selectedSeason}
+          defaultValue="全て"
+          options={availableSeasons}
+          onChange={onSeasonChange}
+        />
+      )}
+    </FilterChipGroup>
   );
 }
 
@@ -456,45 +470,61 @@ export default function StatsOverview({
   hasBattingRecord,
   hasPitchingRecord,
   availableYears,
+  availableSeasons,
   onBattingFilterChange,
   onPitchingFilterChange,
 }: StatsOverviewProps) {
   const [battingYear, setBattingYear] = useState("通算");
   const [battingMatchType, setBattingMatchType] = useState("全て");
+  const [battingSeason, setBattingSeason] = useState("全て");
   const [pitchingYear, setPitchingYear] = useState("通算");
   const [pitchingMatchType, setPitchingMatchType] = useState("全て");
+  const [pitchingSeason, setPitchingSeason] = useState("全て");
 
   const yearOptions = [
     { key: "通算", label: "通算" },
     ...availableYears.map((y) => ({ key: String(y), label: `${y}年` })),
   ];
 
-  const handleBattingYearChange = (keys: SharedSelection) => {
-    if (keys === "all") return;
-    const year = Array.from(keys)[0]?.toString() ?? "通算";
+  const seasonOptions = [
+    { key: "全て", label: "全て" },
+    ...availableSeasons.map((s) => ({ key: String(s.id), label: s.name })),
+  ];
+
+  const handleBattingYearChange = (year: string) => {
     setBattingYear(year);
-    onBattingFilterChange(year, battingMatchType);
+    const seasonId = battingSeason !== "全て" ? battingSeason : undefined;
+    onBattingFilterChange(year, battingMatchType, seasonId);
   };
 
-  const handleBattingMatchTypeChange = (keys: SharedSelection) => {
-    if (keys === "all") return;
-    const matchType = Array.from(keys)[0]?.toString() ?? "全て";
+  const handleBattingMatchTypeChange = (matchType: string) => {
     setBattingMatchType(matchType);
-    onBattingFilterChange(battingYear, matchType);
+    const seasonId = battingSeason !== "全て" ? battingSeason : undefined;
+    onBattingFilterChange(battingYear, matchType, seasonId);
   };
 
-  const handlePitchingYearChange = (keys: SharedSelection) => {
-    if (keys === "all") return;
-    const year = Array.from(keys)[0]?.toString() ?? "通算";
+  const handleBattingSeasonChange = (season: string) => {
+    setBattingSeason(season);
+    const seasonId = season !== "全て" ? season : undefined;
+    onBattingFilterChange(battingYear, battingMatchType, seasonId);
+  };
+
+  const handlePitchingYearChange = (year: string) => {
     setPitchingYear(year);
-    onPitchingFilterChange(year, pitchingMatchType);
+    const seasonId = pitchingSeason !== "全て" ? pitchingSeason : undefined;
+    onPitchingFilterChange(year, pitchingMatchType, seasonId);
   };
 
-  const handlePitchingMatchTypeChange = (keys: SharedSelection) => {
-    if (keys === "all") return;
-    const matchType = Array.from(keys)[0]?.toString() ?? "全て";
+  const handlePitchingMatchTypeChange = (matchType: string) => {
     setPitchingMatchType(matchType);
-    onPitchingFilterChange(pitchingYear, matchType);
+    const seasonId = pitchingSeason !== "全て" ? pitchingSeason : undefined;
+    onPitchingFilterChange(pitchingYear, matchType, seasonId);
+  };
+
+  const handlePitchingSeasonChange = (season: string) => {
+    setPitchingSeason(season);
+    const seasonId = season !== "全て" ? season : undefined;
+    onPitchingFilterChange(pitchingYear, pitchingMatchType, seasonId);
   };
 
   const hasBattingData = !!battingStats?.calculated;
@@ -525,16 +555,19 @@ export default function StatsOverview({
                   />
                 </div>
               )}
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-zinc-400">
+              <div className="flex items-center justify-between mb-2 gap-2 overflow-hidden">
+                <h4 className="text-sm font-semibold text-zinc-400 shrink-0 whitespace-nowrap">
                   打撃成績
                 </h4>
                 <StatsFilter
                   availableYears={yearOptions}
+                  availableSeasons={seasonOptions}
                   selectedYear={battingYear}
                   selectedMatchType={battingMatchType}
+                  selectedSeason={battingSeason}
                   onYearChange={handleBattingYearChange}
                   onMatchTypeChange={handleBattingMatchTypeChange}
+                  onSeasonChange={handleBattingSeasonChange}
                 />
               </div>
               {hasBattingData && battingStats && (
@@ -561,16 +594,19 @@ export default function StatsOverview({
                   />
                 </div>
               )}
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-zinc-400">
+              <div className="flex items-center justify-between mb-2 gap-2 overflow-hidden">
+                <h4 className="text-sm font-semibold text-zinc-400 shrink-0 whitespace-nowrap">
                   投手成績
                 </h4>
                 <StatsFilter
                   availableYears={yearOptions}
+                  availableSeasons={seasonOptions}
                   selectedYear={pitchingYear}
                   selectedMatchType={pitchingMatchType}
+                  selectedSeason={pitchingSeason}
                   onYearChange={handlePitchingYearChange}
                   onMatchTypeChange={handlePitchingMatchTypeChange}
+                  onSeasonChange={handlePitchingSeasonChange}
                 />
               </div>
               {hasPitchingData && pitchingStats && (
