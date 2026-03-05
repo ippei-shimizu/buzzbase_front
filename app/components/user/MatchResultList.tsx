@@ -1,8 +1,8 @@
 import type { SeasonData } from "@app/interface";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import FilterChip from "@app/components/filter/FilterChip";
+import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
-import ResultsSelectBox from "@app/components/select/ResultsSelectBox";
-import { gameType, years } from "@app/data/TestData";
 import {
   getFilterGameResultsV2,
   getFilterGameResultsUserIdV2,
@@ -15,6 +15,7 @@ import { getSeasons } from "@app/services/seasonsService";
 
 type GameResult = {
   game_result_id: number;
+  season_name?: string | null;
   match_result?: {
     match_type: string;
     date_and_time: string;
@@ -49,64 +50,76 @@ type AvailableMatchType = string;
 
 export default function MatchResultList(props: UserId) {
   const { userId } = props;
-  const [availableYears, setAvailableYears] = useState<AvailableYear[]>([]);
+  const [yearOptions, setYearOptions] = useState<
+    { key: string; label: string }[]
+  >([{ key: "通算", label: "通算" }]);
   const [selectedYear, setSelectedYear] = useState("通算");
-  const [availableMatchType, setAvailableMatchType] = useState<AvailableYear[]>(
-    [],
-  );
+  const [matchTypeOptions, setMatchTypeOptions] = useState<
+    { key: string; label: string }[]
+  >([{ key: "全て", label: "全て" }]);
   const [selectedMatchType, setSelectedMatchType] = useState("全て");
   const [seasonsData, setSeasonsData] = useState<SeasonData[]>([]);
-  const [availableSeasons, setAvailableSeasons] = useState<
-    (string | number)[]
-  >([]);
+  const [seasonOptions, setSeasonOptions] = useState<
+    { key: string; label: string }[]
+  >([{ key: "全て", label: "全て" }]);
   const [selectedSeason, setSelectedSeason] = useState("全て");
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
 
-  const fetchFilteredData = useCallback(async () => {
-    try {
-      // シーズン一覧取得
-      const seasonsList = await getSeasons(userId);
-      setSeasonsData(seasonsList);
-      const seasonNames: (string | number)[] = seasonsList.map(
-        (s: SeasonData) => s.name,
-      );
-      seasonNames.unshift("全て");
-      setAvailableSeasons(seasonNames);
+  // シーズンデータは初回のみ取得（userId依存）
+  useEffect(() => {
+    if (!userId) return;
+    const fetchSeasons = async () => {
+      try {
+        const seasonsList = await getSeasons(userId);
+        setSeasonsData(seasonsList);
+        const opts = [
+          { key: "全て", label: "全て" },
+          ...seasonsList.map((s: SeasonData) => ({
+            key: s.name,
+            label: s.name,
+          })),
+        ];
+        setSeasonOptions(opts);
+      } catch (error) {
+        console.error("Failed to fetch seasons:", error);
+      }
+    };
+    fetchSeasons();
+  }, [userId]);
 
-      const seasonId =
-        selectedSeason !== "全て"
-          ? seasonsData.find((s) => s.name === selectedSeason)?.id
-          : undefined;
+  // seasonId を useMemo で安定的に計算
+  const seasonId = useMemo(() => {
+    return selectedSeason !== "全て"
+      ? seasonsData.find((s) => s.name === selectedSeason)?.id
+      : undefined;
+  }, [selectedSeason, seasonsData]);
 
-      let filteredGameResultData;
-      if (userId) {
-        // v2: plate_appearances included in response
-        filteredGameResultData = await getFilterGameResultsUserIdV2(
-          userId,
-          selectedYear,
-          selectedMatchType,
-          seasonId,
-        );
-        // ユーザーごとシーズン
-        const matchResultData = await getMatchResultsUserId(userId);
-        const matchResultDate = matchResultData.map(
-          (result: { date_and_time: string }) => result.date_and_time,
-        );
-        const yearArray: AvailableYear[] = matchResultDate.map(
-          (dateString: string) => {
-            const date = new Date(dateString);
-            return date.getFullYear();
-          },
+  // 年度・試合タイプ一覧は初回のみ取得（userId依存）
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        let matchResultData;
+        if (userId) {
+          matchResultData = await getMatchResultsUserId(userId);
+        } else {
+          matchResultData = await getMatchResults();
+        }
+        // 年度抽出
+        const yearArray: AvailableYear[] = matchResultData.map(
+          (result: { date_and_time: string }) =>
+            new Date(result.date_and_time).getFullYear(),
         );
         const uniqueYears = Array.from(new Set(yearArray));
-        uniqueYears.unshift("通算");
-        setAvailableYears(uniqueYears);
-        // ユーザーごと試合タイプ
+        const yOpts = [
+          { key: "通算", label: "通算" },
+          ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
+        ];
+        setYearOptions(yOpts);
+        // 試合タイプ抽出
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
           (type: { match_type: string }) => type.match_type,
         );
-        const uniqueMatchType = Array.from(new Set(matchTypeData));
-        const uniqueMatchTypeChange = uniqueMatchType.map((type) => {
+        const mappedMatchType = matchTypeData.map((type) => {
           if (type === "open") {
             return "オープン戦";
           } else if (type === "regular") {
@@ -115,165 +128,97 @@ export default function MatchResultList(props: UserId) {
             return type;
           }
         });
-        uniqueMatchTypeChange.unshift("全て");
-        setAvailableMatchType(uniqueMatchTypeChange);
+        const uniqueMatchTypes = Array.from(new Set(mappedMatchType));
+        const mtOpts = [
+          { key: "全て", label: "全て" },
+          ...uniqueMatchTypes.map((t) => ({ key: t, label: t })),
+        ];
+        setMatchTypeOptions(mtOpts);
+      } catch (error) {
+        console.error("Failed to fetch meta:", error);
       }
-      if (filteredGameResultData && filteredGameResultData.length > 0) {
-        filteredGameResultData.sort(
-          (
-            a: { match_result: { date_and_time: string } },
-            b: { match_result: { date_and_time: string } },
-          ) => {
-            const dateA = new Date(a.match_result.date_and_time).getTime();
-            const dateB = new Date(b.match_result.date_and_time).getTime();
-            return dateB - dateA;
-          },
-        );
-      }
-      if (filteredGameResultData) {
-        setGameResultIndex(filteredGameResultData);
-      } else {
-        setGameResultIndex([]);
-      }
-    } catch (error) {
-      console.error(`Filtered game lists fetch error:`, error);
-    }
-  }, [userId, selectedYear, selectedMatchType, selectedSeason, seasonsData]);
+    };
+    fetchMeta();
+  }, [userId]);
 
+  // API送信用の値
+  const apiYear = selectedYear === "通算" ? "通算" : selectedYear;
+  const apiMatchType =
+    selectedMatchType === "全て" ? "全て" : selectedMatchType;
+
+  // フィルタ結果取得（フィルタ条件変更時に再実行）
   useEffect(() => {
-    if (userId) {
-      fetchFilteredData();
-    } else {
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, fetchFilteredData]);
-
-  useEffect(() => {
-    if (selectedYear && selectedMatchType) {
-      fetchFilteredData();
-    }
-  }, [selectedYear, selectedMatchType, selectedSeason, fetchFilteredData]);
-
-  const fetchData = async () => {
-    try {
-      const seasonId =
-        selectedSeason !== "全て"
-          ? seasonsData.find((s) => s.name === selectedSeason)?.id
-          : undefined;
-      // v2: plate_appearances included in response
-      const gameResultsDataLists = await getFilterGameResultsV2(
-        selectedYear,
-        selectedMatchType,
-        seasonId,
-      );
-      const matchResultData = await getMatchResults();
-      const matchResultDate = matchResultData.map(
-        (result: { date_and_time: string }) => result.date_and_time,
-      );
-      const yearArray: AvailableYear[] = matchResultDate.map(
-        (dateString: string) => {
-          const date = new Date(dateString);
-          return date.getFullYear();
-        },
-      );
-      const uniqueYears = Array.from(new Set(yearArray));
-      uniqueYears.unshift("通算");
-      setAvailableYears(uniqueYears);
-
-      const matchTypeData: AvailableMatchType[] = matchResultData.map(
-        (type: { match_type: string }) => type.match_type,
-      );
-      const uniqueMatchType = Array.from(new Set(matchTypeData));
-      const uniqueMatchTypeChange = uniqueMatchType.map((type) => {
-        if (type === "open") {
-          return "オープン戦";
-        } else if (type === "regular") {
-          return "公式戦";
+    let cancelled = false;
+    const fetchFilteredData = async () => {
+      try {
+        let filteredGameResultData;
+        if (userId) {
+          filteredGameResultData = await getFilterGameResultsUserIdV2(
+            userId,
+            apiYear,
+            apiMatchType,
+            seasonId,
+          );
         } else {
-          return type;
+          filteredGameResultData = await getFilterGameResultsV2(
+            apiYear,
+            apiMatchType,
+            seasonId,
+          );
         }
-      });
-      gameResultsDataLists.sort(
-        (
-          a: { match_result: { date_and_time: string } },
-          b: { match_result: { date_and_time: string } },
-        ) => {
-          const dateA = new Date(a.match_result.date_and_time).getTime();
-          const dateB = new Date(b.match_result.date_and_time).getTime();
-          return dateB - dateA;
-        },
-      );
-      uniqueMatchTypeChange.unshift("全て");
-      setAvailableMatchType(uniqueMatchTypeChange);
-      setGameResultIndex(gameResultsDataLists);
-    } catch (error) {
-      console.log(`game lists fetch error:`, error);
-    }
-  };
+        if (cancelled) return;
+        if (filteredGameResultData && filteredGameResultData.length > 0) {
+          filteredGameResultData.sort(
+            (
+              a: { match_result: { date_and_time: string } },
+              b: { match_result: { date_and_time: string } },
+            ) => {
+              const dateA = new Date(a.match_result.date_and_time).getTime();
+              const dateB = new Date(b.match_result.date_and_time).getTime();
+              return dateB - dateA;
+            },
+          );
+        }
+        setGameResultIndex(filteredGameResultData || []);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Filtered game lists fetch error:", error);
+        }
+      }
+    };
+    fetchFilteredData();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, apiYear, apiMatchType, seasonId]);
 
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedYear(event.target.value);
-  };
-
-  const handleMatchTypeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSelectedMatchType(event.target.value);
-  };
-
-  const handleSeasonChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setSelectedSeason(event.target.value);
-  };
   return (
     <>
       <div className="bg-bg_sub p-4 rounded-xl lg:p-6">
-        <div className="flex gap-x-4 mb-5 justify-center">
-          <ResultsSelectBox
-            radius="full"
-            className="bg-transparent rounded-full text-xs border-zinc-400 max-w-xs"
-            data={years}
-            variant="faded"
-            color="primary"
-            ariaLabel="シーズンを選択"
-            labelPlacement="outside"
-            size="sm"
-            onChange={handleYearChange}
-            propsYears={availableYears}
-            selectedKeys={selectedYear ? [selectedYear.toString()] : []}
-          />
-          <ResultsSelectBox
-            radius="full"
-            className="bg-transparent rounded-full text-xs border-zinc-400 max-w-xs"
-            data={gameType}
-            variant="faded"
-            color="primary"
-            ariaLabel="試合の種類を選択"
-            labelPlacement="outside"
-            size="sm"
-            onChange={handleMatchTypeChange}
-            propsYears={availableMatchType}
-            selectedKeys={
-              selectedMatchType ? [selectedMatchType.toString()] : []
-            }
-          />
-          <ResultsSelectBox
-            radius="full"
-            className="bg-transparent rounded-full text-xs border-zinc-400 max-w-xs"
-            data={years}
-            variant="faded"
-            color="primary"
-            ariaLabel="シーズンを選択"
-            labelPlacement="outside"
-            size="sm"
-            onChange={handleSeasonChange}
-            propsYears={availableSeasons}
-            selectedKeys={
-              selectedSeason ? [selectedSeason.toString()] : []
-            }
-          />
+        <div className="mb-5 overflow-hidden">
+          <FilterChipGroup>
+            <FilterChip
+              label="年度"
+              value={selectedYear}
+              defaultValue="通算"
+              options={yearOptions}
+              onChange={setSelectedYear}
+            />
+            <FilterChip
+              label="種別"
+              value={selectedMatchType}
+              defaultValue="全て"
+              options={matchTypeOptions}
+              onChange={setSelectedMatchType}
+            />
+            <FilterChip
+              label="シーズン"
+              value={selectedSeason}
+              defaultValue="全て"
+              options={seasonOptions}
+              onChange={setSelectedSeason}
+            />
+          </FilterChipGroup>
         </div>
         <div className="mt-8">
           <div className="mt-8 grid gap-y-5">
