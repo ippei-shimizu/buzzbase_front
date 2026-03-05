@@ -43,3 +43,15 @@ export const getNotificationCount = async () => {
     throw error;
   }
 };
+
+export const markManagementNoticesRead = async () => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/v1/notifications/mark_management_notices_read`,
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
