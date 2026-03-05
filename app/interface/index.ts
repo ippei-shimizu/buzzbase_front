@@ -193,6 +193,7 @@ export interface TournamentData {
 export interface SeasonData {
   id: number;
   name: string;
+  game_results_count?: number;
 }
 
 export interface GameResultData {

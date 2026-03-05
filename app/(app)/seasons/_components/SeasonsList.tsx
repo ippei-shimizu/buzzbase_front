@@ -1,7 +1,20 @@
 "use client";
 
 import type { SeasonData } from "@app/interface";
-import { Button, Input } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Divider,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from "@heroui/react";
 import { useState } from "react";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import {
@@ -20,13 +33,15 @@ export default function SeasonsList({ initialSeasons }: SeasonsListProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<SeasonData | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleCreate = async () => {
     if (!newSeasonName.trim() || isSubmitting) return;
     setIsSubmitting(true);
     try {
       const newSeason = await createSeason(newSeasonName.trim());
-      setSeasons([...seasons, newSeason]);
+      setSeasons([newSeason, ...seasons]);
       setNewSeasonName("");
     } catch (error) {
       console.error("Failed to create season:", error);
@@ -50,12 +65,19 @@ export default function SeasonsList({ initialSeasons }: SeasonsListProps) {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (isSubmitting) return;
+  const confirmDelete = (season: SeasonData) => {
+    setDeleteTarget(season);
+    onOpen();
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await deleteSeason(id);
-      setSeasons(seasons.filter((s) => s.id !== id));
+      await deleteSeason(deleteTarget.id);
+      setSeasons(seasons.filter((s) => s.id !== deleteTarget.id));
+      onClose();
+      setDeleteTarget(null);
     } catch (error) {
       console.error("Failed to delete season:", error);
     } finally {
@@ -75,98 +97,143 @@ export default function SeasonsList({ initialSeasons }: SeasonsListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-x-3 items-end">
-        <Input
-          type="text"
-          variant="bordered"
-          label="新しいシーズン名"
-          labelPlacement="outside"
-          placeholder="例: 2024年春季"
-          size="md"
-          value={newSeasonName}
-          onChange={(e) => setNewSeasonName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleCreate();
-          }}
-        />
-        <Button
-          color="primary"
-          size="md"
-          radius="sm"
-          isDisabled={!newSeasonName.trim() || isSubmitting}
-          onPress={handleCreate}
-        >
-          追加
-        </Button>
-      </div>
-      <div className="space-y-3">
-        {seasons.length === 0 ? (
-          <p className="text-sm text-zinc-400 text-center py-4">
-            シーズンはまだありません。
-          </p>
-        ) : (
-          seasons.map((season) => (
-            <div
-              key={season.id}
-              className="flex items-center justify-between bg-bg_sub p-3 rounded-lg"
+      <Card className="bg-bg_sub shadow-none">
+        <CardBody>
+          <div className="flex gap-x-3 items-end">
+            <Input
+              type="text"
+              variant="bordered"
+              label="新しいシーズン名"
+              labelPlacement="outside"
+              placeholder="例: 2024年春季"
+              size="md"
+              value={newSeasonName}
+              onChange={(e) => setNewSeasonName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreate();
+              }}
+            />
+            <Button
+              color="primary"
+              size="md"
+              radius="sm"
+              isDisabled={!newSeasonName.trim() || isSubmitting}
+              onPress={handleCreate}
             >
-              {editingId === season.id ? (
-                <div className="flex gap-x-2 items-center flex-1">
-                  <Input
-                    type="text"
-                    variant="bordered"
-                    size="sm"
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleUpdate(season.id);
-                      if (e.key === "Escape") cancelEditing();
-                    }}
-                    className="flex-1"
-                  />
-                  <Button
-                    color="primary"
-                    size="sm"
-                    radius="sm"
-                    isDisabled={!editingName.trim() || isSubmitting}
-                    onPress={() => handleUpdate(season.id)}
-                  >
-                    保存
-                  </Button>
-                  <Button
-                    color="default"
-                    size="sm"
-                    radius="sm"
-                    variant="flat"
-                    onPress={cancelEditing}
-                  >
-                    取消
-                  </Button>
+              追加
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+      {seasons.length === 0 ? (
+        <p className="text-sm text-zinc-400 text-center py-8">
+          シーズンはまだありません。
+        </p>
+      ) : (
+        <Card className="bg-bg_sub shadow-none">
+          <CardBody className="p-0">
+            {seasons.map((season, index) => (
+              <div key={season.id}>
+                {index > 0 && <Divider />}
+                <div className="flex items-center justify-between px-4 py-3">
+                  {editingId === season.id ? (
+                    <div className="flex gap-x-2 items-center flex-1">
+                      <Input
+                        type="text"
+                        variant="bordered"
+                        size="sm"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleUpdate(season.id);
+                          if (e.key === "Escape") cancelEditing();
+                        }}
+                        className="flex-1"
+                      />
+                      <Button
+                        color="primary"
+                        size="sm"
+                        radius="sm"
+                        isDisabled={!editingName.trim() || isSubmitting}
+                        onPress={() => handleUpdate(season.id)}
+                      >
+                        保存
+                      </Button>
+                      <Button
+                        color="default"
+                        size="sm"
+                        radius="sm"
+                        variant="flat"
+                        onPress={cancelEditing}
+                      >
+                        取消
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-x-3">
+                        <span
+                          className="text-sm cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => startEditing(season)}
+                        >
+                          {season.name}
+                        </span>
+                        {(season.game_results_count ?? 0) > 0 && (
+                          <Chip size="sm" variant="flat" color="default">
+                            {season.game_results_count}試合
+                          </Chip>
+                        )}
+                      </div>
+                      <Button
+                        isIconOnly
+                        color="default"
+                        variant="light"
+                        size="sm"
+                        onPress={() => confirmDelete(season)}
+                        isDisabled={isSubmitting}
+                      >
+                        <DeleteIcon fill="currentColor" width="20" height="20" />
+                      </Button>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <span
-                    className="text-sm cursor-pointer hover:text-primary"
-                    onClick={() => startEditing(season)}
-                  >
-                    {season.name}
-                  </span>
-                  <Button
-                    isIconOnly
-                    color="danger"
-                    variant="light"
-                    size="sm"
-                    onPress={() => handleDelete(season.id)}
-                    isDisabled={isSubmitting}
-                  >
-                    <DeleteIcon />
-                  </Button>
-                </>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+      )}
+      <Modal isOpen={isOpen} onClose={onClose} placement="center">
+        <ModalContent>
+          <ModalHeader>シーズンの削除</ModalHeader>
+          <ModalBody>
+            {deleteTarget && (deleteTarget.game_results_count ?? 0) > 0 ? (
+              <p className="text-sm">
+                「{deleteTarget.name}」には
+                <span className="font-bold text-danger">
+                  {deleteTarget.game_results_count}件の試合
+                </span>
+                が紐づいています。削除するとシーズンとの紐付けが解除されます。本当に削除しますか？
+              </p>
+            ) : (
+              <p className="text-sm">
+                「{deleteTarget?.name}」を削除しますか？
+              </p>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={onClose}>
+              キャンセル
+            </Button>
+            <Button
+              color="danger"
+              onPress={handleDelete}
+              isDisabled={isSubmitting}
+            >
+              削除
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
