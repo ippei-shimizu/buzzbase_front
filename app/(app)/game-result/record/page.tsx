@@ -1,5 +1,5 @@
 "use client";
-import type { TournamentData } from "@app/interface";
+import type { SeasonData, TournamentData } from "@app/interface";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -29,6 +29,7 @@ import {
   updateMatchResult,
 } from "@app/services/matchResultsService";
 import { getPositions } from "@app/services/positionService";
+import { createSeason, getSeasons } from "@app/services/seasonsService";
 import { createOrUpdateTeam, getTeams } from "@app/services/teamsService";
 import {
   createTournament,
@@ -99,6 +100,9 @@ export default function GameRecord() {
     useState<string>("");
   const [tournament, setTournament] = useState<number | null>(null);
   const [inputTournamentName, setInputTournamentName] = useState("");
+  const [seasonsData, setSeasonsData] = useState<SeasonData[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
+  const [inputSeasonName, setInputSeasonName] = useState("");
   const [matchMemo, setMatchMemo] = useState<string | null>(null);
   const [isMatchDate, setIsMatchDate] = useState(true);
   const [isMyTeamValid, setIsMyTeamValid] = useState(true);
@@ -124,7 +128,9 @@ export default function GameRecord() {
       const userTeamId = currentUserData.team_id;
       const getTeamsList = await getTeams();
       const getTournamentList = await getTournaments();
+      const getSeasonsList = await getSeasons();
       setTeamsData(getTeamsList);
+      setSeasonsData(getSeasonsList);
       // マイチーム名取得
       const userTeam = getTeamsList.find(
         (team: { id: string }) => team.id === userTeamId,
@@ -148,7 +154,6 @@ export default function GameRecord() {
         gameResultId,
         currentUserId,
       );
-      console.log(existingMatchResult);
       if (existingMatchResult) {
         const date = new Date(existingMatchResult.date_and_time);
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
@@ -164,6 +169,9 @@ export default function GameRecord() {
         setMatchMemo(existingMatchResult.memo);
         setExistingOpponentTeam(existingMatchResult.opponent_team_id);
         setExistingDefensivePosition(existingMatchResult.defensive_position);
+        if (existingMatchResult.season_id) {
+          setSelectedSeason(existingMatchResult.season_id);
+        }
       }
     } catch (error) {
       console.error("Error fetching existing match result:", error);
@@ -268,6 +276,13 @@ export default function GameRecord() {
   };
   const handleTournamentSelectionChange = (value: React.Key | null) => {
     setTournament(value as number | null);
+  };
+
+  const handleSeasonInputChange = (value: string) => {
+    setInputSeasonName(value);
+  };
+  const handleSeasonSelectionChange = (value: React.Key | null) => {
+    setSelectedSeason(value as number | null);
   };
 
   // 自分チーム得点
@@ -421,6 +436,23 @@ export default function GameRecord() {
         }
       }
 
+      // シーズン保存
+      let seasonId = selectedSeason;
+      if (inputSeasonName && !selectedSeason) {
+        const existingSeason = seasonsData.find(
+          (s) => s.name === inputSeasonName,
+        );
+        if (existingSeason) {
+          seasonId = existingSeason.id;
+        } else {
+          const newSeason = await createSeason(inputSeasonName);
+          if (newSeason) {
+            setSeasonsData([...seasonsData, newSeason]);
+            seasonId = newSeason.id;
+          }
+        }
+      }
+
       // 相手チーム保存
       let opponentTeamId;
       if (typeof opponentTeam === "string") {
@@ -467,9 +499,14 @@ export default function GameRecord() {
       );
       if (existingMatchResults) {
         await updateMatchResult(existingMatchResults.id, matchResultData);
+        // season_idをgame_resultに保存
+        if (localStorageGameResultId !== null) {
+          await updateGameResult(localStorageGameResultId, {
+            game_result: { season_id: seasonId },
+          });
+        }
       } else {
         const response = await createMatchResults(matchResultData);
-        console.log(response);
         if (
           typeof userId !== "undefined" &&
           localStorageGameResultId !== null
@@ -480,6 +517,7 @@ export default function GameRecord() {
               match_result_id: response.id,
               batting_average_id: null,
               pitching_result_id: null,
+              season_id: seasonId,
             },
           };
           await updateGameResult(
@@ -564,6 +602,29 @@ export default function GameRecord() {
                   }
                 >
                   {tournamentData.map((data) => (
+                    <AutocompleteItem key={data.id}>
+                      {data.name}
+                    </AutocompleteItem>
+                  ))}
+                </Autocomplete>
+                <Divider className="my-4" />
+                <Autocomplete
+                  allowsCustomValue
+                  label="シーズン"
+                  variant="bordered"
+                  placeholder="シーズン名を入力"
+                  labelPlacement="outside-left"
+                  className="[&>div]:justify-between [&>div&>label]:whitespace-nowrap"
+                  size="md"
+                  onInputChange={handleSeasonInputChange}
+                  onSelectionChange={handleSeasonSelectionChange}
+                  selectedKey={
+                    selectedSeason !== undefined
+                      ? selectedSeason?.toString()
+                      : null
+                  }
+                >
+                  {seasonsData.map((data) => (
                     <AutocompleteItem key={data.id}>
                       {data.name}
                     </AutocompleteItem>
