@@ -1,13 +1,14 @@
 "use client";
 import type { Notifications } from "@app/interface";
 import { Divider, Spinner } from "@heroui/react";
-import NotificationFollowRequest from "@app/components/notification/NotificationFollowRequest";
+import Link from "next/link";
 import NotificationFollowed from "@app/components/notification/NotificationFollowed";
+import NotificationFollowRequest from "@app/components/notification/NotificationFollowRequest";
 import NotificationGroup from "@app/components/notification/NotificationGroup";
+import NotificationManagementNotice from "@app/components/notification/NotificationManagementNotice";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { useNotifications } from "@app/hooks/notification/getNotifications";
 import { readNotification } from "@app/services/notificationsService";
-import Link from "next/link";
 
 export default function NotificationItem() {
   const { notifications, isError, isLoading } = useNotifications();
@@ -40,13 +41,17 @@ export default function NotificationItem() {
     );
   }
 
-  const handleRead = async (id: number) => {
+  const handleRead = async (id: number | string) => {
+    if (typeof id !== "number") return;
     try {
       await readNotification(id);
     } catch (_error) {}
   };
 
   const renderNotification = (notice: Notifications) => {
+    if (notice.event_type === "management_notice") {
+      return <NotificationManagementNotice notice={notice} />;
+    }
     if (
       notice.event_type === "group_invitation" &&
       notice.group_invitation === "pending"

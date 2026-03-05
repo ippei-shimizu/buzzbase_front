@@ -1,14 +1,25 @@
 import { Metadata } from "next";
 import NoticeItems from "@app/(app)/notice-from-management/notice-item";
 import Header from "@app/components/header/Header";
+import MarkNoticesRead from "./_components/MarkNoticesRead";
+import { getPublishedNotices } from "./actions";
 
 export const metadata: Metadata = {
   title: "運営からのお知らせ",
   description: "運営より、新機能追加・不具合などのお知らせを記載しています。",
 };
 
-export default function NoticeFromManagement() {
-  const notices = [
+export default async function NoticeFromManagement() {
+  const apiNotices = await getPublishedNotices();
+
+  const notices = apiNotices.map((notice) => ({
+    href: `/notice-from-management/${notice.id}`,
+    date: notice.published_at,
+    title: notice.title,
+  }));
+
+  // レガシーお知らせ（静的ルートとして残存）
+  const legacyNotices = [
     {
       href: "/notice-from-management/notice-2024-03-12",
       date: "2024.03.11",
@@ -16,15 +27,18 @@ export default function NoticeFromManagement() {
     },
   ];
 
+  const allNotices = [...notices, ...legacyNotices];
+
   return (
     <>
+      <MarkNoticesRead />
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
         <div className="h-full bg-main">
           <Header />
           <main className="h-full pb-16 w-full  max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
             <div className="px-4 pt-20 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:px-6 lg:pb-6">
               <h2 className="text-2xl font-bold">運営からのお知らせ</h2>
-              <NoticeItems notices={notices} />
+              <NoticeItems notices={allNotices} />
             </div>
           </main>
         </div>

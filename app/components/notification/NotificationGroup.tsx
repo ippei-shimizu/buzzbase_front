@@ -82,7 +82,10 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
               size="sm"
               color="primary"
               onPress={() =>
-                handleAcceptGroupInvitation(notice.event_id, notice.id)
+                handleAcceptGroupInvitation(
+                  notice.event_id,
+                  notice.id as number,
+                )
               }
             >
               参加する
@@ -117,7 +120,7 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
                         onPress={() =>
                           handleDeclinedGroupInvitation(
                             notice.event_id,
-                            notice.id,
+                            notice.id as number,
                           )
                         }
                       >

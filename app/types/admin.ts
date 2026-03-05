@@ -93,3 +93,31 @@ export interface UserSearchParams {
   date_from?: string;
   date_to?: string;
 }
+
+// Management Notice types
+export type ManagementNoticeStatus = "draft" | "published";
+
+export interface ManagementNotice {
+  id: number;
+  title: string;
+  body: string;
+  status: ManagementNoticeStatus;
+  published_at: string | null;
+  created_at: string;
+  created_by_name: string;
+}
+
+export interface ManagementNoticeFormData {
+  title: string;
+  body: string;
+  status: ManagementNoticeStatus;
+}
+
+export interface ManagementNoticeResponse {
+  management_notices: ManagementNotice[];
+}
+
+export interface ManagementNoticeSingleResponse {
+  management_notice: ManagementNotice;
+  message?: string;
+}
