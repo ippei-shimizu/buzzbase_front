@@ -31,6 +31,7 @@ type MatchResultDisplay = MatchResult & {
   memo?: string | null;
   tournament_name?: string;
   my_team_name?: string;
+  season_name?: string | null;
 };
 
 type BattingAverageDisplay = BattingAverage;
@@ -299,6 +300,11 @@ export default function ResultsSummary() {
                         {new Date(match.date_and_time).toLocaleDateString()}
                       </p>
                     </div>
+                    {match.season_name && (
+                      <p className="text-xs text-zinc-400 mt-2">
+                        シーズン: {match.season_name}
+                      </p>
+                    )}
                     <p className="text-sm mt-3">{match.tournament_name}</p>
                     <span className="mt-3 text-xs text-zinc-400">
                       マイチーム

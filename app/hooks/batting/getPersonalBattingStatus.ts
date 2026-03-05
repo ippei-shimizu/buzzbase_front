@@ -2,10 +2,25 @@
 import useSWR from "swr";
 import { fetcher } from "@app/hooks/swrFetcher";
 
-export function usePersonalBattingStatus(userId: number) {
+export function usePersonalBattingStatus(
+  userId: number,
+  seasonId?: number,
+  year?: string,
+  matchType?: string,
+) {
+  const params = new URLSearchParams({ user_id: String(userId) });
+  if (seasonId) {
+    params.append("season_id", String(seasonId));
+  }
+  if (year) {
+    params.append("year", year);
+  }
+  if (matchType) {
+    params.append("match_type", matchType);
+  }
   const { data, error } = useSWR(
     userId
-      ? `/api/v1/batting_averages/personal_batting_stats?user_id=${userId}`
+      ? `/api/v1/batting_averages/personal_batting_stats?${params.toString()}`
       : null,
     fetcher,
   );

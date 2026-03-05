@@ -102,6 +102,11 @@ export interface GroupRanking {
   pitching_rankings: RankingEntry[];
 }
 
+export interface SeasonOption {
+  id: number;
+  name: string;
+}
+
 export interface DashboardData {
   recent_game_results: RecentGameResult[];
   batting_stats: BattingStats;
@@ -170,23 +175,49 @@ async function getAuthHeaders(): Promise<Record<string, string> | null> {
   };
 }
 
-function buildFilterQuery(year?: string, matchType?: string): string {
+function buildFilterQuery(
+  year?: string,
+  matchType?: string,
+  seasonId?: string,
+): string {
   const params = new URLSearchParams();
   if (year && year !== "通算") params.append("year", year);
   if (matchType && matchType !== "全て") params.append("match_type", matchType);
+  if (seasonId) params.append("season_id", seasonId);
   const query = params.toString();
   return query ? `?${query}` : "";
+}
+
+export async function getAvailableSeasons(): Promise<SeasonOption[]> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return [];
+
+    const url = `${RAILS_API_URL}/api/v1/seasons`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching seasons:", error);
+    return [];
+  }
 }
 
 export async function getFilteredBattingStats(
   year?: string,
   matchType?: string,
+  seasonId?: string,
 ): Promise<BattingStats | null> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
-    const query = buildFilterQuery(year, matchType);
+    const query = buildFilterQuery(year, matchType, seasonId);
     const url = `${RAILS_API_URL}/api/v2/dashboard/batting_stats${query}`;
 
     const response = await fetch(url, {
@@ -206,12 +237,13 @@ export async function getFilteredBattingStats(
 export async function getFilteredPitchingStats(
   year?: string,
   matchType?: string,
+  seasonId?: string,
 ): Promise<PitchingStats | null> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
-    const query = buildFilterQuery(year, matchType);
+    const query = buildFilterQuery(year, matchType, seasonId);
     const url = `${RAILS_API_URL}/api/v2/dashboard/pitching_stats${query}`;
 
     const response = await fetch(url, {

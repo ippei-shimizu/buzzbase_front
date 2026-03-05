@@ -1,6 +1,11 @@
 "use client";
 
-import type { BattingStats, DashboardData, PitchingStats } from "../actions";
+import type {
+  BattingStats,
+  DashboardData,
+  PitchingStats,
+  SeasonOption,
+} from "../actions";
 import { useState } from "react";
 import { getFilteredBattingStats, getFilteredPitchingStats } from "../actions";
 import GroupRankings from "./GroupRankings";
@@ -10,9 +15,13 @@ import StatsOverview from "./StatsOverview";
 
 interface DashboardContentProps {
   data: DashboardData | null;
+  seasons: SeasonOption[];
 }
 
-export default function DashboardContent({ data }: DashboardContentProps) {
+export default function DashboardContent({
+  data,
+  seasons,
+}: DashboardContentProps) {
   const [battingStats, setBattingStats] = useState<BattingStats | null>(
     data?.batting_stats ?? null,
   );
@@ -20,8 +29,12 @@ export default function DashboardContent({ data }: DashboardContentProps) {
     data?.pitching_stats ?? null,
   );
 
-  const handleBattingFilterChange = async (year: string, matchType: string) => {
-    const filtered = await getFilteredBattingStats(year, matchType);
+  const handleBattingFilterChange = async (
+    year: string,
+    matchType: string,
+    seasonId?: string,
+  ) => {
+    const filtered = await getFilteredBattingStats(year, matchType, seasonId);
     if (filtered) {
       setBattingStats(filtered);
     }
@@ -30,8 +43,9 @@ export default function DashboardContent({ data }: DashboardContentProps) {
   const handlePitchingFilterChange = async (
     year: string,
     matchType: string,
+    seasonId?: string,
   ) => {
-    const filtered = await getFilteredPitchingStats(year, matchType);
+    const filtered = await getFilteredPitchingStats(year, matchType, seasonId);
     if (filtered) {
       setPitchingStats(filtered);
     }
@@ -47,6 +61,7 @@ export default function DashboardContent({ data }: DashboardContentProps) {
         hasBattingRecord={!!data?.batting_stats?.calculated}
         hasPitchingRecord={!!data?.pitching_stats?.calculated}
         availableYears={data?.available_years ?? []}
+        availableSeasons={seasons}
         onBattingFilterChange={handleBattingFilterChange}
         onPitchingFilterChange={handlePitchingFilterChange}
       />

@@ -173,11 +173,14 @@ export const getGameResultsUserIdV2 = async (userId: number) => {
 export const getFilterGameResultsV2 = async (
   year: string | number,
   matchType: string,
+  seasonId?: number,
 ) => {
   try {
-    const response = await axiosInstance.get(
-      `/api/v2/game_results/filtered_index?year=${year}&match_type=${matchType}`,
-    );
+    let url = `/api/v2/game_results/filtered_index?year=${year}&match_type=${matchType}`;
+    if (seasonId) {
+      url += `&season_id=${seasonId}`;
+    }
+    const response = await axiosInstance.get(url);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -196,11 +199,14 @@ export const getFilterGameResultsUserIdV2 = async (
   userId: number,
   year: string | number,
   matchType: string,
+  seasonId?: number,
 ) => {
   try {
-    const response = await axiosInstance.get(
-      `/api/v2/game_results/filtered_user/${userId}?year=${year}&match_type=${matchType}`,
-    );
+    let url = `/api/v2/game_results/filtered_user/${userId}?year=${year}&match_type=${matchType}`;
+    if (seasonId) {
+      url += `&season_id=${seasonId}`;
+    }
+    const response = await axiosInstance.get(url);
     return response.data;
   } catch (error) {
     console.log(error);
