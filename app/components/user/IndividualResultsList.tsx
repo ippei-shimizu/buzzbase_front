@@ -188,58 +188,62 @@ export default function IndividualResultsList(props: UserId) {
           </FilterChipGroup>
         </div>
         <h2 className="text-xl">打撃成績</h2>
-        {personalBattingAverages?.[0] && personalBattingStatus && (() => {
-          const ba = personalBattingAverages[0];
-          return (
-            <div className="mb-2 py-2">
-              <p>
-                <span className="text-sm text-zinc-200">打率</span>
-                <span
-                  className="text-xl font-bold ml-1"
-                  style={{ color: "#d08000" }}
-                >
-                  {formatBattingAvg(personalBattingStatus.batting_average)}
-                </span>
-                <span className="text-sm text-zinc-200 ml-3">
-                  {ba.number_of_matches}試合
-                </span>
-              </p>
-              <p className="text-sm text-zinc-300 mt-0.5">
-                {ba.times_at_bat}打席 {ba.at_bats}打数{" "}
-                {personalBattingStatus.total_hits}安打 / {ba.runs_batted_in}
-                打点 {ba.home_run}本塁打
-              </p>
-            </div>
-          );
-        })()}
+        {personalBattingAverages?.[0] &&
+          personalBattingStatus &&
+          (() => {
+            const ba = personalBattingAverages[0];
+            return (
+              <div className="mb-2 py-2">
+                <p>
+                  <span className="text-sm text-zinc-200">打率</span>
+                  <span
+                    className="text-xl font-bold ml-1"
+                    style={{ color: "#d08000" }}
+                  >
+                    {formatBattingAvg(personalBattingStatus.batting_average)}
+                  </span>
+                  <span className="text-sm text-zinc-200 ml-3">
+                    {ba.number_of_matches}試合
+                  </span>
+                </p>
+                <p className="text-sm text-zinc-300 mt-0.5">
+                  {ba.times_at_bat}打席 {ba.at_bats}打数{" "}
+                  {personalBattingStatus.total_hits}安打 / {ba.runs_batted_in}
+                  打点 {ba.home_run}本塁打
+                </p>
+              </div>
+            );
+          })()}
         <BattingAverageTable
           personalBattingAverages={personalBattingAverages}
           personalBattingStatus={personalBattingStatus}
         />
         <h2 className="text-xl mt-8">投手成績</h2>
-        {personalPitchingResults?.[0] && personalPitchingStatus && (() => {
-          const pr = personalPitchingResults[0];
-          return (
-            <div className="mb-2 py-2">
-              <p>
-                <span className="text-sm text-zinc-200">防御率</span>
-                <span
-                  className="text-xl font-bold ml-1"
-                  style={{ color: "#338EF7" }}
-                >
-                  {formatEra(personalPitchingStatus.era)}
-                </span>
-                <span className="text-sm text-zinc-200 ml-3">
-                  {pr.number_of_appearances}登板
-                </span>
-              </p>
-              <p className="text-sm text-zinc-300 mt-0.5">
-                {pr.innings_pitched}回 {pr.win}勝{pr.loss}敗 /{" "}
-                {pr.strikeouts}奪三振
-              </p>
-            </div>
-          );
-        })()}
+        {personalPitchingResults?.[0] &&
+          personalPitchingStatus &&
+          (() => {
+            const pr = personalPitchingResults[0];
+            return (
+              <div className="mb-2 py-2">
+                <p>
+                  <span className="text-sm text-zinc-200">防御率</span>
+                  <span
+                    className="text-xl font-bold ml-1"
+                    style={{ color: "#338EF7" }}
+                  >
+                    {formatEra(personalPitchingStatus.era)}
+                  </span>
+                  <span className="text-sm text-zinc-200 ml-3">
+                    {pr.number_of_appearances}登板
+                  </span>
+                </p>
+                <p className="text-sm text-zinc-300 mt-0.5">
+                  {pr.innings_pitched}回 {pr.win}勝{pr.loss}敗 / {pr.strikeouts}
+                  奪三振
+                </p>
+              </div>
+            );
+          })()}
         <PitchingRecordTable
           personalPitchingResults={personalPitchingResults}
           personalPitchingStatus={personalPitchingStatus}
