@@ -1,3 +1,5 @@
+"use client";
+
 import type { SeasonData } from "@app/interface";
 import { useEffect, useMemo, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
@@ -115,23 +117,21 @@ export default function MatchResultList(props: UserId) {
           ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
         ];
         setYearOptions(yOpts);
-        // 試合タイプ抽出
+        // 試合タイプ抽出（keyにAPI値、labelに日本語）
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
           (type: { match_type: string }) => type.match_type,
         );
-        const mappedMatchType = matchTypeData.map((type) => {
-          if (type === "open") {
-            return "オープン戦";
-          } else if (type === "regular") {
-            return "公式戦";
-          } else {
-            return type;
-          }
-        });
-        const uniqueMatchTypes = Array.from(new Set(mappedMatchType));
+        const uniqueMatchTypes = Array.from(new Set(matchTypeData));
+        const matchTypeLabels: Record<string, string> = {
+          regular: "公式戦",
+          open: "オープン戦",
+        };
         const mtOpts = [
           { key: "全て", label: "全て" },
-          ...uniqueMatchTypes.map((t) => ({ key: t, label: t })),
+          ...uniqueMatchTypes.map((t) => ({
+            key: t,
+            label: matchTypeLabels[t] ?? t,
+          })),
         ];
         setMatchTypeOptions(mtOpts);
       } catch (error) {
