@@ -154,7 +154,6 @@ export default function GameRecord() {
         gameResultId,
         currentUserId,
       );
-      console.log(existingMatchResult);
       if (existingMatchResult) {
         const date = new Date(existingMatchResult.date_and_time);
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
@@ -508,7 +507,6 @@ export default function GameRecord() {
         }
       } else {
         const response = await createMatchResults(matchResultData);
-        console.log(response);
         if (
           typeof userId !== "undefined" &&
           localStorageGameResultId !== null
