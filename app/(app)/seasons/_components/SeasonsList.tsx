@@ -192,7 +192,11 @@ export default function SeasonsList({ initialSeasons }: SeasonsListProps) {
                         onPress={() => confirmDelete(season)}
                         isDisabled={isSubmitting}
                       >
-                        <DeleteIcon fill="currentColor" width="20" height="20" />
+                        <DeleteIcon
+                          fill="currentColor"
+                          width="20"
+                          height="20"
+                        />
                       </Button>
                     </>
                   )}
