@@ -24,7 +24,7 @@ export default function NotificationFollowRequest({
     if (!notice.follow_request_id) return;
     try {
       await acceptFollowRequest(notice.follow_request_id);
-      await deleteNotification(notice.id);
+      await deleteNotification(notice.id as number);
       setHandled(true);
       setHandledType("accepted");
     } catch (_error) {}
@@ -34,7 +34,7 @@ export default function NotificationFollowRequest({
     if (!notice.follow_request_id) return;
     try {
       await rejectFollowRequest(notice.follow_request_id);
-      await deleteNotification(notice.id);
+      await deleteNotification(notice.id as number);
       setHandled(true);
       setHandledType("rejected");
     } catch (_error) {}

@@ -354,7 +354,7 @@ export interface GroupsData {
 }
 
 export interface Notifications {
-  id: number;
+  id: number | string;
   actor_user_id: number;
   actor_name: string;
   event_type: string;
@@ -367,6 +367,8 @@ export interface Notifications {
   group_name: string;
   group_invitation: string;
   follow_request_id?: number;
+  title?: string;
+  management_notice_id?: number;
 }
 
 export interface AcceptedUsers {

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 interface NotificationFollowedProps {
   notice: Notifications;
-  onRead: (id: number) => void;
+  onRead: (id: number | string) => void;
 }
 
 export default function NotificationFollowed({
