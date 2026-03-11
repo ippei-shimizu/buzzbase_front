@@ -1,6 +1,7 @@
 "use client";
 
 import { GoogleLogin } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
@@ -9,13 +10,19 @@ import { useAuthContext } from "@app/contexts/useAuthContext";
 import { googleSignIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
 
-export default function GoogleLoginButton() {
+interface GoogleLoginButtonProps {
+  mode?: "signin" | "signup";
+}
+
+export default function GoogleLoginButton({
+  mode = "signin",
+}: GoogleLoginButtonProps) {
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { setIsLoggedIn } = useAuthContext();
   const router = useRouter();
 
-  const handleSuccess = async (credentialResponse: { credential?: string }) => {
+  const handleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
       setErrors(["Googleログインに失敗しました"]);
       return;
@@ -57,7 +64,7 @@ export default function GoogleLoginButton() {
         <GoogleLogin
           onSuccess={handleSuccess}
           onError={handleError}
-          text="signin_with"
+          text={mode === "signup" ? "signup_with" : "signin_with"}
           shape="pill"
           size="large"
           width="300"

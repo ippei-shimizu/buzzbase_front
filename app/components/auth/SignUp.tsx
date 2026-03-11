@@ -135,7 +135,7 @@ export default function SignUp() {
         onResendSuccess={handleResendSuccess}
         showEmailInput={showEmailInput}
       />
-      <GoogleLoginButton />
+      <GoogleLoginButton mode="signup" />
       <div className="flex items-center gap-x-3 my-4">
         <div className="h-px flex-1 bg-gray-300" />
         <span className="text-sm text-gray-400">または</span>
