@@ -38,6 +38,20 @@ export const signOut = async () => {
   return response;
 };
 
+export const googleSignIn = async (idToken: string) => {
+  const response = await axiosInstance.post("/api/v1/google_sign_in", {
+    id_token: idToken,
+  });
+  const sixMonths = 30 * 6;
+  Cookies.set("access-token", response.headers["access-token"], {
+    expires: sixMonths,
+  });
+  Cookies.set("client", response.headers["client"], { expires: sixMonths });
+  Cookies.set("uid", response.headers["uid"], { expires: sixMonths });
+
+  return response;
+};
+
 export const resendConfirmation = async (email: string) => {
   const response = await axiosInstance.post("/api/v1/auth/confirmation", {
     email: email,
