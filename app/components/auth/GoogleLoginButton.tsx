@@ -63,14 +63,16 @@ export default function GoogleLoginButton({
       {isLoading && <LoadingSpinner />}
       <ErrorMessages errors={errors} />
       <div className="flex justify-center">
-        <GoogleLogin
-          onSuccess={handleSuccess}
-          onError={handleError}
-          text={mode === "signup" ? "signup_with" : "signin_with"}
-          shape="pill"
-          size="large"
-          width="300"
-        />
+        <div className="overflow-hidden rounded-full">
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={handleError}
+            text={mode === "signup" ? "signup_with" : "signin_with"}
+            shape="pill"
+            size="large"
+            width="300"
+          />
+        </div>
       </div>
     </>
   );
