@@ -3208,6 +3208,11 @@
     "@react-types/shared" "^3.33.0"
     "@swc/helpers" "^0.5.0"
 
+"@react-oauth/google@^0.13.4":
+  version "0.13.4"
+  resolved "https://registry.yarnpkg.com/@react-oauth/google/-/google-0.13.4.tgz#c462a651880162d43fd899ef91526a515ef60a78"
+  integrity sha512-hGKyNEH+/PK8M0sFEuo3MAEk0txtHpgs94tDQit+s2LXg7b6z53NtzHfqDvoB2X8O6lGB+FRg80hY//X6hfD+w==
+
 "@react-stately/calendar@3.9.2", "@react-stately/calendar@^3.9.2":
   version "3.9.2"
   resolved "https://registry.yarnpkg.com/@react-stately/calendar/-/calendar-3.9.2.tgz#e769df99612ca25309fa25390b8e63e5deb2da91"

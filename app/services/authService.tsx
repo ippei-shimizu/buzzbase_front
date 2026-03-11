@@ -1,6 +1,21 @@
 import type { SignInData, SignUpData } from "@app/interface";
+import type { AxiosResponseHeaders, RawAxiosResponseHeaders } from "axios";
 import Cookies from "js-cookie";
 import axiosInstance from "@app/utils/axiosInstance";
+
+const setAuthCookies = (
+  headers: AxiosResponseHeaders | Partial<RawAxiosResponseHeaders>,
+) => {
+  const sixMonths = 30 * 6;
+  const options = {
+    expires: sixMonths,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict" as const,
+  };
+  Cookies.set("access-token", headers["access-token"], options);
+  Cookies.set("client", headers["client"], options);
+  Cookies.set("uid", headers["uid"], options);
+};
 
 export const signUp = async (data: SignUpData) => {
   const response = await axiosInstance.post("/api/v1/auth", {
@@ -18,12 +33,7 @@ export const signIn = async (data: SignInData) => {
     email: data.email,
     password: data.password,
   });
-  const sixMonths = 30 * 6;
-  Cookies.set("access-token", response.headers["access-token"], {
-    expires: sixMonths,
-  });
-  Cookies.set("client", response.headers["client"], { expires: sixMonths });
-  Cookies.set("uid", response.headers["uid"], { expires: sixMonths });
+  setAuthCookies(response.headers);
 
   return response;
 };
@@ -34,6 +44,15 @@ export const signOut = async () => {
   Cookies.remove("access-token");
   Cookies.remove("client");
   Cookies.remove("uid");
+
+  return response;
+};
+
+export const googleSignIn = async (idToken: string) => {
+  const response = await axiosInstance.post("/api/v1/google_sign_in", {
+    id_token: idToken,
+  });
+  setAuthCookies(response.headers);
 
   return response;
 };

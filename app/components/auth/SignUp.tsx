@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import React, { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
+import GoogleLoginButton from "@app/components/auth/GoogleLoginButton";
 import PasswordConfirmInput from "@app/components/auth/PasswordConfirmInput";
 import PasswordInput from "@app/components/auth/PasswordInput";
 import SubmitButton from "@app/components/button/SendButton";
@@ -134,6 +135,12 @@ export default function SignUp() {
         onResendSuccess={handleResendSuccess}
         showEmailInput={showEmailInput}
       />
+      <GoogleLoginButton mode="signup" />
+      <div className="flex items-center gap-x-3 my-4">
+        <div className="h-px flex-1 bg-gray-300" />
+        <span className="text-sm text-gray-400">または</span>
+        <div className="h-px flex-1 bg-gray-300" />
+      </div>
       <form
         onSubmit={handleSubmit}
         className="flex flex-col justify-end gap-y-4"

@@ -24,7 +24,9 @@ export default function HeaderUserMenu() {
   }
 
   const myPageLink = isLoggedIn
-    ? `/mypage/${currentUserData?.user_id}`
+    ? currentUserData?.user_id
+      ? `/mypage/${currentUserData.user_id}`
+      : "/dashboard"
     : "/signup?auth_required=true";
 
   const handleClick = () => {
