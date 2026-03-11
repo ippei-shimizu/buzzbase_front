@@ -62,7 +62,7 @@ export default async function NoticesPage(props: PageProps) {
     ? notices.find((notice) => notice.id === parseInt(id))
     : null;
 
-  if (mode === "edit" && id && !editingNotice) {
+  if ((mode === "edit" || mode === "delete") && id && !editingNotice) {
     redirect("/admin-management-console/notices");
   }
 

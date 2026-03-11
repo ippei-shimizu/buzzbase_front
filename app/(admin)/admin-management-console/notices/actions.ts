@@ -152,9 +152,8 @@ export async function deleteManagementNotice(
       },
     );
 
-    const data = await response.json();
-
     if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
       return {
         success: false,
         errors: data.errors || ["お知らせの削除に失敗しました"],
@@ -162,7 +161,8 @@ export async function deleteManagementNotice(
     }
 
     revalidatePath("/admin-management-console/notices");
-    return { success: true, message: data.message };
+    const data = await response.json().catch(() => ({}));
+    return { success: true, message: data.message || "お知らせを削除しました" };
   } catch (error) {
     console.error("Error deleting management notice:", error);
     return {

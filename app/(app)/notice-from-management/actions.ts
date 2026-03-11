@@ -22,7 +22,7 @@ export async function getPublishedNotices(): Promise<PublicManagementNotice[]> {
     }
 
     const data = await response.json();
-    return data.management_notices;
+    return data.management_notices ?? [];
   } catch (error) {
     console.error("Error fetching published notices:", error);
     return [];
@@ -47,7 +47,7 @@ export async function getPublishedNotice(
     }
 
     const data = await response.json();
-    return data.management_notice;
+    return data.management_notice ?? null;
   } catch (error) {
     console.error("Error fetching published notice:", error);
     return null;
