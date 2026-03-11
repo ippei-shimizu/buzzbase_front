@@ -33,16 +33,18 @@ export default function GoogleLoginButton({
 
     try {
       const response = await googleSignIn(credentialResponse.credential);
-      setIsLoggedIn(true);
 
       if (response.data.requires_username) {
         router.push("/register-username");
+        setIsLoggedIn(true);
       } else {
         const userData = await getUserData();
         if (userData && userData.user_id) {
           router.push(`/mypage/${userData.user_id}`);
+          setIsLoggedIn(true);
         } else {
           router.push("/register-username");
+          setIsLoggedIn(true);
         }
       }
     } catch {

@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import SignIn from "@app/components/auth/SignIn";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -14,14 +14,19 @@ function SignInContent() {
   const logoutParams = searchParams.get("logout");
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
+  const prevIsLoggedInRef = useRef(isLoggedIn);
 
   const logoutSuccess = logoutParams === "success" && !toastTimedOut;
   const message = logoutSuccess ? "ログアウトしました" : "";
 
   useEffect(() => {
-    if (isLoggedIn === true) {
-      return router.push("/");
+    // セッション復元で既にログイン済みの場合のみリダイレクト
+    // このページ上でログインした場合（false→true）はリダイレクトしない
+    // （GoogleLoginButtonやSignInが自前でナビゲーションを行うため）
+    if (isLoggedIn === true && prevIsLoggedInRef.current !== false) {
+      router.push("/");
     }
+    prevIsLoggedInRef.current = isLoggedIn;
   }, [isLoggedIn, router]);
 
   useEffect(() => {
