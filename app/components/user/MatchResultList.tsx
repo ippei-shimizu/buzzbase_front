@@ -1,9 +1,13 @@
 "use client";
 
 import type { SeasonData } from "@app/interface";
-import { useEffect, useMemo, useState } from "react";
+import type { PaginationInfo } from "@app/services/gameResultsService";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import GamePagination from "@app/components/game/GamePagination";
+import GameSearchInput from "@app/components/game/GameSearchInput";
+import GameSortSelect from "@app/components/game/GameSortSelect";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
 import {
   getFilterGameResultsV2,
@@ -14,6 +18,7 @@ import {
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { Spinner } from "@heroui/react";
 
 type GameResult = {
   game_result_id: number;
@@ -66,6 +71,30 @@ export default function MatchResultList(props: UserId) {
   >([{ key: "全て", label: "全て" }]);
   const [selectedSeason, setSelectedSeason] = useState("全て");
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paginationInfo, setPaginationInfo] = useState<PaginationInfo | null>(
+    null,
+  );
+
+  const listTopRef = useRef<HTMLDivElement>(null);
+
+  // デバウンス処理: 検索入力の300ms遅延
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    listTopRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   // シーズンデータは初回のみ取得（userId依存）
   useEffect(() => {
@@ -146,43 +175,75 @@ export default function MatchResultList(props: UserId) {
   const apiMatchType =
     selectedMatchType === "全て" ? "全て" : selectedMatchType;
 
-  // フィルタ結果取得（フィルタ条件変更時に再実行）
+  // フィルター変更時にページを1にリセットするラッパー
+  const handleYearChange = (value: string) => {
+    setSelectedYear(value);
+    setCurrentPage(1);
+  };
+  const handleMatchTypeChange = (value: string) => {
+    setSelectedMatchType(value);
+    setCurrentPage(1);
+  };
+  const handleSeasonChange = (value: string) => {
+    setSelectedSeason(value);
+    setCurrentPage(1);
+  };
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+  const handleSortChange = (newSortBy: string, newSortOrder: string) => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+    setCurrentPage(1);
+  };
+
+  // ソートパラメータ（デフォルトの場合はundefinedにしてパラメータを省略）
+  const isCustomSort = sortBy !== "date" || sortOrder !== "desc";
+  const apiSortBy = isCustomSort ? sortBy : undefined;
+  const apiSortOrder = isCustomSort ? sortOrder : undefined;
+
+  // フィルタ結果取得（フィルタ条件変更時・ページ変更時に再実行）
   useEffect(() => {
     let cancelled = false;
     const fetchFilteredData = async () => {
+      setIsLoading(true);
       try {
-        let filteredGameResultData;
+        let response;
         if (userId) {
-          filteredGameResultData = await getFilterGameResultsUserIdV2(
+          response = await getFilterGameResultsUserIdV2(
             userId,
             apiYear,
             apiMatchType,
             seasonId,
+            currentPage,
+            undefined,
+            debouncedSearch || undefined,
+            apiSortBy,
+            apiSortOrder,
           );
         } else {
-          filteredGameResultData = await getFilterGameResultsV2(
+          response = await getFilterGameResultsV2(
             apiYear,
             apiMatchType,
             seasonId,
+            currentPage,
+            undefined,
+            debouncedSearch || undefined,
+            apiSortBy,
+            apiSortOrder,
           );
         }
         if (cancelled) return;
-        if (filteredGameResultData && filteredGameResultData.length > 0) {
-          filteredGameResultData.sort(
-            (
-              a: { match_result: { date_and_time: string } },
-              b: { match_result: { date_and_time: string } },
-            ) => {
-              const dateA = new Date(a.match_result.date_and_time).getTime();
-              const dateB = new Date(b.match_result.date_and_time).getTime();
-              return dateB - dateA;
-            },
-          );
-        }
-        setGameResultIndex(filteredGameResultData || []);
+        setGameResultIndex((response.data as GameResult[]) || []);
+        setPaginationInfo(response.pagination);
       } catch (error) {
         if (!cancelled) {
           console.error("Filtered game lists fetch error:", error);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
         }
       }
     };
@@ -190,50 +251,79 @@ export default function MatchResultList(props: UserId) {
     return () => {
       cancelled = true;
     };
-  }, [userId, apiYear, apiMatchType, seasonId]);
+  }, [
+    userId,
+    apiYear,
+    apiMatchType,
+    seasonId,
+    currentPage,
+    debouncedSearch,
+    sortBy,
+    sortOrder,
+  ]);
 
   return (
     <>
-      <div className="bg-bg_sub p-4 rounded-xl lg:p-6">
-        <div className="mb-5 overflow-hidden">
+      <div ref={listTopRef} className="bg-bg_sub p-4 rounded-xl lg:p-6">
+        <div className="mb-5 overflow-hidden flex flex-col gap-3">
           <FilterChipGroup>
             <FilterChip
               label="年度"
               value={selectedYear}
               defaultValue="通算"
               options={yearOptions}
-              onChange={setSelectedYear}
+              onChange={handleYearChange}
             />
             <FilterChip
               label="種別"
               value={selectedMatchType}
               defaultValue="全て"
               options={matchTypeOptions}
-              onChange={setSelectedMatchType}
+              onChange={handleMatchTypeChange}
             />
             <FilterChip
               label="シーズン"
               value={selectedSeason}
               defaultValue="全て"
               options={seasonOptions}
-              onChange={setSelectedSeason}
+              onChange={handleSeasonChange}
             />
           </FilterChipGroup>
+          <div className="flex items-center gap-2">
+            <GameSearchInput
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+            <GameSortSelect
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onChange={handleSortChange}
+            />
+          </div>
         </div>
         <div className="mt-8">
           <div className="mt-8 grid gap-y-5">
-            {gameResultIndex.length > 0 ? (
-              <>
-                <MatchResultsItem gameResult={gameResultIndex} />
-              </>
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Spinner color="default" size="sm" />
+              </div>
+            ) : gameResultIndex.length > 0 ? (
+              <MatchResultsItem gameResult={gameResultIndex} />
             ) : (
-              <>
-                <p className="text-sm text-zinc-400 text-center pb-3">
-                  試合結果はありません。
-                </p>
-              </>
+              <p className="text-sm text-zinc-400 text-center pb-3">
+                試合結果はありません。
+              </p>
             )}
           </div>
+          {paginationInfo && (
+            <GamePagination
+              currentPage={paginationInfo.current_page}
+              totalPages={paginationInfo.total_pages}
+              totalCount={paginationInfo.total_count}
+              perPage={paginationInfo.per_page}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       </div>
     </>
