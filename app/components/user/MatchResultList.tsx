@@ -18,6 +18,7 @@ import {
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { Spinner } from "@heroui/react";
 
 type GameResult = {
   game_result_id: number;
@@ -74,6 +75,7 @@ export default function MatchResultList(props: UserId) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationInfo, setPaginationInfo] = useState<PaginationInfo | null>(
     null,
@@ -196,10 +198,16 @@ export default function MatchResultList(props: UserId) {
     setCurrentPage(1);
   };
 
+  // ソートパラメータ（デフォルトの場合はundefinedにしてパラメータを省略）
+  const isCustomSort = sortBy !== "date" || sortOrder !== "desc";
+  const apiSortBy = isCustomSort ? sortBy : undefined;
+  const apiSortOrder = isCustomSort ? sortOrder : undefined;
+
   // フィルタ結果取得（フィルタ条件変更時・ページ変更時に再実行）
   useEffect(() => {
     let cancelled = false;
     const fetchFilteredData = async () => {
+      setIsLoading(true);
       try {
         let response;
         if (userId) {
@@ -211,8 +219,8 @@ export default function MatchResultList(props: UserId) {
             currentPage,
             undefined,
             debouncedSearch || undefined,
-            sortBy !== "date" || sortOrder !== "desc" ? sortBy : undefined,
-            sortBy !== "date" || sortOrder !== "desc" ? sortOrder : undefined,
+            apiSortBy,
+            apiSortOrder,
           );
         } else {
           response = await getFilterGameResultsV2(
@@ -222,8 +230,8 @@ export default function MatchResultList(props: UserId) {
             currentPage,
             undefined,
             debouncedSearch || undefined,
-            sortBy !== "date" || sortOrder !== "desc" ? sortBy : undefined,
-            sortBy !== "date" || sortOrder !== "desc" ? sortOrder : undefined,
+            apiSortBy,
+            apiSortOrder,
           );
         }
         if (cancelled) return;
@@ -232,6 +240,10 @@ export default function MatchResultList(props: UserId) {
       } catch (error) {
         if (!cancelled) {
           console.error("Filtered game lists fetch error:", error);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
         }
       }
     };
@@ -291,16 +303,16 @@ export default function MatchResultList(props: UserId) {
         </div>
         <div className="mt-8">
           <div className="mt-8 grid gap-y-5">
-            {gameResultIndex.length > 0 ? (
-              <>
-                <MatchResultsItem gameResult={gameResultIndex} />
-              </>
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Spinner color="default" size="sm" />
+              </div>
+            ) : gameResultIndex.length > 0 ? (
+              <MatchResultsItem gameResult={gameResultIndex} />
             ) : (
-              <>
-                <p className="text-sm text-zinc-400 text-center pb-3">
-                  試合結果はありません。
-                </p>
-              </>
+              <p className="text-sm text-zinc-400 text-center pb-3">
+                試合結果はありません。
+              </p>
             )}
           </div>
           {paginationInfo && (

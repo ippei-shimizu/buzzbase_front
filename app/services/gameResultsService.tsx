@@ -8,7 +8,7 @@ export const getGameResults = async () => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -20,7 +20,7 @@ export const getAllUserGameResults = async () => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -32,7 +32,7 @@ export const getGameResultsUserId = async (user_id: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -42,7 +42,7 @@ export const createGameResult = async () => {
     const response = await axiosInstance.post("/api/v1/game_results");
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -58,7 +58,7 @@ export const updateGameResult = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -74,7 +74,7 @@ export const updateBattingAverageId = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -90,7 +90,7 @@ export const updatePitchingResultId = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -105,7 +105,7 @@ export const getFilterGameResults = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -121,7 +121,7 @@ export const getFilterGameResultsUserId = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -163,7 +163,7 @@ export const getGameResultsV2 = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -186,7 +186,7 @@ export const getGameResultsUserIdV2 = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -227,7 +227,7 @@ export const getFilterGameResultsV2 = async (
     const response = await axiosInstance.get(url);
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -269,7 +269,7 @@ export const getFilterGameResultsUserIdV2 = async (
     const response = await axiosInstance.get(url);
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -291,7 +291,7 @@ export const getAllUserGameResultsV2 = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
@@ -301,7 +301,7 @@ export const deleteGameResult = async (id: number | null) => {
     const response = await axiosInstance.delete(`/api/v1/game_results/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };
