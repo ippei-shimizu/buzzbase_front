@@ -4,7 +4,8 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
   "batting-average": {
     slug: "batting-average",
     title: "打率計算ツール",
-    metaTitle: "打率計算ツール｜安打数と打数を入力するだけで打率を自動計算【登録不要・無料】",
+    metaTitle:
+      "打率計算ツール｜安打数と打数を入力するだけで打率を自動計算【登録不要・無料】",
     metaDescription:
       "安打数と打数を入力するだけで打率を自動計算。登録不要・無料でブラウザからすぐ使えます。打率の計算式・目安値・意味もわかりやすく解説。プロ野球や高校野球の打率平均も紹介。",
     heading: "打率計算ツール",
