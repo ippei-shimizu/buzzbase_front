@@ -4,7 +4,9 @@ export const battingStats: BattingStat[] = [
   {
     title: "打率",
     equation: "安打 ÷ 打数",
-    descriptions: ["打者のヒットを打つ能力を示す基本的な指標です。"],
+    descriptions: [
+      "打者のヒットを打つ能力を示す基本的な指標です。安打数と打数から簡単に計算できます。",
+    ],
     slug: "batting-average",
   },
   {
