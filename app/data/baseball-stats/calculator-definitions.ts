@@ -6,7 +6,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "打率計算ツール",
     metaTitle: "打率計算ツール｜安打数と打数から打率を自動計算",
     metaDescription:
-      "安打数と打数を入力するだけで打率を自動計算。打率の計算式・目安・意味もわかりやすく解説。BUZZ BASEなら全指標を無料で自動算出できます。",
+      "安打数と打数を入力するだけで打率を自動計算。登録不要・無料でブラウザからすぐ使えます。打率の計算式・目安値・意味もわかりやすく解説。プロ野球や高校野球の打率平均も紹介。",
     heading: "打率計算ツール",
     description:
       "安打数と打数を入力して、打率を計算できます。打率は打者の基本的な打撃能力を示す指標です。",
@@ -73,7 +73,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "防御率計算ツール",
     metaTitle: "防御率（ERA）計算ツール｜自責点と投球回から防御率を自動計算",
     metaDescription:
-      "自責点と投球回を入力するだけで防御率（ERA）を自動計算。防御率の計算式・目安・意味もわかりやすく解説。完全無料。",
+      "自責点と投球回を入力するだけで防御率（ERA）を自動計算。登録不要・無料でブラウザからすぐ使えます。防御率の計算式・目安値・意味もわかりやすく解説。投手の実力を客観的に評価する基本指標です。",
     heading: "防御率（ERA）計算ツール",
     description:
       "自責点と投球回を入力して、防御率を計算できます。防御率は投手の実力を測る最も基本的な指標です。",
@@ -138,7 +138,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "OPS計算ツール",
     metaTitle: "OPS計算ツール｜出塁率・長打率・OPSを生データから一括自動計算",
     metaDescription:
-      "安打・打数・四球・死球・犠飛・塁打を入力するだけでOPS・出塁率・長打率を一括計算。OPSの計算式・目安・意味も解説。完全無料。",
+      "安打・四球・死球・塁打を入力するだけでOPS・出塁率・長打率を一括自動計算。登録不要・無料でブラウザからすぐ使えます。OPSの計算式・目安値・意味もわかりやすく解説。野球の打撃力を総合評価する指標を今すぐチェック。",
     heading: "OPS計算ツール",
     description:
       "成績データを入力して、出塁率・長打率・OPSを一括で計算できます。OPSは打者の総合的な攻撃力を示す指標です。",
@@ -249,7 +249,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "長打率計算ツール",
     metaTitle: "長打率（SLG）計算ツール｜塁打数と打数から長打率を自動計算",
     metaDescription:
-      "塁打数と打数を入力するだけで長打率（SLG）を自動計算。長打率の計算式・目安・意味もわかりやすく解説。完全無料。",
+      "塁打数と打数を入力するだけで長打率（SLG）を自動計算。登録不要・無料でブラウザからすぐ使えます。長打率の計算式・目安値・意味を解説。長打力を数値で評価したい方におすすめ。",
     heading: "長打率（SLG）計算ツール",
     description:
       "塁打数と打数を入力して、長打率を計算できます。長打率は打者の長打力を示す指標です。",
@@ -314,7 +314,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "出塁率計算ツール",
     metaTitle: "出塁率（OBP）計算ツール｜安打・四球・死球から出塁率を自動計算",
     metaDescription:
-      "安打・四球・死球・打数・犠飛を入力するだけで出塁率（OBP）を自動計算。出塁率の計算式・目安・意味もわかりやすく解説。完全無料。",
+      "安打・四球・死球・打数・犠飛を入力するだけで出塁率（OBP）を自動計算。登録不要・無料でブラウザからすぐ使えます。出塁率の計算式・目安値・意味もわかりやすく解説。打率との違いや高い出塁率の基準も紹介。",
     heading: "出塁率（OBP）計算ツール",
     description:
       "成績データを入力して、出塁率を計算できます。出塁率は打者がどれだけの確率で出塁するかを示す指標です。",
@@ -402,7 +402,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "WHIP計算ツール",
     metaTitle: "WHIP計算ツール｜与四球と被安打から WHIPを自動計算",
     metaDescription:
-      "与四球・被安打・投球回を入力するだけでWHIPを自動計算。WHIPの計算式・目安・意味もわかりやすく解説。完全無料。",
+      "与四球・被安打・投球回を入力するだけでWHIPを自動計算。登録不要・無料でブラウザからすぐ使えます。WHIPの計算式・目安値・意味もわかりやすく解説。1イニングあたりの走者許容率で投手力を評価。",
     heading: "WHIP計算ツール",
     description:
       "与四球・被安打・投球回を入力して、WHIPを計算できます。WHIPは投手の安定性を示す指標です。",
@@ -475,7 +475,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "K/BB計算ツール",
     metaTitle: "K/BB計算ツール｜奪三振と与四球からK/BBを自動計算",
     metaDescription:
-      "奪三振と与四球を入力するだけでK/BB（奪三振÷与四球）を自動計算。K/BBの計算式・目安・意味もわかりやすく解説。完全無料。",
+      "奪三振と与四球を入力するだけでK/BB（奪三振÷与四球）を自動計算。登録不要・無料でブラウザからすぐ使えます。K/BBの計算式・目安値・意味を解説。投手の制球力と奪三振能力のバランスを評価する指標です。",
     heading: "K/BB計算ツール",
     description:
       "奪三振と与四球を入力して、K/BBを計算できます。K/BBは投手の制球力と支配力のバランスを示す指標です。",
@@ -539,7 +539,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "K/9計算ツール",
     metaTitle: "K/9計算ツール｜奪三振数と投球回からK/9を自動計算",
     metaDescription:
-      "奪三振数と投球回を入力するだけでK/9（9イニングあたり奪三振数）を自動計算。K/9の計算式・目安・意味もわかりやすく解説。完全無料。",
+      "奪三振数と投球回を入力するだけでK/9（9イニングあたり奪三振数）を自動計算。登録不要・無料でブラウザからすぐ使えます。K/9の計算式・目安値・意味を解説。投手の奪三振能力を評価する指標です。",
     heading: "K/9計算ツール",
     description:
       "奪三振数と投球回を入力して、K/9を計算できます。K/9は投手の奪三振能力を示す指標です。",
@@ -603,7 +603,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     title: "BB/9計算ツール",
     metaTitle: "BB/9計算ツール｜与四球と投球回からBB/9を自動計算",
     metaDescription:
-      "与四球と投球回を入力するだけでBB/9（9イニングあたり与四球数）を自動計算。BB/9の計算式・目安・意味もわかりやすく解説。完全無料。",
+      "与四球と投球回を入力するだけでBB/9（9イニングあたり与四球数）を自動計算。登録不要・無料でブラウザからすぐ使えます。BB/9の計算式・目安値・意味を解説。投手の制球力を数値で把握できます。",
     heading: "BB/9計算ツール",
     description:
       "与四球と投球回を入力して、BB/9を計算できます。BB/9は投手の制球力を示す指標です。",
