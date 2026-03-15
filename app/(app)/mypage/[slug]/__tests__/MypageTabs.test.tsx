@@ -76,8 +76,8 @@ jest.mock("@app/components/button/FollowButton", () => {
   };
 });
 
-jest.mock("@app/components/share/ProfileShareComponent", () => {
-  return function ProfileShareComponent() {
+jest.mock("@app/components/share/StatsShareComponent", () => {
+  return function StatsShareComponent() {
     return <div data-testid="share">Share</div>;
   };
 });
