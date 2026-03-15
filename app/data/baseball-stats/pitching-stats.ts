@@ -5,7 +5,7 @@ export const pitchingStats: PitchingStat[] = [
     title: "防御率",
     equation: "自責点×9 ÷ 投球回数",
     descriptions: [
-      "その投手が9イニング（1試合）を投げたとしたら何点に抑えられるかを示す指標です",
+      "その投手が9イニング（1試合）を投げたとしたら何点に抑えられるかを示す指標です。自責点と投球回から簡単に計算できます。",
     ],
     slug: "era",
   },
@@ -130,7 +130,7 @@ export const pitchingStats: PitchingStat[] = [
     title: "K/BB",
     equation: "奪三振 ÷ 与四球",
     descriptions: [
-      "制球力と支配力のバランスを示す指標で、高い値は投手が多くの奪三振を取りつつ、少ない四球を与えていることを意味します。",
+      "制球力と支配力のバランスを示す指標です。奪三振と与四球から簡単に計算できます。",
     ],
     slug: "k-bb",
   },

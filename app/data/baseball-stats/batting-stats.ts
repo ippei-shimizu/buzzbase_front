@@ -12,7 +12,9 @@ export const battingStats: BattingStat[] = [
   {
     title: "出塁率",
     equation: "（安打数＋四球＋死球）÷（打数＋四球＋死球＋犠飛）",
-    descriptions: ["打者がどれだけの確率で出塁するかを示します。"],
+    descriptions: [
+      "打者がどれだけの確率で出塁するかを示します。安打・四球・死球から簡単に計算できます。",
+    ],
     slug: "obp",
   },
   {
