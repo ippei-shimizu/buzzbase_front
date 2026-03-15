@@ -25,11 +25,13 @@ export default function StatExplanation({
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold mb-3">解説</h2>
-        {explanation.split("\n\n").map((paragraph, index) => (
-          <p key={index} className="text-sm text-zinc-300 leading-7">
-            {paragraph}
-          </p>
-        ))}
+        <div className="space-y-4">
+          {explanation.split("\n\n").map((paragraph, index) => (
+            <p key={index} className="text-sm text-zinc-300 leading-7">
+              {paragraph}
+            </p>
+          ))}
+        </div>
       </section>
 
       {guide.length > 0 ? (
