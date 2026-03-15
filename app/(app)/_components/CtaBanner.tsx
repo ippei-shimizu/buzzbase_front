@@ -3,12 +3,14 @@ import Link from "next/link";
 type Props = {
   heading?: string;
   body: string;
+  buttonText?: string;
   className?: string;
 };
 
 export default function CtaBanner({
   heading,
   body,
+  buttonText = "BUZZ BASEで無料で使ってみる",
   className = "mt-10",
 }: Props) {
   return (
@@ -21,7 +23,7 @@ export default function CtaBanner({
         href="/signup"
         className="inline-block rounded-lg bg-yellow-600 hover:bg-yellow-500 transition-colors px-6 py-2.5 text-sm font-bold text-white"
       >
-        BUZZ BASEで無料で使ってみる
+        {buttonText}
       </Link>
     </section>
   );
