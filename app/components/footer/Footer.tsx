@@ -43,7 +43,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/tools/batting-average" className="text-sm">
+                <Link href="/tools" className="text-sm">
                   計算ツール
                 </Link>
               </li>
