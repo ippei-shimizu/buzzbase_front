@@ -302,7 +302,8 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
   slugging: {
     slug: "slugging",
     title: "長打率計算ツール",
-    metaTitle: "長打率（SLG）計算ツール｜塁打数と打数を入力するだけで長打率を自動計算【登録不要・無料】",
+    metaTitle:
+      "長打率（SLG）計算ツール｜塁打数と打数を入力するだけで長打率を自動計算【登録不要・無料】",
     metaDescription:
       "塁打数と打数を入力するだけで長打率（SLG）を自動計算。登録不要・無料でブラウザからすぐ使えます。長打率の計算式・目安値・意味を解説。長打力を数値で評価したい方におすすめ。",
     heading: "長打率（SLG）計算ツール",
