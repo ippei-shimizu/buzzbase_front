@@ -1,3 +1,5 @@
+import AdBanner from "@app/components/ad/AdBanner";
+import { adSlots } from "@app/components/ad/adConfig";
 import { CalculatorDefinition } from "@app/data/baseball-stats/types";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "./Breadcrumbs";
@@ -54,6 +56,8 @@ export default function CalculatorPageContent({
         body="BUZZ BASEなら毎試合の成績を記録するだけで全29指標を自動算出。友達とランキングで競い合えます。完全無料。"
         buttonText="無料で始める（30秒で登録）"
       />
+
+      <AdBanner slot={adSlots.toolsDisplay} />
 
       <StatExplanation
         explanation={definition.explanation}
