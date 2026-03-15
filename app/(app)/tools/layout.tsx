@@ -6,6 +6,8 @@ export const metadata: Metadata = {
     template: "%s - BUZZ BASE",
     default: "野球計算ツール - BUZZ BASE",
   },
+  description:
+    "打率・防御率・OPS・出塁率・長打率・WHIPなど、野球の主要指標を無料で自動計算。登録不要でブラウザからすぐ使えます。",
 };
 
 export default function ToolsLayout({
