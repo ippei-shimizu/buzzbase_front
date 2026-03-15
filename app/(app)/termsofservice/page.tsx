@@ -125,10 +125,7 @@ export default function TermOfService() {
                 当社は，本サービス上の広告の表示場所，表示内容，表示方法等を，ユーザーへの事前の通知なく変更することができるものとします。
                 <br />
                 広告の配信にあたり，第三者配信事業者がCookie等を使用してユーザーの情報を収集する場合があります。詳細は当社の
-                <Link
-                  href="/privacypolicy"
-                  className="text-blue-400 underline"
-                >
+                <Link href="/privacypolicy" className="text-blue-400 underline">
                   プライバシーポリシー
                 </Link>
                 をご確認ください。
@@ -155,10 +152,7 @@ export default function TermOfService() {
               </h3>
               <p className="text-sm mt-4">
                 当社は，本サービスの利用によって取得する個人情報については，当社「
-                <Link
-                  href="/privacypolicy"
-                  className="text-blue-400 underline"
-                >
+                <Link href="/privacypolicy" className="text-blue-400 underline">
                   プライバシーポリシー
                 </Link>
                 」に従い適切に取り扱うものとします。
