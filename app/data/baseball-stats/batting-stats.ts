@@ -27,7 +27,7 @@ export const battingStats: BattingStat[] = [
     title: "OPS",
     equation: "出塁率 + 長打率",
     descriptions: [
-      "打者の全体的な攻撃力を示す指標です。より高いOPSはより大きな攻撃貢献を意味します。",
+      "打者の全体的な攻撃力を示す指標です。出塁率と長打率から簡単に計算できます。",
     ],
     slug: "ops",
   },
