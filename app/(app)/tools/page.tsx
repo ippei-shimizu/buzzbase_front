@@ -4,13 +4,15 @@ import { calculatorDefinitions } from "@app/data/baseball-stats/calculator-defin
 import { CalculatorDefinition } from "@app/data/baseball-stats/types";
 
 export const metadata: Metadata = {
-  title: "野球計算ツール一覧｜打率・防御率・OPSなど無料で自動計算【登録不要】",
+  title:
+    "野球計算ツール一覧｜打率・防御率・OPS・勝率など無料で自動計算【登録不要】",
   description:
-    "打率・防御率・OPS・出塁率・長打率・WHIPなど、野球の主要指標を無料で自動計算。登録不要でブラウザからすぐ使えます。",
+    "打率・防御率・OPS・出塁率・長打率・WHIP・勝率など、野球の主要指標を無料で自動計算。登録不要でブラウザからすぐ使えます。",
 };
 
 const battingSlugs = ["batting-average", "obp", "slugging", "ops"];
 const pitchingSlugs = ["era", "whip", "k-bb", "k-9", "bb-9"];
+const teamSlugs = ["winning-percentage"];
 
 function getTools(slugs: string[]): CalculatorDefinition[] {
   return slugs
@@ -46,6 +48,7 @@ function ToolCard({ tool }: { tool: CalculatorDefinition }) {
 export default function ToolsPage() {
   const battingTools = getTools(battingSlugs);
   const pitchingTools = getTools(pitchingSlugs);
+  const teamTools = getTools(teamSlugs);
 
   return (
     <div>
@@ -63,10 +66,19 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section>
+      <section className="mb-8">
         <h2 className="text-lg font-bold mb-3">投手指標</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {pitchingTools.map((tool) => (
+            <ToolCard key={tool.slug} tool={tool} />
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-bold mb-3">チーム指標</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {teamTools.map((tool) => (
             <ToolCard key={tool.slug} tool={tool} />
           ))}
         </div>
