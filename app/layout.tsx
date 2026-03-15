@@ -48,6 +48,15 @@ export default function RootLayout({
       <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
       <meta name="apple-mobile-web-app-title" content="BUZZ BASE" />
       <meta name="application-name" content="BUZZ BASE" />
+      <meta name="google-adsense-account" content="ca-pub-2173577862865148" />
+      {isProduction && (
+        <Script
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2173577862865148"
+          crossOrigin="anonymous"
+        />
+      )}
       {isProduction && gaId && (
         <>
           <Script
