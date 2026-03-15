@@ -26,8 +26,8 @@ export default function CalculatorPageContent({
         breadcrumbs={[
           { name: "BUZZ BASE", url: baseUrl },
           {
-            name: "野球指標一覧",
-            url: `${baseUrl}/calculation-of-grades`,
+            name: "計算ツール",
+            url: `${baseUrl}/tools`,
           },
           {
             name: definition.title,
@@ -39,7 +39,7 @@ export default function CalculatorPageContent({
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
-          { label: "野球指標一覧", href: "/calculation-of-grades" },
+          { label: "計算ツール", href: "/tools" },
           { label: definition.title },
         ]}
       />

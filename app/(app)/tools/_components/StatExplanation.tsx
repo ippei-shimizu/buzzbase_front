@@ -23,7 +23,7 @@ export default function StatExplanation({
         </div>
       </section>
 
-      <section>
+      <section className="space-y-4">
         <h2 className="text-xl font-bold mb-3">解説</h2>
         <div className="space-y-4">
           {explanation.split("\n\n").map((paragraph, index) => (
