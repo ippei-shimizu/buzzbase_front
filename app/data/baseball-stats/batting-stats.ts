@@ -19,7 +19,7 @@ export const battingStats: BattingStat[] = [
     title: "長打率",
     equation: "塁打数 ÷ 打数",
     descriptions: [
-      "打者が打席に立った際に平均してどれだけの塁打数を稼ぐかを示す指標です。",
+      "打者が打席に立った際に平均してどれだけの塁打数を稼ぐかを示す指標です。塁打数と打数から簡単に計算できます。",
     ],
     slug: "slugging",
   },
