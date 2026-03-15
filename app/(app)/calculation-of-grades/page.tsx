@@ -23,7 +23,9 @@ export default function CalculationOfGrades() {
                 <BattingStatsSection />
                 <CtaBanner
                   className="my-10"
-                  body="BUZZ BASEなら試合結果を入力するだけで、上記の全指標を自動算出。チームメイトとランキング形式で成績を共有できます。"
+                  heading="全指標を自動で計算するなら"
+                  body="BUZZ BASEなら試合結果を入力するだけで、上記の全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
+                  buttonText="無料で始める（30秒で登録）"
                 />
                 <PitchingStatsSection />
               </div>
