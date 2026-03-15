@@ -9,7 +9,7 @@ import { BallIcon } from "@app/components/icon/BallIcon";
 import { CrownIcon } from "@app/components/icon/CrownIcon";
 import { GloveIcon } from "@app/components/icon/GloveIcon";
 import { LockIcon } from "@app/components/icon/LockIcon";
-import ProfileShareComponent from "@app/components/share/ProfileShareComponent";
+import StatsShareComponent from "@app/components/share/StatsShareComponent";
 import AvatarComponent from "@app/components/user/AvatarComponent";
 import IndividualResultsList from "@app/components/user/IndividualResultsList";
 import MatchResultList from "@app/components/user/MatchResultList";
@@ -235,8 +235,10 @@ export default function MyPage() {
                 ) : (
                   <></>
                 )}
-                <ProfileShareComponent
-                  userData={userData}
+                <StatsShareComponent
+                  userId={userData.user.user_id}
+                  userName={userData.user.name}
+                  positions={userData.user.positions}
                   teamData={teamData}
                 />
               </div>

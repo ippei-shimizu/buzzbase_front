@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import { notoSansJP } from "@app/font";
 
@@ -82,6 +83,7 @@ export default function RootLayout({
       <body className={`${notoSansJP.className} bg-main text-white h-full`}>
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
