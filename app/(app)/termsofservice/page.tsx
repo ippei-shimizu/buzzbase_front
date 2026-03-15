@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import Header from "@app/components/header/Header";
 
 export const metadata: Metadata = {
@@ -117,14 +118,29 @@ export default function TermOfService() {
                 <br></br>
                 当社は，本サービスに関して，ユーザーと他のユーザーまたは第三者との間において生じた取引，連絡または紛争等について一切責任を負いません。
               </p>
+              <h3 className="text-xl font-bold mt-8">第9条（広告表示）</h3>
+              <p className="text-sm mt-4">
+                本サービスには，当社または第三者の広告が表示される場合があります。
+                <br />
+                当社は，本サービス上の広告の表示場所，表示内容，表示方法等を，ユーザーへの事前の通知なく変更することができるものとします。
+                <br />
+                広告の配信にあたり，第三者配信事業者がCookie等を使用してユーザーの情報を収集する場合があります。詳細は当社の
+                <Link
+                  href="/privacypolicy"
+                  className="text-blue-400 underline"
+                >
+                  プライバシーポリシー
+                </Link>
+                をご確認ください。
+              </p>
               <h3 className="text-xl font-bold mt-8">
-                第9条（サービス内容の変更等）
+                第10条（サービス内容の変更等）
               </h3>
               <p className="text-sm mt-4">
                 当社は，ユーザーへの事前の告知をもって、本サービスの内容を変更、追加または廃止することがあり、ユーザーはこれを承諾するものとします。
               </p>
               <h3 className="text-xl font-bold mt-8">
-                第10条（利用規約の変更）
+                第11条（利用規約の変更）
               </h3>
               <p className="text-sm mt-4">
                 当社は以下の場合には、ユーザーの個別の同意を要せず、本規約を変更することができるものとします。
@@ -135,25 +151,32 @@ export default function TermOfService() {
                 当社はユーザーに対し、前項による本規約の変更にあたり、事前に、本規約を変更する旨及び変更後の本規約の内容並びにその効力発生時期を通知します。
               </p>
               <h3 className="text-xl font-bold mt-8">
-                第11条（個人情報の取扱い）
+                第12条（個人情報の取扱い）
               </h3>
               <p className="text-sm mt-4">
-                当社は，本サービスの利用によって取得する個人情報については，当社「プライバシーポリシー」に従い適切に取り扱うものとします。
+                当社は，本サービスの利用によって取得する個人情報については，当社「
+                <Link
+                  href="/privacypolicy"
+                  className="text-blue-400 underline"
+                >
+                  プライバシーポリシー
+                </Link>
+                」に従い適切に取り扱うものとします。
               </p>
               <h3 className="text-xl font-bold mt-8">
-                第12条（通知または連絡）
+                第13条（通知または連絡）
               </h3>
               <p className="text-sm mt-4">
                 ユーザーと当社との間の通知または連絡は，当社の定める方法によって行うものとします。当社は,ユーザーから,当社が別途定める方式に従った変更届け出がない限り,現在登録されている連絡先が有効なものとみなして当該連絡先へ通知または連絡を行い,これらは,発信時にユーザーへ到達したものとみなします。
               </p>
               <h3 className="text-xl font-bold mt-8">
-                第13条（権利義務の譲渡の禁止）
+                第14条（権利義務の譲渡の禁止）
               </h3>
               <p className="text-sm mt-4">
                 ユーザーは，当社の書面による事前の承諾なく，利用契約上の地位または本規約に基づく権利もしくは義務を第三者に譲渡し，または担保に供することはできません。
               </p>
               <h3 className="text-xl font-bold mt-8">
-                第14条（準拠法・裁判管轄）
+                第15条（準拠法・裁判管轄）
               </h3>
               <p className="text-sm mt-4">
                 本規約の解釈にあたっては，日本法を準拠法とします。
