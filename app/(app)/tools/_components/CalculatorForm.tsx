@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Button } from "@heroui/react";
+import Link from "next/link";
 import { useState, useCallback } from "react";
 import {
   CalculatorField,
@@ -135,6 +136,20 @@ export default function CalculatorForm({ fields, outputs, calculate }: Props) {
               </p>
             </div>
           ))}
+        </div>
+      ) : null}
+
+      {results.length > 0 ? (
+        <div className="mt-4 text-center">
+          <Link
+            href="/signup"
+            className="inline-block w-full rounded-lg bg-yellow-600 hover:bg-yellow-500 transition-colors px-6 py-3 text-sm font-bold text-white"
+          >
+            この結果を保存する（無料）
+          </Link>
+          <p className="text-xs text-zinc-400 mt-2">
+            保存すると成績推移グラフやランキングも見られます
+          </p>
         </div>
       ) : null}
     </div>
