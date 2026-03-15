@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import AdInFeed from "@app/components/ad/AdInFeed";
+import { adSlots } from "@app/components/ad/adConfig";
 import Header from "@app/components/header/Header";
 import DashboardContent from "./_components/DashboardContent";
 import { getAvailableSeasons, getDashboardData } from "./actions";
@@ -29,6 +31,7 @@ export default async function DashboardPage() {
               <h2 className="text-2xl font-bold">ダッシュボード</h2>
               <div className="my-6">
                 <DashboardContent data={data} seasons={seasons} />
+                <AdInFeed slot={adSlots.dashboardInFeed} />
               </div>
             </div>
           </div>
