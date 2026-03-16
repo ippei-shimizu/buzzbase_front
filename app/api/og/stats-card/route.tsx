@@ -89,6 +89,7 @@ function AvatarCircle({ name, imageUrl }: { name: string; imageUrl?: string }) {
         style={{
           borderRadius: "50%",
           border: "3px solid rgba(113, 113, 122, 0.6)",
+          objectFit: "cover",
         }}
       />
     );
