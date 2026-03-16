@@ -50,7 +50,9 @@ export default function NotificationItem() {
 
   const renderNotification = (notice: Notifications) => {
     if (notice.event_type === "management_notice") {
-      return <NotificationManagementNotice notice={notice} onRead={() => mutate()} />;
+      return (
+        <NotificationManagementNotice notice={notice} onRead={() => mutate()} />
+      );
     }
     if (
       notice.event_type === "group_invitation" &&
