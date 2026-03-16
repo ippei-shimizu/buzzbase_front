@@ -6,7 +6,7 @@ import { fetcher } from "@app/hooks/swrFetcher";
 export function useNotifications() {
   const { state } = useUser();
   const usersUserId = state.usersUserId;
-  const { data, error } = useSWR(
+  const { data, error, mutate } = useSWR(
     usersUserId ? `/api/v1/notifications?user_id=${usersUserId.user_id}` : null,
     fetcher,
   );
@@ -14,5 +14,6 @@ export function useNotifications() {
     notifications: data,
     isLoading: !error && !data,
     isError: error,
+    mutate,
   };
 }

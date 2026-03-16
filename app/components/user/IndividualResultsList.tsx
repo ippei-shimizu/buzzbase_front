@@ -185,7 +185,7 @@ export default function IndividualResultsList(props: UserId) {
             />
           </FilterChipGroup>
         </div>
-        <h2 className="text-xl">打撃成績</h2>
+        <h2 className="text-sm text-zinc-400">打撃成績</h2>
         {personalBattingAverages?.[0] &&
           personalBattingStatus &&
           (() => {
@@ -216,7 +216,7 @@ export default function IndividualResultsList(props: UserId) {
           personalBattingAverages={personalBattingAverages}
           personalBattingStatus={personalBattingStatus}
         />
-        <h2 className="text-xl mt-8">投手成績</h2>
+        <h2 className="text-sm text-zinc-400 mt-8">投手成績</h2>
         {personalPitchingResults?.[0] &&
           personalPitchingStatus &&
           (() => {

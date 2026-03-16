@@ -1,15 +1,26 @@
 "use client";
 
 import type { Notifications } from "@app/interface";
+import { markManagementNoticesRead } from "@app/services/notificationsService";
 import Link from "next/link";
 
 interface NotificationManagementNoticeProps {
   notice: Notifications;
+  onRead?: () => void;
 }
 
 export default function NotificationManagementNotice({
   notice,
+  onRead,
 }: NotificationManagementNoticeProps) {
+  const handlePress = () => {
+    if (!notice.read_at) {
+      markManagementNoticesRead()
+        .then(() => onRead?.())
+        .catch(() => {});
+    }
+  };
+
   return (
     <div
       className={`grid grid-cols-[28px_1fr] gap-x-3 ${
@@ -35,6 +46,7 @@ export default function NotificationManagementNotice({
         <Link
           href={`/notice-from-management/${notice.management_notice_id}`}
           className="text-sm text-zinc-400"
+          onClick={handlePress}
         >
           <span className="text-base text-white font-bold">
             運営からのお知らせ
