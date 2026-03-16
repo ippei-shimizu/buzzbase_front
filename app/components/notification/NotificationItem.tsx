@@ -11,7 +11,7 @@ import { useNotifications } from "@app/hooks/notification/getNotifications";
 import { readNotification } from "@app/services/notificationsService";
 
 export default function NotificationItem() {
-  const { notifications, isError, isLoading } = useNotifications();
+  const { notifications, isError, isLoading, mutate } = useNotifications();
   useRequireAuth();
   if (isLoading) {
     return (
@@ -50,7 +50,9 @@ export default function NotificationItem() {
 
   const renderNotification = (notice: Notifications) => {
     if (notice.event_type === "management_notice") {
-      return <NotificationManagementNotice notice={notice} />;
+      return (
+        <NotificationManagementNotice notice={notice} onRead={() => mutate()} />
+      );
     }
     if (
       notice.event_type === "group_invitation" &&
