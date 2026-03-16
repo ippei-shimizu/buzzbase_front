@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import { heroui } from "@heroui/react";
+import typography from "@tailwindcss/typography";
 
 const config: Config = {
   content: [
@@ -98,6 +99,7 @@ const config: Config = {
   },
   darkMode: "class",
   plugins: [
+    typography,
     heroui({
       themes: {
         "buzz-dark": {
