@@ -3,6 +3,7 @@
 import type { SeasonData } from "@app/interface";
 import type { PaginationInfo } from "@app/services/gameResultsService";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import GamePagination from "@app/components/game/GamePagination";
@@ -55,8 +56,13 @@ type AvailableYear = number | string;
 
 type AvailableMatchType = string;
 
-export default function MatchResultList(props: UserId) {
-  const { userId } = props;
+type MatchResultListProps = UserId & {
+  adSlot?: string;
+  adLayoutKey?: string;
+};
+
+export default function MatchResultList(props: MatchResultListProps) {
+  const { userId, adSlot, adLayoutKey } = props;
   const [yearOptions, setYearOptions] = useState<
     { key: string; label: string }[]
   >([{ key: "通算", label: "通算" }]);
@@ -308,7 +314,15 @@ export default function MatchResultList(props: UserId) {
                 <Spinner color="default" size="sm" />
               </div>
             ) : gameResultIndex.length > 0 ? (
-              <MatchResultsItem gameResult={gameResultIndex} />
+              <>
+                <MatchResultsItem gameResult={gameResultIndex.slice(0, 5)} />
+                {adSlot && gameResultIndex.length > 5 && (
+                  <AdInFeed slot={adSlot} layoutKey={adLayoutKey} />
+                )}
+                {gameResultIndex.length > 5 && (
+                  <MatchResultsItem gameResult={gameResultIndex.slice(5)} />
+                )}
+              </>
             ) : (
               <p className="text-sm text-zinc-400 text-center pb-3">
                 試合結果はありません。

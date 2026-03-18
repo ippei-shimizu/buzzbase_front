@@ -9,6 +9,8 @@ import { Chip, Divider } from "@heroui/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import { getCurrentBattingAverage } from "@app/services/battingAveragesService";
@@ -519,6 +521,10 @@ export default function ResultsSummary() {
             >
               マイページへ
             </Link>
+            <AdInFeed
+              slot={adSlots.gameResultSummaryInFeed}
+              layoutKey="-6t+ed+2i-1n-4w"
+            />
           </div>
         </div>
       </main>

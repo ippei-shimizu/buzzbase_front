@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import HeaderBack from "@app/components/header/HeaderBack";
 import FollowingUser from "@app/components/user/FollowingUser";
 
@@ -35,6 +37,12 @@ export default function Following() {
               </Link>
             </div>
             <FollowingUser />
+            <div className="px-4 max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
+              <AdInFeed
+                slot={adSlots.followingInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
+            </div>
           </main>
         </div>
       </div>

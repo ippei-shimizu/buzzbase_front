@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import NoticeItems from "@app/(app)/notice-from-management/notice-item";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import MarkNoticesRead from "./_components/MarkNoticesRead";
 import { getPublishedNotices } from "./actions";
@@ -39,6 +41,10 @@ export default async function NoticeFromManagement() {
             <div className="px-4 pt-20 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:px-6 lg:pb-6">
               <h2 className="text-2xl font-bold">運営からのお知らせ</h2>
               <NoticeItems notices={allNotices} />
+              <AdInFeed
+                slot={adSlots.noticeListInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
             </div>
           </main>
         </div>
