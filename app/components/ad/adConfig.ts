@@ -22,4 +22,32 @@ export const adSlots = {
   calcGradesMiddle: "9799802384",
   /** 成績算出ページ 投手成績下 ディスプレイ広告 */
   calcGradesBottom: "8486720710",
+  /** マイページ下部 インフィード広告 */
+  mypageBottomInFeed: "2343416949",
+  /** マイページ試合一覧 インフィード広告 */
+  mypageMatchListInFeed: "8717253604",
+  /** ダッシュボード中間 インフィード広告 */
+  dashboardMiddleInFeed: "9547119544",
+  /** 試合一覧中間 インフィード広告 */
+  gameResultListMiddleInFeed: "7759395150",
+  /** 試合サマリー インフィード広告 */
+  gameResultSummaryInFeed: "6215780592",
+  /** グループ詳細 インフィード広告 */
+  groupDetailInFeed: "7771003447",
+  /** グループ一覧 インフィード広告 */
+  groupListInFeed: "9020372484",
+  /** ノート一覧 インフィード広告 */
+  noteListInFeed: "4687076509",
+  /** フォロワー インフィード広告 */
+  followersInFeed: "7707290815",
+  /** フォロー中 インフィード広告 */
+  followingInFeed: "6457921774",
+  /** お知らせ一覧 インフィード広告 */
+  noticeListInFeed: "5133231818",
+  /** ツール詳細ページ 最下部 横長ディスプレイ広告 */
+  toolsDetailHorizontal: "8892513422",
+  /** ツール一覧ページ 最下部 横長ディスプレイ広告 */
+  toolsListHorizontal: "1266706242",
+  /** 成績算出ページ 最下部 横長ディスプレイ広告 */
+  calcGradesHorizontal: "9963453911",
 } as const;

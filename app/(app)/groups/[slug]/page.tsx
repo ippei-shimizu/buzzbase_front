@@ -12,6 +12,8 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState, use } from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import HeaderBackLink from "@app/components/header/HeaderBackLink";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -393,6 +395,10 @@ export default function GroupDetail(props: GroupDetailProps) {
                   </Tab>
                 </Tabs>
               </div>
+              <AdInFeed
+                slot={adSlots.groupDetailInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
             </div>
           </main>
         </div>

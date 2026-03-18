@@ -7,6 +7,8 @@ import type {
   SeasonOption,
 } from "../actions";
 import { useState } from "react";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import { getFilteredBattingStats, getFilteredPitchingStats } from "../actions";
 import GroupRankings from "./GroupRankings";
 import RecentGameResults from "./RecentGameResults";
@@ -64,6 +66,11 @@ export default function DashboardContent({
         availableSeasons={seasons}
         onBattingFilterChange={handleBattingFilterChange}
         onPitchingFilterChange={handlePitchingFilterChange}
+      />
+
+      <AdInFeed
+        slot={adSlots.dashboardMiddleInFeed}
+        layoutKey="-6t+ed+2i-1n-4w"
       />
 
       <RecentGameResults results={data?.recent_game_results ?? []} />

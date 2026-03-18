@@ -98,6 +98,8 @@ export default function CalculatorPageContent({
       <AdBanner slot={adSlots.toolsDetailBottom} />
 
       <RelatedTools slugs={definition.relatedSlugs} />
+
+      <AdBanner slot={adSlots.toolsDetailHorizontal} format="horizontal" />
     </>
   );
 }
