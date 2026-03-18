@@ -31,7 +31,7 @@ export default async function DashboardPage() {
               <h2 className="text-2xl font-bold">ダッシュボード</h2>
               <div className="my-6">
                 <DashboardContent data={data} seasons={seasons} />
-                <AdInFeed slot={adSlots.dashboardInFeed} />
+                <AdInFeed slot={adSlots.dashboardInFeed} layoutKey="-6t+ed+2i-1n-4w" />
               </div>
             </div>
           </div>
