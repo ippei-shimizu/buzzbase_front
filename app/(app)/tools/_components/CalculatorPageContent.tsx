@@ -95,8 +95,6 @@ export default function CalculatorPageContent({
         buttonText="無料で成績管理を始める"
       />
 
-      <AdBanner slot={adSlots.toolsDetailBottom} />
-
       <RelatedTools slugs={definition.relatedSlugs} />
 
       <AdBanner slot={adSlots.toolsDetailHorizontal} format="horizontal" />
