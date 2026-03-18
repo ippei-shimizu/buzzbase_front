@@ -18,6 +18,8 @@ import {
 } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
@@ -360,9 +362,11 @@ export default function ResultsSummary() {
                       <p className="text-sm text-zinc-400">
                         {getBattingOrderTurn(match.batting_order)}
                       </p>
-                      <p className="text-sm text-zinc-400">
-                        {match.defensive_position}
-                      </p>
+                      {isDetailDataFetched && (
+                        <p className="text-sm text-zinc-400">
+                          {match.defensive_position}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))
@@ -542,6 +546,10 @@ export default function ResultsSummary() {
             <div className="flex justify-center">
               <ResultShareComponent matchResult={matchResult} id={id} />
             </div>
+            <AdInFeed
+              slot={adSlots.gameResultDetailInFeed}
+              layoutKey="-6t+ed+2i-1n-4w"
+            />
           </div>
           {currentUserPage === true ? (
             <>

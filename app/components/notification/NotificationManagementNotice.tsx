@@ -1,8 +1,8 @@
 "use client";
 
 import type { Notifications } from "@app/interface";
-import { markManagementNoticesRead } from "@app/services/notificationsService";
 import Link from "next/link";
+import { markManagementNoticesRead } from "@app/services/notificationsService";
 
 interface NotificationManagementNoticeProps {
   notice: Notifications;
