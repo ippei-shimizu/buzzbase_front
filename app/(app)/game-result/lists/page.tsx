@@ -64,7 +64,10 @@ export default function GameResultList() {
             </Button>
             <div className="mt-5 grid gap-y-5">
               <MatchResultList userId={currentUserId} />
-              <AdInFeed slot={adSlots.gameResultListInFeed} layoutKey="-6t+ed+2i-1n-4w" />
+              <AdInFeed
+                slot={adSlots.gameResultListInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
             </div>
           </div>
         </div>
