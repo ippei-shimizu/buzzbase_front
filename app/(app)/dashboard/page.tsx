@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import AdInFeed from "@app/components/ad/AdInFeed";
 import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import DashboardContent from "./_components/DashboardContent";
 import { getAvailableSeasons, getDashboardData } from "./actions";

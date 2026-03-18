@@ -1,7 +1,7 @@
 "use client";
 
-import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";

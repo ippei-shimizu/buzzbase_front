@@ -44,10 +44,12 @@ export const adSlots = {
   followingInFeed: "6457921774",
   /** お知らせ一覧 インフィード広告 */
   noticeListInFeed: "5133231818",
+  /** 試合詳細結果 インフィード広告 */
+  gameResultDetailInFeed: "",
   /** ツール詳細ページ 最下部 横長ディスプレイ広告 */
-  toolsDetailHorizontal: "8892513422",
+  toolsDetailHorizontal: "7612055498",
   /** ツール一覧ページ 最下部 横長ディスプレイ広告 */
-  toolsListHorizontal: "1266706242",
+  toolsListHorizontal: "3672810486",
   /** 成績算出ページ 最下部 横長ディスプレイ広告 */
-  calcGradesHorizontal: "9963453911",
+  calcGradesHorizontal: "7196288375",
 } as const;

@@ -244,10 +244,6 @@ export default function MyPage() {
                   teamData={teamData}
                 />
               </div>
-              <AdInFeed
-                slot={adSlots.mypageBottomInFeed}
-                layoutKey="-6t+ed+2i-1n-4w"
-              />
               {isPrivateAndNotApproved ? (
                 <div className="mt-12 flex flex-col items-center gap-y-3 pb-8">
                   <LockIcon fill="#a1a1aa" width="40" height="40" />
@@ -256,34 +252,40 @@ export default function MyPage() {
                   </p>
                 </div>
               ) : (
-                <div className="mt-8">
-                  <Tabs
-                    color="primary"
-                    size="lg"
-                    aria-label="Tabs colors"
-                    radius="lg"
-                    className="w-full grid sticky top-10 z-50"
-                  >
-                    <Tab
-                      key="score"
-                      title="成績"
-                      className="font-bold tracking-wide"
+                <>
+                  <div className="mt-8">
+                    <Tabs
+                      color="primary"
+                      size="lg"
+                      aria-label="Tabs colors"
+                      radius="lg"
+                      className="w-full grid sticky top-10 z-50"
                     >
-                      <IndividualResultsList userId={userData.user.id} />
-                    </Tab>
-                    <Tab
-                      key="game"
-                      title="試合"
-                      className="font-bold tracking-wide"
-                    >
-                      <MatchResultList
-                        userId={userData.user.id}
-                        adSlot={adSlots.mypageMatchListInFeed}
-                        adLayoutKey="-6t+ed+2i-1n-4w"
-                      />
-                    </Tab>
-                  </Tabs>
-                </div>
+                      <Tab
+                        key="score"
+                        title="成績"
+                        className="font-bold tracking-wide"
+                      >
+                        <IndividualResultsList userId={userData.user.id} />
+                      </Tab>
+                      <Tab
+                        key="game"
+                        title="試合"
+                        className="font-bold tracking-wide"
+                      >
+                        <MatchResultList
+                          userId={userData.user.id}
+                          adSlot={adSlots.mypageMatchListInFeed}
+                          adLayoutKey="-6t+ed+2i-1n-4w"
+                        />
+                      </Tab>
+                    </Tabs>
+                  </div>
+                  <AdInFeed
+                    slot={adSlots.mypageBottomInFeed}
+                    layoutKey="-6t+ed+2i-1n-4w"
+                  />
+                </>
               )}
             </div>
           </div>

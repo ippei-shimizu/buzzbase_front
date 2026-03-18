@@ -332,9 +332,11 @@ export default function ResultsSummary() {
                       <p className="text-sm text-zinc-400">
                         {getBattingOrderTurn(match.batting_order)}
                       </p>
-                      <p className="text-sm text-zinc-400">
-                        {match.defensive_position}
-                      </p>
+                      {isDetailDataFetched && (
+                        <p className="text-sm text-zinc-400">
+                          {match.defensive_position}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))
