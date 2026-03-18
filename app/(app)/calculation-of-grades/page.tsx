@@ -1,6 +1,6 @@
-import Header from "@app/components/header/Header";
 import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
+import Header from "@app/components/header/Header";
 import CtaBanner from "../_components/CtaBanner";
 import BattingStatsSection from "./_components/BattingStatsSection";
 import PitchingStatsSection from "./_components/PitchingStatsSection";
