@@ -5,9 +5,9 @@ export const isAdsenseEnabled =
 
 export const adSlots = {
   /** 計算ツールページ CTAバナー下 ディスプレイ広告 */
-  toolsDisplay: "",
+  toolsDisplay: "6569468966",
   /** ダッシュボード インフィード広告 */
-  dashboardInFeed: "",
+  dashboardInFeed: "8812488929",
   /** 成績一覧 インフィード広告 */
-  gameResultListInFeed: "",
+  gameResultListInFeed: "6315018792",
 } as const;
