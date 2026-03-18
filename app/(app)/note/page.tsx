@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import NoteAddButton from "@app/components/button/NoteAddButton";
 import Header from "@app/components/header/Header";
 import NoteListComponent from "@app/components/note/NoteListComponent";
@@ -20,6 +22,10 @@ export default async function NoteList() {
               <div className="my-6">
                 <NoteListComponent />
               </div>
+              <AdInFeed
+                slot={adSlots.noteListInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
               <NoteAddButton />
             </div>
           </div>

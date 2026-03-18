@@ -3,6 +3,8 @@ import type { GroupsData } from "@app/interface";
 import { Avatar, Button, Divider } from "@heroui/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
@@ -106,6 +108,10 @@ export default function Group() {
                   )}
                 </div>
               </div>
+              <AdInFeed
+                slot={adSlots.groupListInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
             </div>
           </main>
         </div>

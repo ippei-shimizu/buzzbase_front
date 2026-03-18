@@ -2,6 +2,8 @@
 import { Spinner, Tab, Tabs } from "@heroui/react";
 import Link from "next/link";
 import React, { useState } from "react";
+import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import Header from "@app/components/header/Header";
@@ -242,6 +244,10 @@ export default function MyPage() {
                   teamData={teamData}
                 />
               </div>
+              <AdInFeed
+                slot={adSlots.mypageBottomInFeed}
+                layoutKey="-6t+ed+2i-1n-4w"
+              />
               {isPrivateAndNotApproved ? (
                 <div className="mt-12 flex flex-col items-center gap-y-3 pb-8">
                   <LockIcon fill="#a1a1aa" width="40" height="40" />
@@ -270,7 +276,11 @@ export default function MyPage() {
                       title="試合"
                       className="font-bold tracking-wide"
                     >
-                      <MatchResultList userId={userData.user.id} />
+                      <MatchResultList
+                        userId={userData.user.id}
+                        adSlot={adSlots.mypageMatchListInFeed}
+                        adLayoutKey="-6t+ed+2i-1n-4w"
+                      />
                     </Tab>
                   </Tabs>
                 </div>

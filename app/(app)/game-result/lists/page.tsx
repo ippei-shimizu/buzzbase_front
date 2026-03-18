@@ -3,8 +3,8 @@
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import AdInFeed from "@app/components/ad/AdInFeed";
 import { adSlots } from "@app/components/ad/adConfig";
+import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -63,7 +63,11 @@ export default function GameResultList() {
               新規追加
             </Button>
             <div className="mt-5 grid gap-y-5">
-              <MatchResultList userId={currentUserId} />
+              <MatchResultList
+                userId={currentUserId}
+                adSlot={adSlots.gameResultListMiddleInFeed}
+                adLayoutKey="-6t+ed+2i-1n-4w"
+              />
               <AdInFeed
                 slot={adSlots.gameResultListInFeed}
                 layoutKey="-6t+ed+2i-1n-4w"

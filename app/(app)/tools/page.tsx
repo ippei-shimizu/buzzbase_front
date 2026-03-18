@@ -89,6 +89,8 @@ export default function ToolsPage() {
       </section>
 
       <AdBanner slot={adSlots.toolsListBottom} />
+
+      <AdBanner slot={adSlots.toolsListHorizontal} format="horizontal" />
     </div>
   );
 }
