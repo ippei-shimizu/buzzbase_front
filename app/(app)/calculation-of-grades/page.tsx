@@ -1,3 +1,5 @@
+import AdBanner from "@app/components/ad/AdBanner";
+import { adSlots } from "@app/components/ad/adConfig";
 import Header from "@app/components/header/Header";
 import CtaBanner from "../_components/CtaBanner";
 import BattingStatsSection from "./_components/BattingStatsSection";
@@ -21,6 +23,7 @@ export default function CalculationOfGrades() {
               <TableOfContents />
               <div className="mt-6">
                 <BattingStatsSection />
+                <AdBanner slot={adSlots.calcGradesMiddle} />
                 <CtaBanner
                   className="my-10"
                   heading="全指標を自動で計算するなら"
@@ -28,6 +31,7 @@ export default function CalculationOfGrades() {
                   buttonText="無料で始める（30秒で登録）"
                 />
                 <PitchingStatsSection />
+                <AdBanner slot={adSlots.calcGradesBottom} />
               </div>
             </div>
           </div>
