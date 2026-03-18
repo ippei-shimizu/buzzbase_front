@@ -2,6 +2,7 @@
 
 import type { SeasonData } from "@app/interface";
 import type { PaginationInfo } from "@app/services/gameResultsService";
+import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import FilterChip from "@app/components/filter/FilterChip";
@@ -19,7 +20,6 @@ import {
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
-import { Spinner } from "@heroui/react";
 
 type GameResult = {
   game_result_id: number;
