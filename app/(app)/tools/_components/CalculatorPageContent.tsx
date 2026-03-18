@@ -66,6 +66,8 @@ export default function CalculatorPageContent({
         guide={definition.guide}
       />
 
+      <AdBanner slot={adSlots.toolsDetailMiddle} />
+
       {definition.faq.length > 0 ? (
         <section className="mt-10">
           <h2 className="text-xl font-bold mb-3">よくある質問</h2>
@@ -92,6 +94,8 @@ export default function CalculatorPageContent({
         body="試合ごとの成績入力で打率・防御率・OPSなど全指標を自動算出。チーム内ランキングでモチベーションもアップ。"
         buttonText="無料で成績管理を始める"
       />
+
+      <AdBanner slot={adSlots.toolsDetailBottom} />
 
       <RelatedTools slugs={definition.relatedSlugs} />
     </>

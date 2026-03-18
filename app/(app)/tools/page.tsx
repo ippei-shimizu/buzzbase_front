@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { calculatorDefinitions } from "@app/data/baseball-stats/calculator-definitions";
 import { CalculatorDefinition } from "@app/data/baseball-stats/types";
+import AdBanner from "@app/components/ad/AdBanner";
+import { adSlots } from "@app/components/ad/adConfig";
 
 export const metadata: Metadata = {
   title:
@@ -66,6 +68,8 @@ export default function ToolsPage() {
         </div>
       </section>
 
+      <AdBanner slot={adSlots.toolsListMiddle} />
+
       <section className="mb-8">
         <h2 className="text-lg font-bold mb-3">投手指標</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -83,6 +87,8 @@ export default function ToolsPage() {
           ))}
         </div>
       </section>
+
+      <AdBanner slot={adSlots.toolsListBottom} />
     </div>
   );
 }
