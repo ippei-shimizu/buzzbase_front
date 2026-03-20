@@ -38,7 +38,7 @@ describe("useRequireAuth", () => {
   });
 
   it("ログイン済みの場合、リダイレクトしない", () => {
-    mockUseAuthContext.mockReturnValue({ isLoggedIn: true });
+    mockUseAuthContext.mockReturnValue({ isLoggedIn: true, setIsLoggedIn: jest.fn(), loading: false });
 
     renderHook(() => useRequireAuth());
 
@@ -46,7 +46,7 @@ describe("useRequireAuth", () => {
   });
 
   it("未ログインの場合、サインアップページにリダイレクトする", async () => {
-    mockUseAuthContext.mockReturnValue({ isLoggedIn: false });
+    mockUseAuthContext.mockReturnValue({ isLoggedIn: false, setIsLoggedIn: jest.fn(), loading: false });
 
     renderHook(() => useRequireAuth());
 
@@ -57,7 +57,7 @@ describe("useRequireAuth", () => {
   });
 
   it("isLoggedIn が undefined（未確定）の場合、リダイレクトしない", async () => {
-    mockUseAuthContext.mockReturnValue({ isLoggedIn: undefined });
+    mockUseAuthContext.mockReturnValue({ isLoggedIn: undefined, setIsLoggedIn: jest.fn(), loading: true });
 
     renderHook(() => useRequireAuth());
 
@@ -67,7 +67,7 @@ describe("useRequireAuth", () => {
   });
 
   it("isLoggedIn の値を返す", () => {
-    mockUseAuthContext.mockReturnValue({ isLoggedIn: true });
+    mockUseAuthContext.mockReturnValue({ isLoggedIn: true, setIsLoggedIn: jest.fn(), loading: false });
 
     const { result } = renderHook(() => useRequireAuth());
 
@@ -75,7 +75,7 @@ describe("useRequireAuth", () => {
   });
 
   it("isLoggedIn が false の場合、false を返す", () => {
-    mockUseAuthContext.mockReturnValue({ isLoggedIn: false });
+    mockUseAuthContext.mockReturnValue({ isLoggedIn: false, setIsLoggedIn: jest.fn(), loading: false });
 
     const { result } = renderHook(() => useRequireAuth());
 
