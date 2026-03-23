@@ -120,19 +120,19 @@ yarn dev    # http://localhost:4100
 
 `make help` で全コマンドを確認可能。
 
-| コマンド             | 説明                     |
-| -------------------- | ------------------------ |
-| `make dev`           | 開発サーバー起動         |
-| `make build`         | 本番ビルド               |
-| `make lint`          | ESLint実行               |
-| `make lint-fix`      | ESLint自動修正           |
-| `make typecheck`     | TypeScript型チェック     |
-| `make test`          | テスト実行               |
-| `make test-watch`    | ウォッチモードでテスト   |
-| `make test-coverage` | カバレッジ付きテスト     |
-| `make format`        | Prettier整形             |
-| `make format-check`  | フォーマットチェック     |
-| `make install`       | 依存関係インストール     |
+| コマンド             | 説明                   |
+| -------------------- | ---------------------- |
+| `make dev`           | 開発サーバー起動       |
+| `make build`         | 本番ビルド             |
+| `make lint`          | ESLint実行             |
+| `make lint-fix`      | ESLint自動修正         |
+| `make typecheck`     | TypeScript型チェック   |
+| `make test`          | テスト実行             |
+| `make test-watch`    | ウォッチモードでテスト |
+| `make test-coverage` | カバレッジ付きテスト   |
+| `make format`        | Prettier整形           |
+| `make format-check`  | フォーマットチェック   |
+| `make install`       | 依存関係インストール   |
 
 ## 環境変数
 
