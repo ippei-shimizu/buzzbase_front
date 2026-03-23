@@ -8,6 +8,7 @@ type Props = {
   equation: string;
   descriptions: string[];
   slug?: string;
+  columnUrl?: string;
 };
 
 export default function StatCard({
@@ -15,6 +16,7 @@ export default function StatCard({
   equation,
   descriptions,
   slug,
+  columnUrl,
 }: Props) {
   return (
     <Card className="px-4 py-3 relative">
@@ -29,14 +31,24 @@ export default function StatCard({
             {desc}
           </p>
         ))}
-        {slug ? (
-          <Link
-            href={`/tools/${slug}`}
-            className="inline-flex items-center gap-1 mt-3 text-xs text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
-          >
-            計算する &rarr;
-          </Link>
-        ) : null}
+        <div className="flex items-center gap-3 mt-3">
+          {slug ? (
+            <Link
+              href={`/tools/${slug}`}
+              className="inline-flex items-center gap-1 text-xs text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
+            >
+              計算する &rarr;
+            </Link>
+          ) : null}
+          {columnUrl ? (
+            <Link
+              href={columnUrl}
+              className="inline-flex items-center gap-1 text-xs text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
+            >
+              詳しく見る &rarr;
+            </Link>
+          ) : null}
+        </div>
       </CardBody>
     </Card>
   );
