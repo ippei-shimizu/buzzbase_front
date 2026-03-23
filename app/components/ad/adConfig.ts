@@ -52,4 +52,10 @@ export const adSlots = {
   toolsListHorizontal: "3672810486",
   /** 成績算出ページ 最下部 横長ディスプレイ広告 */
   calcGradesHorizontal: "7196288375",
+  /** コラムページ 中間 ディスプレイ広告 */
+  columnMiddle: "1821345216",
+  /** コラムページ 下部 ディスプレイ広告 */
+  columnBottom: "6882100207",
+  /** コラムページ 最下部 横長ディスプレイ広告 */
+  columnHorizontal: "4770675289",
 } as const;

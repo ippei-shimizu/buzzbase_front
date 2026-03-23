@@ -32,6 +32,7 @@ export const battingStats: BattingStat[] = [
       "打者の全体的な攻撃力を示す指標です。出塁率と長打率から簡単に計算できます。",
     ],
     slug: "ops",
+    columnUrl: "/column/ops",
   },
   {
     title: "ISO",
