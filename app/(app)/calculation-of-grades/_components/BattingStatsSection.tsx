@@ -13,6 +13,7 @@ export default function BattingStatsSection() {
             equation={item.equation}
             descriptions={item.descriptions}
             slug={item.slug}
+            columnUrl={item.columnUrl}
           />
         ))}
       </div>
