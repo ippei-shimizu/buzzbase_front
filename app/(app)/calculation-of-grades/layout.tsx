@@ -1,9 +1,10 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "野球成績の計算方法＆指標一覧｜打率・防御率・OPSなど全29指標を解説",
+  title:
+    "野球の成績指標29種の計算方法まとめ｜打率・OPS・防御率を図解で解説【計算ツール付き】",
   description:
-    "打率・防御率・OPS・出塁率・WHIP・K/BBなど全29指標の計算式・意味・目安を一覧で解説。各指標の無料計算ツール付きで、登録不要・ブラウザだけで今すぐ計算できます。BUZZ BASEなら試合成績を入力するだけで全指標を自動算出。",
+    "打率・出塁率・長打率・OPS・防御率・K/BBなど野球の全29指標の計算方法を一覧で解説。各指標の無料計算ツールへのリンク付き。中学・高校野球選手向けにわかりやすく解説。",
   alternates: {
     canonical: "https://buzzbase.jp/calculation-of-grades",
   },
