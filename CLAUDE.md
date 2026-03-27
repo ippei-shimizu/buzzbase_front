@@ -18,8 +18,18 @@
 
 - `yarn dev` - 開発サーバーを起動
 - `yarn build` - 本番用ビルド
-- `yarn lint` - リンターを実行
 - `yarn start` - 本番サーバーを起動
+
+## コード品質
+
+- `yarn lint` - ESLint実行
+- `yarn lint:fix` - ESLint自動修正
+- `yarn typecheck` - TypeScript型チェック
+- `yarn format` - Prettierフォーマット
+- `yarn format:check` - フォーマットチェック
+- `yarn test` - Jestテスト実行
+- `yarn test:watch` - ウォッチモード
+- `yarn test:coverage` - カバレッジ付きテスト
 
 ## コード標準
 
