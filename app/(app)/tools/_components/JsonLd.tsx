@@ -1,4 +1,4 @@
-import { FaqItem } from "@app/data/baseball-stats/types";
+import { type FaqItem } from "@app/data/baseball-stats/types";
 
 type Props = {
   toolName: string;

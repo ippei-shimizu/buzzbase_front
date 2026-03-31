@@ -4,8 +4,8 @@ import { Input, Button } from "@heroui/react";
 import Link from "next/link";
 import { useState, useCallback } from "react";
 import {
-  CalculatorField,
-  CalculatorOutput,
+  type CalculatorField,
+  type CalculatorOutput,
 } from "@app/data/baseball-stats/types";
 
 type ResultItem = {

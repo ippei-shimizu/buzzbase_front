@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ManagementNotice } from "../../../../types/admin";
+import { type ManagementNotice } from "../../../../types/admin";
 import {
   createManagementNoticeAction,
   updateManagementNoticeAction,

@@ -3,7 +3,7 @@ import Link from "next/link";
 import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import { calculatorDefinitions } from "@app/data/baseball-stats/calculator-definitions";
-import { CalculatorDefinition } from "@app/data/baseball-stats/types";
+import { type CalculatorDefinition } from "@app/data/baseball-stats/types";
 
 export const metadata: Metadata = {
   title:

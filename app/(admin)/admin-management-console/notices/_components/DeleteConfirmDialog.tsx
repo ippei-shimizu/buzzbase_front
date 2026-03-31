@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ManagementNotice } from "../../../../types/admin";
+import { type ManagementNotice } from "../../../../types/admin";
 import { deleteManagementNotice } from "../actions";
 
 interface DeleteConfirmDialogProps {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AdminUser } from "../../../../types/admin";
+import { type AdminUser } from "../../../../types/admin";
 import { deleteAdminUser } from "../actions";
 
 interface DeleteConfirmDialogProps {

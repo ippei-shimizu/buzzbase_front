@@ -13,7 +13,7 @@ import {
   Textarea,
 } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
-import { SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
