@@ -2,7 +2,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 
 const RAILS_API_URL =
   process.env.RAILS_API_URL ||

@@ -1,4 +1,4 @@
-import { CalculatorDefinition } from "./types";
+import { type CalculatorDefinition } from "./types";
 
 export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
   "batting-average": {

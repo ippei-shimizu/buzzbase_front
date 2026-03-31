@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdminUser } from "../../../../types/admin";
+import { type AdminUser } from "../../../../types/admin";
 
 interface AdminUserTableProps {
   users: AdminUser[];

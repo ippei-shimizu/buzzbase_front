@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdminUser } from "../../../../types/admin";
+import { type AdminUser } from "../../../../types/admin";
 import { createAdminUserAction, updateAdminUserAction } from "../actions";
 
 interface AdminUserFormProps {

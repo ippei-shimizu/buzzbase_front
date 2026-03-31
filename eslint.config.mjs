@@ -35,6 +35,7 @@ const eslintConfig = defineConfig([
       ],
       "import/no-duplicates": "error",
       "import/newline-after-import": "warn",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
 
@@ -56,6 +57,13 @@ const eslintConfig = defineConfig([
         },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        {
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
+        },
+      ],
     },
   },
 
