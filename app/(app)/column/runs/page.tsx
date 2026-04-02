@@ -270,6 +270,8 @@ export default function RunsColumnPage() {
         </div>
       </section>
 
+      <AdBanner slot={adSlots.columnBottom} className="mt-8" />
+
       {/* よくある質問 */}
       <section id="faq" className="mt-10">
         <h2 className="text-xl font-bold mb-4">よくある質問</h2>
@@ -292,8 +294,6 @@ export default function RunsColumnPage() {
           ))}
         </div>
       </section>
-
-      <AdBanner slot={adSlots.columnBottom} className="mt-8" />
 
       {/* 関連指標 */}
       <section id="related" className="mt-10">
