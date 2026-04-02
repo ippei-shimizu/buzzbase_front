@@ -3,12 +3,14 @@
 @config "../tailwind.config.ts";
 
 html {
+  --smart-banner-height: 0px;
   background-color: #2e2e2e !important;
 }
 
 body {
   font-weight: 400;
   color: #f4f4f4;
+  padding-top: var(--smart-banner-height, 0px);
   --mantine-color-text: #f4f4f4;
   --mantine-color-body: #f4f4f4;
 }

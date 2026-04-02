@@ -379,12 +379,11 @@ export default function OpsColumnPage() {
         </div>
       </section>
 
-      {/* BUZZ BASE登録CTA */}
+      {/* BUZZ BASEアプリCTA */}
       <CtaBanner
         className="mt-10"
-        heading="チームの成績をまとめて管理するなら"
-        body="BUZZ BASEなら試合結果を入力するだけで、OPSを含む全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
-        buttonText="無料で始める（30秒で登録）"
+        heading="チームの成績をアプリでまとめて管理するなら"
+        body="BUZZ BASEアプリなら試合結果を入力するだけで、OPSを含む全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
       <AdBanner
