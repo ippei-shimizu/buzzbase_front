@@ -49,6 +49,7 @@ export default function RootLayout({
       <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
       <meta name="apple-mobile-web-app-title" content="BUZZ BASE" />
       <meta name="application-name" content="BUZZ BASE" />
+      <meta name="apple-itunes-app" content="app-id=6761011816" />
       <meta name="google-adsense-account" content="ca-pub-2173577862865148" />
       {isProduction && (
         <Script
