@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { APP_STORE_URL } from "@app/constants/app";
 
 const STORAGE_KEY = "smart_app_banner_dismissed_at";
@@ -11,19 +11,17 @@ function setCssVar(value: string) {
   document.documentElement.style.setProperty("--smart-banner-height", value);
 }
 
-export default function SmartAppBanner() {
-  const [visible, setVisible] = useState(false);
-  const bannerRef = useRef<HTMLDivElement>(null);
+function shouldShow() {
+  if (typeof window === "undefined") return false;
+  const dismissedAt = localStorage.getItem(STORAGE_KEY);
+  return (
+    !dismissedAt || Date.now() - Number(dismissedAt) >= RESHOW_INTERVAL_MS
+  );
+}
 
-  useEffect(() => {
-    const dismissedAt = localStorage.getItem(STORAGE_KEY);
-    if (
-      !dismissedAt ||
-      Date.now() - Number(dismissedAt) >= RESHOW_INTERVAL_MS
-    ) {
-      setVisible(true);
-    }
-  }, []);
+export default function SmartAppBanner() {
+  const [visible, setVisible] = useState(shouldShow);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!visible || !bannerRef.current) {

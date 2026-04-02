@@ -3,8 +3,8 @@ import { Button } from "@heroui/react";
 import { Group } from "@mantine/core";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuthContext } from "@app/contexts/useAuthContext";
 import { APP_STORE_URL } from "@app/constants/app";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function LoginAndSignUp() {
   const { isLoggedIn, loading } = useAuthContext();
