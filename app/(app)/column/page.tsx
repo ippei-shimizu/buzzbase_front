@@ -17,6 +17,18 @@ const columns = [
     description:
       "OPSの意味・計算式・評価基準を解説。NPB・高校野球・中学野球の目安値を一覧表で掲載。",
   },
+  {
+    slug: "era",
+    title: "防御率（ERA）とは？計算方法・目安値を解説",
+    description:
+      "防御率の意味・計算式・評価基準を解説。NPB・高校野球の目安値を一覧表で掲載。",
+  },
+  {
+    slug: "runs",
+    title: "野球の失点とは？自責点との違い・失点率の計算方法",
+    description:
+      "失点の意味・自責点との違い・失点率の計算方法を解説。防御率との関係もわかりやすく説明。",
+  },
 ];
 
 export default function ColumnIndexPage() {

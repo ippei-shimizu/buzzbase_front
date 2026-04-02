@@ -48,6 +48,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/column" className="text-sm">
+                  コラム
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-sm">
                   お問い合わせ
                 </Link>
