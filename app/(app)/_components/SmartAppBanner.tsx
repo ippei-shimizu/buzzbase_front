@@ -14,9 +14,7 @@ function setCssVar(value: string) {
 function shouldShow() {
   if (typeof window === "undefined") return false;
   const dismissedAt = localStorage.getItem(STORAGE_KEY);
-  return (
-    !dismissedAt || Date.now() - Number(dismissedAt) >= RESHOW_INTERVAL_MS
-  );
+  return !dismissedAt || Date.now() - Number(dismissedAt) >= RESHOW_INTERVAL_MS;
 }
 
 export default function SmartAppBanner() {
