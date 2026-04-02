@@ -1,6 +1,7 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /mypage/
 
 # Host
 Host: https://buzzbase.jp/
