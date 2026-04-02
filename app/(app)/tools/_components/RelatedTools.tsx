@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { calculatorDefinitions } from "@app/data/baseball-stats/calculator-definitions";
-import { CalculatorDefinition } from "@app/data/baseball-stats/types";
+import { type CalculatorDefinition } from "@app/data/baseball-stats/types";
 
 type Props = {
   slugs: string[];

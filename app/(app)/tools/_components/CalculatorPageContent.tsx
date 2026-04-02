@@ -1,6 +1,6 @@
 import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
-import { CalculatorDefinition } from "@app/data/baseball-stats/types";
+import { type CalculatorDefinition } from "@app/data/baseball-stats/types";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "./Breadcrumbs";
 import JsonLd from "./JsonLd";

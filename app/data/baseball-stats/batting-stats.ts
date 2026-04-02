@@ -1,4 +1,4 @@
-import { BattingStat } from "./types";
+import { type BattingStat } from "./types";
 
 export const battingStats: BattingStat[] = [
   {

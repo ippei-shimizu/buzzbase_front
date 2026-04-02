@@ -1,6 +1,6 @@
 "use client";
 import type { UserContextType } from "@app/interface";
-import React, { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext, type ReactNode } from "react";
 import useSWR from "swr";
 import { fetcher } from "@app/hooks/swrFetcher";
 

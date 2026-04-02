@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { type Metadata } from "next";
 import NoticeContent from "./_components/NoticeContent";
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { SetStateAction, useMemo, useState } from "react";
+import { type SetStateAction, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";

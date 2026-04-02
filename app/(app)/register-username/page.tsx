@@ -140,8 +140,8 @@ export default function RegisterUserName() {
               }
               isRequired
             />
-            <span className="text-sm text-red-500">
-              ※IDは一度決めると変更できません。
+            <span className="text-sm text-zinc-400">
+              ※IDはプロフィール編集から変更できます。
             </span>
             <SubmitButton
               className="bg-yellow-500 text-white h-auto text-base mt-6 mx-auto py-2 px-14 rounded-full block font-semibold"
