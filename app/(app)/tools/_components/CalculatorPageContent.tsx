@@ -52,9 +52,8 @@ export default function CalculatorPageContent({
       {calculatorSlot}
 
       <CtaBanner
-        heading="この計算結果を保存 & チームメイトとランキングで競おう"
-        body="BUZZ BASEなら毎試合の成績を記録するだけで全29指標を自動算出。友達とランキングで競い合えます。完全無料。"
-        buttonText="無料で始める（30秒で登録）"
+        heading="アプリで成績を記録しよう"
+        body="BUZZ BASEアプリなら毎試合の成績を記録するだけで全29指標を自動算出。友達とランキングで競い合えます。完全無料。"
       />
 
       <AdBanner slot={adSlots.toolsDisplay} />
@@ -90,9 +89,8 @@ export default function CalculatorPageContent({
       ) : null}
 
       <CtaBanner
-        heading="チームの成績をまとめて管理"
-        body="試合ごとの成績入力で打率・防御率・OPSなど全指標を自動算出。チーム内ランキングでモチベーションもアップ。"
-        buttonText="無料で成績管理を始める"
+        heading="チームの成績をアプリでまとめて管理"
+        body="BUZZ BASEアプリなら試合ごとの成績入力で打率・防御率・OPSなど全指標を自動算出。チーム内ランキングでモチベーションもアップ。"
       />
 
       <RelatedTools slugs={definition.relatedSlugs} />
