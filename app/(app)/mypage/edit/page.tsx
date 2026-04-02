@@ -18,6 +18,7 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PlusButton from "@app/components/button/PlusButton";
 import HeaderSave from "@app/components/header/HeaderSave";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
+import UserIdInput from "@app/components/user/UserIdInput";
 import SaveSpinner from "@app/components/spinner/SavingSpinner";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
@@ -233,6 +234,12 @@ export default function ProfileEdit() {
       setErrorsWithTimeout(["名前が未入力、または無効です。"]);
       return;
     }
+    if (isInvalidUserId) {
+      setErrorsWithTimeout([
+        "ユーザーIDは半角英数字、ハイフン(-)、アンダーバー(_)のみ、3〜30文字で入力してください。",
+      ]);
+      return;
+    }
     // チーム設定バリデーション
     if (
       !teamName &&
@@ -330,8 +337,25 @@ export default function ProfileEdit() {
       setTimeout(() => {
         router.push(`/mypage/${profile.user_id}`);
       }, 1000);
-    } catch (error) {
-      console.log(error);
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "errors" in error.response.data
+      ) {
+        const axiosError = error as {
+          response: { data: { errors: string[] } };
+        };
+        setErrorsWithTimeout(axiosError.response.data.errors);
+      } else {
+        setErrorsWithTimeout(["プロフィールの更新に失敗しました"]);
+      }
     }
   };
 
@@ -348,6 +372,19 @@ export default function ProfileEdit() {
     return profile.name === "" || !validateUserName(profile.name);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile.name]);
+
+  const validateUserId = useCallback(
+    (userId: string) => /^[A-Za-z0-9_-]+$/.test(userId),
+    [],
+  );
+
+  const isInvalidUserId = useMemo(() => {
+    if (profile.user_id === "") return false;
+    const uid = profile.user_id.toString();
+    if (!validateUserId(uid)) return true;
+    if (uid.length < 3 || uid.length > 30) return true;
+    return false;
+  }, [profile.user_id, validateUserId]);
 
   // カテゴリーをフィルタリング
   const handleBaseballCategoryChange = (value: string) => {
@@ -506,6 +543,29 @@ export default function ProfileEdit() {
                   }
                   isRequired
                   className="mb-5"
+                />
+                <UserIdInput
+                  value={profile.user_id.toString()}
+                  onChange={(e) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      user_id: e.target.value,
+                    }))
+                  }
+                  className="mb-5"
+                  type="text"
+                  label="ユーザーID"
+                  placeholder="buzz_base235"
+                  labelPlacement="inside"
+                  isInvalid={isInvalidUserId}
+                  color={isInvalidUserId ? "danger" : "primary"}
+                  errorMessage={
+                    isInvalidUserId
+                      ? "半角英数字、ハイフン(-)、アンダーバー(_)のみ、3〜30文字"
+                      : ""
+                  }
+                  variant="underlined"
+                  isRequired
                 />
                 <Textarea
                   name="introduction"
