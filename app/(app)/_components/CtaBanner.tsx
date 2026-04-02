@@ -1,12 +1,11 @@
 import Image from "next/image";
+import { APP_STORE_URL } from "@app/constants/app";
 
 type Props = {
   heading?: string;
   body: string;
   className?: string;
 };
-
-const APP_STORE_URL = "https://apps.apple.com/jp/app/buzz-base/id6761011816";
 
 export default function CtaBanner({
   heading,

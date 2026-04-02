@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { APP_STORE_URL } from "@app/constants/app";
 
 const STORAGE_KEY = "smart_app_banner_dismissed_at";
 const RESHOW_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7日
-const APP_STORE_URL = "https://apps.apple.com/jp/app/buzz-base/id6761011816";
 
 function setCssVar(value: string) {
   document.documentElement.style.setProperty("--smart-banner-height", value);

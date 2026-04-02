@@ -4,8 +4,7 @@ import { Group } from "@mantine/core";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-
-const APP_STORE_URL = "https://apps.apple.com/jp/app/buzz-base/id6761011816";
+import { APP_STORE_URL } from "@app/constants/app";
 
 export default function LoginAndSignUp() {
   const { isLoggedIn, loading } = useAuthContext();

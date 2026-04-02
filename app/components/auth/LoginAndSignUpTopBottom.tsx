@@ -3,6 +3,7 @@ import { Button } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import { APP_STORE_URL } from "@app/constants/app";
 
 export default function LoginAndSignUpTopBottom() {
   const { isLoggedIn, loading } = useAuthContext();
@@ -51,11 +52,7 @@ export default function LoginAndSignUpTopBottom() {
           </div>
           <div className="flex flex-col items-center mt-6">
             <p className="text-xs text-zinc-400 mb-2">iOSアプリはこちら</p>
-            <a
-              href="https://apps.apple.com/jp/app/buzz-base/id6761011816"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
               <Image
                 src="/images/download_app_store_badge_jp.svg"
                 alt="App Storeからダウンロード"
