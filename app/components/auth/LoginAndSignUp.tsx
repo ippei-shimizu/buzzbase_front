@@ -1,8 +1,11 @@
 "use client";
 import { Button } from "@heroui/react";
 import { Group } from "@mantine/core";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+
+const APP_STORE_URL = "https://apps.apple.com/jp/app/buzz-base/id6761011816";
 
 export default function LoginAndSignUp() {
   const { isLoggedIn, loading } = useAuthContext();
@@ -37,6 +40,18 @@ export default function LoginAndSignUp() {
               </Button>
             </Link>
           </Group>
+          <div className="mt-5">
+            <p className="text-xs text-zinc-400 mb-2">iOSアプリはこちら</p>
+            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
+              <Image
+                src="/images/download_app_store_badge_jp.svg"
+                alt="App Storeからダウンロード"
+                width={150}
+                height={50}
+                className="h-[44px] w-auto"
+              />
+            </a>
+          </div>
         </>
       )}
     </>
