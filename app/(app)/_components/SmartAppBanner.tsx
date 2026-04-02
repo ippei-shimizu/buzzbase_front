@@ -11,15 +11,21 @@ function setCssVar(value: string) {
   document.documentElement.style.setProperty("--smart-banner-height", value);
 }
 
-function shouldShow() {
-  if (typeof window === "undefined") return false;
-  const dismissedAt = localStorage.getItem(STORAGE_KEY);
-  return !dismissedAt || Date.now() - Number(dismissedAt) >= RESHOW_INTERVAL_MS;
-}
-
 export default function SmartAppBanner() {
-  const [visible, setVisible] = useState(shouldShow);
+  const [visible, setVisible] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const dismissedAt = localStorage.getItem(STORAGE_KEY);
+    if (
+      !dismissedAt ||
+      Date.now() - Number(dismissedAt) >= RESHOW_INTERVAL_MS
+    ) {
+      // SSRとクライアントの初期値を揃えるためuseEffectで判定
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setVisible(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!visible || !bannerRef.current) {
