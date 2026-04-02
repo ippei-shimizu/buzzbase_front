@@ -11,6 +11,7 @@ export type PitchingStat = {
   equation: string;
   descriptions: string[];
   slug?: string;
+  columnUrl?: string;
 };
 
 export type CalculatorField = {

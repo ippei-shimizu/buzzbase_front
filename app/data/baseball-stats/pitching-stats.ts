@@ -8,6 +8,7 @@ export const pitchingStats: PitchingStat[] = [
       "その投手が9イニング（1試合）を投げたとしたら何点に抑えられるかを示す指標です。自責点と投球回から簡単に計算できます。",
     ],
     slug: "era",
+    columnUrl: "/column/era",
   },
   {
     title: "勝利",
@@ -77,6 +78,7 @@ export const pitchingStats: PitchingStat[] = [
     descriptions: [
       "投手がマウンドにいる間に相手チームが得た得点の総数です。これには、ヒット、四球、野手のエラーなどによって生じたすべての得点が含まれます。",
     ],
+    columnUrl: "/column/runs",
   },
   {
     title: "自責点",
