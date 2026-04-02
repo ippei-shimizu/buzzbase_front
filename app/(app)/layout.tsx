@@ -5,6 +5,7 @@ import NavigationMenu from "@app/components/header/NavigationMenu";
 import { AuthProvider } from "@app/contexts/useAuthContext";
 import { UserProvider } from "@app/contexts/userContext";
 import { Providers } from "@app/providers";
+import SmartAppBanner from "./_components/SmartAppBanner";
 
 export const metadata: Metadata = {
   title: {
@@ -19,6 +20,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <UserProvider>
         <Providers>
+          <SmartAppBanner />
           {children}
           <NavigationMenu />
           <Footer />
