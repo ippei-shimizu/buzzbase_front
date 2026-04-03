@@ -52,8 +52,11 @@ export default function CalculatorPageContent({
       {calculatorSlot}
 
       <CtaBanner
-        heading="アプリで成績を記録しよう"
-        body="BUZZ BASEアプリなら毎試合の成績を記録するだけで全29指標を自動算出。友達とランキングで競い合えます。完全無料。"
+        heading={definition.cta?.heading ?? "アプリで成績を記録しよう"}
+        body={
+          definition.cta?.body ??
+          "BUZZ BASEアプリなら毎試合の成績を記録するだけで全29指標を自動算出。友達とランキングで競い合えます。完全無料。"
+        }
       />
 
       <AdBanner slot={adSlots.toolsDisplay} />

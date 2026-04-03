@@ -39,6 +39,9 @@ export default function CtaBanner({
           className="h-[44px] w-auto"
         />
       </a>
+      <p className="text-xs text-zinc-400 mt-2">
+        登録30秒・クレジットカード不要・完全無料
+      </p>
     </section>
   );
 }
