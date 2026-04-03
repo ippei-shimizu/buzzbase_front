@@ -94,6 +94,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["obp", "ops", "slugging"],
+    cta: {
+      heading: "打率.300を目指して毎試合記録しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけで打率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   era: {
     slug: "era",
@@ -186,6 +190,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["whip", "k-9", "k-bb"],
+    cta: {
+      heading: "防御率の推移を記録して成長を可視化しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけで防御率を含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   ops: {
     slug: "ops",
@@ -325,6 +333,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["batting-average", "obp", "slugging"],
+    cta: {
+      heading: "今日の試合のOPSを記録して、チーム1位を目指そう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけでOPSを含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   slugging: {
     slug: "slugging",
@@ -417,6 +429,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["batting-average", "ops", "obp"],
+    cta: {
+      heading: "長打率を記録して、パワーヒッターランキングに参加しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけで長打率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   obp: {
     slug: "obp",
@@ -532,6 +548,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["batting-average", "ops", "slugging"],
+    cta: {
+      heading: "出塁率をシーズン通して記録。チーム内ランキングに挑戦",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけで出塁率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   whip: {
     slug: "whip",
@@ -605,6 +625,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["era", "k-9", "k-bb"],
+    cta: {
+      heading: "WHIPの推移を記録して、投球の安定感を数値で確認しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけでWHIPを含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   "k-bb": {
     slug: "k-bb",
@@ -697,6 +721,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["era", "whip", "k-9"],
+    cta: {
+      heading: "K/BBの推移を記録して、投球の安定感を可視化しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけでK/BBを含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   "k-9": {
     slug: "k-9",
@@ -761,6 +789,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["era", "whip", "k-bb"],
+    cta: {
+      heading: "K/9を記録して、奪三振能力の成長を追跡しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけでK/9を含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   "winning-percentage": {
     slug: "winning-percentage",
@@ -840,6 +872,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["era", "whip", "batting-average"],
+    cta: {
+      heading: "勝率を記録して、チームの成績推移を確認しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけで勝率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
   "bb-9": {
     slug: "bb-9",
@@ -904,6 +940,10 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["era", "whip", "k-bb"],
+    cta: {
+      heading: "BB/9を記録して、制球力の向上を確認しよう",
+      body: "BUZZ BASEアプリなら試合結果を入力するだけでBB/9を含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
+    },
   },
 };
 
