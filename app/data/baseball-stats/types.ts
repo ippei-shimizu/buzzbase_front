@@ -51,4 +51,8 @@ export type CalculatorDefinition = {
   ) => number | Record<string, number | null> | null;
   faq: FaqItem[];
   relatedSlugs: string[];
+  cta?: {
+    heading: string;
+    body: string;
+  };
 };
