@@ -3,6 +3,7 @@
 import { Input, Button } from "@heroui/react";
 import Link from "next/link";
 import { useState, useCallback } from "react";
+import { APP_STORE_URL } from "@app/constants/app";
 import {
   type CalculatorField,
   type CalculatorOutput,
@@ -13,15 +14,26 @@ type ResultItem = {
   value: string;
 };
 
+type NextAction = {
+  label: string;
+  href: string;
+};
+
 type Props = {
   fields: CalculatorField[];
   outputs: CalculatorOutput[];
   calculate: (
     values: Record<string, number>,
   ) => number | Record<string, number | null> | null;
+  nextActions?: NextAction[];
 };
 
-export default function CalculatorForm({ fields, outputs, calculate }: Props) {
+export default function CalculatorForm({
+  fields,
+  outputs,
+  calculate,
+  nextActions,
+}: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [results, setResults] = useState<ResultItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -141,15 +153,47 @@ export default function CalculatorForm({ fields, outputs, calculate }: Props) {
 
       {results.length > 0 ? (
         <div className="mt-4 text-center">
-          <Link
-            href="/signup"
+          <a
+            href={APP_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block w-full rounded-lg bg-yellow-600 hover:bg-yellow-500 transition-colors px-6 py-3 text-sm font-bold text-white"
           >
-            この結果を保存する（無料）
-          </Link>
+            アプリで成績を記録する（無料）
+          </a>
           <p className="text-xs text-zinc-400 mt-2">
-            保存すると成績推移グラフやランキングも見られます
+            アプリなら成績推移グラフやランキングも見られます
           </p>
+        </div>
+      ) : null}
+
+      {results.length > 0 && nextActions && nextActions.length > 0 ? (
+        <div className="mt-5 pt-5 border-t border-zinc-700">
+          <p className="text-sm font-bold text-zinc-300 mb-3">次のステップ</p>
+          <div className="space-y-2">
+            {nextActions.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="flex items-center justify-between rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-2.5"
+              >
+                <span className="text-sm text-zinc-300">{action.label}</span>
+                <svg
+                  className="w-4 h-4 shrink-0 text-zinc-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>
