@@ -18,6 +18,12 @@ const columns = [
       "OPSの意味・計算式・評価基準を解説。NPB・高校野球・中学野球の目安値を一覧表で掲載。",
   },
   {
+    slug: "batting-average",
+    title: "打率とは？計算方法・打率の出し方・目安値を解説",
+    description:
+      "打率の意味・計算式・打率の出し方を解説。NPB・高校野球の目安値を一覧表で掲載。",
+  },
+  {
     slug: "era",
     title: "防御率（ERA）とは？計算方法・目安値を解説",
     description:
