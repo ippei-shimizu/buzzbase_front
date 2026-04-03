@@ -3,12 +3,14 @@ import { adSlots } from "@app/components/ad/adConfig";
 import Header from "@app/components/header/Header";
 import CtaBanner from "../_components/CtaBanner";
 import BattingStatsSection from "./_components/BattingStatsSection";
+import CalcGradesJsonLd from "./_components/CalcGradesJsonLd";
 import PitchingStatsSection from "./_components/PitchingStatsSection";
 import TableOfContents from "./_components/TableOfContents";
 
 export default function CalculationOfGrades() {
   return (
     <>
+      <CalcGradesJsonLd />
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
         <Header />
         <main className="h-full w-full max-w-180 mx-auto lg:m-[0_auto_0_28%]">
