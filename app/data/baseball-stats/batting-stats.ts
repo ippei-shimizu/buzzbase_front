@@ -8,6 +8,7 @@ export const battingStats: BattingStat[] = [
       "打者のヒットを打つ能力を示す基本的な指標です。安打数と打数から簡単に計算できます。",
     ],
     slug: "batting-average",
+    columnUrl: "/column/batting-average",
   },
   {
     title: "出塁率",
