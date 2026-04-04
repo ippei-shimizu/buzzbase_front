@@ -14,6 +14,8 @@ import React, { useEffect, useState, use } from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
+import FilterChip from "@app/components/filter/FilterChip";
+import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import HeaderBackLink from "@app/components/header/HeaderBackLink";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -82,7 +84,14 @@ type GroupsDetailData = {
     name: string;
   };
   id: number;
+  available_years: number[];
 };
+
+const MATCH_TYPE_OPTIONS = [
+  { key: "全て", label: "全て" },
+  { key: "regular", label: "公式戦" },
+  { key: "open", label: "オープン戦" },
+];
 
 type AcceptedUsers = {
   id: number;
@@ -187,18 +196,26 @@ export default function GroupDetail(props: GroupDetailProps) {
   const [pitchingAggregate, setPitchingAggregate] =
     useState<PitchingAggregate[]>();
   const [pitchingStats, setPitchingStats] = useState<PitchingStats[]>();
+  const [selectedYear, setSelectedYear] = useState("通算");
+  const [selectedMatchType, setSelectedMatchType] = useState("全て");
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const router = useRouter();
   useRequireAuth();
 
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedYear, selectedMatchType]);
 
   const fetchData = async () => {
     try {
-      const responseGroupDetail = await getGroupDetail(params.slug);
+      const responseGroupDetail = await getGroupDetail(
+        params.slug,
+        selectedYear,
+        selectedMatchType,
+      );
       setGroupData(responseGroupDetail);
+      setAvailableYears(responseGroupDetail.available_years ?? []);
 
       if (responseGroupDetail) {
         const battingStatsWithUsersData = responseGroupDetail.batting_stats.map(
@@ -330,6 +347,30 @@ export default function GroupDetail(props: GroupDetailProps) {
               <h2 className="text-xl font-bold mt-2 lg:text-2xl">
                 個人成績ランキング
               </h2>
+              <div className="mt-3">
+                <FilterChipGroup>
+                  <FilterChip
+                    label="年度"
+                    value={selectedYear}
+                    defaultValue="通算"
+                    options={[
+                      { key: "通算", label: "通算" },
+                      ...availableYears.map((y) => ({
+                        key: String(y),
+                        label: `${y}年`,
+                      })),
+                    ]}
+                    onChange={setSelectedYear}
+                  />
+                  <FilterChip
+                    label="種別"
+                    value={selectedMatchType}
+                    defaultValue="全て"
+                    options={MATCH_TYPE_OPTIONS}
+                    onChange={setSelectedMatchType}
+                  />
+                </FilterChipGroup>
+              </div>
               <div>
                 <Tabs
                   color="primary"

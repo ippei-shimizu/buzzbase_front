@@ -58,14 +58,14 @@ export function normalizeBattingStats(batting: BattingStats): RadarAxis[] {
       label: "ミート",
       metric: "打率",
       value: normalizePositive(batting_average, 0.5),
-      rawValue: batting_average.toFixed(3),
+      rawValue: batting_average.toFixed(3).replace(/^0/, ""),
       description: "安打数 ÷ 打数。基準: .000〜.500",
     },
     {
       label: "パワー",
       metric: "ISO",
       value: normalizePositive(iso, 0.4),
-      rawValue: iso.toFixed(3),
+      rawValue: iso.toFixed(3).replace(/^0/, ""),
       description: "長打率 − 打率。純粋な長打力を示す。基準: .000〜.400",
     },
     {
@@ -86,7 +86,7 @@ export function normalizeBattingStats(batting: BattingStats): RadarAxis[] {
       label: "総合力",
       metric: "OPS",
       value: normalizePositive(ops, 1.2),
-      rawValue: ops.toFixed(3),
+      rawValue: ops.toFixed(3).replace(/^0/, ""),
       description: "出塁率 + 長打率。打撃の総合評価。基準: .000〜1.200",
     },
   ];
@@ -153,7 +153,7 @@ export function normalizePitchingStats(pitching: PitchingStats): RadarAxis[] {
       label: "勝負強さ",
       metric: "勝率",
       value: normalizePositive(win_percentage, 1.0),
-      rawValue: win_percentage.toFixed(3),
+      rawValue: win_percentage.toFixed(3).replace(/^0/, ""),
       description: "勝利 ÷ (勝利 + 敗北)。基準: .000〜1.000",
     },
   ];

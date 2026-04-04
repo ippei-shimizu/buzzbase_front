@@ -18,8 +18,8 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PlusButton from "@app/components/button/PlusButton";
 import HeaderSave from "@app/components/header/HeaderSave";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
-import UserIdInput from "@app/components/user/UserIdInput";
 import SaveSpinner from "@app/components/spinner/SavingSpinner";
+import UserIdInput from "@app/components/user/UserIdInput";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   createAward,

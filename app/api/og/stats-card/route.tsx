@@ -424,14 +424,17 @@ export async function GET(request: NextRequest) {
           label: "打率",
           value:
             batStats.batting_average != null
-              ? Number(batStats.batting_average).toFixed(3)
+              ? Number(batStats.batting_average).toFixed(3).replace(/^0/, "")
               : "-",
         },
         { label: "本塁打", value: totals.home_run },
         { label: "打点", value: totals.runs_batted_in },
         {
           label: "OPS",
-          value: batStats.ops != null ? Number(batStats.ops).toFixed(3) : "-",
+          value:
+            batStats.ops != null
+              ? Number(batStats.ops).toFixed(3).replace(/^0/, "")
+              : "-",
         },
         {
           label: "安打",

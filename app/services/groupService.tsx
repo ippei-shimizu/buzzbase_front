@@ -38,9 +38,20 @@ export const getGroupDetailUsers = async (groupId: number) => {
   }
 };
 
-export const getGroupDetail = async (id: number) => {
+export const getGroupDetail = async (
+  id: number,
+  year?: string,
+  matchType?: string,
+) => {
   try {
-    const response = await axiosInstance.get(`/api/v1/groups/${id}`);
+    const params = new URLSearchParams();
+    if (year && year !== "通算") params.append("year", year);
+    if (matchType && matchType !== "全て")
+      params.append("match_type", matchType);
+    const query = params.toString();
+    const response = await axiosInstance.get(
+      `/api/v1/groups/${id}${query ? `?${query}` : ""}`,
+    );
     return response.data;
   } catch (error) {
     console.log(error);
