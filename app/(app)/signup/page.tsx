@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect } from "react";
+import CtaBanner from "@app/(app)/_components/CtaBanner";
 import SignUp from "@app/components/auth/SignUp";
 import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 
@@ -35,6 +36,10 @@ function SignUpContent() {
               ログイン
             </Link>
           </p>
+          <CtaBanner
+            body="アプリならもっと便利に成績を記録・管理できます。"
+            className="mt-10"
+          />
         </div>
       </div>
     </>
