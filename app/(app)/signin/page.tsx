@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import React, { Suspense, useEffect, useRef, useState } from "react";
+import CtaBanner from "@app/(app)/_components/CtaBanner";
 import SignIn from "@app/components/auth/SignIn";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -64,6 +65,10 @@ function SignInContent() {
               新規会員登録（無料）
             </Link>
           </p>
+          <CtaBanner
+            body="アプリならもっと便利に成績を記録・管理できます。"
+            className="mt-10"
+          />
         </div>
       </div>
     </>
