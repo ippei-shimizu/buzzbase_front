@@ -1,3 +1,5 @@
+import { formatRate2 } from "@app/utils/formatStats";
+
 type PersonalPitchingResults = {
   number_of_appearances: number;
   win: number;
@@ -40,17 +42,10 @@ export default function PitchingRecordTable(props: Props) {
     ? personalPitchingStatus
     : undefined;
 
-  function formatNumber(value: number): string {
-    if (value < 1 && value > -1) {
-      return value.toFixed(3).replace("0", "");
-    }
-    return value.toFixed(2);
-  }
-
   const displayValue = (value: number | undefined | null) =>
     value == null ? "-" : value.toString();
   const displayFormattedValue = (value: number | undefined | null) =>
-    value == null ? "-" : formatNumber(value);
+    value == null ? "-" : formatRate2(value);
 
   const styleTableBox = "grid grid-cols-2 text-center";
   const styleTableTitle =

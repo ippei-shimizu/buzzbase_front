@@ -1,3 +1,4 @@
+import { formatRate } from "@app/utils/formatStats";
 import { type CalculatorDefinition } from "./types";
 
 export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
@@ -42,7 +43,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     outputs: [
       {
         label: "打率",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
     ],
     calculate: (values: Record<string, number>) => {
@@ -265,17 +266,17 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       {
         label: "出塁率",
         key: "obp",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
       {
         label: "長打率",
         key: "slg",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
       {
         label: "OPS",
         key: "ops",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
     ],
     calculate: (
@@ -378,7 +379,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     outputs: [
       {
         label: "長打率",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
     ],
     calculate: (values: Record<string, number>) => {
@@ -496,7 +497,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     outputs: [
       {
         label: "出塁率",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
     ],
     calculate: (values: Record<string, number>) => {
@@ -835,7 +836,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     outputs: [
       {
         label: "勝率",
-        format: (value: number) => value.toFixed(3).replace(/^0/, ""),
+        format: (value: number) => formatRate(value),
       },
     ],
     calculate: (values: Record<string, number>) => {
