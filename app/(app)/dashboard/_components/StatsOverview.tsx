@@ -4,6 +4,7 @@ import type { BattingStats, PitchingStats, SeasonOption } from "../actions";
 import { useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import { formatRate, formatRate2 } from "@app/utils/formatStats";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
@@ -35,20 +36,6 @@ const MATCH_TYPE_OPTIONS = [
   { key: "open", label: "オープン戦" },
 ];
 
-function formatNumber(value: number): string {
-  if (value < 1 && value > -1) {
-    return value.toFixed(3).replace("0", "");
-  }
-  return value.toFixed(3);
-}
-
-function formatNumber2(value: number): string {
-  if (value < 1 && value > -1) {
-    return value.toFixed(3).replace("0", "");
-  }
-  return value.toFixed(2);
-}
-
 function calcTotalHits(agg: BattingStats["aggregate"]): number {
   return (
     (agg?.hit ?? 0) +
@@ -61,9 +48,9 @@ function calcTotalHits(agg: BattingStats["aggregate"]): number {
 const displayValue = (value: number | undefined | null) =>
   value == null ? "-" : value.toString();
 const displayFormattedValue = (value: number | undefined | null) =>
-  value == null ? "-" : formatNumber(value);
+  value == null ? "-" : formatRate(value);
 const displayFormattedValue2 = (value: number | undefined | null) =>
-  value == null ? "-" : formatNumber2(value);
+  value == null ? "-" : formatRate2(value);
 
 const styleTableBox = "grid grid-cols-2 text-center";
 const styleTableTitle =
@@ -137,7 +124,7 @@ function BattingSummary({ battingStats }: { battingStats: BattingStats }) {
       <p>
         <span className="text-sm text-zinc-200">打率</span>
         <span className="text-xl font-bold ml-1" style={{ color: "#d08000" }}>
-          {formatNumber(avg)}
+          {formatRate(avg)}
         </span>
         <span className="text-sm text-zinc-200 ml-3">{matches}試合</span>
       </p>
@@ -163,7 +150,7 @@ function PitchingSummary({ pitchingStats }: { pitchingStats: PitchingStats }) {
       <p>
         <span className="text-sm text-zinc-200">防御率</span>
         <span className="text-xl font-bold ml-1" style={{ color: "#338EF7" }}>
-          {formatNumber2(era)}
+          {formatRate2(era)}
         </span>
         <span className="text-sm text-zinc-200 ml-3">{appearances}登板</span>
       </p>

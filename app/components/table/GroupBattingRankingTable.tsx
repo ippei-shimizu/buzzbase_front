@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { formatRate } from "@app/utils/formatStats";
 import RankingSection from "./RankingSection";
 
 type BattingAverage = {
@@ -29,13 +30,6 @@ type Props = {
 
 export default function GroupBattingRankingTable(props: Props) {
   const { battingAverage, battingStats } = props;
-
-  function formatNumber(value: number): string {
-    if (value < 1 && value > -1) {
-      return value.toFixed(3).replace("0", "");
-    }
-    return value.toFixed(3);
-  }
 
   const sortedBattingAverage = useMemo(
     () =>
@@ -126,14 +120,13 @@ export default function GroupBattingRankingTable(props: Props) {
       label: "打率",
       id: "battingAverage",
       data: sortedBattingAverage,
-      renderValue: (item: BattingStats) => formatNumber(item.batting_average),
+      renderValue: (item: BattingStats) => formatRate(item.batting_average),
     },
     {
       label: "出塁率",
       id: "onBasePercentage",
       data: sortedOnBasePercentage,
-      renderValue: (item: BattingStats) =>
-        formatNumber(item.on_base_percentage),
+      renderValue: (item: BattingStats) => formatRate(item.on_base_percentage),
     },
   ];
 
