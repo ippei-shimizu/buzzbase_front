@@ -203,61 +203,22 @@ export default function GroupDetail(props: GroupDetailProps) {
   useRequireAuth();
 
   useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedYear, selectedMatchType]);
-
-  const fetchData = async () => {
-    try {
-      const responseGroupDetail = await getGroupDetail(
-        params.slug,
-        selectedYear,
-        selectedMatchType,
-      );
-      setGroupData(responseGroupDetail);
-      setAvailableYears(responseGroupDetail.available_years ?? []);
-
-      if (responseGroupDetail) {
-        const battingStatsWithUsersData = responseGroupDetail.batting_stats.map(
-          (stats: BattingStatsAPI) => {
-            const userInfo = responseGroupDetail.accepted_users.find(
-              (user: AcceptedUsers) => user.id === stats.user_id,
-            );
-            if (userInfo) {
-              return {
-                ...stats,
-                name: userInfo.name,
-                user_id: userInfo.user_id,
-                image_url: userInfo.image.url,
-              };
-            }
-            return stats;
-          },
+    const fetchData = async () => {
+      try {
+        const year = selectedYear === "通算" ? undefined : selectedYear;
+        const matchType =
+          selectedMatchType === "全て" ? undefined : selectedMatchType;
+        const responseGroupDetail = await getGroupDetail(
+          params.slug,
+          year,
+          matchType,
         );
-        setBattingStats(battingStatsWithUsersData);
+        setGroupData(responseGroupDetail);
+        setAvailableYears(responseGroupDetail.available_years ?? []);
 
-        const battingAverageWithUsersData = responseGroupDetail.batting_averages
-          .flat()
-          .map((stats: BattingAverageAPI) => {
-            const userInfo = responseGroupDetail.accepted_users.find(
-              (user: AcceptedUsers) => user.id === stats.user_id,
-            );
-            if (userInfo) {
-              return {
-                ...stats,
-                name: userInfo.name,
-                user_id: userInfo.user_id,
-                image_url: userInfo.image.url,
-              };
-            }
-            return stats;
-          });
-        setBattingAverages(battingAverageWithUsersData);
-
-        const pitchingAggregateWithUsersData =
-          responseGroupDetail.pitching_aggregate
-            .flat()
-            .map((stats: PitchingAggregateAPI) => {
+        if (responseGroupDetail) {
+          const battingStatsWithUsersData =
+            responseGroupDetail.batting_stats.map((stats: BattingStatsAPI) => {
               const userInfo = responseGroupDetail.accepted_users.find(
                 (user: AcceptedUsers) => user.id === stats.user_id,
               );
@@ -271,34 +232,75 @@ export default function GroupDetail(props: GroupDetailProps) {
               }
               return stats;
             });
-        setPitchingAggregate(pitchingAggregateWithUsersData);
+          setBattingStats(battingStatsWithUsersData);
 
-        const pitchingStatsWithUsersData = responseGroupDetail.pitching_stats
-          .filter((stats: PitchingStatsAPI | null) => stats != null)
-          .map((stats: PitchingStatsAPI) => {
-            const userInfo = responseGroupDetail.accepted_users.find(
-              (user: AcceptedUsers) => user.id === stats.user_id,
-            );
-            if (userInfo) {
-              return {
-                ...stats,
-                name: userInfo.name,
-                user_id: userInfo.user_id,
-                image_url: userInfo.image.url,
-              };
-            }
-            return stats;
-          });
-        setPitchingStats(pitchingStatsWithUsersData);
+          const battingAverageWithUsersData =
+            responseGroupDetail.batting_averages
+              .flat()
+              .map((stats: BattingAverageAPI) => {
+                const userInfo = responseGroupDetail.accepted_users.find(
+                  (user: AcceptedUsers) => user.id === stats.user_id,
+                );
+                if (userInfo) {
+                  return {
+                    ...stats,
+                    name: userInfo.name,
+                    user_id: userInfo.user_id,
+                    image_url: userInfo.image.url,
+                  };
+                }
+                return stats;
+              });
+          setBattingAverages(battingAverageWithUsersData);
+
+          const pitchingAggregateWithUsersData =
+            responseGroupDetail.pitching_aggregate
+              .flat()
+              .map((stats: PitchingAggregateAPI) => {
+                const userInfo = responseGroupDetail.accepted_users.find(
+                  (user: AcceptedUsers) => user.id === stats.user_id,
+                );
+                if (userInfo) {
+                  return {
+                    ...stats,
+                    name: userInfo.name,
+                    user_id: userInfo.user_id,
+                    image_url: userInfo.image.url,
+                  };
+                }
+                return stats;
+              });
+          setPitchingAggregate(pitchingAggregateWithUsersData);
+
+          const pitchingStatsWithUsersData = responseGroupDetail.pitching_stats
+            .filter((stats: PitchingStatsAPI | null) => stats != null)
+            .map((stats: PitchingStatsAPI) => {
+              const userInfo = responseGroupDetail.accepted_users.find(
+                (user: AcceptedUsers) => user.id === stats.user_id,
+              );
+              if (userInfo) {
+                return {
+                  ...stats,
+                  name: userInfo.name,
+                  user_id: userInfo.user_id,
+                  image_url: userInfo.image.url,
+                };
+              }
+              return stats;
+            });
+          setPitchingStats(pitchingStatsWithUsersData);
+        }
+      } catch (error: unknown) {
+        if (error instanceof AxiosError && error.response?.status === 403) {
+          router.push("/404");
+        } else {
+          console.error(error);
+        }
       }
-    } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.status === 403) {
-        router.push("/404");
-      } else {
-        console.error(error);
-      }
-    }
-  };
+    };
+
+    fetchData();
+  }, [selectedYear, selectedMatchType, params.slug, router]);
 
   if (!groupData) {
     return <LoadingSpinner />;

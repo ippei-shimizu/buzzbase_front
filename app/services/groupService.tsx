@@ -45,9 +45,8 @@ export const getGroupDetail = async (
 ) => {
   try {
     const params = new URLSearchParams();
-    if (year && year !== "通算") params.append("year", year);
-    if (matchType && matchType !== "全て")
-      params.append("match_type", matchType);
+    if (year) params.append("year", year);
+    if (matchType) params.append("match_type", matchType);
     const query = params.toString();
     const response = await axiosInstance.get(
       `/api/v1/groups/${id}${query ? `?${query}` : ""}`,
