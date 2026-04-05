@@ -14,6 +14,7 @@ import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchi
 import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
 import { getMatchResultsUserId } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { formatRate, formatRate2 } from "@app/utils/formatStats";
 
 type UserId = {
   userId: number;
@@ -21,20 +22,6 @@ type UserId = {
 
 type AvailableYear = number | string;
 type AvailableMatchType = string;
-
-function formatBattingAvg(value: number): string {
-  if (value < 1 && value > -1) {
-    return value.toFixed(3).replace("0", "");
-  }
-  return value.toFixed(3);
-}
-
-function formatEra(value: number): string {
-  if (value < 1 && value > -1) {
-    return value.toFixed(3).replace("0", "");
-  }
-  return value.toFixed(2);
-}
 
 export default function IndividualResultsList(props: UserId) {
   const { userId } = props;
@@ -198,7 +185,7 @@ export default function IndividualResultsList(props: UserId) {
                     className="text-xl font-bold ml-1"
                     style={{ color: "#d08000" }}
                   >
-                    {formatBattingAvg(personalBattingStatus.batting_average)}
+                    {formatRate(personalBattingStatus.batting_average)}
                   </span>
                   <span className="text-sm text-zinc-200 ml-3">
                     {ba.number_of_matches}試合
@@ -229,7 +216,7 @@ export default function IndividualResultsList(props: UserId) {
                     className="text-xl font-bold ml-1"
                     style={{ color: "#338EF7" }}
                   >
-                    {formatEra(personalPitchingStatus.era)}
+                    {formatRate2(personalPitchingStatus.era)}
                   </span>
                   <span className="text-sm text-zinc-200 ml-3">
                     {pr.number_of_appearances}登板

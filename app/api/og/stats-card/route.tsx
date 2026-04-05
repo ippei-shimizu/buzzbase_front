@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { type NextRequest } from "next/server";
+import { formatRate } from "@app/utils/formatStats";
 
 const RAILS_API_URL =
   process.env.RAILS_API_URL ||
@@ -424,17 +425,14 @@ export async function GET(request: NextRequest) {
           label: "打率",
           value:
             batStats.batting_average != null
-              ? Number(batStats.batting_average).toFixed(3).replace(/^0/, "")
+              ? formatRate(Number(batStats.batting_average))
               : "-",
         },
         { label: "本塁打", value: totals.home_run },
         { label: "打点", value: totals.runs_batted_in },
         {
           label: "OPS",
-          value:
-            batStats.ops != null
-              ? Number(batStats.ops).toFixed(3).replace(/^0/, "")
-              : "-",
+          value: batStats.ops != null ? formatRate(Number(batStats.ops)) : "-",
         },
         {
           label: "安打",

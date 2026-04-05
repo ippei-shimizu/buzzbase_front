@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { formatRate2 } from "@app/utils/formatStats";
 import RankingSection from "./RankingSection";
 
 type PitchingAggregate = {
@@ -28,13 +29,6 @@ type Props = {
 
 export default function GroupPitchingRankingTable(props: Props) {
   const { pitchingAggregate, pitchingStats } = props;
-
-  function formatNumber(value: number): string {
-    if (value < 1 && value > -1) {
-      return value.toFixed(3).replace("0", "");
-    }
-    return value.toFixed(2);
-  }
 
   const sortedPitchingEra = useMemo(
     () => pitchingStats?.slice().sort((a, b) => a.era - b.era) || [],
@@ -90,13 +84,13 @@ export default function GroupPitchingRankingTable(props: Props) {
       label: "防御率",
       id: "era",
       data: sortedPitchingEra,
-      renderValue: (item: PitchingStats) => formatNumber(item.era),
+      renderValue: (item: PitchingStats) => formatRate2(item.era),
     },
     {
       label: "勝率",
       id: "winPercentage",
       data: sortedWinPercentage,
-      renderValue: (item: PitchingStats) => formatNumber(item.win_percentage),
+      renderValue: (item: PitchingStats) => formatRate2(item.win_percentage),
     },
   ];
 
