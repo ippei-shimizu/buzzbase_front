@@ -446,38 +446,8 @@ export default function BattingRecord() {
       setIsSubmitting(false);
       return;
     }
-    const battingAverageData = {
-      batting_average: {
-        game_result_id: localStorageGameResultId,
-        user_id: currentUserId,
-        // plate_appearances: ,
-        times_at_bat: timesAtBat, // 打席数
-        at_bats: atBats,
-        hit: hit, // 安打数
-        two_base_hit: twoBaseHit, // 2塁打数
-        three_base_hit: threeBaseHit, // 3塁打数
-        home_run: homeRun, // 本塁打数
-        total_bases: totalBases, // 塁打数
-        runs_batted_in: existingRunsBattedIn
-          ? existingRunsBattedIn
-          : runsBattedIn,
-        run: existingRun ? existingRun : run,
-        strike_out: strikeOuts, // 三振数
-        base_on_balls: baseOnBalls, //四球
-        hit_by_pitch: hitByPitch, // 死球
-        sacrifice_hit: sacrificeHit, //犠打
-        sacrifice_fly: sacrificeFly, //犠飛
-        error: existingDefensiveError ? existingDefensiveError : defensiveError,
-        stealing_base: existingStealingBase
-          ? existingStealingBase
-          : stealingBase,
-        caught_stealing: existingCaughtStealing
-          ? existingCaughtStealing
-          : caughtStealing,
-      },
-    };
-    const filteredBattingBoxes = battingBoxes.filter((box) => box.result !== 0);
     // 未記入判定: 打席データも手動入力フィールドも全て空/0ならスキップ
+    const filteredBattingBoxes = battingBoxes.filter((box) => box.result !== 0);
     const rbi = existingRunsBattedIn ? existingRunsBattedIn : runsBattedIn;
     const r = existingRun ? existingRun : run;
     const err = existingDefensiveError
@@ -497,6 +467,31 @@ export default function BattingRecord() {
       router.push(`/game-result/pitching/`);
       return;
     }
+
+    const battingAverageData = {
+      batting_average: {
+        game_result_id: localStorageGameResultId,
+        user_id: currentUserId,
+        // plate_appearances: ,
+        times_at_bat: timesAtBat, // 打席数
+        at_bats: atBats,
+        hit: hit, // 安打数
+        two_base_hit: twoBaseHit, // 2塁打数
+        three_base_hit: threeBaseHit, // 3塁打数
+        home_run: homeRun, // 本塁打数
+        total_bases: totalBases, // 塁打数
+        runs_batted_in: rbi,
+        run: r,
+        strike_out: strikeOuts, // 三振数
+        base_on_balls: baseOnBalls, //四球
+        hit_by_pitch: hitByPitch, // 死球
+        sacrifice_hit: sacrificeHit, //犠打
+        sacrifice_fly: sacrificeFly, //犠飛
+        error: err,
+        stealing_base: sb,
+        caught_stealing: cs,
+      },
+    };
 
     for (let i = 0; i < filteredBattingBoxes.length; i++) {
       const battingBox = battingBoxes[i];

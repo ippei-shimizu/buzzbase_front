@@ -293,8 +293,6 @@ export default function PitchingRecord() {
     const totalInnings = existingTotalInnings
       ? Number(existingSelectedInnings) + Number(changeExistingFractions)
       : Number(selectedInnings) + Number(selectedFractions);
-    console.log(totalInnings);
-
     // 未記入判定: 全フィールドが0/デフォルトならスキップ
     const w = existingWin ? existingWin : win;
     const l = existingLoss ? existingLoss : loss;
