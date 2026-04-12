@@ -477,6 +477,27 @@ export default function BattingRecord() {
       },
     };
     const filteredBattingBoxes = battingBoxes.filter((box) => box.result !== 0);
+    // 未記入判定: 打席データも手動入力フィールドも全て空/0ならスキップ
+    const rbi = existingRunsBattedIn ? existingRunsBattedIn : runsBattedIn;
+    const r = existingRun ? existingRun : run;
+    const err = existingDefensiveError
+      ? existingDefensiveError
+      : defensiveError;
+    const sb = existingStealingBase ? existingStealingBase : stealingBase;
+    const cs = existingCaughtStealing ? existingCaughtStealing : caughtStealing;
+    const isBattingEmpty =
+      filteredBattingBoxes.length === 0 &&
+      rbi === 0 &&
+      r === 0 &&
+      err === 0 &&
+      sb === 0 &&
+      cs === 0;
+
+    if (isBattingEmpty) {
+      router.push(`/game-result/pitching/`);
+      return;
+    }
+
     for (let i = 0; i < filteredBattingBoxes.length; i++) {
       const battingBox = battingBoxes[i];
       if (battingBox.text.replace("-", "") === "") continue;
