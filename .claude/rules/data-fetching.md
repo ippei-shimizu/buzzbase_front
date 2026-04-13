@@ -18,7 +18,12 @@ async function getAuthHeaders(): Promise<Record<string, string> | null> {
   const client = cookieStore.get("client")?.value;
   const uid = cookieStore.get("uid")?.value;
   if (!accessToken || !client || !uid) return null;
-  return { "Content-Type": "application/json", "access-token": accessToken, client, uid };
+  return {
+    "Content-Type": "application/json",
+    "access-token": accessToken,
+    client,
+    uid,
+  };
 }
 ```
 
