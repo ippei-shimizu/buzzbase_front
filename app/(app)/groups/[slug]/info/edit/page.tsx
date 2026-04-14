@@ -153,9 +153,7 @@ export default function GroupEdit(props: {
     try {
       const response = await updateGroupInfo(groupId, formData);
       router.push(`/groups/${response.id}/`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
   return (
     <>

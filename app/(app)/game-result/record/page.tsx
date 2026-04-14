@@ -528,7 +528,6 @@ export default function GameRecord() {
       }
       router.push(`/game-result/batting/`);
     } catch (error) {
-      console.log(error);
       throw error;
     }
   };

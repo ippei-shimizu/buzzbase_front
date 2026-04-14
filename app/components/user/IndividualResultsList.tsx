@@ -14,7 +14,7 @@ import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchi
 import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
 import { getMatchResultsUserId } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
-import { formatRate, formatRate2 } from "@app/utils/formatStats";
+import { formatRate, formatEra } from "@app/utils/formatStats";
 
 type UserId = {
   userId: number;
@@ -216,7 +216,7 @@ export default function IndividualResultsList(props: UserId) {
                     className="text-xl font-bold ml-1"
                     style={{ color: "#338EF7" }}
                   >
-                    {formatRate2(personalPitchingStatus.era)}
+                    {formatEra(personalPitchingStatus.era)}
                   </span>
                   <span className="text-sm text-zinc-200 ml-3">
                     {pr.number_of_appearances}登板

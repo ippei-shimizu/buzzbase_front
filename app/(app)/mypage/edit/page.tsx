@@ -319,9 +319,7 @@ export default function ProfileEdit() {
               };
               await createAward(awardData);
             }
-          } catch (error) {
-            console.log(error);
-          }
+          } catch {}
         }
       }
 
@@ -329,9 +327,7 @@ export default function ProfileEdit() {
       for (const awardId of deletedAwards) {
         try {
           await deleteAward(profile.id, awardId);
-        } catch (error) {
-          console.log(error);
-        }
+        } catch {}
       }
 
       setTimeout(() => {
@@ -460,9 +456,7 @@ export default function ProfileEdit() {
       setDeletedAwards([...deletedAwards, awardId]);
       const newAwards = awards.filter((_, idx) => idx !== index);
       setAwards(newAwards);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   return (

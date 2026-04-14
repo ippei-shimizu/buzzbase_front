@@ -170,9 +170,7 @@ export default function ResultsSummary() {
     try {
       const response = await getCurrentUsersUserId(id);
       setCurrentUsersUserId(response);
-    } catch (error) {
-      console.log(`get user_id error: ${error}`);
-    }
+    } catch {}
   };
 
   // 勝敗
@@ -285,8 +283,7 @@ export default function ResultsSummary() {
         router.push(`/mypage/${currentUsersUserId}`);
         setIsLoading(false);
       }, 1000);
-    } catch (error) {
-      console.log(error);
+    } catch {
       setIsLoading(false);
     }
   };

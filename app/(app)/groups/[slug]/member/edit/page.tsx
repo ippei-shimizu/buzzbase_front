@@ -92,9 +92,7 @@ export default function GroupMember(props: {
     try {
       const response = await updateGroup(groupId, formData);
       router.push(`/groups/${response.id}/`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   return (

@@ -98,9 +98,7 @@ export default function PitchingRecord() {
     try {
       const currentUserIdData = await getCurrentUserId();
       setCurrentUserId(currentUserIdData);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   // 既に同じgame_result_idが存在する場合
@@ -389,9 +387,7 @@ export default function PitchingRecord() {
         }
       }
       router.push(`/game-result/summary/`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
   return (
     <>

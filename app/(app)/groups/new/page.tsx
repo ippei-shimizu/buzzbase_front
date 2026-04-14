@@ -35,9 +35,7 @@ export default function GroupNew() {
     try {
       const response = await getFollowingUser(userId);
       setFollowing(response);
-    } catch (error) {
-      console.log("フォロー中のユーザーはいません", error);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -132,9 +130,7 @@ export default function GroupNew() {
     try {
       const response = await createGroup(formData);
       router.push(`/groups/${response.id}/`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   return (

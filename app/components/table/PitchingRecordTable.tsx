@@ -1,4 +1,4 @@
-import { formatRate2 } from "@app/utils/formatStats";
+import { formatEra, formatRate2 } from "@app/utils/formatStats";
 
 type PersonalPitchingResults = {
   number_of_appearances: number;
@@ -44,6 +44,8 @@ export default function PitchingRecordTable(props: Props) {
 
   const displayValue = (value: number | undefined | null) =>
     value == null ? "-" : value.toString();
+  const displayEraValue = (value: number | undefined | null) =>
+    value == null ? "-" : formatEra(value);
   const displayFormattedValue = (value: number | undefined | null) =>
     value == null ? "-" : formatRate2(value);
 
@@ -61,7 +63,7 @@ export default function PitchingRecordTable(props: Props) {
             <div className={styleTableBox}>
               <p className={styleTableTitle}>防御率</p>
               <span className={styleTableData}>
-                {displayFormattedValue(pitchingStats?.era)}
+                {displayEraValue(pitchingStats?.era)}
               </span>
             </div>
             <div className={styleTableBox}>
@@ -115,13 +117,13 @@ export default function PitchingRecordTable(props: Props) {
             <div className={styleTableBox}>
               <p className={styleTableTitle}>BB/9</p>
               <span className={styleTableData}>
-                {displayFormattedValue(pitchingStats?.bb_per_nine)}
+                {displayEraValue(pitchingStats?.bb_per_nine)}
               </span>
             </div>
             <div className={styleTableBox}>
               <p className={`${styleTableTitle} rounded-bl-md`}>WHIP</p>
               <span className={styleTableData}>
-                {displayFormattedValue(pitchingStats?.whip)}
+                {displayEraValue(pitchingStats?.whip)}
               </span>
             </div>
           </div>
@@ -179,7 +181,7 @@ export default function PitchingRecordTable(props: Props) {
             <div className={styleTableBox}>
               <p className={styleTableTitle}>K/9</p>
               <span className={styleTableData}>
-                {displayFormattedValue(pitchingStats?.k_per_nine)}
+                {displayEraValue(pitchingStats?.k_per_nine)}
               </span>
             </div>
             <div className={styleTableBox}>

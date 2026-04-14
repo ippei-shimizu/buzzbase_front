@@ -33,8 +33,7 @@ export default function NoteMenu({ noteId }: { noteId: number }) {
         router.push(`/note`);
         setIsLoading(false);
       }, 1000);
-    } catch (error) {
-      console.log(error);
+    } catch {
       setIsLoading(false);
     }
   };

@@ -92,8 +92,7 @@ export default function NoteDetail(props: {
       await updateBaseballNote(noteId, { date, title, memo });
       mutate(`/api/v1/baseball_notes/${noteId}`);
       router.push("/note");
-    } catch (error) {
-      console.log(error);
+    } catch {
       setErrorsWithTimeout(["更新中にエラーが発生しました"]);
       setIsSubmitting(false);
     }

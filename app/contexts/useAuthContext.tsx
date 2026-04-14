@@ -39,8 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             },
           });
           setIsLoggedIn(true);
-        } catch (error) {
-          console.log(error);
+        } catch {
           setIsLoggedIn(false);
         }
       } else {
