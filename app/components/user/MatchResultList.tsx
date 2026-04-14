@@ -117,8 +117,8 @@ export default function MatchResultList(props: MatchResultListProps) {
           })),
         ];
         setSeasonOptions(opts);
-      } catch (error) {
-        console.error("Failed to fetch seasons:", error);
+      } catch {
+        console.error("Failed to fetch seasons:");
       }
     };
     fetchSeasons();
@@ -169,8 +169,8 @@ export default function MatchResultList(props: MatchResultListProps) {
           })),
         ];
         setMatchTypeOptions(mtOpts);
-      } catch (error) {
-        console.error("Failed to fetch meta:", error);
+      } catch {
+        console.error("Failed to fetch meta:");
       }
     };
     fetchMeta();
@@ -266,6 +266,8 @@ export default function MatchResultList(props: MatchResultListProps) {
     debouncedSearch,
     sortBy,
     sortOrder,
+    apiSortBy,
+    apiSortOrder,
   ]);
 
   return (
