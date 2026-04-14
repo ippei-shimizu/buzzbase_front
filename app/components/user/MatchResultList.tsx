@@ -117,9 +117,7 @@ export default function MatchResultList(props: MatchResultListProps) {
           })),
         ];
         setSeasonOptions(opts);
-      } catch {
-        console.error("Failed to fetch seasons:");
-      }
+      } catch {}
     };
     fetchSeasons();
   }, [userId]);
@@ -169,9 +167,7 @@ export default function MatchResultList(props: MatchResultListProps) {
           })),
         ];
         setMatchTypeOptions(mtOpts);
-      } catch {
-        console.error("Failed to fetch meta:");
-      }
+      } catch {}
     };
     fetchMeta();
   }, [userId]);
