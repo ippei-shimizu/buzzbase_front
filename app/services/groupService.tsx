@@ -9,7 +9,6 @@ export const createGroup = async (formData: FormData) => {
     });
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -21,7 +20,6 @@ export const getGroups = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -33,7 +31,6 @@ export const getGroupDetailUsers = async (groupId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -53,7 +50,6 @@ export const getGroupDetail = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -95,7 +91,6 @@ export const createInviteMembers = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -105,7 +100,6 @@ export const deleteGroup = async (groupId: number) => {
     const response = await axiosInstance.delete(`/api/v1/groups/${groupId}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

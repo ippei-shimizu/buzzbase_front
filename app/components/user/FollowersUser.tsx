@@ -27,9 +27,7 @@ export default function FollowersUser() {
       if (response) {
         setUserId(response);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   useEffect(() => {

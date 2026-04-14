@@ -91,10 +91,8 @@ export default function NoteNew() {
     try {
       const noteData = { date: effectiveDate, title, memo };
       await createBaseballNote(noteData);
-      console.log(noteData);
       router.push("/note");
-    } catch (error) {
-      console.log(error);
+    } catch {
       setIsSubmitting(false);
     }
   };

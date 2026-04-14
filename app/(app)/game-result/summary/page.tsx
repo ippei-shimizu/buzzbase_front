@@ -131,9 +131,7 @@ export default function ResultsSummary() {
       setPitchingResult(pitchingResultData);
       setPlateAppearance(plateAppearanceData);
       setCurrentUserId(currentUserIdData);
-    } catch (error) {
-      console.log(`fetch error: ${error}`);
-    }
+    } catch {}
   };
 
   // user_id
@@ -141,9 +139,7 @@ export default function ResultsSummary() {
     try {
       const response = await getCurrentUsersUserId(id);
       setCurrentUsersUserId(response);
-    } catch (error) {
-      console.log(`get user_id error: ${error}`);
-    }
+    } catch {}
   };
 
   // 勝敗

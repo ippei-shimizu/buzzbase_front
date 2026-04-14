@@ -199,9 +199,7 @@ export default function BattingRecord() {
     try {
       const currentUserIdData = await getCurrentUserId();
       setCurrentUserId(currentUserIdData);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   const {
@@ -232,9 +230,7 @@ export default function BattingRecord() {
       setExistingDefensiveError(existingBattingAverage.error);
       setExistingStealingBase(existingBattingAverage.stealing_base);
       setExistingCaughtStealing(existingBattingAverage.caught_stealing);
-    } catch (error) {
-      console.log(`Error fetch existing batting average:`, error);
-    }
+    } catch {}
   };
 
   const fetchExistingPlateAppearance = async (gameResultId: number) => {
@@ -277,9 +273,7 @@ export default function BattingRecord() {
         );
         setExistingBattingBoxes(newBattingBoxes);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -529,9 +523,7 @@ export default function BattingRecord() {
         } catch (error) {
           console.error("打席結果の削除に失敗しました", error);
         }
-      } catch (error) {
-        console.log(`plate error :${error}`);
-      }
+      } catch {}
     }
     // 打撃トータル
     try {
@@ -562,9 +554,7 @@ export default function BattingRecord() {
         }
       }
       router.push(`/game-result/pitching/`);
-    } catch (error) {
-      console.log(`batting average ${error}`);
-    }
+    } catch {}
   };
   return (
     <>

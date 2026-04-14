@@ -5,8 +5,7 @@ export const getTeamName = async (id: number) => {
   try {
     const response = await axiosInstance.get(`/api/v1/teams/${id}/team_name`);
     return response.data.name;
-  } catch (error) {
-    console.log(error);
+  } catch {
     return "";
   }
 };
@@ -26,7 +25,6 @@ export const createOrUpdateTeam = async (teamData: teamData) => {
     const response = await axiosInstance.post("/api/v1/teams", teamData);
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -45,7 +43,6 @@ export const updateTeam = async (
     const response = await axiosInstance.put(`/api/v1/teams/${id}`, teamData);
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
