@@ -7,7 +7,6 @@ export const getNotifications = async (user_id: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -17,7 +16,6 @@ export const deleteNotification = async (id: number) => {
     const response = await axiosInstance.delete(`/api/v1/notifications/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -29,7 +27,6 @@ export const readNotification = async (id: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -39,7 +36,6 @@ export const getNotificationCount = async () => {
     const response = await axiosInstance.get(`/api/v1/notifications/count`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -51,7 +47,6 @@ export const markManagementNoticesRead = async () => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

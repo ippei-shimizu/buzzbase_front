@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { formatRate2 } from "@app/utils/formatStats";
+import { formatEra, formatRate2 } from "@app/utils/formatStats";
 import RankingSection from "./RankingSection";
 
 type PitchingAggregate = {
@@ -84,7 +84,7 @@ export default function GroupPitchingRankingTable(props: Props) {
       label: "防御率",
       id: "era",
       data: sortedPitchingEra,
-      renderValue: (item: PitchingStats) => formatRate2(item.era),
+      renderValue: (item: PitchingStats) => formatEra(item.era),
     },
     {
       label: "勝率",

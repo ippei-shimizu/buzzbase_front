@@ -6,7 +6,6 @@ export const getPitchingResults = async () => {
     const response = await axiosInstance.get("/api/v1/pitching_results");
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -16,7 +15,6 @@ export const createPitchingResult = async (data: PitchingResultData) => {
     const response = await axiosInstance.post("/api/v1/pitching_results", data);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -32,7 +30,6 @@ export const updatePitchingResult = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -46,8 +43,7 @@ export const checkExistingPitchingResult = async (
       `/api/v1/pitching_search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
     return null;
   }
 };
@@ -59,7 +55,6 @@ export const getCurrentPitchingResult = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -71,7 +66,6 @@ export const getUserPitchingResult = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -83,7 +77,6 @@ export const getPersonalPitchingResult = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -95,7 +88,6 @@ export const getPersonalPitchingResultStats = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

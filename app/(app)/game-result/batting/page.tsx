@@ -199,9 +199,7 @@ export default function BattingRecord() {
     try {
       const currentUserIdData = await getCurrentUserId();
       setCurrentUserId(currentUserIdData);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   const {
@@ -232,9 +230,7 @@ export default function BattingRecord() {
       setExistingDefensiveError(existingBattingAverage.error);
       setExistingStealingBase(existingBattingAverage.stealing_base);
       setExistingCaughtStealing(existingBattingAverage.caught_stealing);
-    } catch (error) {
-      console.log(`Error fetch existing batting average:`, error);
-    }
+    } catch {}
   };
 
   const fetchExistingPlateAppearance = async (gameResultId: number) => {
@@ -277,9 +273,7 @@ export default function BattingRecord() {
         );
         setExistingBattingBoxes(newBattingBoxes);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -446,6 +440,28 @@ export default function BattingRecord() {
       setIsSubmitting(false);
       return;
     }
+    // 未記入判定: 打席データも手動入力フィールドも全て空/0ならスキップ
+    const filteredBattingBoxes = battingBoxes.filter((box) => box.result !== 0);
+    const rbi = existingRunsBattedIn ? existingRunsBattedIn : runsBattedIn;
+    const r = existingRun ? existingRun : run;
+    const err = existingDefensiveError
+      ? existingDefensiveError
+      : defensiveError;
+    const sb = existingStealingBase ? existingStealingBase : stealingBase;
+    const cs = existingCaughtStealing ? existingCaughtStealing : caughtStealing;
+    const isBattingEmpty =
+      filteredBattingBoxes.length === 0 &&
+      rbi === 0 &&
+      r === 0 &&
+      err === 0 &&
+      sb === 0 &&
+      cs === 0;
+
+    if (isBattingEmpty) {
+      router.push(`/game-result/pitching/`);
+      return;
+    }
+
     const battingAverageData = {
       batting_average: {
         game_result_id: localStorageGameResultId,
@@ -458,25 +474,19 @@ export default function BattingRecord() {
         three_base_hit: threeBaseHit, // 3塁打数
         home_run: homeRun, // 本塁打数
         total_bases: totalBases, // 塁打数
-        runs_batted_in: existingRunsBattedIn
-          ? existingRunsBattedIn
-          : runsBattedIn,
-        run: existingRun ? existingRun : run,
+        runs_batted_in: rbi,
+        run: r,
         strike_out: strikeOuts, // 三振数
         base_on_balls: baseOnBalls, //四球
         hit_by_pitch: hitByPitch, // 死球
         sacrifice_hit: sacrificeHit, //犠打
         sacrifice_fly: sacrificeFly, //犠飛
-        error: existingDefensiveError ? existingDefensiveError : defensiveError,
-        stealing_base: existingStealingBase
-          ? existingStealingBase
-          : stealingBase,
-        caught_stealing: existingCaughtStealing
-          ? existingCaughtStealing
-          : caughtStealing,
+        error: err,
+        stealing_base: sb,
+        caught_stealing: cs,
       },
     };
-    const filteredBattingBoxes = battingBoxes.filter((box) => box.result !== 0);
+
     for (let i = 0; i < filteredBattingBoxes.length; i++) {
       const battingBox = battingBoxes[i];
       if (battingBox.text.replace("-", "") === "") continue;
@@ -513,9 +523,7 @@ export default function BattingRecord() {
         } catch (error) {
           console.error("打席結果の削除に失敗しました", error);
         }
-      } catch (error) {
-        console.log(`plate error :${error}`);
-      }
+      } catch {}
     }
     // 打撃トータル
     try {
@@ -546,9 +554,7 @@ export default function BattingRecord() {
         }
       }
       router.push(`/game-result/pitching/`);
-    } catch (error) {
-      console.log(`batting average ${error}`);
-    }
+    } catch {}
   };
   return (
     <>

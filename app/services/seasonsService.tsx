@@ -7,7 +7,6 @@ export const getSeasons = async (userId?: number) => {
     const response = await axiosInstance.get(`/api/v1/seasons${params}`);
     return response.data as SeasonData[];
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -19,7 +18,6 @@ export const createSeason = async (name: string) => {
     });
     return response.data as SeasonData;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -31,7 +29,6 @@ export const updateSeason = async (id: number, name: string) => {
     });
     return response.data as SeasonData;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -41,7 +38,6 @@ export const deleteSeason = async (id: number) => {
     const response = await axiosInstance.delete(`/api/v1/seasons/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

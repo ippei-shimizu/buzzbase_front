@@ -4,7 +4,7 @@ import type { BattingStats, PitchingStats, SeasonOption } from "../actions";
 import { useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
-import { formatRate, formatRate2 } from "@app/utils/formatStats";
+import { formatRate, formatRate2, formatEra } from "@app/utils/formatStats";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
@@ -49,6 +49,8 @@ const displayValue = (value: number | undefined | null) =>
   value == null ? "-" : value.toString();
 const displayFormattedValue = (value: number | undefined | null) =>
   value == null ? "-" : formatRate(value);
+const displayEraValue = (value: number | undefined | null) =>
+  value == null ? "-" : formatEra(value);
 const displayFormattedValue2 = (value: number | undefined | null) =>
   value == null ? "-" : formatRate2(value);
 
@@ -150,7 +152,7 @@ function PitchingSummary({ pitchingStats }: { pitchingStats: PitchingStats }) {
       <p>
         <span className="text-sm text-zinc-200">防御率</span>
         <span className="text-xl font-bold ml-1" style={{ color: "#338EF7" }}>
-          {formatRate2(era)}
+          {formatEra(era)}
         </span>
         <span className="text-sm text-zinc-200 ml-3">{appearances}登板</span>
       </p>
@@ -327,9 +329,7 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
         <div>
           <div className={styleTableBox}>
             <p className={styleTableTitle}>防御率</p>
-            <span className={styleTableData}>
-              {displayFormattedValue2(calc?.era)}
-            </span>
+            <span className={styleTableData}>{displayEraValue(calc?.era)}</span>
           </div>
           <div className={styleTableBox}>
             <p className={styleTableTitle}>勝利</p>
@@ -378,13 +378,13 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
           <div className={styleTableBox}>
             <p className={styleTableTitle}>BB/9</p>
             <span className={styleTableData}>
-              {displayFormattedValue2(calc?.bb_per_nine)}
+              {displayEraValue(calc?.bb_per_nine)}
             </span>
           </div>
           <div className={styleTableBox}>
             <p className={`${styleTableTitle} rounded-bl-md`}>WHIP</p>
             <span className={styleTableData}>
-              {displayFormattedValue2(calc?.whip)}
+              {displayEraValue(calc?.whip)}
             </span>
           </div>
         </div>
@@ -436,7 +436,7 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
           <div className={styleTableBox}>
             <p className={styleTableTitle}>K/9</p>
             <span className={styleTableData}>
-              {displayFormattedValue2(calc?.k_per_nine)}
+              {displayEraValue(calc?.k_per_nine)}
             </span>
           </div>
           <div className={styleTableBox}>

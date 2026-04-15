@@ -25,9 +25,7 @@ export default function Header() {
         const responseNotificationCount = await getNotificationCount();
         setNotificationCount(responseNotificationCount);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   return (

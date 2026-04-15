@@ -7,7 +7,6 @@ export const acceptGroupInvitation = async (groupId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -19,7 +18,6 @@ export const declinedGroupInvitation = async (groupId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

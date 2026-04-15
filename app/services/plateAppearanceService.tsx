@@ -6,7 +6,6 @@ export const getPlateAppearances = async () => {
     const response = await axiosInstance.get("/api/v1/plate_appearances");
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -19,7 +18,6 @@ export const createPlateAppearance = async (data: PlateAppearance) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -35,7 +33,6 @@ export const updatePlateAppearance = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -47,7 +44,6 @@ export const deletePlateAppearance = async (id: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -62,8 +58,7 @@ export const checkExistingPlateAppearance = async (
       `/api/v1/plate_search?game_result_id=${gameResultId}&user_id=${userId}&batter_box_number=${batterBoxNumber}`,
     );
     return response.data;
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
     return null;
   }
 };
@@ -77,7 +72,6 @@ export const getCurrentPlateAppearance = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -89,7 +83,6 @@ export const getUserPlateAppearance = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -104,7 +97,6 @@ export const getCurrentPlateAppearanceUserId = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

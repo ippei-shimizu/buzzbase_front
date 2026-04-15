@@ -6,7 +6,6 @@ export const getMatchResults = async () => {
     const response = await axiosInstance.get("/api/v1/match_results");
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -18,7 +17,6 @@ export const getMatchResultsUserId = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -33,7 +31,6 @@ export const createMatchResults = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -43,7 +40,6 @@ export const getMatchResult = async (id: number) => {
     const response = await axiosInstance.get(`/api/v1/match_results/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -59,7 +55,6 @@ export const updateMatchResult = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -69,7 +64,6 @@ export const deleteMatchResult = async (id: number) => {
     const response = await axiosInstance.delete(`/api/v1/match_results/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -83,8 +77,7 @@ export const checkExistingMatchResults = async (
       `/api/v1/existing_search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
     return null;
   }
 };
@@ -96,7 +89,6 @@ export const getCurrentMatchResult = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -108,7 +100,6 @@ export const getUserMatchResult = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

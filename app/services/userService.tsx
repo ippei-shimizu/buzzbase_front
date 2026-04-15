@@ -52,9 +52,7 @@ export const getCurrentUserId = async () => {
   try {
     const response = await axiosInstance.get("/api/v1/users/current");
     return response.data.id;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch {}
 };
 
 export const getCurrentUsersUserId = async (id: number | null) => {
@@ -63,9 +61,7 @@ export const getCurrentUsersUserId = async (id: number | null) => {
       `/api/v1/users/${id}/show_current_user_id`,
     );
     return response.data.user_id;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch {}
 };
 
 export const getUserId = async (user_id: string) => {
@@ -74,9 +70,7 @@ export const getUserId = async (user_id: string) => {
       `/api/v1/users/show_by_user_id?user_id=${user_id}`,
     );
     return response.data;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch {}
 };
 
 export const userFollow = async (userId: number) => {
@@ -86,7 +80,6 @@ export const userFollow = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -96,7 +89,6 @@ export const userUnFollow = async (id: number) => {
     const response = await axiosInstance.delete(`/api/v1/relationships/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -108,7 +100,6 @@ export const getFollowingUser = async (id: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -120,7 +111,6 @@ export const getFollowersUser = async (id: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -130,7 +120,6 @@ export const deleteUser = async (id: number) => {
     const response = await axiosInstance.delete(`/api/v1/users/${id}`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -142,7 +131,6 @@ export const acceptFollowRequest = async (relationshipId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -154,7 +142,6 @@ export const rejectFollowRequest = async (relationshipId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

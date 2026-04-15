@@ -6,7 +6,6 @@ export const getBattingAverages = async () => {
     const response = await axiosInstance.get("/api/v1/batting_averages");
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -16,7 +15,6 @@ export const createBattingAverage = async (data: BattingAverageData) => {
     const response = await axiosInstance.post("/api/v1/batting_averages", data);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -32,7 +30,6 @@ export const updateBattingAverage = async (
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -46,8 +43,7 @@ export const checkExistingBattingAverage = async (
       `/api/v1/search?game_result_id=${gameResultId}&user_id=${userId}`,
     );
     return response.data;
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
     return null;
   }
 };
@@ -59,7 +55,6 @@ export const getCurrentBattingAverage = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -71,7 +66,6 @@ export const getUserBattingAverage = async (gameResultId: number | null) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -83,7 +77,6 @@ export const getPersonalBattingAverage = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -95,7 +88,6 @@ export const getPersonalBattingStatus = async (userId: number) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

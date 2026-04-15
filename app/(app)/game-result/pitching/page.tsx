@@ -98,9 +98,7 @@ export default function PitchingRecord() {
     try {
       const currentUserIdData = await getCurrentUserId();
       setCurrentUserId(currentUserIdData);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   // 既に同じgame_result_idが存在する場合
@@ -293,7 +291,46 @@ export default function PitchingRecord() {
     const totalInnings = existingTotalInnings
       ? Number(existingSelectedInnings) + Number(changeExistingFractions)
       : Number(selectedInnings) + Number(selectedFractions);
-    console.log(totalInnings);
+    // 未記入判定: 全フィールドが0/デフォルトならスキップ
+    const w = existingWin ? existingWin : win;
+    const l = existingLoss ? existingLoss : loss;
+    const h = existingHolds ? existingHolds : holds;
+    const sv = existingSaves ? existingSaves : saves;
+    const np = existingNumberOfPitches
+      ? existingNumberOfPitches
+      : numberOfPitches;
+    const gtd = existingGotToTheDistance
+      ? existingGotToTheDistance
+      : gotToTheDistance;
+    const ra = existingRunsAllowed ? existingRunsAllowed : runsAllowed;
+    const er = existingEarnedRuns ? existingEarnedRuns : earnedRuns;
+    const ha = existingHitsAllowed ? existingHitsAllowed : hitsAllowed;
+    const hr = existingHomeRuns ? existingHomeRuns : homeRuns;
+    const so = existingStrikeouts ? existingStrikeouts : strikeouts;
+    const bb = existingBasesOnBalls ? existingBasesOnBalls : basesOnBalls;
+    const hbp = existingHitByPitches ? existingHitByPitches : hitByPitches;
+
+    const isPitchingEmpty =
+      totalInnings === 0 &&
+      w === 0 &&
+      l === 0 &&
+      h === 0 &&
+      sv === 0 &&
+      np === 0 &&
+      !gtd &&
+      ra === 0 &&
+      er === 0 &&
+      ha === 0 &&
+      hr === 0 &&
+      so === 0 &&
+      bb === 0 &&
+      hbp === 0;
+
+    if (isPitchingEmpty) {
+      router.push(`/game-result/summary/`);
+      return;
+    }
+
     try {
       const pitchingResultData = {
         pitching_result: {
@@ -350,9 +387,7 @@ export default function PitchingRecord() {
         }
       }
       router.push(`/game-result/summary/`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
   return (
     <>

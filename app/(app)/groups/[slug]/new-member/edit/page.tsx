@@ -59,9 +59,7 @@ export default function GroupMemberAdd(props: {
             (follow: FollowingUser) => !groupMemberIds.includes(follow.id),
           );
           setFollowing(filteredFollowing);
-        } catch (error) {
-          console.log("フォロー中のユーザーはいません", error);
-        }
+        } catch {}
       }
     };
     fetchFollowing();
@@ -90,9 +88,7 @@ export default function GroupMemberAdd(props: {
     try {
       const _response = await createInviteMembers(groupId, formData);
       router.push(`/groups/${groupId}/`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   return (

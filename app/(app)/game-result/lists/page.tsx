@@ -23,9 +23,7 @@ export default function GameResultList() {
     try {
       const currentUserIdData = await getCurrentUserId();
       setCurrentUserId(currentUserIdData);
-    } catch (error) {
-      console.log(`game lists fetch error:`, error);
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -39,9 +37,7 @@ export default function GameResultList() {
       const newGameResult = await createGameResult();
       localStorage.setItem("gameResultId", JSON.stringify(newGameResult.id));
       router.push(`/game-result/record`);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
   return (
     <>

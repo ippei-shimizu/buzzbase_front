@@ -9,7 +9,6 @@ export const createAward = async (awardData: AwardData) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -19,7 +18,6 @@ export const getUserAwards = async (userId: UserAwards) => {
     const response = await axiosInstance.get(`/api/v1/users/${userId}/awards`);
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -31,7 +29,6 @@ export const deleteAward = async (userId: number, awardId: number) => {
     );
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -48,7 +45,6 @@ export const updatePutAward = async (
     );
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -64,7 +60,6 @@ export const updatePatchAward = async (
     );
     return response;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

@@ -8,8 +8,7 @@ export const getPositionName = async (id: number | null) => {
   try {
     const response = await axiosInstance.get(`/api/v1/positions/${id}`);
     return response.data.name;
-  } catch (error) {
-    console.log(error);
+  } catch {
     return "";
   }
 };
@@ -34,7 +33,6 @@ export const updateUserPositions = async ({
       position_ids: positionIds,
     });
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };
@@ -46,7 +44,6 @@ export const getUserPositions = async ({ userId }: GetUserPositionsData) => {
     );
     return response.data;
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

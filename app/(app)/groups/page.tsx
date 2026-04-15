@@ -22,18 +22,14 @@ export default function Group() {
     try {
       const responseCurrentUserId = await getCurrentUserId();
       setCurrentUserId(responseCurrentUserId);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   const fetchData = async (currentUserId: number) => {
     try {
       const responseGroups = await getGroups(currentUserId);
       setGroups(responseGroups);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch {}
   };
 
   useEffect(() => {
