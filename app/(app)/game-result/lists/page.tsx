@@ -52,7 +52,7 @@ export default function GameResultList() {
               variant="solid"
               radius="full"
               endContent={<PlusIcon width="22" height="22" fill="#F4F4F4" />}
-              className="fixed top-16 right-4 z-50 font-medium lg:absolute lg:z-10"
+              className="fixed top-[calc(var(--smart-banner-height,0px)+4rem)] right-4 z-50 font-medium lg:absolute lg:top-16 lg:z-10"
               onPress={handleNewRecord}
               isDisabled={isSubmitting}
             >
