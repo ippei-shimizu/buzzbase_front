@@ -23,7 +23,12 @@ export default function NavigationMenu() {
     if (path === "/signin" || path === "/signup") {
       return false;
     }
-    const basePath = ["/game-result/lists", "/game-result/record", "/groups"];
+    const basePath = [
+      "/game-result/lists",
+      "/game-result/record",
+      "/groups",
+      "/stats",
+    ];
     const isBasePath = basePath.some((base) => itemHref.startsWith(base));
 
     if (isBasePath) {
