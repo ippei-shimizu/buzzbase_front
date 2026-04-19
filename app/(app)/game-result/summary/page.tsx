@@ -91,12 +91,11 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // ローカルストレージからid取得し、記録完了としてクリア
+    // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
       fetchCurrentResultData(JSON.parse(savedGameResultId));
-      localStorage.removeItem("gameResultId");
     }
   }, [pathname]);
 
@@ -252,6 +251,7 @@ export default function ResultsSummary() {
 
   const _handleShare = () => {};
   const handleResultComplete = () => {
+    localStorage.removeItem("gameResultId");
     router.push("/game-result/lists");
   };
 
