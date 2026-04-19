@@ -91,11 +91,12 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // ローカルストレージからid取得
+    // ローカルストレージからid取得し、記録完了としてクリア
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
       fetchCurrentResultData(JSON.parse(savedGameResultId));
+      localStorage.removeItem("gameResultId");
     }
   }, [pathname]);
 
