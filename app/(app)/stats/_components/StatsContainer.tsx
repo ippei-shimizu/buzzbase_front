@@ -1,94 +1,89 @@
 "use client";
 
-import type {
-  BattingStatsRow,
-  PitchingStatsRow,
-  StatsPeriod,
-} from "../actions";
-import { useEffect, useState } from "react";
-import { getBattingStats, getPitchingStats } from "../actions";
+import type { BattingStatsRow, PitchingStatsRow, StatsPeriod } from "../actions";
+import Link from "next/link";
 import BattingStatsTable from "./BattingStatsTable";
-import PeriodToggle from "./PeriodToggle";
 import PitchingStatsTable from "./PitchingStatsTable";
 
 type ActiveTab = "batting" | "pitching";
 
-export default function StatsContainer() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>("batting");
-  const [period, setPeriod] = useState<StatsPeriod>("yearly");
-  const [battingRows, setBattingRows] = useState<BattingStatsRow[]>([]);
-  const [pitchingRows, setPitchingRows] = useState<PitchingStatsRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const PERIOD_OPTIONS: { value: StatsPeriod; label: string }[] = [
+  { value: "yearly", label: "年" },
+  { value: "monthly", label: "月" },
+  { value: "daily", label: "日" },
+];
 
-  useEffect(() => {
-    let cancelled = false;
-    const fetchStats = async () => {
-      setIsLoading(true);
-      if (activeTab === "batting") {
-        const rows = await getBattingStats(period);
-        if (!cancelled) setBattingRows(rows);
-      } else {
-        const rows = await getPitchingStats(period);
-        if (!cancelled) setPitchingRows(rows);
-      }
-      if (!cancelled) setIsLoading(false);
-    };
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchStats();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeTab, period]);
+interface StatsContainerProps {
+  tab: ActiveTab;
+  period: StatsPeriod;
+  rows: BattingStatsRow[] | PitchingStatsRow[];
+}
 
+export default function StatsContainer({
+  tab,
+  period,
+  rows,
+}: StatsContainerProps) {
   return (
     <div>
-      {/* タブバー（モバイル準拠） */}
+      {/* タブバー */}
       <div className="flex" style={{ borderBottom: "1px solid #424242" }}>
-        <button
-          onClick={() => setActiveTab("batting")}
+        <Link
+          href={`/stats?tab=batting&period=${period}`}
           className="flex-1 py-3 text-center text-sm font-semibold"
           style={{
             borderBottom:
-              activeTab === "batting"
+              tab === "batting"
                 ? "2px solid #d08000"
                 : "2px solid transparent",
-            color: activeTab === "batting" ? "#F4F4F4" : "#A1A1AA",
+            color: tab === "batting" ? "#F4F4F4" : "#A1A1AA",
           }}
         >
           打撃
-        </button>
-        <button
-          onClick={() => setActiveTab("pitching")}
+        </Link>
+        <Link
+          href={`/stats?tab=pitching&period=${period}`}
           className="flex-1 py-3 text-center text-sm font-semibold"
           style={{
             borderBottom:
-              activeTab === "pitching"
+              tab === "pitching"
                 ? "2px solid #d08000"
                 : "2px solid transparent",
-            color: activeTab === "pitching" ? "#F4F4F4" : "#A1A1AA",
+            color: tab === "pitching" ? "#F4F4F4" : "#A1A1AA",
           }}
         >
           投球
-        </button>
+        </Link>
       </div>
 
       {/* 期間トグル */}
       <div className="flex justify-end mt-4 mb-2">
-        <PeriodToggle value={period} onChange={setPeriod} />
+        <div
+          className="flex rounded-lg p-0.5 gap-0.5"
+          style={{ backgroundColor: "#3A3A3A" }}
+        >
+          {PERIOD_OPTIONS.map((opt) => (
+            <Link
+              key={opt.value}
+              href={`/stats?tab=${tab}&period=${opt.value}`}
+              className="px-3 py-1 rounded-md text-xs font-semibold transition-colors"
+              style={{
+                backgroundColor:
+                  period === opt.value ? "#d08000" : "transparent",
+                color: period === opt.value ? "#F4F4F4" : "#A1A1AA",
+              }}
+            >
+              {opt.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* テーブル */}
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div
-            className="w-6 h-6 border-2 rounded-full animate-spin"
-            style={{ borderColor: "#d08000", borderTopColor: "transparent" }}
-          />
-        </div>
-      ) : activeTab === "batting" ? (
-        <BattingStatsTable rows={battingRows} />
+      {tab === "batting" ? (
+        <BattingStatsTable rows={rows as BattingStatsRow[]} />
       ) : (
-        <PitchingStatsTable rows={pitchingRows} />
+        <PitchingStatsTable rows={rows as PitchingStatsRow[]} />
       )}
       {/* フッターナビとの余白 */}
       <div className="h-24 lg:h-0" />

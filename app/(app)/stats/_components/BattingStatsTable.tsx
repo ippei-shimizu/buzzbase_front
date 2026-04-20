@@ -1,5 +1,3 @@
-"use client";
-
 import type { BattingStatsRow } from "../actions";
 import StatsTable, { type Column, fmt3, fmtInt } from "./StatsTable";
 
