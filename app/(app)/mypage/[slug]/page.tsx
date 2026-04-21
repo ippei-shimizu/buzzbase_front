@@ -28,7 +28,7 @@ type Position = {
 };
 
 export default function MyPage() {
-  const { isLoggedIn } = useAuthContext();
+  const { isLoggedIn, loading: authLoading } = useAuthContext();
   const [errors, setErrors] = useState<string[]>([]);
 
   const { userData, isLoadingUsers, isErrorUser } = getUserIdData();
@@ -252,6 +252,8 @@ export default function MyPage() {
                     このアカウントは非公開です
                   </p>
                 </div>
+              ) : authLoading ? (
+                <div className="mt-8" />
               ) : isLoggedIn === false ? (
                 <div className="mt-8">
                   <AuthRequiredOverlay message="成績・試合情報を閲覧するにはログインが必要です" />
