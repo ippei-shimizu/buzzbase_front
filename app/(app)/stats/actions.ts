@@ -73,6 +73,11 @@ async function getAuthHeaders(): Promise<Record<string, string> | null> {
   };
 }
 
+export async function getIsAuthenticated(): Promise<boolean> {
+  const headers = await getAuthHeaders();
+  return headers !== null;
+}
+
 export async function getBattingStats(
   period: StatsPeriod,
   year?: string,

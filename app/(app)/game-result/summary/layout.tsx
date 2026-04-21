@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "試合結果まとめ",
   description:
     "この試合についての試合結果・打撃成績・投手成績をまとめて表示します。SNSなどで成績をシェアすることもできます。",
+  robots: { index: false },
 };
 export default function SummaryLayout({
   children,

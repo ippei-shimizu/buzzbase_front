@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
+import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import Header from "@app/components/header/Header";
@@ -250,6 +251,10 @@ export default function MyPage() {
                   <p className="text-sm text-zinc-400 text-center">
                     このアカウントは非公開です
                   </p>
+                </div>
+              ) : isLoggedIn === false ? (
+                <div className="mt-8">
+                  <AuthRequiredOverlay message="成績・試合情報を閲覧するにはログインが必要です" />
                 </div>
               ) : (
                 <>
