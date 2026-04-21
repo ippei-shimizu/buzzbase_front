@@ -20,10 +20,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
+import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getUserBattingAverage } from "@app/services/battingAveragesService";
 import { deleteGameResult } from "@app/services/gameResultsService";
 import { getUserMatchResult } from "@app/services/matchResultsService";
@@ -63,6 +65,7 @@ const battingOrder = [
 ];
 
 export default function ResultsSummary() {
+  const { isLoggedIn, loading: authLoading } = useAuthContext();
   const [matchResult, setMatchResult] = useState<MatchResultDisplay[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
@@ -287,6 +290,34 @@ export default function ResultsSummary() {
       setIsLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <>
+        <HeaderGameDetail />
+        <main className="h-full">
+          <div className="pb-20 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
+            <LoadingSpinner />
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (isLoggedIn === false) {
+    return (
+      <>
+        <HeaderGameDetail />
+        <main className="h-full">
+          <div className="pb-20 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
+            <div className="pt-20 px-4 lg:px-6">
+              <AuthRequiredOverlay message="試合結果を閲覧するにはログインが必要です" />
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
