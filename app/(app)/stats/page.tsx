@@ -16,8 +16,7 @@ export default async function StatsPage({
   searchParams: Promise<{ tab?: string; period?: string }>;
 }) {
   const params = await searchParams;
-  const tab: ActiveTab =
-    params.tab === "pitching" ? "pitching" : "batting";
+  const tab: ActiveTab = params.tab === "pitching" ? "pitching" : "batting";
   const period: StatsPeriod =
     params.period === "monthly"
       ? "monthly"

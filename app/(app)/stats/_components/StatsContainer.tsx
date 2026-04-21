@@ -1,6 +1,10 @@
 "use client";
 
-import type { BattingStatsRow, PitchingStatsRow, StatsPeriod } from "../actions";
+import type {
+  BattingStatsRow,
+  PitchingStatsRow,
+  StatsPeriod,
+} from "../actions";
 import Link from "next/link";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
@@ -33,9 +37,7 @@ export default function StatsContainer({
           className="flex-1 py-3 text-center text-sm font-semibold"
           style={{
             borderBottom:
-              tab === "batting"
-                ? "2px solid #d08000"
-                : "2px solid transparent",
+              tab === "batting" ? "2px solid #d08000" : "2px solid transparent",
             color: tab === "batting" ? "#F4F4F4" : "#A1A1AA",
           }}
         >
