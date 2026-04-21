@@ -1,7 +1,7 @@
 import { BallIcon } from "@app/components/icon/BallIcon";
 import { GroupIcon } from "@app/components/icon/GroupIcon";
 import { HomeIcon } from "@app/components/icon/HomeIcon";
-import { RecordIcon } from "@app/components/icon/RecordIcon";
+import { StatsIcon } from "@app/components/icon/StatsIcon";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export type NavigationItem = {
@@ -28,9 +28,9 @@ const NavigationItems = (): NavigationItem[] => {
       authRequired: !isLoggedIn,
     },
     {
-      href: isLoggedIn ? "/game-result/record" : "/signup?auth_required=true",
-      label: "記録",
-      icon: RecordIcon,
+      href: isLoggedIn ? "/stats" : "/signup?auth_required=true",
+      label: "成績",
+      icon: StatsIcon,
       authRequired: !isLoggedIn,
     },
     {

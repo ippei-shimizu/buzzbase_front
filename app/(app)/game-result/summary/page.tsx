@@ -251,6 +251,7 @@ export default function ResultsSummary() {
 
   const _handleShare = () => {};
   const handleResultComplete = () => {
+    localStorage.removeItem("gameResultId");
     router.push("/game-result/lists");
   };
 
