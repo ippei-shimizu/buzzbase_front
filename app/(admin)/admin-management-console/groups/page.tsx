@@ -21,7 +21,7 @@ export default async function GroupsPage(props: PageProps) {
   const searchParams = await props.searchParams;
   const { mode, id, page, error } = searchParams;
 
-  let data;
+  let data: Awaited<ReturnType<typeof getGroups>>;
   try {
     data = await getGroups({ page });
   } catch (_error) {

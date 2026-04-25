@@ -21,7 +21,7 @@ export default async function TeamsPage(props: PageProps) {
   const searchParams = await props.searchParams;
   const { mode, id, page, error } = searchParams;
 
-  let data;
+  let data: Awaited<ReturnType<typeof getTeams>>;
   try {
     data = await getTeams({ page });
   } catch (_error) {
