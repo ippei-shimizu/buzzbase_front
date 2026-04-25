@@ -187,6 +187,7 @@ export interface AdminGroupMember {
   email: string;
   user_id: string | null;
   image_url: string | null;
+  is_creator: boolean;
   joined_at: string;
 }
 

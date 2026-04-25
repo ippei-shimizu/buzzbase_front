@@ -42,12 +42,19 @@ export default function GroupMembersList({ members }: GroupMembersListProps) {
                   className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Link
-                      href={`/admin-management-console/app-users/${member.id}`}
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
-                    >
-                      {member.name || "-"}
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin-management-console/app-users/${member.id}`}
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                      >
+                        {member.name || "-"}
+                      </Link>
+                      {member.is_creator ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          作成者
+                        </span>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {member.email}
