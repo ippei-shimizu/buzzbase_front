@@ -121,3 +121,34 @@ export interface ManagementNoticeSingleResponse {
   management_notice: ManagementNotice;
   message?: string;
 }
+
+// Team Management types
+export interface AdminTeam {
+  id: number;
+  name: string;
+  category_name: string | null;
+  prefecture_name: string | null;
+  user_name: string | null;
+  match_results_count: number;
+  deletable: boolean;
+  created_at: string;
+}
+
+export interface AdminTeamsResponse {
+  teams: AdminTeam[];
+}
+
+// Group Management types
+export interface AdminGroup {
+  id: number;
+  name: string;
+  icon_url: string | null;
+  group_users_count: number;
+  group_invitations_count: number;
+  deletable: boolean;
+  created_at: string;
+}
+
+export interface AdminGroupsResponse {
+  groups: AdminGroup[];
+}
