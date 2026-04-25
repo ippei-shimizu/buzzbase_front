@@ -154,3 +154,63 @@ export interface AdminGroupsResponse {
   groups: AdminGroup[];
   pagination: PaginationInfo;
 }
+
+// Team Detail types
+export interface AdminTeamMember {
+  id: number;
+  name: string | null;
+  email: string;
+  user_id: string | null;
+  image_url: string | null;
+  created_at: string;
+}
+
+export interface AdminTeamDetail {
+  id: number;
+  name: string;
+  category_name: string | null;
+  prefecture_name: string | null;
+  match_results_count: number;
+  deletable: boolean;
+  created_at: string;
+  members: AdminTeamMember[];
+}
+
+export interface AdminTeamDetailResponse {
+  team: AdminTeamDetail;
+}
+
+// Group Detail types
+export interface AdminGroupMember {
+  id: number;
+  name: string | null;
+  email: string;
+  user_id: string | null;
+  image_url: string | null;
+  joined_at: string;
+}
+
+export interface AdminGroupInvitation {
+  id: number;
+  user_name: string | null;
+  user_email: string;
+  state: "pending" | "accepted" | "declined";
+  sent_at: string | null;
+  responded_at: string | null;
+}
+
+export interface AdminGroupDetail {
+  id: number;
+  name: string;
+  icon_url: string | null;
+  group_users_count: number;
+  group_invitations_count: number;
+  deletable: boolean;
+  created_at: string;
+  members: AdminGroupMember[];
+  invitations: AdminGroupInvitation[];
+}
+
+export interface AdminGroupDetailResponse {
+  group: AdminGroupDetail;
+}

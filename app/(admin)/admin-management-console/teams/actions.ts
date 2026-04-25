@@ -1,6 +1,10 @@
 "use server";
 
-import type { AdminTeamsResponse } from "../../../types/admin";
+import type {
+  AdminTeamDetail,
+  AdminTeamDetailResponse,
+  AdminTeamsResponse,
+} from "../../../types/admin";
 import { revalidatePath } from "next/cache";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
@@ -39,6 +43,36 @@ export async function getTeams(
     return response.json();
   } catch (error) {
     console.error("Error fetching teams:", error);
+    throw error;
+  }
+}
+
+export async function getTeam(id: number): Promise<AdminTeamDetail> {
+  try {
+    const adminUser = await getAdminUser();
+    if (!adminUser) {
+      throw new Error("認証が必要です");
+    }
+
+    const jwtToken = generateInternalJWT(adminUser.id);
+
+    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/teams/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("チームの取得に失敗しました");
+    }
+
+    const data: AdminTeamDetailResponse = await response.json();
+    return data.team;
+  } catch (error) {
+    console.error("Error fetching team:", error);
     throw error;
   }
 }
