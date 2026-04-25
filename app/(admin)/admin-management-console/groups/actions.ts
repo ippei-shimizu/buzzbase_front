@@ -1,12 +1,14 @@
 "use server";
 
-import type { AdminGroup, AdminGroupsResponse } from "../../../types/admin";
+import type { AdminGroupsResponse } from "../../../types/admin";
 import { revalidatePath } from "next/cache";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
 import { RAILS_API_URL } from "../../../constants/api";
 
-export async function getGroups(): Promise<AdminGroup[]> {
+export async function getGroups(
+  params: { page?: string } = {},
+): Promise<AdminGroupsResponse> {
   try {
     const adminUser = await getAdminUser();
     if (!adminUser) {
@@ -15,7 +17,13 @@ export async function getGroups(): Promise<AdminGroup[]> {
 
     const jwtToken = generateInternalJWT(adminUser.id);
 
-    const response = await fetch(`${RAILS_API_URL}/api/v1/admin/groups`, {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set("page", params.page);
+
+    const query = searchParams.toString();
+    const url = `${RAILS_API_URL}/api/v1/admin/groups${query ? `?${query}` : ""}`;
+
+    const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -28,8 +36,7 @@ export async function getGroups(): Promise<AdminGroup[]> {
       throw new Error("グループの取得に失敗しました");
     }
 
-    const data: AdminGroupsResponse = await response.json();
-    return data.groups;
+    return response.json();
   } catch (error) {
     console.error("Error fetching groups:", error);
     throw error;

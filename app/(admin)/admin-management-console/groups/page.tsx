@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import Pagination from "../../_components/Pagination";
 import DeleteConfirmDialog from "./_components/DeleteConfirmDialog";
 import GroupTable from "./_components/GroupTable";
 import { getGroups } from "./actions";
@@ -10,17 +12,18 @@ interface PageProps {
   searchParams: Promise<{
     mode?: "delete";
     id?: string;
+    page?: string;
     error?: string;
   }>;
 }
 
 export default async function GroupsPage(props: PageProps) {
   const searchParams = await props.searchParams;
-  const { mode, id, error } = searchParams;
+  const { mode, id, page, error } = searchParams;
 
-  let groups;
+  let data;
   try {
-    groups = await getGroups();
+    data = await getGroups({ page });
   } catch (_error) {
     console.error("Error loading groups:", _error);
 
@@ -58,7 +61,7 @@ export default async function GroupsPage(props: PageProps) {
   }
 
   const targetGroup = id
-    ? groups.find((group) => group.id === parseInt(id, 10))
+    ? data.groups.find((group) => group.id === parseInt(id, 10))
     : null;
 
   if (mode === "delete" && id && !targetGroup) {
@@ -69,11 +72,11 @@ export default async function GroupsPage(props: PageProps) {
     <div className="px-4 py-6 sm:px-0">
       <div className="border-4 border-dashed border-gray-200 rounded-lg p-6">
         <div className="sm:flex sm:items-center sm:justify-between mb-6">
-          <div>
+          <div className="flex items-baseline gap-3">
             <h2 className="text-2xl font-bold text-gray-900">グループ管理</h2>
-            <p className="mt-2 text-sm text-gray-700">
-              グループの一覧表示・削除を行えます。
-            </p>
+            <span className="text-sm text-gray-500">
+              {data.pagination.total_count}件
+            </span>
           </div>
         </div>
 
@@ -86,7 +89,15 @@ export default async function GroupsPage(props: PageProps) {
         {mode === "delete" && targetGroup ? (
           <DeleteConfirmDialog group={targetGroup} />
         ) : (
-          <GroupTable groups={groups} />
+          <>
+            <GroupTable groups={data.groups} />
+            <Suspense fallback={null}>
+              <Pagination
+                pagination={data.pagination}
+                basePath="/admin-management-console/groups"
+              />
+            </Suspense>
+          </>
         )}
       </div>
     </div>

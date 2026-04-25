@@ -136,6 +136,7 @@ export interface AdminTeam {
 
 export interface AdminTeamsResponse {
   teams: AdminTeam[];
+  pagination: PaginationInfo;
 }
 
 // Group Management types
@@ -151,4 +152,5 @@ export interface AdminGroup {
 
 export interface AdminGroupsResponse {
   groups: AdminGroup[];
+  pagination: PaginationInfo;
 }
