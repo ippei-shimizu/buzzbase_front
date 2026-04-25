@@ -58,7 +58,7 @@ export default async function GroupsPage(props: PageProps) {
   }
 
   const targetGroup = id
-    ? groups.find((group) => group.id === parseInt(id))
+    ? groups.find((group) => group.id === parseInt(id, 10))
     : null;
 
   if (mode === "delete" && id && !targetGroup) {

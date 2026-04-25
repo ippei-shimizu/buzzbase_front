@@ -57,7 +57,9 @@ export default async function TeamsPage(props: PageProps) {
     );
   }
 
-  const targetTeam = id ? teams.find((team) => team.id === parseInt(id)) : null;
+  const targetTeam = id
+    ? teams.find((team) => team.id === parseInt(id, 10))
+    : null;
 
   if (mode === "delete" && id && !targetTeam) {
     redirect("/admin-management-console/teams");

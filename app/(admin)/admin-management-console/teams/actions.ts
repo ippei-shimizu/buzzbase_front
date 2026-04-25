@@ -21,6 +21,7 @@ export async function getTeams(): Promise<AdminTeam[]> {
         "Content-Type": "application/json",
         Authorization: `Bearer ${jwtToken}`,
       },
+      cache: "no-store",
     });
 
     if (!response.ok) {
