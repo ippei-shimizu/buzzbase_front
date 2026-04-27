@@ -1,5 +1,6 @@
 "use server";
 
+import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
 
 export interface PublicManagementNotice {
@@ -24,6 +25,7 @@ export async function getPublishedNotices(): Promise<PublicManagementNotice[]> {
     const data = await response.json();
     return data.management_notices ?? [];
   } catch (error) {
+    captureServerActionError(error, { action: "getPublishedNotices" });
     console.error("Error fetching published notices:", error);
     return [];
   }
@@ -49,6 +51,7 @@ export async function getPublishedNotice(
     const data = await response.json();
     return data.management_notice ?? null;
   } catch (error) {
+    captureServerActionError(error, { action: "getPublishedNotice" });
     console.error("Error fetching published notice:", error);
     return null;
   }

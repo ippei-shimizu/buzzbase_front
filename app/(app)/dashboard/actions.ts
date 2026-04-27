@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
 
 export interface RecentGameResult {
@@ -154,6 +155,7 @@ export async function getDashboardData(
 
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getDashboardData" });
     console.error("Error fetching dashboard data:", error);
     return null;
   }
@@ -203,6 +205,7 @@ export async function getAvailableSeasons(): Promise<SeasonOption[]> {
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getAvailableSeasons" });
     console.error("Error fetching seasons:", error);
     return [];
   }
@@ -229,6 +232,7 @@ export async function getFilteredBattingStats(
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getFilteredBattingStats" });
     console.error("Error fetching batting stats:", error);
     return null;
   }
@@ -255,6 +259,7 @@ export async function getFilteredPitchingStats(
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getFilteredPitchingStats" });
     console.error("Error fetching pitching stats:", error);
     return null;
   }
