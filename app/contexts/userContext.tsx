@@ -1,6 +1,12 @@
 "use client";
 import type { UserContextType } from "@app/interface";
-import React, { createContext, useContext, type ReactNode } from "react";
+import * as Sentry from "@sentry/nextjs";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  type ReactNode,
+} from "react";
 import useSWR from "swr";
 import { fetcher } from "@app/hooks/swrFetcher";
 
@@ -28,6 +34,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     userId: userId ?? { id: null, team_id: null, user_id: "" },
     usersUserId: usersUserId ?? { user_id: "" },
   };
+
+  useEffect(() => {
+    if (state.userId.id) {
+      Sentry.setUser({ id: String(state.userId.id) });
+    } else {
+      Sentry.setUser(null);
+    }
+  }, [state.userId.id]);
 
   return (
     <UserContext.Provider value={{ state }}>{children}</UserContext.Provider>
