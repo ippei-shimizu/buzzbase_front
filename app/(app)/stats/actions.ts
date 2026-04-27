@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
 
 export interface BattingStatsRow {
@@ -101,7 +102,8 @@ export async function getBattingStats(
 
     const data = await response.json();
     return data.rows ?? [];
-  } catch {
+  } catch (error) {
+    captureServerActionError(error, { action: "getBattingStats" });
     return [];
   }
 }
@@ -129,7 +131,8 @@ export async function getPitchingStats(
 
     const data = await response.json();
     return data.rows ?? [];
-  } catch {
+  } catch (error) {
+    captureServerActionError(error, { action: "getPitchingStats" });
     return [];
   }
 }

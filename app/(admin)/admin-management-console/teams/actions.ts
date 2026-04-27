@@ -8,6 +8,7 @@ import type {
 import { revalidatePath } from "next/cache";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function getTeams(
@@ -42,6 +43,7 @@ export async function getTeams(
 
     return response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getTeams", rethrow: true });
     console.error("Error fetching teams:", error);
     throw error;
   }
@@ -72,6 +74,7 @@ export async function getTeam(id: number): Promise<AdminTeamDetail> {
     const data: AdminTeamDetailResponse = await response.json();
     return data.team;
   } catch (error) {
+    captureServerActionError(error, { action: "getTeam", rethrow: true });
     console.error("Error fetching team:", error);
     throw error;
   }
@@ -108,6 +111,10 @@ export async function deleteTeam(
     const data = await response.json().catch(() => ({}));
     return { success: true, message: data.message || "チームを削除しました" };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "deleteTeam",
+      extra: { teamId: id },
+    });
     console.error("Error deleting team:", error);
     return {
       success: false,

@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function getManagementNotices(): Promise<ManagementNotice[]> {
@@ -38,6 +39,10 @@ export async function getManagementNotices(): Promise<ManagementNotice[]> {
     const data: ManagementNoticeResponse = await response.json();
     return data.management_notices;
   } catch (error) {
+    captureServerActionError(error, {
+      action: "getManagementNotices",
+      rethrow: true,
+    });
     console.error("Error fetching management notices:", error);
     throw error;
   }
@@ -78,6 +83,7 @@ export async function createManagementNotice(
     revalidatePath("/admin-management-console/notices");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, { action: "createManagementNotice" });
     console.error("Error creating management notice:", error);
     return {
       success: false,
@@ -122,6 +128,10 @@ export async function updateManagementNotice(
     revalidatePath("/admin-management-console/notices");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "updateManagementNotice",
+      extra: { noticeId: id },
+    });
     console.error("Error updating management notice:", error);
     return {
       success: false,
@@ -164,6 +174,10 @@ export async function deleteManagementNotice(
     const data = await response.json().catch(() => ({}));
     return { success: true, message: data.message || "お知らせを削除しました" };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "deleteManagementNotice",
+      extra: { noticeId: id },
+    });
     console.error("Error deleting management notice:", error);
     return {
       success: false,

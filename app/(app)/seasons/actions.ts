@@ -3,6 +3,7 @@
 import type { SeasonData } from "@app/interface";
 import { cookies } from "next/headers";
 import { RAILS_API_URL } from "@app/constants/api";
+import { captureServerActionError } from "../../../lib/sentry-helpers";
 
 async function getAuthHeaders(): Promise<Record<string, string> | null> {
   const cookieStore = await cookies();
@@ -35,6 +36,7 @@ export async function getSeasonsServer(): Promise<SeasonData[]> {
     if (!response.ok) return [];
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getSeasonsServer" });
     console.error("Error fetching seasons:", error);
     return [];
   }
