@@ -8,6 +8,7 @@ import type {
 import { revalidatePath } from "next/cache";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function getGroups(
@@ -42,6 +43,7 @@ export async function getGroups(
 
     return response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getGroups" });
     console.error("Error fetching groups:", error);
     throw error;
   }
@@ -72,6 +74,7 @@ export async function getGroup(id: number): Promise<AdminGroupDetail> {
     const data: AdminGroupDetailResponse = await response.json();
     return data.group;
   } catch (error) {
+    captureServerActionError(error, { action: "getGroup" });
     console.error("Error fetching group:", error);
     throw error;
   }
@@ -108,6 +111,10 @@ export async function deleteGroup(
     const data = await response.json().catch(() => ({}));
     return { success: true, message: data.message || "グループを削除しました" };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "deleteGroup",
+      extra: { groupId: id },
+    });
     console.error("Error deleting group:", error);
     return {
       success: false,

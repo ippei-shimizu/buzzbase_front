@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function adminLogin(
@@ -55,6 +56,7 @@ export async function adminLogin(
     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
       throw error;
     }
+    captureServerActionError(error, { action: "adminLogin" });
     console.error("Admin login error:", error);
     return { error: "ログイン処理中にエラーが発生しました" };
   }
@@ -71,6 +73,7 @@ export async function adminLogout() {
       },
     });
   } catch (error) {
+    captureServerActionError(error, { action: "adminLogout" });
     console.error("Admin logout API error:", error);
   }
 

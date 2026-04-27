@@ -2,6 +2,7 @@
 
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export interface DashboardStats {
@@ -59,6 +60,7 @@ export async function getDashboardStats(
 
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getDashboardStats" });
     console.error("Error fetching dashboard stats:", error);
     throw error;
   }
@@ -91,6 +93,7 @@ export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
 
     return await response.json();
   } catch (error) {
+    captureServerActionError(error, { action: "getUserAnalytics" });
     console.error("Error fetching user analytics:", error);
     throw error;
   }

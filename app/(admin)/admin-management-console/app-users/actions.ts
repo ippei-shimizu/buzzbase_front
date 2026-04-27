@@ -9,6 +9,7 @@ import type {
 import { revalidatePath } from "next/cache";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function getAppUsers(
@@ -109,6 +110,10 @@ export async function suspendUser(
     revalidatePath("/admin-management-console/app-users");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "suspendUser",
+      extra: { userId: id },
+    });
     console.error("Error suspending user:", error);
     return {
       success: false,
@@ -151,6 +156,10 @@ export async function restoreUser(
     revalidatePath("/admin-management-console/app-users");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "restoreUser",
+      extra: { userId: id },
+    });
     console.error("Error restoring user:", error);
     return {
       success: false,
@@ -193,6 +202,10 @@ export async function softDeleteUser(
     revalidatePath("/admin-management-console/app-users");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "softDeleteUser",
+      extra: { userId: id },
+    });
     console.error("Error deleting user:", error);
     return {
       success: false,

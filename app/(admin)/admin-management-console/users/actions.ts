@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAdminUser } from "../../../../lib/admin-auth";
 import { generateInternalJWT } from "../../../../lib/internal-jwt";
+import { captureServerActionError } from "../../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../../constants/api";
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
@@ -36,6 +37,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
     const data: AdminUserResponse = await response.json();
     return data.admin_users;
   } catch (error) {
+    captureServerActionError(error, { action: "getAdminUsers" });
     console.error("Error fetching admin users:", error);
     throw error;
   }
@@ -73,6 +75,7 @@ export async function createAdminUser(
     revalidatePath("/admin-management-console/users");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, { action: "createAdminUser" });
     console.error("Error creating admin user:", error);
     return {
       success: false,
@@ -117,6 +120,10 @@ export async function updateAdminUser(
     revalidatePath("/admin-management-console/users");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "updateAdminUser",
+      extra: { adminUserId: id },
+    });
     console.error("Error updating admin user:", error);
     return {
       success: false,
@@ -159,6 +166,10 @@ export async function deleteAdminUser(
     revalidatePath("/admin-management-console/users");
     return { success: true, message: data.message };
   } catch (error) {
+    captureServerActionError(error, {
+      action: "deleteAdminUser",
+      extra: { adminUserId: id },
+    });
     console.error("Error deleting admin user:", error);
     return {
       success: false,
