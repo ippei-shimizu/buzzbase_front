@@ -37,7 +37,7 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
     const data: AdminUserResponse = await response.json();
     return data.admin_users;
   } catch (error) {
-    captureServerActionError(error, { action: "getAdminUsers" });
+    captureServerActionError(error, { action: "getAdminUsers", rethrow: true });
     console.error("Error fetching admin users:", error);
     throw error;
   }

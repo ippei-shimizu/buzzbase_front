@@ -43,7 +43,7 @@ export async function getTeams(
 
     return response.json();
   } catch (error) {
-    captureServerActionError(error, { action: "getTeams" });
+    captureServerActionError(error, { action: "getTeams", rethrow: true });
     console.error("Error fetching teams:", error);
     throw error;
   }
@@ -74,7 +74,7 @@ export async function getTeam(id: number): Promise<AdminTeamDetail> {
     const data: AdminTeamDetailResponse = await response.json();
     return data.team;
   } catch (error) {
-    captureServerActionError(error, { action: "getTeam" });
+    captureServerActionError(error, { action: "getTeam", rethrow: true });
     console.error("Error fetching team:", error);
     throw error;
   }

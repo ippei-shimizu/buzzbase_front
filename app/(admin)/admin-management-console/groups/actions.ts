@@ -43,7 +43,7 @@ export async function getGroups(
 
     return response.json();
   } catch (error) {
-    captureServerActionError(error, { action: "getGroups" });
+    captureServerActionError(error, { action: "getGroups", rethrow: true });
     console.error("Error fetching groups:", error);
     throw error;
   }
@@ -74,7 +74,7 @@ export async function getGroup(id: number): Promise<AdminGroupDetail> {
     const data: AdminGroupDetailResponse = await response.json();
     return data.group;
   } catch (error) {
-    captureServerActionError(error, { action: "getGroup" });
+    captureServerActionError(error, { action: "getGroup", rethrow: true });
     console.error("Error fetching group:", error);
     throw error;
   }

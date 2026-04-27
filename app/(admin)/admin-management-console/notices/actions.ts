@@ -39,7 +39,10 @@ export async function getManagementNotices(): Promise<ManagementNotice[]> {
     const data: ManagementNoticeResponse = await response.json();
     return data.management_notices;
   } catch (error) {
-    captureServerActionError(error, { action: "getManagementNotices" });
+    captureServerActionError(error, {
+      action: "getManagementNotices",
+      rethrow: true,
+    });
     console.error("Error fetching management notices:", error);
     throw error;
   }

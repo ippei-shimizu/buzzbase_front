@@ -60,7 +60,10 @@ export async function getDashboardStats(
 
     return await response.json();
   } catch (error) {
-    captureServerActionError(error, { action: "getDashboardStats" });
+    captureServerActionError(error, {
+      action: "getDashboardStats",
+      rethrow: true,
+    });
     console.error("Error fetching dashboard stats:", error);
     throw error;
   }
@@ -93,7 +96,10 @@ export async function getUserAnalytics(period: "7d" | "30d" | "90d" = "30d") {
 
     return await response.json();
   } catch (error) {
-    captureServerActionError(error, { action: "getUserAnalytics" });
+    captureServerActionError(error, {
+      action: "getUserAnalytics",
+      rethrow: true,
+    });
     console.error("Error fetching user analytics:", error);
     throw error;
   }
