@@ -1,4 +1,5 @@
 "use client";
+import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { signOut } from "@app/services/authService";
@@ -12,7 +13,11 @@ export default function Logout() {
       await signOut();
       setIsLoggedIn(false);
       router.push("/signin?logout=success");
-    } catch {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "logout" },
+      });
+    }
   };
   return (
     <button onClick={handleLogout} className="text-sm text-white">

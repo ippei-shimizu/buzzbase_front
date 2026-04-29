@@ -12,6 +12,7 @@ import {
   Switch,
   Textarea,
 } from "@heroui/react";
+import * as Sentry from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
@@ -319,7 +320,11 @@ export default function ProfileEdit() {
               };
               await createAward(awardData);
             }
-          } catch {}
+          } catch (error) {
+            Sentry.captureException(error, {
+              tags: { source: "mypage-edit", action: "saveAward" },
+            });
+          }
         }
       }
 
@@ -327,7 +332,11 @@ export default function ProfileEdit() {
       for (const awardId of deletedAwards) {
         try {
           await deleteAward(profile.id, awardId);
-        } catch {}
+        } catch (error) {
+          Sentry.captureException(error, {
+            tags: { source: "mypage-edit", action: "deleteAward" },
+          });
+        }
       }
 
       setTimeout(() => {
@@ -451,12 +460,10 @@ export default function ProfileEdit() {
     setAwards([...awards, { id: Date.now(), title: "" }]);
   };
   // 受賞削除
-  const handleDeleteAward = async (awardId: number, index: number) => {
-    try {
-      setDeletedAwards([...deletedAwards, awardId]);
-      const newAwards = awards.filter((_, idx) => idx !== index);
-      setAwards(newAwards);
-    } catch {}
+  const handleDeleteAward = (awardId: number, index: number) => {
+    setDeletedAwards([...deletedAwards, awardId]);
+    const newAwards = awards.filter((_, idx) => idx !== index);
+    setAwards(newAwards);
   };
 
   return (
