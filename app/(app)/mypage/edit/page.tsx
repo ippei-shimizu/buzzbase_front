@@ -460,16 +460,10 @@ export default function ProfileEdit() {
     setAwards([...awards, { id: Date.now(), title: "" }]);
   };
   // 受賞削除
-  const handleDeleteAward = async (awardId: number, index: number) => {
-    try {
-      setDeletedAwards([...deletedAwards, awardId]);
-      const newAwards = awards.filter((_, idx) => idx !== index);
-      setAwards(newAwards);
-    } catch (error) {
-      Sentry.captureException(error, {
-        tags: { source: "mypage-edit", action: "handleDeleteAward" },
-      });
-    }
+  const handleDeleteAward = (awardId: number, index: number) => {
+    setDeletedAwards([...deletedAwards, awardId]);
+    const newAwards = awards.filter((_, idx) => idx !== index);
+    setAwards(newAwards);
   };
 
   return (
