@@ -1,6 +1,7 @@
 "use client";
 import type { Notifications } from "@app/interface";
 import { Divider, Spinner } from "@heroui/react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import NotificationFollowed from "@app/components/notification/NotificationFollowed";
 import NotificationFollowRequest from "@app/components/notification/NotificationFollowRequest";
@@ -45,7 +46,11 @@ export default function NotificationItem() {
     if (typeof id !== "number") return;
     try {
       await readNotification(id);
-    } catch (_error) {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "notification-item" },
+      });
+    }
   };
 
   const renderNotification = (notice: Notifications) => {
