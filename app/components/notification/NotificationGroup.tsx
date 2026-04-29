@@ -10,6 +10,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@heroui/react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GroupIcon } from "@app/components/icon/GroupIcon";
@@ -32,7 +33,11 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
       await acceptGroupInvitation(groupId);
       await deleteNotification(id);
       router.push(`/groups/${groupId}`);
-    } catch (_error) {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "notification-group", action: "acceptInvitation" },
+      });
+    }
   };
 
   const handleDeclinedGroupInvitation = async (groupId: number, id: number) => {
@@ -41,7 +46,11 @@ export default function NotificationGroup({ notice }: NotificationGroupProps) {
       await deleteNotification(id);
       onClose();
       window.location.reload();
-    } catch (_error) {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "notification-group", action: "declineInvitation" },
+      });
+    }
   };
 
   const handleOpen = () => {

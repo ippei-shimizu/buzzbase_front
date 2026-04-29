@@ -2,6 +2,7 @@
 
 import type { Notifications } from "@app/interface";
 import { Avatar, Button } from "@heroui/react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useState } from "react";
 import { deleteNotification } from "@app/services/notificationsService";
@@ -27,7 +28,11 @@ export default function NotificationFollowRequest({
       await deleteNotification(notice.id as number);
       setHandled(true);
       setHandledType("accepted");
-    } catch (_error) {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "notification-follow-request", action: "accept" },
+      });
+    }
   };
 
   const handleReject = async () => {
@@ -37,7 +42,11 @@ export default function NotificationFollowRequest({
       await deleteNotification(notice.id as number);
       setHandled(true);
       setHandledType("rejected");
-    } catch (_error) {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "notification-follow-request", action: "reject" },
+      });
+    }
   };
 
   if (handled) {
