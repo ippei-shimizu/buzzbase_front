@@ -16,6 +16,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@heroui/react";
+import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
@@ -282,13 +283,17 @@ export default function ResultsSummary() {
     setIsLoading(true);
     try {
       await deleteGameResult(id);
-      setTimeout(() => {
-        router.push(`/mypage/${currentUsersUserId}`);
+    } catch (error) {
+      // 404 は既に削除済みなので成功扱い（クライアント側のキャッシュ等に古い id が
+      // 残るケースで「削除できません」状態を起こさないため）。それ以外は失敗扱い。
+      const isNotFound =
+        axios.isAxiosError(error) && error.response?.status === 404;
+      if (!isNotFound) {
         setIsLoading(false);
-      }, 1000);
-    } catch {
-      setIsLoading(false);
+        return;
+      }
     }
+    router.push(`/mypage/${currentUsersUserId}`);
   };
 
   if (authLoading) {
