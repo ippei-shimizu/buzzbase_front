@@ -293,10 +293,7 @@ export default function ResultsSummary() {
         return;
       }
     }
-    setTimeout(() => {
-      router.push(`/mypage/${currentUsersUserId}`);
-      setIsLoading(false);
-    }, 1000);
+    router.push(`/mypage/${currentUsersUserId}`);
   };
 
   if (authLoading) {
