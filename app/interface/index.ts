@@ -220,8 +220,11 @@ export interface MatchResultsData {
     defensive_position: string;
     tournament_id: number | null;
     memo: string | null;
+    inning_format: InningFormat;
   };
 }
+
+export type InningFormat = 7 | 9;
 
 export interface BattingAverageData {
   batting_average: {

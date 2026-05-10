@@ -103,3 +103,21 @@ export const getUserMatchResult = async (gameResultId: number | null) => {
     throw error;
   }
 };
+
+/**
+ * 試合作成・編集フォームの初期値を取得する。
+ * 直近試合の inning_format（試合のイニング制: 7 or 9）が返る。
+ * 履歴がない場合は 9。
+ */
+export const getMatchResultFormDefaults = async (): Promise<{
+  inning_format: number;
+}> => {
+  try {
+    const response = await axiosInstance.get(
+      "/api/v1/match_results/form_defaults",
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

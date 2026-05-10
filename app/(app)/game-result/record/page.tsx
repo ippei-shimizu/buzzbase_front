@@ -1,5 +1,5 @@
 "use client";
-import type { SeasonData, TournamentData } from "@app/interface";
+import type { InningFormat, SeasonData, TournamentData } from "@app/interface";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -26,6 +26,7 @@ import {
 import {
   checkExistingMatchResults,
   createMatchResults,
+  getMatchResultFormDefaults,
   updateMatchResult,
 } from "@app/services/matchResultsService";
 import { getPositions } from "@app/services/positionService";
@@ -104,6 +105,8 @@ export default function GameRecord() {
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null);
   const [inputSeasonName, setInputSeasonName] = useState("");
   const [matchMemo, setMatchMemo] = useState<string | null>(null);
+  // 試合のイニング制（7 or 9）。初期値は新規作成時に直近試合の値、編集時は当該試合の値で上書きされる。
+  const [inningFormat, setInningFormat] = useState<InningFormat>(9);
   const [isMatchDate, setIsMatchDate] = useState(true);
   const [isMyTeamValid, setIsMyTeamValid] = useState(true);
   const [isOpponentTeamValid, setIsOpponentTeamValid] = useState(true);
@@ -172,6 +175,12 @@ export default function GameRecord() {
         if (existingMatchResult.season_id) {
           setSelectedSeason(existingMatchResult.season_id);
         }
+        if (
+          existingMatchResult.inning_format === 7 ||
+          existingMatchResult.inning_format === 9
+        ) {
+          setInningFormat(existingMatchResult.inning_format);
+        }
       }
     } catch (error) {
       console.error("Error fetching existing match result:", error);
@@ -201,6 +210,18 @@ export default function GameRecord() {
         }
       };
       createNew();
+      // 新規作成時は直近試合のイニング制を初期値として読み込む（履歴なしは 9）
+      const loadInningFormatDefault = async () => {
+        try {
+          const defaults = await getMatchResultFormDefaults();
+          if (defaults?.inning_format === 7 || defaults?.inning_format === 9) {
+            setInningFormat(defaults.inning_format);
+          }
+        } catch (error) {
+          console.error("フォーム初期値の取得に失敗しました", error);
+        }
+      };
+      loadInningFormatDefault();
     }
     if (
       !(pathname === "/game-result/battings") &&
@@ -491,6 +512,7 @@ export default function GameRecord() {
             : myPosition,
           tournament_id: tournamentId,
           memo: matchMemo,
+          inning_format: inningFormat,
         },
       };
       const existingMatchResults = await checkExistingMatchResults(
@@ -584,6 +606,23 @@ export default function GameRecord() {
                 >
                   <Radio value="regular">公式戦</Radio>
                   <Radio value="open">オープン戦</Radio>
+                </RadioGroup>
+                <Divider className="my-4" />
+                <RadioGroup
+                  isRequired
+                  label="イニング制"
+                  orientation="horizontal"
+                  value={String(inningFormat)}
+                  color="primary"
+                  size="sm"
+                  className="text-sm flex justify-between items-center flex-row [&>span]:text-white"
+                  onValueChange={(value) => {
+                    const next = Number(value);
+                    if (next === 7 || next === 9) setInningFormat(next);
+                  }}
+                >
+                  <Radio value="9">9回制</Radio>
+                  <Radio value="7">7回制</Radio>
                 </RadioGroup>
                 <Divider className="my-4" />
                 <Autocomplete
