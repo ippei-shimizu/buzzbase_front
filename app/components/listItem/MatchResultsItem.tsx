@@ -1,5 +1,6 @@
 "use client";
 
+import type { AppearanceType } from "@app/interface";
 import {
   Button,
   Card,
@@ -9,6 +10,7 @@ import {
   Divider,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { getAppearanceTypeBadgeLabel } from "@app/constants/appearanceType";
 
 type GameResultItem = {
   game_result_id: number;
@@ -22,6 +24,7 @@ type GameResultItem = {
     tournament_name?: string;
     my_team_score: number;
     opponent_team_score: number;
+    appearance_type?: AppearanceType;
   };
   plate_appearances?: PlateAppearance[];
   pitching_result?: {
@@ -163,7 +166,7 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
               詳細
             </Button>
             <CardHeader className="p-0 flex-col items-start">
-              <div className="flex items-center gap-x-2">
+              <div className="flex items-center gap-x-2 flex-wrap">
                 {game.match_result?.match_type ? (
                   <>
                     <Chip
@@ -179,6 +182,22 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                           ? "オープン戦"
                           : ""}
                     </Chip>
+                    {(() => {
+                      const badge = getAppearanceTypeBadgeLabel(
+                        game.match_result.appearance_type,
+                      );
+                      return badge ? (
+                        <Chip
+                          variant="faded"
+                          classNames={{
+                            base: "border-small border-zic-500 px-2",
+                            content: "text-blue-300 text-xs",
+                          }}
+                        >
+                          {badge}
+                        </Chip>
+                      ) : null;
+                    })()}
                     <p className="text-sm font-normal text-zinc-400">
                       {new Date(
                         game.match_result.date_and_time,
