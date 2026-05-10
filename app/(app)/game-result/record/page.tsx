@@ -1,5 +1,10 @@
 "use client";
-import type { InningFormat, SeasonData, TournamentData } from "@app/interface";
+import type {
+  AppearanceType,
+  InningFormat,
+  SeasonData,
+  TournamentData,
+} from "@app/interface";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -18,6 +23,7 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { APPEARANCE_TYPE_OPTIONS } from "@app/constants/appearanceType";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   createGameResult,
@@ -39,17 +45,20 @@ import {
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
 
+// 打順の選択肢。代打・代走・途中出場・未出場のケースで「なし」を選べるよう先頭に追加。
+// 「なし」は id=""（空文字）として、state（matchBattingOrder）と Select の selectedKeys を一致させる。
 const battingOrder = [
-  { id: 1, turn: "1番" },
-  { id: 2, turn: "2番" },
-  { id: 3, turn: "3番" },
-  { id: 4, turn: "4番" },
-  { id: 5, turn: "5番" },
-  { id: 6, turn: "6番" },
-  { id: 7, turn: "7番" },
-  { id: 8, turn: "8番" },
-  { id: 9, turn: "9番" },
-  { id: 10, turn: "-" },
+  { id: "", turn: "なし" },
+  { id: "1", turn: "1番" },
+  { id: "2", turn: "2番" },
+  { id: "3", turn: "3番" },
+  { id: "4", turn: "4番" },
+  { id: "5", turn: "5番" },
+  { id: "6", turn: "6番" },
+  { id: "7", turn: "7番" },
+  { id: "8", turn: "8番" },
+  { id: "9", turn: "9番" },
+  { id: "10", turn: "-" },
 ];
 
 type Team = {
@@ -107,6 +116,9 @@ export default function GameRecord() {
   const [matchMemo, setMatchMemo] = useState<string | null>(null);
   // 試合のイニング制（7 or 9）。初期値は新規作成時に直近試合の値、編集時は当該試合の値で上書きされる。
   const [inningFormat, setInningFormat] = useState<InningFormat>(9);
+  // 出場区分（先発 / 代打のみ / 代走のみ）。代打のみ・代走のみは打順／守備位置を任意に。
+  const [appearanceType, setAppearanceType] =
+    useState<AppearanceType>("starter");
   const [isMatchDate, setIsMatchDate] = useState(true);
   const [isMyTeamValid, setIsMyTeamValid] = useState(true);
   const [isOpponentTeamValid, setIsOpponentTeamValid] = useState(true);
@@ -181,6 +193,9 @@ export default function GameRecord() {
         ) {
           setInningFormat(existingMatchResult.inning_format);
         }
+        // appearance_type は MatchResultsData で AppearanceType として型付けされているため
+        // ランタイムガードは不要。inning_format と同様にそのまま反映する。
+        setAppearanceType(existingMatchResult.appearance_type);
       }
     } catch (error) {
       console.error("Error fetching existing match result:", error);
@@ -318,7 +333,7 @@ export default function GameRecord() {
     setOpponentTeamScore(Number(event.target.value));
   };
 
-  // 打順
+  // 打順。「なし」は id=""（空文字）なのでそのまま state に保存する。
   const handleBattingOrderChange = (event: { target: { value: string } }) => {
     const order = event.target.value;
     setExistingMatchBattingOrder(order);
@@ -390,7 +405,12 @@ export default function GameRecord() {
       setIsOpponentTeamScoreValid(true);
     }
 
-    if (!matchBattingOrder && !existingMatchBattingOrder) {
+    // 先発／途中出場の場合のみ打順／守備位置を必須とする。
+    // 代打／代走／未出場は入力任意（出場区分切替時に自動で空文字がセットされる）。
+    const lineupRequired =
+      appearanceType === "starter" || appearanceType === "substitute";
+
+    if (lineupRequired && !matchBattingOrder && !existingMatchBattingOrder) {
       setIsBattingOrderValid(false);
       isValid = false;
       newErrors.push("打順が未入力です。");
@@ -398,7 +418,12 @@ export default function GameRecord() {
       setIsBattingOrderValid(true);
     }
 
-    if (!defensivePosition && !myPosition && !existingDefensivePosition) {
+    if (
+      lineupRequired &&
+      !defensivePosition &&
+      !myPosition &&
+      !existingDefensivePosition
+    ) {
       setIsDefensivePositionValid(false);
       isValid = false;
       newErrors.push("守備位置が未入力です。");
@@ -513,6 +538,7 @@ export default function GameRecord() {
           tournament_id: tournamentId,
           memo: matchMemo,
           inning_format: inningFormat,
+          appearance_type: appearanceType,
         },
       };
       const existingMatchResults = await checkExistingMatchResults(
@@ -548,7 +574,12 @@ export default function GameRecord() {
           );
         }
       }
-      router.push(`/game-result/batting/`);
+      // 未出場の場合は打撃・投手成績の入力をスキップして試合結果まとめへ。
+      const nextPath =
+        appearanceType === "no_play"
+          ? `/game-result/summary/`
+          : `/game-result/batting/`;
+      router.push(nextPath);
     } catch (error) {
       throw error;
     }
@@ -623,6 +654,43 @@ export default function GameRecord() {
                 >
                   <Radio value="9">9回制</Radio>
                   <Radio value="7">7回制</Radio>
+                </RadioGroup>
+                <Divider className="my-4" />
+                {/* 出場区分は選択肢が5つあるためラジオ側は折り返しを許可し、
+                    ラベル＋必須マーク部分は shrink-0 で縮まないようにする。 */}
+                <RadioGroup
+                  isRequired
+                  label="出場区分"
+                  orientation="horizontal"
+                  value={appearanceType}
+                  color="primary"
+                  size="sm"
+                  className="text-sm flex justify-between items-center flex-row [&>span]:text-white"
+                  classNames={{
+                    label: "shrink-0 whitespace-nowrap",
+                    wrapper: "flex-wrap",
+                  }}
+                  onValueChange={(value) => {
+                    // RadioGroup の選択肢は APPEARANCE_TYPE_OPTIONS から生成しているため、
+                    // value は必ず AppearanceType に絞られる。
+                    const next = value as AppearanceType;
+                    setAppearanceType(next);
+                    // 代打／代走／未出場 を選んだ瞬間に打順／守備位置を「なし」（空文字）に
+                    // 自動セットする。先発／途中出場のときは現状の値を維持。
+                    if (next !== "starter" && next !== "substitute") {
+                      setMatchBattingOrder("");
+                      setExistingMatchBattingOrder("");
+                      setDefensivePosition("");
+                      setExistingDefensivePosition("");
+                      setMyPosition("");
+                    }
+                  }}
+                >
+                  {APPEARANCE_TYPE_OPTIONS.map((opt) => (
+                    <Radio key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Radio>
+                  ))}
                 </RadioGroup>
                 <Divider className="my-4" />
                 <Autocomplete
@@ -752,14 +820,17 @@ export default function GameRecord() {
                 </div>
                 <Divider className="my-4" />
                 <Select
-                  isRequired
+                  isRequired={
+                    appearanceType === "starter" ||
+                    appearanceType === "substitute"
+                  }
                   variant="faded"
                   label="打順"
                   labelPlacement="outside-left"
                   size="md"
                   fullWidth={false}
                   color={isBattingOrderValid ? "default" : "danger"}
-                  className="grid justify-between items-center grid-cols-[auto_78px]"
+                  className="grid justify-between items-center grid-cols-[auto_96px]"
                   onChange={handleBattingOrderChange}
                   selectedKeys={
                     existingMatchBattingOrder !== undefined
@@ -775,7 +846,10 @@ export default function GameRecord() {
                 </Select>
                 <Divider className="my-4" />
                 <Select
-                  isRequired
+                  isRequired={
+                    appearanceType === "starter" ||
+                    appearanceType === "substitute"
+                  }
                   variant="faded"
                   label="守備位置"
                   labelPlacement="outside-left"
@@ -791,15 +865,20 @@ export default function GameRecord() {
                       : myPosition
                   }
                 >
-                  {positionData.map((position) => (
-                    <SelectItem
-                      key={position.id}
-                      textValue={position.name}
-                      className="text-white"
-                    >
-                      {position.name}
-                    </SelectItem>
-                  ))}
+                  {[
+                    <SelectItem key="" textValue="なし" className="text-white">
+                      なし
+                    </SelectItem>,
+                    ...positionData.map((position) => (
+                      <SelectItem
+                        key={position.id}
+                        textValue={position.name}
+                        className="text-white"
+                      >
+                        {position.name}
+                      </SelectItem>
+                    )),
+                  ]}
                 </Select>
                 <Divider className="my-4" />
                 <Textarea
@@ -823,7 +902,7 @@ export default function GameRecord() {
                   endContent={<NextArrowIcon stroke="#F4F4F4" />}
                   isDisabled={isSubmitting}
                 >
-                  打撃結果
+                  {appearanceType === "no_play" ? "試合結果まとめ" : "打撃結果"}
                 </Button>
               </div>
             </form>

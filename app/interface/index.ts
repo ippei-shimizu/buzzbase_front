@@ -221,10 +221,17 @@ export interface MatchResultsData {
     tournament_id: number | null;
     memo: string | null;
     inning_format: InningFormat;
+    appearance_type: AppearanceType;
   };
 }
 
 export type InningFormat = 7 | 9;
+export type AppearanceType =
+  | "starter"
+  | "substitute"
+  | "pinch_hitter"
+  | "pinch_runner"
+  | "no_play";
 
 export interface BattingAverageData {
   batting_average: {
@@ -276,6 +283,7 @@ export interface MatchResult {
   opponent_team_name: string;
   my_team_score: number;
   opponent_team_score: number;
+  appearance_type?: AppearanceType;
 }
 
 export interface BattingAverage {
