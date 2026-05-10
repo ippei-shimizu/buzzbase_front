@@ -220,6 +220,7 @@ export interface MatchResultsData {
     defensive_position: string;
     tournament_id: number | null;
     memo: string | null;
+    inning_format: number;
   };
 }
 
