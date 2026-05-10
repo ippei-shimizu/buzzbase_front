@@ -46,19 +46,19 @@ import {
 import { getCurrentUserId, getUserData } from "@app/services/userService";
 
 // 打順の選択肢。代打・代走・途中出場・未出場のケースで「なし」を選べるよう先頭に追加。
-// id: 0 は「なし」を示し、送信時は空文字に変換する（DB に "0" を保存しないため）。
+// 「なし」は id=""（空文字）として、state（matchBattingOrder）と Select の selectedKeys を一致させる。
 const battingOrder = [
-  { id: 0, turn: "なし" },
-  { id: 1, turn: "1番" },
-  { id: 2, turn: "2番" },
-  { id: 3, turn: "3番" },
-  { id: 4, turn: "4番" },
-  { id: 5, turn: "5番" },
-  { id: 6, turn: "6番" },
-  { id: 7, turn: "7番" },
-  { id: 8, turn: "8番" },
-  { id: 9, turn: "9番" },
-  { id: 10, turn: "-" },
+  { id: "", turn: "なし" },
+  { id: "1", turn: "1番" },
+  { id: "2", turn: "2番" },
+  { id: "3", turn: "3番" },
+  { id: "4", turn: "4番" },
+  { id: "5", turn: "5番" },
+  { id: "6", turn: "6番" },
+  { id: "7", turn: "7番" },
+  { id: "8", turn: "8番" },
+  { id: "9", turn: "9番" },
+  { id: "10", turn: "-" },
 ];
 
 type Team = {
@@ -193,15 +193,9 @@ export default function GameRecord() {
         ) {
           setInningFormat(existingMatchResult.inning_format);
         }
-        if (
-          existingMatchResult.appearance_type === "starter" ||
-          existingMatchResult.appearance_type === "substitute" ||
-          existingMatchResult.appearance_type === "pinch_hitter" ||
-          existingMatchResult.appearance_type === "pinch_runner" ||
-          existingMatchResult.appearance_type === "no_play"
-        ) {
-          setAppearanceType(existingMatchResult.appearance_type);
-        }
+        // appearance_type は MatchResultsData で AppearanceType として型付けされているため
+        // ランタイムガードは不要。inning_format と同様にそのまま反映する。
+        setAppearanceType(existingMatchResult.appearance_type);
       }
     } catch (error) {
       console.error("Error fetching existing match result:", error);
@@ -339,9 +333,9 @@ export default function GameRecord() {
     setOpponentTeamScore(Number(event.target.value));
   };
 
-  // 打順。「なし」を選んだとき (id=0) は空文字を保存して未指定として扱う。
+  // 打順。「なし」は id=""（空文字）なのでそのまま state に保存する。
   const handleBattingOrderChange = (event: { target: { value: string } }) => {
-    const order = event.target.value === "0" ? "" : event.target.value;
+    const order = event.target.value;
     setExistingMatchBattingOrder(order);
     setMatchBattingOrder(order);
   };
@@ -677,19 +671,13 @@ export default function GameRecord() {
                     wrapper: "flex-wrap",
                   }}
                   onValueChange={(value) => {
-                    if (
-                      value !== "starter" &&
-                      value !== "substitute" &&
-                      value !== "pinch_hitter" &&
-                      value !== "pinch_runner" &&
-                      value !== "no_play"
-                    ) {
-                      return;
-                    }
-                    setAppearanceType(value);
+                    // RadioGroup の選択肢は APPEARANCE_TYPE_OPTIONS から生成しているため、
+                    // value は必ず AppearanceType に絞られる。
+                    const next = value as AppearanceType;
+                    setAppearanceType(next);
                     // 代打／代走／未出場 を選んだ瞬間に打順／守備位置を「なし」（空文字）に
                     // 自動セットする。先発／途中出場のときは現状の値を維持。
-                    if (value !== "starter" && value !== "substitute") {
+                    if (next !== "starter" && next !== "substitute") {
                       setMatchBattingOrder("");
                       setExistingMatchBattingOrder("");
                       setDefensivePosition("");

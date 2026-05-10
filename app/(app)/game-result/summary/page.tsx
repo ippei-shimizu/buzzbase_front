@@ -11,9 +11,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
+import AppearanceTypeBadge from "@app/components/chip/AppearanceTypeBadge";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
-import { getAppearanceTypeBadgeLabel } from "@app/constants/appearanceType";
 import { getCurrentBattingAverage } from "@app/services/battingAveragesService";
 import { getCurrentMatchResult } from "@app/services/matchResultsService";
 import { getCurrentPitchingResult } from "@app/services/pitchingResultsService";
@@ -296,22 +296,9 @@ export default function ResultsSummary() {
                             ? "オープン戦"
                             : ""}
                       </Chip>
-                      {(() => {
-                        const badge = getAppearanceTypeBadgeLabel(
-                          match.appearance_type,
-                        );
-                        return badge ? (
-                          <Chip
-                            variant="faded"
-                            classNames={{
-                              base: "border-small border-zic-500 px-2",
-                              content: "text-blue-300 text-xs",
-                            }}
-                          >
-                            {badge}
-                          </Chip>
-                        ) : null;
-                      })()}
+                      <AppearanceTypeBadge
+                        appearanceType={match.appearance_type}
+                      />
                       <p className="text-sm font-normal">
                         {new Date(match.date_and_time).toLocaleDateString()}
                       </p>

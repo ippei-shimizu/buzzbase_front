@@ -10,7 +10,7 @@ import {
   Divider,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { getAppearanceTypeBadgeLabel } from "@app/constants/appearanceType";
+import AppearanceTypeBadge from "@app/components/chip/AppearanceTypeBadge";
 
 type GameResultItem = {
   game_result_id: number;
@@ -182,22 +182,9 @@ export default function MatchResultsItem(props: MatchResultsItemProps) {
                           ? "オープン戦"
                           : ""}
                     </Chip>
-                    {(() => {
-                      const badge = getAppearanceTypeBadgeLabel(
-                        game.match_result.appearance_type,
-                      );
-                      return badge ? (
-                        <Chip
-                          variant="faded"
-                          classNames={{
-                            base: "border-small border-zic-500 px-2",
-                            content: "text-blue-300 text-xs",
-                          }}
-                        >
-                          {badge}
-                        </Chip>
-                      ) : null;
-                    })()}
+                    <AppearanceTypeBadge
+                      appearanceType={game.match_result.appearance_type}
+                    />
                     <p className="text-sm font-normal text-zinc-400">
                       {new Date(
                         game.match_result.date_and_time,

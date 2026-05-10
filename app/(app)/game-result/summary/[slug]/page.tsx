@@ -22,11 +22,11 @@ import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
+import AppearanceTypeBadge from "@app/components/chip/AppearanceTypeBadge";
 import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { getAppearanceTypeBadgeLabel } from "@app/constants/appearanceType";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getUserBattingAverage } from "@app/services/battingAveragesService";
 import { deleteGameResult } from "@app/services/gameResultsService";
@@ -362,22 +362,9 @@ export default function ResultsSummary() {
                             ? "オープン戦"
                             : ""}
                       </Chip>
-                      {(() => {
-                        const badge = getAppearanceTypeBadgeLabel(
-                          match.appearance_type,
-                        );
-                        return badge ? (
-                          <Chip
-                            variant="faded"
-                            classNames={{
-                              base: "border-small border-zic-500 px-2",
-                              content: "text-blue-300 text-xs",
-                            }}
-                          >
-                            {badge}
-                          </Chip>
-                        ) : null;
-                      })()}
+                      <AppearanceTypeBadge
+                        appearanceType={match.appearance_type}
+                      />
                       <p className="text-sm font-normal">
                         {new Date(match.date_and_time).toLocaleDateString()}
                       </p>
