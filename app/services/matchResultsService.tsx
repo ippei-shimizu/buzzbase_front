@@ -112,8 +112,12 @@ export const getUserMatchResult = async (gameResultId: number | null) => {
 export const getMatchResultFormDefaults = async (): Promise<{
   inning_format: number;
 }> => {
-  const response = await axiosInstance.get(
-    "/api/v1/match_results/form_defaults",
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.get(
+      "/api/v1/match_results/form_defaults",
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };

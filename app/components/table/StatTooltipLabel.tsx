@@ -11,14 +11,7 @@ interface Props {
   className?: string;
 }
 
-/**
- * 成績テーブルのラベルセル用ツールチップ。
- *
- * `<p>` で組まれた既存セルを置き換える形で使う。
- * クリックで HeroUI Popover を開き、計算式や前提条件などの補足を表示する。
- * 見た目は `className` 経由でセルの border / padding を継承し、ラベルテキストには
- * 「ツールチップを開ける」ことを示す dotted underline を付与する。
- */
+// 成績テーブルのラベルセルをタップで開く Popover に置き換えるヘルパー。
 export default function StatTooltipLabel({ label, tooltip, className }: Props) {
   return (
     <Popover placement="top" showArrow>

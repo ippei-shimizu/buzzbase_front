@@ -133,7 +133,7 @@ export default function StatsTable<
                         <PopoverTrigger>
                           <button
                             type="button"
-                            className="flex items-center justify-center underline decoration-dotted decoration-zinc-500 underline-offset-2"
+                            className="flex w-full items-center justify-center underline decoration-dotted decoration-zinc-500 underline-offset-2"
                           >
                             {labelSpan}
                           </button>
