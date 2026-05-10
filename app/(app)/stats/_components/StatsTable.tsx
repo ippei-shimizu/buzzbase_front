@@ -1,10 +1,13 @@
 "use client";
 
+import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+
 interface Column<T> {
   key: keyof T;
   label: string;
   format?: (value: number) => string;
   highlight?: boolean;
+  tooltip?: string;
 }
 
 interface StatsTableProps<T> {
@@ -102,11 +105,12 @@ export default function StatsTable<
               className="flex min-w-max h-[68px]"
               style={{ backgroundColor: "#27272a" }}
             >
-              {columns.map((col) => (
-                <div
-                  key={String(col.key)}
-                  className="flex items-center justify-center w-12 px-1.5"
-                >
+              {columns.map((col) => {
+                const labelText = col.label
+                  .split("")
+                  .map((c) => (c === "ー" ? "｜" : c === "/" ? "／" : c))
+                  .join("\n");
+                const labelSpan = (
                   <span
                     className="text-center whitespace-pre-wrap"
                     style={{
@@ -116,13 +120,36 @@ export default function StatsTable<
                       lineHeight: "11px",
                     }}
                   >
-                    {col.label
-                      .split("")
-                      .map((c) => (c === "ー" ? "｜" : c === "/" ? "／" : c))
-                      .join("\n")}
+                    {labelText}
                   </span>
-                </div>
-              ))}
+                );
+                return (
+                  <div
+                    key={String(col.key)}
+                    className="flex items-center justify-center w-12 px-1.5"
+                  >
+                    {col.tooltip ? (
+                      <Popover placement="bottom" showArrow>
+                        <PopoverTrigger>
+                          <button
+                            type="button"
+                            className="flex items-center justify-center underline decoration-dotted decoration-zinc-500 underline-offset-2"
+                          >
+                            {labelSpan}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="max-w-[220px] p-3">
+                          <p className="text-xs text-zinc-100 leading-snug">
+                            {col.tooltip}
+                          </p>
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      labelSpan
+                    )}
+                  </div>
+                );
+              })}
             </div>
             {/* データ行 */}
             {rows.map((row, i) => {

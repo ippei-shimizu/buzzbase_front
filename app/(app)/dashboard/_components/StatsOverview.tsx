@@ -4,12 +4,16 @@ import type { BattingStats, PitchingStats, SeasonOption } from "../actions";
 import { useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import StatTooltipLabel from "@app/components/table/StatTooltipLabel";
 import { formatRate, formatRate2, formatEra } from "@app/utils/formatStats";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
 } from "./radarChartUtils";
 import StatsRadarChart from "./StatsRadarChart";
+
+const INNING_FORMAT_TOOLTIP =
+  "試合のイニング制（7回制 or 9回制）に応じて計算されます。";
 
 interface StatsOverviewProps {
   battingStats: BattingStats | null;
@@ -328,7 +332,11 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
       <div className="grid grid-cols-2">
         <div>
           <div className={styleTableBox}>
-            <p className={styleTableTitle}>防御率</p>
+            <StatTooltipLabel
+              label="防御率"
+              tooltip={INNING_FORMAT_TOOLTIP}
+              className={styleTableTitle}
+            />
             <span className={styleTableData}>{displayEraValue(calc?.era)}</span>
           </div>
           <div className={styleTableBox}>
@@ -376,7 +384,11 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
             </span>
           </div>
           <div className={styleTableBox}>
-            <p className={styleTableTitle}>BB/9</p>
+            <StatTooltipLabel
+              label="BB/9"
+              tooltip={INNING_FORMAT_TOOLTIP}
+              className={styleTableTitle}
+            />
             <span className={styleTableData}>
               {displayEraValue(calc?.bb_per_nine)}
             </span>
@@ -434,7 +446,11 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
             </span>
           </div>
           <div className={styleTableBox}>
-            <p className={styleTableTitle}>K/9</p>
+            <StatTooltipLabel
+              label="K/9"
+              tooltip={INNING_FORMAT_TOOLTIP}
+              className={styleTableTitle}
+            />
             <span className={styleTableData}>
               {displayEraValue(calc?.k_per_nine)}
             </span>
