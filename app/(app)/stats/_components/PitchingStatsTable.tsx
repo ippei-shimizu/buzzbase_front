@@ -1,8 +1,6 @@
 import type { PitchingStatsRow } from "../actions";
+import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import StatsTable, { type Column, fmt2, fmtInt } from "./StatsTable";
-
-const INNING_FORMAT_TOOLTIP =
-  "試合のイニング制（7回制 or 9回制）に応じて計算されます。";
 
 const PITCHING_COLUMNS: Column<PitchingStatsRow>[] = [
   {

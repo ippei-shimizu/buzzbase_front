@@ -1,5 +1,5 @@
 "use client";
-import type { SeasonData, TournamentData } from "@app/interface";
+import type { InningFormat, SeasonData, TournamentData } from "@app/interface";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -106,7 +106,7 @@ export default function GameRecord() {
   const [inputSeasonName, setInputSeasonName] = useState("");
   const [matchMemo, setMatchMemo] = useState<string | null>(null);
   // 試合のイニング制（7 or 9）。初期値は新規作成時に直近試合の値、編集時は当該試合の値で上書きされる。
-  const [inningFormat, setInningFormat] = useState<number>(9);
+  const [inningFormat, setInningFormat] = useState<InningFormat>(9);
   const [isMatchDate, setIsMatchDate] = useState(true);
   const [isMyTeamValid, setIsMyTeamValid] = useState(true);
   const [isOpponentTeamValid, setIsOpponentTeamValid] = useState(true);
@@ -175,7 +175,10 @@ export default function GameRecord() {
         if (existingMatchResult.season_id) {
           setSelectedSeason(existingMatchResult.season_id);
         }
-        if (typeof existingMatchResult.inning_format === "number") {
+        if (
+          existingMatchResult.inning_format === 7 ||
+          existingMatchResult.inning_format === 9
+        ) {
           setInningFormat(existingMatchResult.inning_format);
         }
       }
@@ -211,7 +214,7 @@ export default function GameRecord() {
       const loadInningFormatDefault = async () => {
         try {
           const defaults = await getMatchResultFormDefaults();
-          if (typeof defaults?.inning_format === "number") {
+          if (defaults?.inning_format === 7 || defaults?.inning_format === 9) {
             setInningFormat(defaults.inning_format);
           }
         } catch (error) {
@@ -613,7 +616,10 @@ export default function GameRecord() {
                   color="primary"
                   size="sm"
                   className="text-sm flex justify-between items-center flex-row [&>span]:text-white"
-                  onValueChange={(value) => setInningFormat(Number(value))}
+                  onValueChange={(value) => {
+                    const next = Number(value);
+                    if (next === 7 || next === 9) setInningFormat(next);
+                  }}
                 >
                   <Radio value="9">9回制</Radio>
                   <Radio value="7">7回制</Radio>

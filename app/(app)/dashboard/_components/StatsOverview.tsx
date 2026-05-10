@@ -5,15 +5,13 @@ import { useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import StatTooltipLabel from "@app/components/table/StatTooltipLabel";
+import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import { formatRate, formatRate2, formatEra } from "@app/utils/formatStats";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
 } from "./radarChartUtils";
 import StatsRadarChart from "./StatsRadarChart";
-
-const INNING_FORMAT_TOOLTIP =
-  "試合のイニング制（7回制 or 9回制）に応じて計算されます。";
 
 interface StatsOverviewProps {
   battingStats: BattingStats | null;

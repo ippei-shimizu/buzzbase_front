@@ -1,8 +1,6 @@
+import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import { formatEra, formatRate2 } from "@app/utils/formatStats";
 import StatTooltipLabel from "./StatTooltipLabel";
-
-const INNING_FORMAT_TOOLTIP =
-  "試合のイニング制（7回制 or 9回制）に応じて計算されます。";
 
 type PersonalPitchingResults = {
   number_of_appearances: number;
