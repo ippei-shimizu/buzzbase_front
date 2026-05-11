@@ -338,6 +338,12 @@ export default function GroupDetail(props: GroupDetailProps) {
                       メンバー招待
                     </DropdownItem>
                     <DropdownItem
+                      key="inviteCode"
+                      href={`/groups/${params.slug}/share-invite`}
+                    >
+                      招待コード
+                    </DropdownItem>
+                    <DropdownItem
                       key="edit"
                       href={`/groups/${params.slug}/info/edit`}
                     >
