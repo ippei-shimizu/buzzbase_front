@@ -11,6 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
+import AppearanceTypeBadge from "@app/components/chip/AppearanceTypeBadge";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import { getCurrentBattingAverage } from "@app/services/battingAveragesService";
@@ -281,7 +282,7 @@ export default function ResultsSummary() {
               {matchResult ? (
                 matchResult.map((match: MatchResultDisplay) => (
                   <div key={match.id}>
-                    <div className="flex items-center gap-x-2">
+                    <div className="flex items-center gap-x-2 flex-wrap">
                       <Chip
                         variant="faded"
                         classNames={{
@@ -295,6 +296,9 @@ export default function ResultsSummary() {
                             ? "オープン戦"
                             : ""}
                       </Chip>
+                      <AppearanceTypeBadge
+                        appearanceType={match.appearance_type}
+                      />
                       <p className="text-sm font-normal">
                         {new Date(match.date_and_time).toLocaleDateString()}
                       </p>

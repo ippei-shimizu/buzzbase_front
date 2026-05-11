@@ -1,4 +1,6 @@
+import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import { formatEra, formatRate2 } from "@app/utils/formatStats";
+import StatTooltipLabel from "./StatTooltipLabel";
 
 type PersonalPitchingResults = {
   number_of_appearances: number;
@@ -61,7 +63,11 @@ export default function PitchingRecordTable(props: Props) {
         <div className="grid grid-cols-2">
           <div>
             <div className={styleTableBox}>
-              <p className={styleTableTitle}>防御率</p>
+              <StatTooltipLabel
+                label="防御率"
+                tooltip={INNING_FORMAT_TOOLTIP}
+                className={styleTableTitle}
+              />
               <span className={styleTableData}>
                 {displayEraValue(pitchingStats?.era)}
               </span>
@@ -115,7 +121,11 @@ export default function PitchingRecordTable(props: Props) {
               </span>
             </div>
             <div className={styleTableBox}>
-              <p className={styleTableTitle}>BB/9</p>
+              <StatTooltipLabel
+                label="BB/9"
+                tooltip={INNING_FORMAT_TOOLTIP}
+                className={styleTableTitle}
+              />
               <span className={styleTableData}>
                 {displayEraValue(pitchingStats?.bb_per_nine)}
               </span>
@@ -179,7 +189,11 @@ export default function PitchingRecordTable(props: Props) {
               </span>
             </div>
             <div className={styleTableBox}>
-              <p className={styleTableTitle}>K/9</p>
+              <StatTooltipLabel
+                label="K/9"
+                tooltip={INNING_FORMAT_TOOLTIP}
+                className={styleTableTitle}
+              />
               <span className={styleTableData}>
                 {displayEraValue(pitchingStats?.k_per_nine)}
               </span>
