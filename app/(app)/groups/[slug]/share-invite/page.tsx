@@ -62,13 +62,16 @@ export default function ShareInvitePage(props: {
     }
   };
 
+  const shareMessage = inviteLink
+    ? buildShareMessage(inviteLink.group_name, inviteLink.code)
+    : "";
+
   const handleShare = async () => {
     if (!inviteLink) return;
-    const message = buildShareMessage(inviteLink.group_name, inviteLink.code);
 
     if (typeof navigator !== "undefined" && "share" in navigator) {
       try {
-        await navigator.share({ text: message });
+        await navigator.share({ text: shareMessage });
         return;
       } catch (error) {
         if ((error as DOMException)?.name === "AbortError") {
@@ -172,10 +175,7 @@ export default function ShareInvitePage(props: {
         <ShareInviteFallbackModal
           isOpen={isOpen}
           onClose={onClose}
-          shareMessage={buildShareMessage(
-            inviteLink.group_name,
-            inviteLink.code,
-          )}
+          shareMessage={shareMessage}
         />
       ) : null}
     </div>

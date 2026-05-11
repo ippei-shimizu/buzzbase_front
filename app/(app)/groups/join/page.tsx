@@ -21,11 +21,13 @@ export default function GroupJoinPage() {
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
 
+  const trimmedCode = code.trim();
+
   const handleLookup = async () => {
-    if (!code) return;
+    if (!trimmedCode) return;
     setIsLookingUp(true);
     try {
-      const info = await getInviteLinkInfo(code);
+      const info = await getInviteLinkInfo(trimmedCode);
       setInviteInfo(info);
     } catch (error) {
       console.error("招待コードの確認に失敗しました", error);
@@ -37,10 +39,10 @@ export default function GroupJoinPage() {
   };
 
   const handleAccept = async () => {
-    if (!code || !inviteInfo) return;
+    if (!trimmedCode || !inviteInfo) return;
     setIsAccepting(true);
     try {
-      const result = await acceptInviteLink(code);
+      const result = await acceptInviteLink(trimmedCode);
       router.push(`/groups/${result.group_id}`);
     } catch (error) {
       console.error("グループへの参加に失敗しました", error);
@@ -93,7 +95,7 @@ export default function GroupJoinPage() {
             size="lg"
             radius="md"
             className="mt-4"
-            isDisabled={code.length === 0}
+            isDisabled={trimmedCode.length === 0}
             isLoading={isLookingUp}
             onPress={handleLookup}
           >
