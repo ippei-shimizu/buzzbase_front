@@ -451,3 +451,27 @@ export interface ResendConfirmationModalProps {
   onResendSuccess: () => void;
   showEmailInput: boolean;
 }
+
+export interface InviteLinkResponse {
+  code: string;
+  group_name: string;
+  group_id: number;
+}
+
+export interface InviteLinkInfo {
+  group: {
+    id: number;
+    name: string;
+    icon: string | null;
+    member_count: number;
+  };
+  inviter: {
+    name: string;
+    image: { url: string | null };
+  };
+}
+
+export interface AcceptInviteLinkResponse {
+  success: boolean;
+  group_id: number;
+}
