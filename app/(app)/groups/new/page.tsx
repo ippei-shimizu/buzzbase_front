@@ -129,7 +129,7 @@ export default function GroupNew() {
     });
     try {
       const response = await createGroup(formData);
-      router.push(`/groups/${response.id}/`);
+      router.push(`/groups/${response.id}/share-invite`);
     } catch {}
   };
 

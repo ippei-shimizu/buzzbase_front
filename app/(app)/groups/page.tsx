@@ -57,7 +57,7 @@ export default function Group() {
               <p className="text-sm text-zinc-400 mt-2">
                 グループ機能は、フォローしているユーザーを招待して成績をランキング形式で共有することができます。
               </p>
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-4 gap-x-3 flex-wrap">
                 <Link href="/groups/new">
                   <Button
                     color="primary"
@@ -69,6 +69,16 @@ export default function Group() {
                     className="font-medium"
                   >
                     グループ作成
+                  </Button>
+                </Link>
+                <Link href="/groups/join">
+                  <Button
+                    color="default"
+                    variant="bordered"
+                    radius="full"
+                    className="font-medium"
+                  >
+                    招待コードで参加
                   </Button>
                 </Link>
               </div>
