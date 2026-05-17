@@ -17,6 +17,7 @@ function makeProActiveStatus(): ProStatus {
       platform: "ios",
       started_at: "2026-04-01T00:00:00+09:00",
       expires_at: "2026-06-01T00:00:00+09:00",
+      pro_active: true,
       in_trial: false,
       in_grace_period: false,
       days_remaining: 14,
@@ -108,6 +109,7 @@ describe("useEntitlement", () => {
         subscription: {
           ...DEFAULT_PRO_STATUS.subscription,
           status: "trial",
+          pro_active: true,
           in_trial: true,
           expires_at: "2026-06-01T00:00:00+09:00",
           days_remaining: 7,
@@ -131,6 +133,7 @@ describe("useEntitlement", () => {
         subscription: {
           ...DEFAULT_PRO_STATUS.subscription,
           status: "cancelled",
+          pro_active: true,
           in_grace_period: true,
           expires_at: "2026-06-01T00:00:00+09:00",
           days_remaining: 5,

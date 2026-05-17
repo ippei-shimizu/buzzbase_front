@@ -28,9 +28,9 @@ export function useProStatus(): UseProStatusReturn {
   }
 
   const { proStatus, isRefreshing, refresh } = ctx;
-  const isPro = ["trial", "active", "cancelled", "billing_issue"].includes(
-    proStatus.subscription.status,
-  );
+  // サーバー側で「期限内かつ Pro 扱いの status」を判定済みのフラグを単一の真実とする。
+  // 期限切れの cancelled / billing_issue で誤って true にならないようにするため。
+  const isPro = proStatus.subscription.pro_active;
 
   return { proStatus, isPro, isRefreshing, refresh };
 }
