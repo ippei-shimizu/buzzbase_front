@@ -89,10 +89,10 @@ export async function syncProStatus(): Promise<ProStatus | null> {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
+    // POST はそもそも Next.js のフェッチキャッシュ対象外。cache: "no-store" は不要。
     const response = await fetch(`${RAILS_API_URL}/api/v1/pro/sync`, {
       method: "POST",
       headers,
-      cache: "no-store",
     });
 
     if (!response.ok) {
