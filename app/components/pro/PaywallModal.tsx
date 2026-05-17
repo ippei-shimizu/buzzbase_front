@@ -9,7 +9,7 @@ import {
   ModalHeader,
   Button,
 } from "@heroui/react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface PaywallCopy {
   title: string;
@@ -96,14 +96,8 @@ export default function PaywallModal({
   onClose,
   feature,
 }: PaywallModalProps) {
-  const router = useRouter();
   const copy =
     (PRO_PAYWALL_COPY as Record<string, PaywallCopy>)[feature] ?? DEFAULT_COPY;
-
-  const handleUpgrade = () => {
-    onClose();
-    router.push("/pro");
-  };
 
   return (
     <Modal
@@ -128,7 +122,8 @@ export default function PaywallModal({
           >
             閉じる
           </Button>
-          <Button color="primary" onPress={handleUpgrade}>
+          {/* Link を Button の中身として使うことで、Next.js の prefetch を効かせる。 */}
+          <Button color="primary" as={Link} href="/pro" onPress={onClose}>
             Pro プランを見る
           </Button>
         </ModalFooter>

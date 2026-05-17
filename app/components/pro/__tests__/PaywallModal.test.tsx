@@ -1,27 +1,11 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { useRouter } from "next/navigation";
 import PaywallModal from "../PaywallModal";
 
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-}));
-
-const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
-
 describe("PaywallModal", () => {
-  const mockPush = jest.fn();
   const mockOnClose = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRouter.mockReturnValue({
-      push: mockPush,
-      replace: jest.fn(),
-      refresh: jest.fn(),
-      back: jest.fn(),
-      forward: jest.fn(),
-      prefetch: jest.fn(),
-    });
   });
 
   it("Pro 機能を渡すと、その機能に対応したコピーが表示される", () => {
@@ -64,13 +48,16 @@ describe("PaywallModal", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("「Pro プランを見る」ボタンで /pro へ遷移し onClose も呼ばれる", () => {
+  it("「Pro プランを見る」ボタンが /pro への Link になっていて、押下で onClose が呼ばれる", () => {
     render(<PaywallModal isOpen onClose={mockOnClose} feature="no_ads" />);
 
-    fireEvent.click(screen.getByText("Pro プランを見る"));
+    // HeroUI の Button は as={Link} を渡しても role=button のままで、
+    // 内部要素が <a href> を持つ。href の検証は closest("a") で行う。
+    const upgradeButton = screen.getByText("Pro プランを見る");
+    expect(upgradeButton.closest("a")).toHaveAttribute("href", "/pro");
 
+    fireEvent.click(upgradeButton);
     expect(mockOnClose).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith("/pro");
   });
 
   it("「閉じる」ボタンで onClose が呼ばれる", () => {
