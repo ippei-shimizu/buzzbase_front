@@ -6,17 +6,6 @@ jest.mock("@app/hooks/pro/useEntitlement", () => ({
   useEntitlement: jest.fn(),
 }));
 
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(() => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    refresh: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    prefetch: jest.fn(),
-  })),
-}));
-
 const mockUseEntitlement = useEntitlement as jest.MockedFunction<
   typeof useEntitlement
 >;
@@ -47,7 +36,7 @@ describe("ProGate", () => {
     expect(screen.getByText("Pro Content")).toBeInTheDocument();
   });
 
-  it("entitlement を持たない場合、children を表示しない", () => {
+  it("entitlement を持たない場合、children も PaywallModal も DOM に存在しない", () => {
     mockEntitlement(false);
 
     render(
@@ -57,6 +46,10 @@ describe("ProGate", () => {
     );
 
     expect(screen.queryByText("Pro Content")).not.toBeInTheDocument();
+    // renderLockedTrigger / fallback どちらも無いので、Paywall コピーは描画されない
+    expect(
+      screen.queryByText("シーズンを跨いだ成長を可視化"),
+    ).not.toBeInTheDocument();
   });
 
   it("entitlement を持たない場合、fallback を表示する", () => {

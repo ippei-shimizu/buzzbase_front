@@ -9,22 +9,20 @@ interface ProGateProps {
   feature: Feature;
   children: ReactNode;
   /**
-   * Pro 未加入時に children の代わりに表示するノード。
-   * 未指定の場合は何も表示せず、locked ハンドラを呼んだタイミングで Paywall が開く想定。
+   * Pro 未加入時に children の代わりに表示する静的ノード。
+   * renderLockedTrigger と排他で使う想定（同時指定なら renderLockedTrigger を優先）。
    */
   fallback?: ReactNode;
   /**
-   * fallback と Paywall モーダル両方を有効化する場合のラッパー。
-   * 「タップ時に Paywall を開く」UX を提供するために使う。
-   * 未指定の場合、fallback がそのまま表示されるだけ。
+   * タップで PaywallModal を開けるロックトリガーをレンダリングする関数。
+   * 指定された場合のみ PaywallModal を DOM 上に用意する。
    */
   renderLockedTrigger?: (open: () => void) => ReactNode;
 }
 
 /**
- * Pro 機能をラップし、Pro 加入時のみ children を表示する。
- * 未加入時は fallback or 何も表示しない、もしくは renderLockedTrigger 経由で
- * クリックすると PaywallModal が立ち上がる構造を提供する。
+ * Pro 機能をラップし、entitlement を持つときのみ children を表示する。
+ * 未許可時の代替表示は renderLockedTrigger / fallback / なし の3パターン。
  */
 export default function ProGate({
   feature,
@@ -37,16 +35,18 @@ export default function ProGate({
 
   if (hasEntitlement(feature)) return <>{children}</>;
 
-  return (
-    <>
-      {renderLockedTrigger
-        ? renderLockedTrigger(() => setPaywallOpen(true))
-        : (fallback ?? null)}
-      <PaywallModal
-        isOpen={isPaywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        feature={feature}
-      />
-    </>
-  );
+  if (renderLockedTrigger) {
+    return (
+      <>
+        {renderLockedTrigger(() => setPaywallOpen(true))}
+        <PaywallModal
+          isOpen={isPaywallOpen}
+          onClose={() => setPaywallOpen(false)}
+          feature={feature}
+        />
+      </>
+    );
+  }
+
+  return <>{fallback ?? null}</>;
 }
