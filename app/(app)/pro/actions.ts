@@ -1,0 +1,108 @@
+"use server";
+
+import type {
+  EntitlementCheck,
+  EntitlementsResponse,
+  ProStatus,
+} from "../../types/pro";
+import { cookies } from "next/headers";
+import { captureServerActionError } from "../../../lib/sentry-helpers";
+import { RAILS_API_URL } from "../../constants/api";
+
+async function getAuthHeaders(): Promise<Record<string, string> | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("access-token")?.value;
+  const client = cookieStore.get("client")?.value;
+  const uid = cookieStore.get("uid")?.value;
+
+  if (!accessToken || !client || !uid) return null;
+
+  return {
+    "Content-Type": "application/json",
+    "access-token": accessToken,
+    client,
+    uid,
+  };
+}
+
+/**
+ * 現在ユーザーの Pro 加入状態と保有 entitlement を取得する。
+ * 未認証・API 失敗時は null を返す。UI 側で DEFAULT_PRO_STATUS にフォールバックする想定。
+ */
+export async function getProStatus(): Promise<ProStatus | null> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return null;
+
+    const response = await fetch(`${RAILS_API_URL}/api/v1/pro/status`, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.error("Pro status API error:", response.status);
+      return null;
+    }
+
+    return (await response.json()) as ProStatus;
+  } catch (error) {
+    captureServerActionError(error, { action: "getProStatus" });
+    return null;
+  }
+}
+
+/**
+ * 全 entitlement キーごとの granted フラグを取得する。
+ * 個別画面で「この機能が利用可能か」のチェックリスト的に使う。
+ */
+export async function getEntitlements(): Promise<EntitlementCheck[] | null> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return null;
+
+    const response = await fetch(`${RAILS_API_URL}/api/v1/pro/entitlements`, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.error("Pro entitlements API error:", response.status);
+      return null;
+    }
+
+    const body = (await response.json()) as EntitlementsResponse;
+    return body.entitlements;
+  } catch (error) {
+    captureServerActionError(error, { action: "getEntitlements" });
+    return null;
+  }
+}
+
+/**
+ * RevenueCat と Rails の Pro 状態を再同期する。
+ * 本Issueはスタブで last_synced_at の更新のみ。実同期ロジックは #318 で実装する。
+ */
+export async function syncProStatus(): Promise<ProStatus | null> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return null;
+
+    const response = await fetch(`${RAILS_API_URL}/api/v1/pro/sync`, {
+      method: "POST",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      console.error("Pro sync API error:", response.status);
+      return null;
+    }
+
+    return (await response.json()) as ProStatus;
+  } catch (error) {
+    captureServerActionError(error, { action: "syncProStatus" });
+    return null;
+  }
+}
