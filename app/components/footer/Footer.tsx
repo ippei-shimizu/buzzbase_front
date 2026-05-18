@@ -64,14 +64,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="https://twitter.com/ippei_111"
+                  href="https://x.com/ippei_buzzbase"
                   target="_blank"
                   className="flex items-baseline text-sm"
                 >
                   運営者
                   <span className="flex items-center gap-x-1 pl-2">
                     <XIcon fill="#f4f4f4" width="14" height="14" />
-                    @ippei_111
+                    @ippei_buzzbase
                   </span>
                 </Link>
               </li>
