@@ -80,6 +80,70 @@ export async function getEntitlements(): Promise<EntitlementCheck[] | null> {
   }
 }
 
+export type ProPlan = "monthly" | "yearly";
+
+export type StartProCheckoutResult =
+  | { ok: true; checkoutUrl: string }
+  | {
+      ok: false;
+      error:
+        | "unauthorized"
+        | "already_subscribed"
+        | "invalid_plan"
+        | "stripe_api_error"
+        | "unknown";
+    };
+
+/**
+ * Stripe Checkout Session を作成し、リダイレクト先 URL を返す。
+ * success_url / cancel_url の元になるホストは Server 側で `APP_URL` 環境変数から決定する。
+ * クライアント発の値（window.location.origin など）は受け取らない: Server Action は POST で
+ * 直接叩けるため任意ドメインを差し込まれると Stripe 経由のフィッシングに繋がる。
+ */
+export async function startProCheckout(args: {
+  plan: ProPlan;
+}): Promise<StartProCheckoutResult> {
+  const { plan } = args;
+  const appUrl = process.env.APP_URL ?? "http://localhost:8100";
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return { ok: false, error: "unauthorized" };
+
+    const response = await fetch(`${RAILS_API_URL}/api/v1/pro/checkout`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        plan,
+        success_url: `${appUrl}/pro/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/pro/cancel`,
+      }),
+    });
+
+    if (response.status === 401) return { ok: false, error: "unauthorized" };
+    if (response.status === 409) {
+      return { ok: false, error: "already_subscribed" };
+    }
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (body.error === "invalid_plan") {
+        return { ok: false, error: "invalid_plan" };
+      }
+      if (body.error === "stripe_api_error") {
+        return { ok: false, error: "stripe_api_error" };
+      }
+      return { ok: false, error: "unknown" };
+    }
+
+    const body = (await response.json()) as { checkout_url: string };
+    return { ok: true, checkoutUrl: body.checkout_url };
+  } catch (error) {
+    captureServerActionError(error, { action: "startProCheckout" });
+    return { ok: false, error: "unknown" };
+  }
+}
+
 /**
  * RevenueCat と Rails の Pro 状態を再同期する。
  * 本Issueはスタブで last_synced_at の更新のみ。実同期ロジックは #318 で実装する。

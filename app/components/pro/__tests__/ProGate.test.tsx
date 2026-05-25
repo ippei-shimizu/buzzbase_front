@@ -1,10 +1,17 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { useEntitlement } from "@app/hooks/pro/useEntitlement";
-import ProGate from "../ProGate";
+const openMock = jest.fn();
+const closeMock = jest.fn();
+
+jest.mock("@app/contexts/proUpgradeModalContext", () => ({
+  useProUpgradeModal: () => ({ open: openMock, close: closeMock }),
+}));
 
 jest.mock("@app/hooks/pro/useEntitlement", () => ({
   useEntitlement: jest.fn(),
 }));
+
+import { render, screen, fireEvent } from "@testing-library/react";
+import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import ProGate from "../ProGate";
 
 const mockUseEntitlement = useEntitlement as jest.MockedFunction<
   typeof useEntitlement
@@ -36,7 +43,7 @@ describe("ProGate", () => {
     expect(screen.getByText("Pro Content")).toBeInTheDocument();
   });
 
-  it("entitlement を持たない場合、children も PaywallModal も DOM に存在しない", () => {
+  it("entitlement を持たない場合、children も fallback も無ければ何も描画しない", () => {
     mockEntitlement(false);
 
     render(
@@ -46,10 +53,6 @@ describe("ProGate", () => {
     );
 
     expect(screen.queryByText("Pro Content")).not.toBeInTheDocument();
-    // renderLockedTrigger / fallback どちらも無いので、Paywall コピーは描画されない
-    expect(
-      screen.queryByText("シーズンを跨いだ成長を可視化"),
-    ).not.toBeInTheDocument();
   });
 
   it("entitlement を持たない場合、fallback を表示する", () => {
@@ -68,7 +71,7 @@ describe("ProGate", () => {
     expect(screen.queryByText("Pro Content")).not.toBeInTheDocument();
   });
 
-  it("renderLockedTrigger 経由でクリックすると PaywallModal が開く", () => {
+  it("renderLockedTrigger 経由でクリックすると ProUpgradeModal が feature 付きで開く", () => {
     mockEntitlement(false);
 
     render(
@@ -86,9 +89,8 @@ describe("ProGate", () => {
 
     fireEvent.click(screen.getByText("ロック解除"));
 
-    // PaywallModal の Pro 機能特有の文言が表示される
-    expect(
-      screen.getByText("シーズンを跨いだ成長を可視化"),
-    ).toBeInTheDocument();
+    expect(openMock).toHaveBeenCalledWith({
+      trigger: "season_transition_graph",
+    });
   });
 });
