@@ -27,12 +27,19 @@ function setupAuthCookies() {
 }
 
 describe("startProCheckout", () => {
+  const originalAppUrl = process.env.APP_URL;
+
   beforeEach(() => {
     jest.clearAllMocks();
     global.fetch = jest.fn();
+    process.env.APP_URL = "http://localhost:8100";
   });
 
-  it("認証済み + 正常な plan で checkout_url を返す", async () => {
+  afterAll(() => {
+    process.env.APP_URL = originalAppUrl;
+  });
+
+  it("認証済み + 正常な plan で checkout_url を返し、success_url/cancel_url はサーバー側 APP_URL から構築される", async () => {
     setupAuthCookies();
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -42,10 +49,7 @@ describe("startProCheckout", () => {
       }),
     });
 
-    const result = await startProCheckout({
-      plan: "monthly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "monthly" });
 
     expect(result).toEqual({
       ok: true,
@@ -68,10 +72,7 @@ describe("startProCheckout", () => {
   it("未認証 cookie のとき unauthorized を返す（fetch しない）", async () => {
     mockGet.mockReturnValue(undefined);
 
-    const result = await startProCheckout({
-      plan: "monthly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "monthly" });
 
     expect(result).toEqual({ ok: false, error: "unauthorized" });
     expect(global.fetch).not.toHaveBeenCalled();
@@ -85,10 +86,7 @@ describe("startProCheckout", () => {
       json: async () => ({}),
     });
 
-    const result = await startProCheckout({
-      plan: "monthly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "monthly" });
 
     expect(result).toEqual({ ok: false, error: "unauthorized" });
   });
@@ -101,10 +99,7 @@ describe("startProCheckout", () => {
       json: async () => ({ error: "already_subscribed" }),
     });
 
-    const result = await startProCheckout({
-      plan: "monthly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "monthly" });
 
     expect(result).toEqual({ ok: false, error: "already_subscribed" });
   });
@@ -117,10 +112,7 @@ describe("startProCheckout", () => {
       json: async () => ({ error: "invalid_plan" }),
     });
 
-    const result = await startProCheckout({
-      plan: "monthly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "monthly" });
 
     expect(result).toEqual({ ok: false, error: "invalid_plan" });
   });
@@ -133,10 +125,7 @@ describe("startProCheckout", () => {
       json: async () => ({ error: "stripe_api_error" }),
     });
 
-    const result = await startProCheckout({
-      plan: "monthly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "monthly" });
 
     expect(result).toEqual({ ok: false, error: "stripe_api_error" });
   });
@@ -145,11 +134,29 @@ describe("startProCheckout", () => {
     setupAuthCookies();
     (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
 
-    const result = await startProCheckout({
-      plan: "yearly",
-      baseUrl: "http://localhost:8100",
-    });
+    const result = await startProCheckout({ plan: "yearly" });
 
     expect(result).toEqual({ ok: false, error: "unknown" });
+  });
+
+  it("APP_URL が未設定なら http://localhost:8100 をデフォルトとして使う", async () => {
+    delete process.env.APP_URL;
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        checkout_url: "https://checkout.stripe.com/sess_y",
+      }),
+    });
+
+    await startProCheckout({ plan: "yearly" });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://back:3000/api/v1/pro/checkout",
+      expect.objectContaining({
+        body: expect.stringContaining("http://localhost:8100/pro/success"),
+      }),
+    );
   });
 });

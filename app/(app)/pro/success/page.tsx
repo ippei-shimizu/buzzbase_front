@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pro 加入手続きを受け付けました — BUZZ BASE",
+  robots: { index: false },
 };
 
 export default function ProSuccessPage() {

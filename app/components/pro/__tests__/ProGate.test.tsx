@@ -89,6 +89,8 @@ describe("ProGate", () => {
 
     fireEvent.click(screen.getByText("ロック解除"));
 
-    expect(openMock).toHaveBeenCalledWith("season_transition_graph");
+    expect(openMock).toHaveBeenCalledWith({
+      trigger: "season_transition_graph",
+    });
   });
 });

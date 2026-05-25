@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pro 加入手続きを中断しました — BUZZ BASE",
+  robots: { index: false },
 };
 
 export default function ProCancelPage() {

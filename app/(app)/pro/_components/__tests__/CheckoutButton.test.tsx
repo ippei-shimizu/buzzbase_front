@@ -13,13 +13,20 @@ describe("CheckoutButton (LP CTA)", () => {
     jest.clearAllMocks();
   });
 
-  it("ボタンを押すと ProUpgradeModal を開く（trigger 無しの汎用呼び出し）", async () => {
+  it("ボタンを押すと ProUpgradeModal を開く（defaultPlan 未指定の汎用呼び出し）", async () => {
     render(<CheckoutButton label="無料トライアルを始める" />);
     await userEvent.click(
       screen.getByRole("button", { name: "無料トライアルを始める" }),
     );
 
     expect(openMock).toHaveBeenCalledTimes(1);
-    expect(openMock).toHaveBeenCalledWith();
+    expect(openMock).toHaveBeenCalledWith({ defaultPlan: undefined });
+  });
+
+  it("defaultPlan を渡すとモーダル open に伝播する", async () => {
+    render(<CheckoutButton label="月額で始める" defaultPlan="monthly" />);
+    await userEvent.click(screen.getByRole("button", { name: "月額で始める" }));
+
+    expect(openMock).toHaveBeenCalledWith({ defaultPlan: "monthly" });
   });
 });

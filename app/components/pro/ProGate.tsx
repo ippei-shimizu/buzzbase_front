@@ -1,9 +1,9 @@
 "use client";
 
-import type { Feature } from "@app/types/pro";
 import type { ReactNode } from "react";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { PRO_FEATURES, type Feature, type ProFeature } from "@app/types/pro";
 
 interface ProGateProps {
   feature: Feature;
@@ -18,6 +18,13 @@ interface ProGateProps {
    * モーダルは ProUpgradeModalProvider 側で常設されているため、ここでは open 関数だけ渡す。
    */
   renderLockedTrigger?: (open: () => void) => ReactNode;
+}
+
+// PRO_FEATURES（readonly tuple）に含まれる場合だけ ProFeature として trigger 用に渡せる。
+function asProFeatureOrUndefined(feature: Feature): ProFeature | undefined {
+  return (PRO_FEATURES as readonly string[]).includes(feature)
+    ? (feature as ProFeature)
+    : undefined;
 }
 
 /**
@@ -36,7 +43,13 @@ export default function ProGate({
   if (hasEntitlement(feature)) return <>{children}</>;
 
   if (renderLockedTrigger) {
-    return <>{renderLockedTrigger(() => open(feature))}</>;
+    return (
+      <>
+        {renderLockedTrigger(() =>
+          open({ trigger: asProFeatureOrUndefined(feature) }),
+        )}
+      </>
+    );
   }
 
   return <>{fallback ?? null}</>;

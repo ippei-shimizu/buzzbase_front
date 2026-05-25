@@ -1,6 +1,6 @@
 "use client";
 
-import type { Feature, ProFeature } from "@app/types/pro";
+import type { ProFeature } from "@app/types/pro";
 import {
   Button,
   Modal,
@@ -111,7 +111,9 @@ interface ProUpgradeModalProps {
    * 指定された場合、モーダル上部に「[機能名] を使うには Pro 加入が必要です」相当の
    * コンテキスト訴求を出す。未指定なら汎用文言。
    */
-  trigger?: Feature;
+  trigger?: ProFeature;
+  /** 初期選択させたい料金プラン。未指定なら年額。 */
+  defaultPlan?: ProPlan;
 }
 
 /**
@@ -123,23 +125,21 @@ export default function ProUpgradeModal({
   isOpen,
   onClose,
   trigger,
+  defaultPlan,
 }: ProUpgradeModalProps) {
-  const isMobile = useMediaQuery("(max-width: 640px)");
-  const [plan, setPlan] = useState<ProPlan>("yearly");
+  // 初期値 false を明示することで、ハイドレーション直後の placement フラッシュを防ぐ。
+  const isMobile = useMediaQuery("(max-width: 640px)", false);
+  // defaultPlan は「初回マウント時の初期値」としてのみ扱う。呼び出し元（Provider）が open ごとに
+  // key を変えて remount するため、再 open のたびに defaultPlan が再評価される。
+  const [plan, setPlan] = useState<ProPlan>(defaultPlan ?? "yearly");
   const [isPending, startTransition] = useTransition();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const copy =
-    trigger && (PRO_PAYWALL_COPY as Record<string, PaywallCopy>)[trigger]
-      ? (PRO_PAYWALL_COPY as Record<string, PaywallCopy>)[trigger]
-      : DEFAULT_COPY;
+  const copy = (trigger && PRO_PAYWALL_COPY[trigger]) ?? DEFAULT_COPY;
 
   const handleCheckout = () => {
     startTransition(async () => {
-      const result = await startProCheckout({
-        plan,
-        baseUrl: window.location.origin,
-      });
+      const result = await startProCheckout({ plan });
 
       if (result.ok) {
         setIsRedirecting(true);

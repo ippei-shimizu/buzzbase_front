@@ -96,13 +96,15 @@ export type StartProCheckoutResult =
 
 /**
  * Stripe Checkout Session を作成し、リダイレクト先 URL を返す。
- * baseUrl は呼び出し元クライアント側で `window.location.origin` を渡す（Server 側からはホスト推測しないため）。
+ * success_url / cancel_url の元になるホストは Server 側で `APP_URL` 環境変数から決定する。
+ * クライアント発の値（window.location.origin など）は受け取らない: Server Action は POST で
+ * 直接叩けるため任意ドメインを差し込まれると Stripe 経由のフィッシングに繋がる。
  */
 export async function startProCheckout(args: {
   plan: ProPlan;
-  baseUrl: string;
 }): Promise<StartProCheckoutResult> {
-  const { plan, baseUrl } = args;
+  const { plan } = args;
+  const appUrl = process.env.APP_URL ?? "http://localhost:8100";
   try {
     const headers = await getAuthHeaders();
     if (!headers) return { ok: false, error: "unauthorized" };
@@ -112,8 +114,8 @@ export async function startProCheckout(args: {
       headers,
       body: JSON.stringify({
         plan,
-        success_url: `${baseUrl}/pro/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${baseUrl}/pro/cancel`,
+        success_url: `${appUrl}/pro/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${appUrl}/pro/cancel`,
       }),
     });
 

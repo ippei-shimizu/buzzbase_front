@@ -1,5 +1,6 @@
 "use client";
 
+import type { ProPlan } from "../actions";
 import { Button } from "@heroui/react";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 
@@ -8,6 +9,8 @@ interface CheckoutButtonProps {
   variant?: "solid" | "bordered";
   color?: "primary" | "default";
   fullWidth?: boolean;
+  /** モーダルを開く際に初期選択させたい料金プラン。 */
+  defaultPlan?: ProPlan;
 }
 
 /**
@@ -20,6 +23,7 @@ export default function CheckoutButton({
   variant = "solid",
   color = "primary",
   fullWidth = false,
+  defaultPlan,
 }: CheckoutButtonProps) {
   const { open } = useProUpgradeModal();
 
@@ -27,7 +31,7 @@ export default function CheckoutButton({
     <Button
       color={color}
       variant={variant}
-      onPress={() => open()}
+      onPress={() => open({ defaultPlan })}
       fullWidth={fullWidth}
       className="font-bold"
     >
