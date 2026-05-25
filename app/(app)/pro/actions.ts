@@ -80,6 +80,68 @@ export async function getEntitlements(): Promise<EntitlementCheck[] | null> {
   }
 }
 
+export type ProPlan = "monthly" | "yearly";
+
+export type StartProCheckoutResult =
+  | { ok: true; checkoutUrl: string }
+  | {
+      ok: false;
+      error:
+        | "unauthorized"
+        | "already_subscribed"
+        | "invalid_plan"
+        | "stripe_api_error"
+        | "unknown";
+    };
+
+/**
+ * Stripe Checkout Session を作成し、リダイレクト先 URL を返す。
+ * baseUrl は呼び出し元クライアント側で `window.location.origin` を渡す（Server 側からはホスト推測しないため）。
+ */
+export async function startProCheckout(args: {
+  plan: ProPlan;
+  baseUrl: string;
+}): Promise<StartProCheckoutResult> {
+  const { plan, baseUrl } = args;
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return { ok: false, error: "unauthorized" };
+
+    const response = await fetch(`${RAILS_API_URL}/api/v1/pro/checkout`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        plan,
+        success_url: `${baseUrl}/pro/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/pro/cancel`,
+      }),
+    });
+
+    if (response.status === 401) return { ok: false, error: "unauthorized" };
+    if (response.status === 409) {
+      return { ok: false, error: "already_subscribed" };
+    }
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (body.error === "invalid_plan") {
+        return { ok: false, error: "invalid_plan" };
+      }
+      if (body.error === "stripe_api_error") {
+        return { ok: false, error: "stripe_api_error" };
+      }
+      return { ok: false, error: "unknown" };
+    }
+
+    const body = (await response.json()) as { checkout_url: string };
+    return { ok: true, checkoutUrl: body.checkout_url };
+  } catch (error) {
+    captureServerActionError(error, { action: "startProCheckout" });
+    return { ok: false, error: "unknown" };
+  }
+}
+
 /**
  * RevenueCat と Rails の Pro 状態を再同期する。
  * 本Issueはスタブで last_synced_at の更新のみ。実同期ロジックは #318 で実装する。
