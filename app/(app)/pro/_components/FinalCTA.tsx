@@ -11,14 +11,10 @@ export default function FinalCTA() {
           期間中はいつでも解約可能。Pro 機能をしっかり試してから決められます。
         </p>
         <div className="mx-auto max-w-xs">
-          <CheckoutButton plan="monthly" label="月額プランで始める" fullWidth />
+          <CheckoutButton label="無料トライアルを始める" fullWidth />
         </div>
         <p className="mt-6 text-xs text-gray-500">
-          年額プランをご希望の方は{" "}
-          <a href="#pricing" className="text-[#d08000] underline">
-            プラン一覧
-          </a>{" "}
-          からお選びください。
+          プラン（月額 / 年額）の選択は次の画面でお選びいただけます。
         </p>
       </div>
     </section>

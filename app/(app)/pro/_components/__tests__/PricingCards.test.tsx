@@ -1,8 +1,6 @@
 jest.mock("../CheckoutButton", () => {
-  return function MockCheckoutButton(props: { plan: string; label: string }) {
-    return (
-      <button data-testid={`checkout-${props.plan}`}>{props.label}</button>
-    );
+  return function MockCheckoutButton(props: { label: string }) {
+    return <button data-testid="checkout-trigger">{props.label}</button>;
   };
 });
 
@@ -19,11 +17,9 @@ describe("PricingCards", () => {
     expect(screen.getByText("¥9,800")).toBeInTheDocument();
   });
 
-  it("両プランの CheckoutButton にそれぞれ plan が渡されている", () => {
+  it("両プランに CheckoutButton（モーダルトリガー）が配置されている", () => {
     render(<PricingCards />);
-
-    expect(screen.getByTestId("checkout-monthly")).toBeInTheDocument();
-    expect(screen.getByTestId("checkout-yearly")).toBeInTheDocument();
+    expect(screen.getAllByTestId("checkout-trigger").length).toBe(2);
   });
 
   it("年額プランに「2 ヶ月分お得」のバッジが付く", () => {

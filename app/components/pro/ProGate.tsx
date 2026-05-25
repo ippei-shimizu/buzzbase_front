@@ -1,8 +1,8 @@
 "use client";
 
 import type { Feature } from "@app/types/pro";
-import { useState, type ReactNode } from "react";
-import PaywallModal from "@app/components/pro/PaywallModal";
+import type { ReactNode } from "react";
+import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 
 interface ProGateProps {
@@ -14,8 +14,8 @@ interface ProGateProps {
    */
   fallback?: ReactNode;
   /**
-   * タップで PaywallModal を開けるロックトリガーをレンダリングする関数。
-   * 指定された場合のみ PaywallModal を DOM 上に用意する。
+   * タップで Pro 加入モーダルを開けるロックトリガーをレンダリングする関数。
+   * モーダルは ProUpgradeModalProvider 側で常設されているため、ここでは open 関数だけ渡す。
    */
   renderLockedTrigger?: (open: () => void) => ReactNode;
 }
@@ -31,21 +31,12 @@ export default function ProGate({
   renderLockedTrigger,
 }: ProGateProps) {
   const { hasEntitlement } = useEntitlement();
-  const [isPaywallOpen, setPaywallOpen] = useState(false);
+  const { open } = useProUpgradeModal();
 
   if (hasEntitlement(feature)) return <>{children}</>;
 
   if (renderLockedTrigger) {
-    return (
-      <>
-        {renderLockedTrigger(() => setPaywallOpen(true))}
-        <PaywallModal
-          isOpen={isPaywallOpen}
-          onClose={() => setPaywallOpen(false)}
-          feature={feature}
-        />
-      </>
-    );
+    return <>{renderLockedTrigger(() => open(feature))}</>;
   }
 
   return <>{fallback ?? null}</>;

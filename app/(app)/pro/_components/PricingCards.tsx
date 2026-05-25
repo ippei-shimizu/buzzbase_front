@@ -42,11 +42,7 @@ export default function PricingCards() {
                 </li>
               ))}
             </ul>
-            <CheckoutButton
-              plan="monthly"
-              label="7 日間の無料トライアルを始める"
-              fullWidth
-            />
+            <CheckoutButton label="7 日間の無料トライアルを始める" fullWidth />
           </article>
 
           <article className="relative rounded-2xl border-2 border-[#d08000] bg-[#424242] p-6 shadow-xl">
@@ -72,11 +68,7 @@ export default function PricingCards() {
                 </li>
               ))}
             </ul>
-            <CheckoutButton
-              plan="yearly"
-              label="7 日間の無料トライアルを始める"
-              fullWidth
-            />
+            <CheckoutButton label="7 日間の無料トライアルを始める" fullWidth />
           </article>
         </div>
       </div>
