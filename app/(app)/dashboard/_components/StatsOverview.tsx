@@ -455,8 +455,12 @@ function PitchingTable({ pitchingStats }: { pitchingStats: PitchingStats }) {
           </div>
           <div className={styleTableBox}>
             <p className={styleTableTitle}>K/BB</p>
+            <span className={styleTableData}>{displayValue(calc?.k_bb)}</span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={`${styleTableTitle} rounded-bl-md`}>総投球数</p>
             <span className={`${styleTableData} rounded-br-md`}>
-              {displayValue(calc?.k_bb)}
+              {displayValue(agg?.number_of_pitches)}
             </span>
           </div>
         </div>
