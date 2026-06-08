@@ -125,7 +125,6 @@ export default function GameRecord() {
   const [isMyTeamScoreValid, setIsMyTeamScoreValid] = useState(true);
   const [isOpponentTeamScoreValid, setIsOpponentTeamScoreValid] =
     useState(true);
-  const [isBattingOrderValid, setIsBattingOrderValid] = useState(true);
   const [isDefensivePositionValid, setIsDefensivePositionValid] =
     useState(true);
   const [errors, setErrors] = useState<string[]>([]);
@@ -405,18 +404,11 @@ export default function GameRecord() {
       setIsOpponentTeamScoreValid(true);
     }
 
-    // 先発／途中出場の場合のみ打順／守備位置を必須とする。
+    // 先発／途中出場の場合のみ守備位置を必須とする。
+    // 打順は DH 制で投手として出場する場合「なし」を許容するため任意。
     // 代打／代走／未出場は入力任意（出場区分切替時に自動で空文字がセットされる）。
     const lineupRequired =
       appearanceType === "starter" || appearanceType === "substitute";
-
-    if (lineupRequired && !matchBattingOrder && !existingMatchBattingOrder) {
-      setIsBattingOrderValid(false);
-      isValid = false;
-      newErrors.push("打順が未入力です。");
-    } else {
-      setIsBattingOrderValid(true);
-    }
 
     if (
       lineupRequired &&
@@ -820,16 +812,11 @@ export default function GameRecord() {
                 </div>
                 <Divider className="my-4" />
                 <Select
-                  isRequired={
-                    appearanceType === "starter" ||
-                    appearanceType === "substitute"
-                  }
                   variant="faded"
                   label="打順"
                   labelPlacement="outside-left"
                   size="md"
                   fullWidth={false}
-                  color={isBattingOrderValid ? "default" : "danger"}
                   className="grid justify-between items-center grid-cols-[auto_96px]"
                   onChange={handleBattingOrderChange}
                   selectedKeys={
