@@ -11,6 +11,7 @@ import ResendConfirmationModal from "@app/components/modal/ResendConfirmationMod
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import { trackEvent } from "@app/lib/analytics";
 import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
 
@@ -44,6 +45,7 @@ export default function SignIn() {
     try {
       await signIn({ email, password });
       setIsLoggedIn(true);
+      trackEvent("login", { method: "email" });
       const userData = await getUserData();
       if (userData && userData.user_id) {
         setIsLoggedIn(true);
