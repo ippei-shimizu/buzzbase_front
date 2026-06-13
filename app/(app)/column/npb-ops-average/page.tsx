@@ -2,21 +2,42 @@ import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
 
+type AverageRow = {
+  year: string;
+  central: string;
+  pacific: string;
+  note?: string;
+};
+
+const averageHistory: AverageRow[] = [
+  { year: "2018", central: ".738", pacific: ".725" },
+  { year: "2019", central: ".738", pacific: ".719" },
+  {
+    year: "2020",
+    central: ".720",
+    pacific: ".703",
+    note: "120 試合短縮シーズン",
+  },
+  { year: "2021", central: ".697", pacific: ".684" },
+  { year: "2022", central: ".679", pacific: ".670" },
+  { year: "2023", central: ".662", pacific: ".662" },
+];
+
 const faqItems = [
   {
     question: "NPBのリーグ平均OPSはどれくらい？",
     answer:
-      "年度によって変動しますが、おおむね.680〜.720の範囲で推移しています。セ・リーグとパ・リーグで大きな差はなく、いずれも.700前後が平均値の目安です。",
+      "近年は .660〜.700 のレンジで推移しています。2018年は両リーグとも .720〜.740 程度でしたが、2023年は両リーグとも .662 まで低下しており、長期的に投高打低のトレンドが続いています。",
   },
   {
     question: "リーグ平均OPSはどう変化してきた？",
     answer:
-      "投高打低の時期はリーグ平均が.660前後まで下がり、打高投低の時期は.720を超えることもあります。ボール仕様の変更や戦術の変化（フライボール革命など）の影響を受けやすい指標です。",
+      "2018年の .738／.725（セ／パ）から、2023年には両リーグとも .662 まで低下し、約 .070 のマイナスが累積しています。ボール仕様や打高投低／投高打低のトレンドの影響を受けやすい指標です。",
   },
   {
     question: "セ・パでOPSの傾向は違う？",
     answer:
-      "DH制を採用しているパ・リーグの方がリーグ全体のOPSはわずかに高くなる傾向があります。投手が打席に立たない分、平均OBP・SLGが押し上げられるためです。",
+      "セ・リーグの方が直近数年はリーグ平均 OPS がやや高い傾向です。2018-2022 はセが パより .010〜.015 高く、2023 は両リーグ同値（.662）でした。DH 制でパが押し上げられるという一般論は近年は当てはまらないシーズンが増えています。",
   },
 ];
 
@@ -43,42 +64,78 @@ export default function NpbOpsAverageColumnPage() {
       </h1>
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
-        NPB（日本プロ野球）のリーグ平均OPSは、年度や球の規格・戦術トレンドによって変動するものの、おおむね{" "}
-        <strong>.680〜.720 の範囲</strong>{" "}
-        で推移しています。OPSを「いくつから良い」と判断するときは、リーグ平均との比較が重要な物差しになります。
+        NPB（日本プロ野球）のリーグ平均 OPS は、近年
+        <strong>長期的な低下傾向</strong>
+        にあります。2018 年は両リーグとも .720〜.740 のレンジでしたが、2023
+        年は両リーグとも <strong>.662</strong>{" "}
+        まで下がっており、投高打低のトレンドが強まっています。OPS
+        を「いくつから良い」と判断するときは、その年のリーグ平均との比較が重要な物差しになります。
       </p>
 
       <section className="mt-8">
         <h2 className="text-xl font-bold mb-3">
-          NPB リーグ平均OPSの目安（直近トレンド）
+          NPB リーグ平均 OPS の推移（直近）
         </h2>
-        <ul className="text-sm text-zinc-300 leading-6 list-disc ml-5 space-y-1">
-          <li>投高打低の年：リーグ平均OPSが .660〜.690 程度に下がる</li>
-          <li>打高投低の年：リーグ平均OPSが .710〜.730 まで上がる</li>
-          <li>近年のトレンド：おおむね .680〜.710 のレンジで推移</li>
-        </ul>
-        <p className="text-sm text-zinc-300 leading-6 mt-3">
-          ボール仕様の変更や、フライボール革命のような戦術トレンドの影響でリーグ全体のOPSが上下します。リーグ平均が
-          .680 を下回るシーズンは投手有利、 .720
-          を超えるシーズンは打者有利と覚えておくと現場感がつかみやすくなります。
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border border-zinc-700">
+            <thead>
+              <tr className="bg-zinc-800">
+                <th className="px-3 py-2 text-left border-b border-zinc-700 text-zinc-300">
+                  年度
+                </th>
+                <th className="px-3 py-2 text-left border-b border-zinc-700 text-zinc-300">
+                  セ・リーグ平均
+                </th>
+                <th className="px-3 py-2 text-left border-b border-zinc-700 text-zinc-300">
+                  パ・リーグ平均
+                </th>
+                <th className="px-3 py-2 text-left border-b border-zinc-700 text-zinc-300">
+                  備考
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {averageHistory.map((row) => (
+                <tr key={row.year} className="even:bg-zinc-800/50">
+                  <td className="px-3 py-2 border-b border-zinc-700 text-zinc-200 font-bold whitespace-nowrap">
+                    {row.year}
+                  </td>
+                  <td className="px-3 py-2 border-b border-zinc-700 text-yellow-500 font-bold whitespace-nowrap">
+                    {row.central}
+                  </td>
+                  <td className="px-3 py-2 border-b border-zinc-700 text-yellow-500 font-bold whitespace-nowrap">
+                    {row.pacific}
+                  </td>
+                  <td className="px-3 py-2 border-b border-zinc-700 text-zinc-400">
+                    {row.note ?? ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-zinc-400 leading-6 mt-3">
+          ※リーグ平均は出典・集計対象（規定打席/全打席）によって値が変動する場合があります。
         </p>
       </section>
 
       <section className="mt-8">
-        <h2 className="text-xl font-bold mb-3">セ・パで違いはある？</h2>
+        <h2 className="text-xl font-bold mb-3">セ・パの違いはどれくらい？</h2>
         <p className="text-sm text-zinc-300 leading-6">
-          DH制を採用するパ・リーグはリーグ平均OPSがやや高くなる傾向があります。投手が打席に立たない分、平均OBP・SLGが押し上げられるためです。差は小さいものの、シーズン通算
-          .010〜.020 程度の開きが出ることがあります。
+          近年（2018〜2023）はセ・リーグの方がパ・リーグよりわずかに高い傾向で、差は
+          .010〜.015 程度。2023 年は両リーグとも .662 で同値でした。DH
+          制を採用するパ・リーグが押し上げられるという一般論は、年度によっては当てはまらないことが増えています。
         </p>
       </section>
 
       <section className="mt-8">
         <h2 className="text-xl font-bold mb-3">歴代スラッガーとの比較</h2>
         <p className="text-sm text-zinc-300 leading-6">
-          リーグ平均 .700 に対して、歴代上位（王貞治 1.293／バレンティン
-          1.234／落合博満 1.207 など）は
-          <strong>.500 以上もリーグ平均を上回る</strong>
-          規格外の数値です。リーグ平均OPSとの差（OPS+
+          現代のリーグ平均が .660〜.700 に対して、歴代上位（王貞治 1974 =
+          1.293／バース 1986 = 1.258／王貞治 1973 = 1.255／落合博満 1985 =
+          1.244／バレンティン 2013 = 1.234）は
+          <strong>リーグ平均を約 .500 以上も上回る</strong>
+          規格外の数値です。リーグ平均 OPS との差（OPS+
           のような考え方）を意識すると、選手の偉大さがより明確になります。
         </p>
       </section>
