@@ -16,50 +16,62 @@ const historicalRanking: RankingRow[] = [
     player: "王 貞治",
     year: "1974",
     ops: "1.293",
-    note: "本塁打49・出塁率.532",
+    note: "三冠王 (.332/49HR/107打点) ／ 出塁率 .532 はNPB歴代最高",
   },
   {
     rank: 2,
-    player: "バレンティン",
-    year: "2013",
-    ops: "1.234",
-    note: "シーズン本塁打60本の年",
+    player: "ランディ・バース",
+    year: "1986",
+    ops: "1.258",
+    note: "2年連続三冠王 (.389/47HR/109打点)",
   },
   {
     rank: 3,
+    player: "王 貞治",
+    year: "1973",
+    ops: "1.255",
+    note: "三冠王 (.355/51HR/114打点)",
+  },
+  {
+    rank: 4,
     player: "落合 博満",
     year: "1985",
-    ops: "1.207",
-    note: "三冠王獲得シーズン",
+    ops: "1.244",
+    note: "三冠王 (.367/52HR/146打点)",
   },
-  { rank: 4, player: "ブーマー", year: "1984", ops: "1.198", note: "三冠王" },
   {
     rank: 5,
-    player: "松井 秀喜",
-    year: "2002",
-    ops: "1.153",
-    note: "本塁打50・打点107",
+    player: "ウラディミール・バレンティン",
+    year: "2013",
+    ops: "1.234",
+    note: "シーズン本塁打60本 ／ MVP",
+  },
+];
+
+const notableSeasons = [
+  {
+    label: "ランディ・バース (1985, 阪神)",
+    note: "セ・リーグ外国人初の三冠王 (.350/54HR/134打点)",
   },
   {
-    rank: 6,
-    player: "落合 博満",
-    year: "1986",
-    ops: "1.150",
-    note: "三冠王（2年連続）",
+    label: "落合博満 (1986, ロッテ)",
+    note: "2年連続3度目の三冠王 (.360/50HR/116打点)",
   },
   {
-    rank: 7,
-    player: "アレックス・ラミレス",
-    year: "2010",
-    ops: "1.046",
-    note: "ヤクルト時代の最高シーズン",
+    label: "ブーマー・ウェルズ (1984, 阪急)",
+    note: "外国人選手初の三冠王 (.355/37HR/130打点)",
   },
   {
-    rank: 8,
-    player: "T-岡田",
-    year: "2010",
-    ops: "1.024",
-    note: "本塁打33・若き本塁打王",
+    label: "松井秀喜 (2002, 巨人)",
+    note: "本塁打王・打点王・最高出塁率・MVP (50HR/107打点)",
+  },
+  {
+    label: "柳田悠岐 (2015 / 2018 / 2020 / 2017, ソフトバンク)",
+    note: "OPS 1.000超え 4 シーズン (1.101 / 1.092 / 1.071 / 1.016)",
+  },
+  {
+    label: "ロベルト・ペタジーニ (2003, ヤクルト)",
+    note: "OPS 1.139",
   },
 ];
 
@@ -67,12 +79,17 @@ const faqItems = [
   {
     question: "NPB歴代最高シーズンOPSは誰？",
     answer:
-      "王貞治の1974年シーズン（OPS 1.293）が歴代最高クラスとされています。バレンティンの2013年（1.234）や落合博満の1985年（1.207）も近い水準です。",
+      "1974年の王貞治のOPS 1.293がNPB歴代最高です。打率.332、本塁打49、打点107で2年連続三冠王を達成し、出塁率.532はNPB歴代最高記録としていまも残っています。",
   },
   {
     question: "現役NPB選手のOPSの目安は？",
     answer:
-      "リーグを代表する打者は .900 を超え、好打者ラインは .800、平均的なレギュラーは .700 前後です。タイトル争いには .900 以上が必要になる年が多くなります。",
+      "リーグを代表する打者は .900 を超え、好打者ラインは .800、平均的なレギュラーは .700 前後とされてきました。ただし近年はリーグ平均が低下傾向にあり、.800 を超えれば十分タイトル争いに絡める年が増えています。",
+  },
+  {
+    question: "OPS 1.000を超えると歴代何位くらいになる？",
+    answer:
+      "規定打席に到達したシーズンで OPS 1.000 を超えるのは、NPBでも年間 0〜数人レベル。歴代でも 1.000 超えを複数年達成しているのは王貞治、ランディ・バース、落合博満、松井秀喜、柳田悠岐などごく一部に限られます。",
   },
 ];
 
@@ -81,7 +98,7 @@ export default function OpsRankingNpbColumnPage() {
     <>
       <ColumnArticleJsonLd
         headline="NPB OPSランキング｜歴代シーズン上位と現役主要選手の目安"
-        description="NPB歴代シーズンOPSランキングと現役主力打者のOPS水準を整理。"
+        description="NPB 歴代シーズン OPS ランキング上位と、注目すべき他の高 OPS シーズン、現役主力打者の水準を整理。"
         path="/column/ops-ranking-npb"
         breadcrumbLeafName="NPB OPSランキング"
         faq={faqItems}
@@ -99,13 +116,13 @@ export default function OpsRankingNpbColumnPage() {
       </h1>
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
-        NPB（日本プロ野球）の歴代シーズンOPS上位を整理しました。
-        <strong>1.000を超えるシーズン</strong>
+        NPB（日本プロ野球）の歴代シーズン OPS 上位を整理しました。
+        <strong>1.000 を超えるシーズン</strong>
         は歴代でも限られており、リーグを代表する超一流打者の証です。記録は年度・球団・規定打席のカウントによって若干の差があります。
       </p>
 
       <p className="text-sm text-zinc-400 leading-6 mt-2">
-        ※本記事の数値はシーズン規定打席到達者を対象としており、年度や情報源によって小数第3位以下が変動する場合があります。
+        ※本記事の数値はシーズン規定打席到達者を対象としており、出典・年度によって小数第3位以下が変動する場合があります。
       </p>
 
       <section className="mt-8">
@@ -160,11 +177,26 @@ export default function OpsRankingNpbColumnPage() {
       </section>
 
       <section className="mt-8">
+        <h2 className="text-xl font-bold mb-3">
+          他に語られることの多い高 OPS シーズン
+        </h2>
+        <ul className="space-y-2 text-sm text-zinc-300 leading-6 list-disc ml-5">
+          {notableSeasons.map((season) => (
+            <li key={season.label}>
+              <strong>{season.label}</strong>: {season.note}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-8">
         <h2 className="text-xl font-bold mb-3">現役NPB選手のOPSの目安</h2>
         <p className="text-sm text-zinc-300 leading-6">
-          シーズンを通して .900 を維持できれば各球団の主軸クラス、 1.000
-          を超えれば打撃部門のタイトル候補。リーグ平均はおおむね .700
-          前後で推移し、レギュラー定着のラインは .700 〜 .750 が目安になります。
+          近年の NPB はリーグ平均 OPS が .660〜.700
+          程度に低下しており、シーズンを通して .800
+          を維持できれば各球団の主軸クラス、.900
+          を超えれば打撃部門のタイトル争いに絡める水準です。1.000
+          超えはリーグでも年間 0〜数人レベルに限られます。
         </p>
       </section>
 
@@ -204,7 +236,7 @@ export default function OpsRankingNpbColumnPage() {
             href="/column/ops-ranking-mlb"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
-            <p className="font-bold text-sm">MLB OPS 歴代TOP30</p>
+            <p className="font-bold text-sm">MLB OPS 歴代TOP</p>
             <p className="text-xs text-zinc-400 mt-1">
               バリー・ボンズから現役まで
             </p>
