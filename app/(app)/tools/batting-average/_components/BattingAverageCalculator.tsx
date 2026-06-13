@@ -2,6 +2,7 @@
 
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorForm from "../../_components/CalculatorForm";
+import BattingAverageResultCard from "./BattingAverageResultCard";
 
 const definition = getCalculatorDefinition("batting-average")!;
 
@@ -22,6 +23,11 @@ export default function BattingAverageCalculator() {
       calculate={definition.calculate}
       nextActions={nextActions}
       analyticsSourceTool={definition.slug}
+      renderExtraResult={(raw) => {
+        if (typeof raw !== "number") return null;
+        if (Number.isNaN(raw)) return null;
+        return <BattingAverageResultCard avg={raw} />;
+      }}
     />
   );
 }

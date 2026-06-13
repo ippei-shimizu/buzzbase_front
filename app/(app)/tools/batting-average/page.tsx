@@ -1,18 +1,79 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@app/constants/app";
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorPageContent from "../_components/CalculatorPageContent";
 import BattingAverageCalculator from "./_components/BattingAverageCalculator";
 
 const definition = getCalculatorDefinition("batting-average")!;
 
-export const metadata: Metadata = {
-  title: definition.metaTitle,
-  description: definition.metaDescription,
-  alternates: {
-    canonical: `https://buzzbase.jp/tools/${definition.slug}`,
-  },
+type BattingAverageSearchParams = {
+  avg?: string;
 };
+
+// 数値だけを許容する厳密な正規表現。Number.parseFloat は "0.3<script>" のような
+// 末尾ゴミ付き文字列も部分的にパースしてしまうため、metadata 注入を防ぐ目的で
+// 文字列全体が数値表現であることをチェックする。
+const NUMERIC_PARAM_RE = /^\d+(?:\.\d{1,3})?$/;
+
+/**
+ * シェア URL のクエリパラメータを安全な数値に正規化する。
+ * 0.0〜1.0 の範囲は打率の理論上の値域 (安打数 ÷ 打数) に合わせている。
+ */
+function parseShareAvg(value: string | undefined): number | null {
+  if (!value || !NUMERIC_PARAM_RE.test(value)) return null;
+  const parsed = Number.parseFloat(value);
+  if (Number.isNaN(parsed) || parsed < 0 || parsed > 1) return null;
+  return parsed;
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<BattingAverageSearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const avgValue = parseShareAvg(sp.avg);
+
+  const baseMetadata: Metadata = {
+    title: definition.metaTitle,
+    description: definition.metaDescription,
+    alternates: {
+      canonical: `${SITE_URL}/tools/${definition.slug}`,
+    },
+  };
+
+  if (avgValue === null) {
+    return baseMetadata;
+  }
+
+  // 以降は必ず正規化済みの数値文字列のみを使い、生クエリは description / alt に
+  // 一切流入させない。これにより metadata 注入の余地を構造的に消す。
+  const avgText = avgValue.toFixed(3);
+  const ogImageUrl = `${SITE_URL}/api/og/batting-average-card?avg=${avgText}`;
+
+  return {
+    ...baseMetadata,
+    openGraph: {
+      title: definition.metaTitle,
+      description: `打率 ${avgText} の計算結果。あなたも BUZZ BASE で打率を計算してシェアしよう。`,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `打率 ${avgText} の計算結果カード`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: definition.metaTitle,
+      description: `打率（AVG） ${avgText}`,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default function BattingAveragePage() {
   return (
@@ -100,41 +161,52 @@ export default function BattingAveragePage() {
             </thead>
             <tbody>
               <tr className="bg-zinc-800/50">
-                <td className="px-4 py-2 border-b border-zinc-700 text-yellow-500 font-bold">
-                  首位打者クラス
+                <td className="px-4 py-2 border-b border-zinc-700 text-amber-400 font-bold">
+                  S（歴代級）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
                   .350以上
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  リーグを代表するトップバッター
+                  リーグを代表するトップバッター・首位打者上位
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-2 border-b border-zinc-700 text-yellow-500 font-bold">
-                  好打者
+                  A（好打者）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
                   .300〜.349
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  クリーンアップを任せられる一流レベル
+                  3 割打者の証・クリーンアップを任せられる一流レベル
                 </td>
               </tr>
               <tr className="bg-zinc-800/50">
-                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300 font-bold">
-                  平均的
+                <td className="px-4 py-2 border-b border-zinc-700 text-yellow-500 font-bold">
+                  B（中堅レギュラー）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  .250〜.299
+                  .280〜.299
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  リーグ平均前後。レギュラーとして標準的
+                  リーグ平均より上の中堅レギュラー水準
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300 font-bold">
-                  要改善
+                  C（平均）
+                </td>
+                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
+                  .250〜.279
+                </td>
+                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
+                  NPB のリーグ平均前後・標準的なレギュラー
+                </td>
+              </tr>
+              <tr className="bg-zinc-800/50">
+                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300 font-bold">
+                  D（要改善）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
                   .250未満
