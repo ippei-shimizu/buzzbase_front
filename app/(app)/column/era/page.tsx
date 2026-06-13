@@ -7,6 +7,11 @@ import EraColumnJsonLd from "./_components/EraColumnJsonLd";
 
 const faqItems = [
   {
+    question: "防御率（ERA）の読み方と意味は？",
+    answer:
+      "防御率は「ぼうぎょりつ」と読み、英語の Earned Run Average（ERA、イーアールエー）の略です。投手が 9 イニング投げた場合に許す自責点の平均値を示し、投手の純粋な実力を客観評価するための指標です。",
+  },
+  {
     question: "防御率の計算方法は？",
     answer:
       "防御率は「自責点 × 9 ÷ 投球回数」で計算します。たとえば、7イニングで2自責点なら、防御率は 2 × 9 ÷ 7 = 2.57 です。投球回数が 6回1/3 の場合は 6.333... として計算します。",
@@ -19,12 +24,32 @@ const faqItems = [
   {
     question: "防御率の良い数値はいくつ？",
     answer:
-      "プロ野球（NPB）では防御率2.00以下がエース級、2.00〜3.00が優秀、3.00〜4.00がリーグ平均前後です。高校野球では木製バットではないため、2.00以下なら地区大会で上位を狙える投手です。",
+      "プロ野球（NPB）では防御率2.00以下がエース級、2.00〜3.00が優秀、3.00〜4.00がリーグ平均前後です。高校野球では金属バットの影響で全体に数字が出やすく、2.00以下なら地区大会で上位を狙える投手です。",
   },
   {
     question: "高校野球の防御率の目安は？",
     answer:
       "高校野球では金属バットを使用するため、プロ野球より全体的に数値が高くなる傾向があります。2.00以下ならエース級、2.00〜3.00なら好投手、3.00〜4.00が平均的、4.00以上は改善が必要です。",
+  },
+  {
+    question: "中学野球（シニア・ボーイズ）の防御率目安は？",
+    answer:
+      "硬式リーグでは 2.50 以下でエース級、3.50 以下で主戦投手、4.50 以下で平均的が目安。軟式では球速が上がりにくく、エースで 1.50 以下が見える水準もあります。",
+  },
+  {
+    question: "先発投手と中継ぎ・抑えで防御率の基準は違う？",
+    answer:
+      "短いイニングを高い集中度で投げる中継ぎ・抑え投手は、先発より防御率が出やすい傾向があります。中継ぎは 2.50 以下、抑え（クローザー）は 2.00 以下が一線級の目安です。",
+  },
+  {
+    question: "MLB と NPB で防御率の基準は変わる？",
+    answer:
+      "MLB はリーグ平均が 3.80〜4.20 で推移する年が多く、NPB（3.30〜3.70）より高めに出ます。タイトル獲得ラインも MLB は 3.00 前後、NPB は 2.00 前後と異なります。",
+  },
+  {
+    question: "防御率 0.00 はあり得る？",
+    answer:
+      "自責点が 0 のシーズンや 1 試合では、防御率の式の分子が 0 になるため理論的に 0.00 になります。短い登板回数のリリーフ投手では現実的に発生しますが、規定投球回到達者で 0.00 を継続することは事実上不可能です。",
   },
 ];
 
@@ -46,10 +71,21 @@ export default function EraColumnPage() {
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">
-        防御率（ERA）とは、
+        防御率（読み方：<strong>ぼうぎょりつ</strong>、英語表記：
+        <strong>ERA / Earned Run Average</strong>）とは、
         <strong>投手が9イニング投げたと仮定した場合に何点取られるか</strong>
-        を示す野球の投手指標です。「Earned Run
-        Average」の略で、投手の実力を客観的に評価するために最も広く使われています。この記事では、防御率の意味・計算方法・レベル別の目安値を詳しく解説します。
+        を示す野球の投手指標です。投手の実力を客観的に評価するために最も広く使われています。この記事では、防御率の意味・計算方法・レベル別の目安値を詳しく解説します。
+      </p>
+      <p className="text-sm text-zinc-400 leading-6 mt-2">
+        「防御率はいくつから良いのか」や「1.00 / 2.00 / 3.00 / 4.00
+        台」の意味、先発・中継ぎ・抑え別の目安を網羅した
+        <Link
+          href="/column/era-criteria"
+          className="text-yellow-500 hover:text-yellow-400 transition-colors font-bold"
+        >
+          防御率の目安・基準を詳しく解説した記事
+        </Link>
+        も併せて参照してください。
       </p>
 
       {/* 目次 */}
@@ -396,6 +432,59 @@ export default function EraColumnPage() {
             <p className="text-xs text-zinc-400 mt-1">
               9イニングあたりの奪三振数
             </p>
+          </Link>
+        </div>
+      </section>
+
+      {/* 関連コラム */}
+      <section className="mt-10">
+        <h2 className="text-xl font-bold mb-4">関連コラム</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/column/era-criteria"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">防御率の目安・基準</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              1.00 / 2.00 / 3.00 / 4.00 の意味、先発・中継ぎ別
+            </p>
+          </Link>
+          <Link
+            href="/column/era-1"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">防御率 1 点台はどのレベル？</p>
+            <p className="text-xs text-zinc-400 mt-1">歴代級レジェンド水準</p>
+          </Link>
+          <Link
+            href="/column/era-2"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">防御率 2 点台はどのレベル？</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              エース・タイトル争いライン
+            </p>
+          </Link>
+          <Link
+            href="/column/era-vs-runs"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">防御率と失点率の違い</p>
+            <p className="text-xs text-zinc-400 mt-1">指標の使い分け方</p>
+          </Link>
+          <Link
+            href="/column/era-ranking-npb"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">NPB 防御率ランキング</p>
+            <p className="text-xs text-zinc-400 mt-1">歴代上位の名投手</p>
+          </Link>
+          <Link
+            href="/column/npb-era-average"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">NPB 防御率平均値の推移</p>
+            <p className="text-xs text-zinc-400 mt-1">リーグ平均の変遷</p>
           </Link>
         </div>
       </section>
