@@ -70,12 +70,12 @@ export default function OpsColumnJsonLd({ faq }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }}
       />
-      {faqPage && (
+      {faqPage ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPage) }}
         />
-      )}
+      ) : null}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbList) }}

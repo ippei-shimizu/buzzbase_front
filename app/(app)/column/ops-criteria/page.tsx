@@ -3,7 +3,7 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import OpsCriteriaColumnJsonLd from "./_components/OpsCriteriaColumnJsonLd";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
 
 const faqItems = [
   {
@@ -84,7 +84,13 @@ const benchmarks = [
 export default function OpsCriteriaColumnPage() {
   return (
     <>
-      <OpsCriteriaColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline="OPSはいくつから良い？レベル別の目安・基準・現場感を野球指標で解説"
+        description="OPS（オーピーエス）はいくつから良いのか、.700／.800／.900／1.000 の意味とカテゴリ別の目安、現場感を解説。"
+        path="/column/ops-criteria"
+        breadcrumbLeafName="OPSの目安・基準"
+        faq={faqItems}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
