@@ -137,13 +137,86 @@ const categories: Category[] = [
         description: "安打数÷打数で算出する、最も基本的な打撃指標。",
         groups: [
           {
-            label: null,
+            label: "基本",
             articles: [
               {
                 slug: "batting-average",
-                title: "打率とは？計算方法・打率の出し方・目安値を解説",
+                title:
+                  "打率（AVG・だりつ）とは？計算方法・打率の出し方・目安値を解説",
                 description:
-                  "打率の意味・計算式・打率の出し方を解説。NPB・高校野球の目安値を一覧表で掲載。",
+                  "打率の読み方・意味・計算式・打率の出し方を解説。NPB・MLB・高校野球・中学野球の目安値、ポジション別の基準も掲載。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "batting-average-criteria",
+                title: "打率はいくつから良い？レベル別の目安・基準を解説",
+                description:
+                  "打率 .250 / .280 / .300 / .350 の意味と、中学・高校・大学・社会人・プロのカテゴリ別目安テーブル、ポジション別の基準まで整理。",
+              },
+            ],
+          },
+          {
+            label: "数値別解説",
+            articles: [
+              {
+                slug: "batting-average-300",
+                title:
+                  "打率 3 割の意味｜「3割打者」がすごい理由とプロ・高校での難易度",
+                description:
+                  ".300 が好打者の代名詞とされる理由、NPB・MLB の歴代 3 割打者、達成に必要な打席ごとの安打ペース。",
+              },
+              {
+                slug: "batting-average-350",
+                title: "打率 .350 はどのレベル？歴代首位打者と達成条件",
+                description:
+                  "首位打者の上位ライン。バース・イチロー・落合博満ら歴代の .350 越え打者と達成条件。",
+              },
+              {
+                slug: "batting-average-250",
+                title: "打率 .250 は平均？高校野球・プロ野球での位置づけ",
+                description:
+                  "リーグ平均水準。プロ・高校野球での意味と .250 から .280 / .300 へ上げる改善ポイント。",
+              },
+            ],
+          },
+          {
+            label: "比較",
+            articles: [
+              {
+                slug: "batting-average-vs-obp",
+                title:
+                  "打率と出塁率の違いをわかりやすく解説｜AVG と OBP の使い分け",
+                description:
+                  "四球・死球の扱いの違いを、打率は高いのに出塁率が低い／逆のケースなど具体例で整理。",
+              },
+            ],
+          },
+          {
+            label: "ランキング・データ",
+            articles: [
+              {
+                slug: "batting-average-ranking-npb",
+                title: "NPB 打率ランキング｜歴代シーズン上位の名打者",
+                description:
+                  "バース・イチロー・落合博満・青木宣親ら歴代上位の名打者を整理。",
+              },
+              {
+                slug: "batting-average-ranking-mlb",
+                title:
+                  "MLB 打率歴代 TOP｜テッド・ウィリアムズ・イチローら歴代名打者",
+                description:
+                  "最後の 4 割打者ウィリアムズ、イチローの .372、歴代名打者の記録を整理。",
+              },
+              {
+                slug: "npb-batting-average-average",
+                title:
+                  "NPB 打率平均値の推移｜セ・パ両リーグの平均と歴代名打者の比較",
+                description:
+                  "NPB のリーグ平均打率の推移、セ・パの違い、歴代名打者との差を整理。",
               },
             ],
           },
