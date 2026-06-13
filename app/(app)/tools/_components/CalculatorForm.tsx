@@ -26,6 +26,13 @@ type Props = {
     values: Record<string, number>,
   ) => number | Record<string, number | null> | null;
   nextActions?: NextAction[];
+  /**
+   * 計算成功時に追加で表示する要素。出力（数値）に応じてレベル評価やシェアなど
+   * ツール固有の UI を結果カード直下に描画したい場合に渡す。
+   */
+  renderExtraResult?: (
+    rawResult: number | Record<string, number | null>,
+  ) => React.ReactNode;
 };
 
 export default function CalculatorForm({
@@ -33,9 +40,13 @@ export default function CalculatorForm({
   outputs,
   calculate,
   nextActions,
+  renderExtraResult,
 }: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [results, setResults] = useState<ResultItem[]>([]);
+  const [rawResult, setRawResult] = useState<
+    number | Record<string, number | null> | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = useCallback((name: string, value: string) => {
@@ -45,6 +56,7 @@ export default function CalculatorForm({
   const handleCalculate = useCallback(() => {
     setError(null);
     setResults([]);
+    setRawResult(null);
 
     const numericValues: Record<string, number> = {};
     for (const field of fields) {
@@ -84,11 +96,13 @@ export default function CalculatorForm({
       }
       setResults(formatted);
     }
+    setRawResult(calculated);
   }, [values, fields, outputs, calculate]);
 
   const handleReset = useCallback(() => {
     setValues({});
     setResults([]);
+    setRawResult(null);
     setError(null);
   }, []);
 
@@ -149,6 +163,10 @@ export default function CalculatorForm({
             </div>
           ))}
         </div>
+      ) : null}
+
+      {results.length > 0 && renderExtraResult && rawResult !== null ? (
+        <div className="mt-4">{renderExtraResult(rawResult)}</div>
       ) : null}
 
       {results.length > 0 ? (

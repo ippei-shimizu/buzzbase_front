@@ -4,22 +4,43 @@ type FaqItem = {
 };
 
 type Props = {
+  /** 記事タイトル（Article.headline / BreadcrumbList の最終要素に使う） */
+  headline: string;
+  /** 記事概要（Article.description に使う） */
+  description: string;
+  /** 記事 URL（path のみ。例: "/column/ops-800"） */
+  path: string;
+  /** Breadcrumb の最終要素に表示する短い名前（例: "OPS .800"） */
+  breadcrumbLeafName: string;
+  /** FAQPage に展開する FAQ。空配列なら FAQPage を出力しない */
   faq: FaqItem[];
 };
 
-export default function OpsColumnJsonLd({ faq }: Props) {
+const SITE_URL = "https://buzzbase.jp";
+
+/**
+ * /column 配下の短いストック記事向け、共有 JSON-LD コンポーネント。
+ * Article / BreadcrumbList を常に出力し、FAQ がある場合のみ FAQPage を追加する。
+ */
+export default function ColumnArticleJsonLd({
+  headline,
+  description,
+  path,
+  breadcrumbLeafName,
+  faq,
+}: Props) {
+  const url = `${SITE_URL}${path}`;
+
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline:
-      "OPSとは（オーピーエス）｜読み方・計算方法・高校野球/プロ野球の目安を解説",
-    description:
-      "OPS（オーピーエス）の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
-    url: "https://buzzbase.jp/column/ops",
+    headline,
+    description,
+    url,
     publisher: {
       "@type": "Organization",
       name: "BUZZ BASE",
-      url: "https://buzzbase.jp",
+      url: SITE_URL,
     },
   };
 
@@ -47,19 +68,19 @@ export default function OpsColumnJsonLd({ faq }: Props) {
         "@type": "ListItem",
         position: 1,
         name: "BUZZ BASE",
-        item: "https://buzzbase.jp",
+        item: SITE_URL,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "コラム",
-        item: "https://buzzbase.jp/column",
+        item: `${SITE_URL}/column`,
       },
       {
         "@type": "ListItem",
         position: 3,
-        name: "OPSとは",
-        item: "https://buzzbase.jp/column/ops",
+        name: breadcrumbLeafName,
+        item: url,
       },
     ],
   };
