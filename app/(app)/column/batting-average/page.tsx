@@ -259,39 +259,50 @@ export default function BattingAverageColumnPage() {
             </thead>
             <tbody>
               <tr className="bg-zinc-800/50">
-                <td className="px-4 py-2 border-b border-zinc-700 text-yellow-500 font-bold">
-                  A（首位打者クラス）
+                <td className="px-4 py-2 border-b border-zinc-700 text-amber-400 font-bold">
+                  S（歴代級）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
                   .350以上
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  リーグを代表するトップバッター。首位打者の有力候補
+                  リーグを代表するトップバッター・首位打者上位
                 </td>
               </tr>
               <tr>
                 <td className="px-4 py-2 border-b border-zinc-700 text-yellow-500 font-bold">
-                  B（好打者）
+                  A（好打者）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
                   .300〜.349
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  クリーンアップを任せられる一流レベル
+                  3 割打者の証・クリーンアップを任せられる一流レベル
                 </td>
               </tr>
               <tr className="bg-zinc-800/50">
-                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300 font-bold">
-                  C（平均的）
+                <td className="px-4 py-2 border-b border-zinc-700 text-yellow-500 font-bold">
+                  B（中堅レギュラー）
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  .250〜.299
+                  .280〜.299
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
-                  リーグ平均前後。レギュラーとして標準的
+                  リーグ平均より上の中堅レギュラー水準
                 </td>
               </tr>
               <tr>
+                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300 font-bold">
+                  C（平均）
+                </td>
+                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
+                  .250〜.279
+                </td>
+                <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300">
+                  NPB のリーグ平均前後・標準的なレギュラー
+                </td>
+              </tr>
+              <tr className="bg-zinc-800/50">
                 <td className="px-4 py-2 border-b border-zinc-700 text-zinc-300 font-bold">
                   D（要改善）
                 </td>
