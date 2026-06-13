@@ -1,9 +1,8 @@
 "use client";
 import { Button } from "@heroui/react";
 import { Group } from "@mantine/core";
-import Image from "next/image";
 import Link from "next/link";
-import { APP_STORE_URL } from "@app/constants/app";
+import AppStoreLink from "@app/components/cta/AppStoreLink";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function LoginAndSignUp() {
@@ -41,15 +40,7 @@ export default function LoginAndSignUp() {
           </Group>
           <div className="mt-5">
             <p className="text-xs text-zinc-400 mb-2">iOSアプリはこちら</p>
-            <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer">
-              <Image
-                src="/images/download_app_store_badge_jp.svg"
-                alt="App Storeからダウンロード"
-                width={150}
-                height={50}
-                className="h-[44px] w-auto"
-              />
-            </a>
+            <AppStoreLink ctaLocation="login_form" />
           </div>
         </>
       )}
