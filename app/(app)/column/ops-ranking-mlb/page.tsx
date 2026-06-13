@@ -29,15 +29,15 @@ const historicalRanking: RankingRow[] = [
     rank: 3,
     player: "ベーブ・ルース",
     year: "1920",
-    ops: "1.382",
-    note: "本塁打54・打率.376",
+    ops: "1.379",
+    note: "本塁打54・長打率.847（当時の歴代最高）",
   },
   {
     rank: 4,
     player: "バリー・ボンズ",
     year: "2001",
     ops: "1.379",
-    note: "シーズン本塁打73本",
+    note: "シーズン本塁打73本（歴代最多）",
   },
   {
     rank: 5,
@@ -48,24 +48,24 @@ const historicalRanking: RankingRow[] = [
   },
   {
     rank: 6,
-    player: "テッド・ウィリアムズ",
-    year: "1941",
-    ops: "1.287",
-    note: "シーズン打率.406",
-  },
-  {
-    rank: 7,
     player: "ベーブ・ルース",
     year: "1923",
     ops: "1.309",
-    note: "MVP獲得シーズン",
+    note: "MVP獲得シーズン (打率.393/41HR)",
+  },
+  {
+    rank: 7,
+    player: "テッド・ウィリアムズ",
+    year: "1941",
+    ops: "1.287",
+    note: "シーズン打率.406（MLB最後の4割打者）",
   },
   {
     rank: 8,
     player: "ロジャース・ホーンスビー",
     year: "1925",
     ops: "1.245",
-    note: "三冠王",
+    note: "三冠王 (.403/39HR/143打点)",
   },
 ];
 
