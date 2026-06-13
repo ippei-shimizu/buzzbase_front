@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import React, { useCallback } from "react";
 import { XIcon } from "@app/components/icon/XIcon";
+import { SITE_URL } from "@app/constants/app";
 import { trackEvent } from "@app/lib/analytics";
 
 type Position = {
@@ -41,7 +42,7 @@ export default function StatsShareComponent({
 }: StatsShareComponentProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const shareUrl = `https://buzzbase.jp/mypage/${userId}`;
+  const shareUrl = `${SITE_URL}/mypage/${userId}`;
   const cardImageUrl = `/api/og/stats-card?userId=${userId}`;
 
   const buildShareText = () => {
@@ -72,8 +73,8 @@ export default function StatsShareComponent({
   const lineShareUrl = `https://line.me/R/msg/text/?${encodedText} ${encodeURIComponent(shareUrl)}`;
 
   const handleShareMobile = () => {
-    trackEvent("share", { method: "navigator", content_type: "stats_card" });
     if (navigator.share) {
+      trackEvent("share", { method: "navigator", content_type: "stats_card" });
       navigator
         .share({
           title: `${userName}さんの成績カード`,
@@ -82,6 +83,7 @@ export default function StatsShareComponent({
         })
         .catch((error) => console.error("Error sharing", error));
     } else {
+      // モーダル内 X/LINE/画像 DL のクリックで個別に share イベントが送られるため、ここでは発火しない
       onOpen();
     }
   };
