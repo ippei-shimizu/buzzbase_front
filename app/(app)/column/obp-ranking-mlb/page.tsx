@@ -26,7 +26,7 @@ const seasonRanking: RankingRow[] = [
     player: "テッド・ウィリアムズ",
     year: "1941",
     obp: ".553",
-    note: "シーズン打率 .406（戦後最後の 4 割打者）",
+    note: "シーズン打率 .406（MLB 史上最後の 4 割打者）",
   },
   {
     player: "ジョン・マッグロー",
