@@ -75,7 +75,10 @@ export default function OpsResultCard({ ops, obp, slg }: Props) {
   const obpText = formatRate(obp);
   const slgText = formatRate(slg);
 
-  const toolUrl = `${SITE_URL}/tools/ops`;
+  // SNS シェア時に Twitter / LINE が取得する URL。
+  // /tools/ops の generateMetadata がこのクエリから動的に og:image を組み立てるので、
+  // share URL 側に必ずクエリを含める。
+  const toolUrl = `${SITE_URL}/tools/ops?ops=${ops.toFixed(3)}&obp=${obp.toFixed(3)}&slg=${slg.toFixed(3)}`;
   const ogUrl = `${SITE_URL}/api/og/ops-card?ops=${ops.toFixed(3)}&obp=${obp.toFixed(3)}&slg=${slg.toFixed(3)}`;
   const shareText = buildShareText(opsText, obpText, slgText);
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(toolUrl)}`;

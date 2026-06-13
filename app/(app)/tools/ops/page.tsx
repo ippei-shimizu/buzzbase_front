@@ -1,18 +1,74 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@app/constants/app";
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorPageContent from "../_components/CalculatorPageContent";
 import OpsCalculator from "./_components/OpsCalculator";
 
 const definition = getCalculatorDefinition("ops")!;
 
-export const metadata: Metadata = {
-  title: definition.metaTitle,
-  description: definition.metaDescription,
-  alternates: {
-    canonical: `https://buzzbase.jp/tools/${definition.slug}`,
-  },
+type OpsSearchParams = {
+  ops?: string;
+  obp?: string;
+  slg?: string;
 };
+
+function isValidShareParam(value: string | undefined): value is string {
+  if (!value) return false;
+  const parsed = Number.parseFloat(value);
+  if (Number.isNaN(parsed)) return false;
+  return parsed >= 0 && parsed <= 5;
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<OpsSearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const hasShareParams =
+    isValidShareParam(sp.ops) &&
+    isValidShareParam(sp.obp) &&
+    isValidShareParam(sp.slg);
+
+  const baseMetadata: Metadata = {
+    title: definition.metaTitle,
+    description: definition.metaDescription,
+    alternates: {
+      canonical: `${SITE_URL}/tools/${definition.slug}`,
+    },
+  };
+
+  if (!hasShareParams) {
+    return baseMetadata;
+  }
+
+  const ogImageUrl = `${SITE_URL}/api/og/ops-card?ops=${encodeURIComponent(
+    sp.ops!,
+  )}&obp=${encodeURIComponent(sp.obp!)}&slg=${encodeURIComponent(sp.slg!)}`;
+
+  return {
+    ...baseMetadata,
+    openGraph: {
+      title: definition.metaTitle,
+      description: `OPS ${sp.ops} の計算結果。出塁率 ${sp.obp} / 長打率 ${sp.slg}。あなたも BUZZ BASE で OPS を計算してシェアしよう。`,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `OPS ${sp.ops} の計算結果カード`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: definition.metaTitle,
+      description: `OPS ${sp.ops}（出塁率 ${sp.obp} / 長打率 ${sp.slg}）`,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default function OpsPage() {
   return (
