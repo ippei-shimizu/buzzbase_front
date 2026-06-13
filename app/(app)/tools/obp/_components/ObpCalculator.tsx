@@ -2,6 +2,7 @@
 
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorForm from "../../_components/CalculatorForm";
+import ObpResultCard from "./ObpResultCard";
 
 const definition = getCalculatorDefinition("obp")!;
 
@@ -22,6 +23,10 @@ export default function ObpCalculator() {
       calculate={definition.calculate}
       nextActions={nextActions}
       analyticsSourceTool={definition.slug}
+      renderExtraResult={(raw) => {
+        if (typeof raw !== "number" || Number.isNaN(raw)) return null;
+        return <ObpResultCard obp={raw} />;
+      }}
     />
   );
 }
