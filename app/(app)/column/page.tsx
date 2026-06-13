@@ -13,9 +13,63 @@ export const metadata: Metadata = {
 const columns = [
   {
     slug: "ops",
-    title: "OPSとは？意味・計算方法・目安を解説",
+    title: "OPSとは（オーピーエス）？意味・計算方法・目安を解説",
     description:
-      "OPSの意味・計算式・評価基準を解説。NPB・高校野球・中学野球の目安値を一覧表で掲載。",
+      "OPSの読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
+  },
+  {
+    slug: "ops-criteria",
+    title: "OPSはいくつから良い？レベル別の目安・基準を解説",
+    description:
+      "OPS .700/.800/.900/1.000 の意味と、中学・高校・大学・社会人・プロのカテゴリ別目安テーブル、4 番を任される現場感まで整理。",
+  },
+  {
+    slug: "ops-800",
+    title: "OPS .800 はどのレベル？プロ・高校野球での意味",
+    description:
+      "OPS .800 はクリーンアップを任される好打者の目安。リーグ平均との比較や、達成するための OBP / SLG バランスを解説。",
+  },
+  {
+    slug: "ops-1000",
+    title: "OPS 1.000 を超える選手の特徴と「1超え」の意味",
+    description:
+      "OPS 1超えの難易度、達成に必要な OBP / SLG、NPB・MLB 歴代の 1.000 超えスラッガーを整理。",
+  },
+  {
+    slug: "ops-700",
+    title: "OPS .700 は平均？高校野球・プロ野球での位置づけ",
+    description:
+      "OPS .700 はリーグ平均水準でレギュラー定着の最低ライン。プロ・高校野球での意味と .700 を超えるための課題を解説。",
+  },
+  {
+    slug: "ops-max",
+    title: "OPSの最大値（マックス）は？理論値と歴代最高記録",
+    description:
+      "OPSの理論上の最大値（5.000）と実戦での天井、NPB・MLB 歴代シーズン最高 OPS を整理。",
+  },
+  {
+    slug: "ops-vs-batting-average",
+    title: "OPSと打率・出塁率・長打率の違いをわかりやすく解説",
+    description:
+      "OPS・打率・出塁率・長打率の使い分け方を、打率が高いのにOPSが低い／逆のケースなど具体例で整理。",
+  },
+  {
+    slug: "ops-ranking-npb",
+    title: "NPB OPSランキング｜歴代シーズン上位と現役主要選手の目安",
+    description:
+      "NPB 歴代シーズン OPS ランキングと現役主力打者の OPS 水準を整理。",
+  },
+  {
+    slug: "ops-ranking-mlb",
+    title: "MLB OPS歴代TOP｜バリー・ボンズから現役まで歴代シーズン最高 OPS",
+    description:
+      "MLB 歴代シーズン最高 OPS ランキングと近年のトップ選手の水準を整理。",
+  },
+  {
+    slug: "npb-ops-average",
+    title: "NPB OPS平均値の推移｜セ・パ両リーグの平均と歴代スラッガーの比較",
+    description:
+      "NPB のリーグ平均 OPS の推移、セ・パの違い、歴代スラッガーとの差を整理。",
   },
   {
     slug: "batting-average",
