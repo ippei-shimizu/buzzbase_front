@@ -12,6 +12,7 @@ import SubmitButton from "@app/components/button/SendButton";
 import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
+import { trackEvent } from "@app/lib/analytics";
 import { signUp } from "@app/services/authService";
 
 export default function SignUp() {
@@ -53,6 +54,7 @@ export default function SignUp() {
         passwordConfirmation,
         confirm_success_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
       });
+      trackEvent("sign_up", { method: "email" });
       router.push("/registration-confirmation");
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.errors) {
