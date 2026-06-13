@@ -13,11 +13,20 @@ type OpsSearchParams = {
   slg?: string;
 };
 
-function isValidShareParam(value: string | undefined): value is string {
-  if (!value) return false;
+// 数値だけを許容する厳密な正規表現。Number.parseFloat は "0.5<script>" のような
+// 末尾ゴミ付き文字列も部分的にパースしてしまうため、metadata 注入を防ぐ目的で
+// 文字列全体が数値表現であることをチェックする。
+const NUMERIC_PARAM_RE = /^\d+(?:\.\d{1,3})?$/;
+
+/**
+ * シェア URL のクエリパラメータを安全な数値に正規化する。
+ * 形式不正・範囲外なら null。0..5 の範囲は OPS の理論最大値 5.000 に合わせている。
+ */
+function parseShareParam(value: string | undefined): number | null {
+  if (!value || !NUMERIC_PARAM_RE.test(value)) return null;
   const parsed = Number.parseFloat(value);
-  if (Number.isNaN(parsed)) return false;
-  return parsed >= 0 && parsed <= 5;
+  if (Number.isNaN(parsed) || parsed < 0 || parsed > 5) return null;
+  return parsed;
 }
 
 export async function generateMetadata({
@@ -26,10 +35,9 @@ export async function generateMetadata({
   searchParams: Promise<OpsSearchParams>;
 }): Promise<Metadata> {
   const sp = await searchParams;
-  const hasShareParams =
-    isValidShareParam(sp.ops) &&
-    isValidShareParam(sp.obp) &&
-    isValidShareParam(sp.slg);
+  const opsValue = parseShareParam(sp.ops);
+  const obpValue = parseShareParam(sp.obp);
+  const slgValue = parseShareParam(sp.slg);
 
   const baseMetadata: Metadata = {
     title: definition.metaTitle,
@@ -39,32 +47,35 @@ export async function generateMetadata({
     },
   };
 
-  if (!hasShareParams) {
+  if (opsValue === null || obpValue === null || slgValue === null) {
     return baseMetadata;
   }
 
-  const ogImageUrl = `${SITE_URL}/api/og/ops-card?ops=${encodeURIComponent(
-    sp.ops!,
-  )}&obp=${encodeURIComponent(sp.obp!)}&slg=${encodeURIComponent(sp.slg!)}`;
+  // 以降は必ず正規化済みの数値文字列のみを使い、生クエリは description / alt に
+  // 一切流入させない。これにより metadata 注入の余地を構造的に消す。
+  const opsText = opsValue.toFixed(3);
+  const obpText = obpValue.toFixed(3);
+  const slgText = slgValue.toFixed(3);
+  const ogImageUrl = `${SITE_URL}/api/og/ops-card?ops=${opsText}&obp=${obpText}&slg=${slgText}`;
 
   return {
     ...baseMetadata,
     openGraph: {
       title: definition.metaTitle,
-      description: `OPS ${sp.ops} の計算結果。出塁率 ${sp.obp} / 長打率 ${sp.slg}。あなたも BUZZ BASE で OPS を計算してシェアしよう。`,
+      description: `OPS ${opsText} の計算結果。出塁率 ${obpText} / 長打率 ${slgText}。あなたも BUZZ BASE で OPS を計算してシェアしよう。`,
       images: [
         {
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `OPS ${sp.ops} の計算結果カード`,
+          alt: `OPS ${opsText} の計算結果カード`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
       title: definition.metaTitle,
-      description: `OPS ${sp.ops}（出塁率 ${sp.obp} / 長打率 ${sp.slg}）`,
+      description: `OPS ${opsText}（出塁率 ${obpText} / 長打率 ${slgText}）`,
       images: [ogImageUrl],
     },
   };
