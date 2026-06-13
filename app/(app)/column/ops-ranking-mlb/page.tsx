@@ -30,7 +30,7 @@ const historicalRanking: RankingRow[] = [
     player: "ベーブ・ルース",
     year: "1920",
     ops: "1.379",
-    note: "本塁打54・長打率.847（当時の歴代最高）",
+    note: "本塁打54・長打率.849（当時の歴代最高）",
   },
   {
     rank: 4,
