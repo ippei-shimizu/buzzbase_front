@@ -7,9 +7,29 @@ import OpsColumnJsonLd from "./_components/OpsColumnJsonLd";
 
 const faqItems = [
   {
+    question: "OPSの読み方は？",
+    answer:
+      "OPSは「オーピーエス」と読みます。On-base Plus Slugging（出塁率＋長打率）の頭文字を取った略称で、英語圏でもアルファベットそのままの読みが一般的です。",
+  },
+  {
     question: "OPSが高いとどうなる？",
     answer:
       "OPSが高い打者はチームの得点力に大きく貢献します。OPSは出塁率と長打率の合計なので、「塁に出る力」と「遠くに飛ばす力」の両方が優れていることを意味します。OPSが.800以上なら優秀、.900以上ならチームの中心打者レベルです。",
+  },
+  {
+    question: "OPS .800はどれくらいすごい？",
+    answer:
+      "OPS .800 は NPB（日本プロ野球）のリーグ平均（近年は .660〜.700 で推移）を 1〜1.5 割上回る数値で、レギュラー上位〜クリーンアップを任される好打者の目安です。MLBでもAll-Star候補ラインに入る水準といえます。",
+  },
+  {
+    question: "OPS .700は平均ですか？",
+    answer:
+      "歴史的に NPB のリーグ平均 OPS は .700 前後とされてきましたが、2018 年以降は .720→.660 へと低下傾向で、2023 年は両リーグとも .662 でした。「.700 はリーグ平均よりやや上」が現代の感覚に近く、レギュラー定着の目安としてはまだ十分通用するラインです。",
+  },
+  {
+    question: "OPS 1超えの意味は？",
+    answer:
+      "OPSが1.000を超える（「1超え」）とは、出塁率と長打率の合計が1.000以上になることを指します。NPBでも年間を通して達成できる選手は数人程度しかおらず、首位打者・本塁打王・MVP争いに絡むスラッガーの証です。MLBでも歴代の超一流打者の象徴的な数字として扱われます。",
   },
   {
     question: "OPS 1.000超えはどのくらいすごい？",
@@ -25,6 +45,16 @@ const faqItems = [
     question: "高校野球のOPSの目安は？",
     answer:
       "高校野球では金属バットを使用するためプロ野球より数値が高くなる傾向があります。一般的に.700以上で平均的、.800以上で好打者、.900以上で強打者、1.000を超えると地区を代表するレベルの打者といえます。",
+  },
+  {
+    question: "中学野球のOPSの目安は？",
+    answer:
+      "中学野球も金属バットのため数値が出やすく、シニア・ボーイズ等の硬式リーグでは.800前後でレギュラー上位、.900以上で4番候補、1.000超えなら全国レベルの強打者の目安になります。軟式の中学野球ではさらに数値が伸びやすい傾向があります。",
+  },
+  {
+    question: "NPBとMLBでOPSの基準は違う？",
+    answer:
+      "歴史的にはどちらもリーグ平均が .700 前後でしたが、近年の NPB は .660〜.700 まで低下しており、MLB の方がやや高めの平均に位置する年が増えています。それでも基準値（.800 で優秀／.900 で強打者／1.000 超えで超一流）は両リーグで概ね共通して使えます。",
   },
 ];
 
@@ -46,9 +76,19 @@ export default function OpsColumnPage() {
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">
-        OPS（オーピーエス）とは、
+        OPS（読み方：<strong>オーピーエス</strong>）とは、
         <strong>出塁率と長打率を足し合わせた野球の打撃指標</strong>
-        です。打者の「塁に出る力」と「長打を打つ力」を1つの数値で総合評価できるため、プロ野球から高校野球まで幅広く使われています。この記事では、OPSの意味・計算方法・レベル別の目安値を詳しく解説します。
+        です。打者の「塁に出る力」と「長打を打つ力」を1つの数値で総合評価できるため、NPB（日本プロ野球）やMLB（メジャーリーグ）はもちろん、高校野球・中学野球の現場でも幅広く使われています。この記事では、OPSの意味・計算方法・レベル別の目安値を詳しく解説します。
+      </p>
+      <p className="text-sm text-zinc-400 leading-6 mt-2">
+        「OPSはいくつから良いのか」や「.700／.800／.900／1.000」の意味を網羅した
+        <Link
+          href="/column/ops-criteria"
+          className="text-yellow-500 hover:text-yellow-400 transition-colors font-bold"
+        >
+          OPSの目安・基準を詳しく解説した記事
+        </Link>
+        も併せて参照してください。
       </p>
 
       {/* 目次 */}
@@ -113,7 +153,10 @@ export default function OpsColumnPage() {
           も反映するため、打者の攻撃力をより総合的に評価できます。セイバーメトリクス（データ分析による野球の科学的評価）の普及とともに、チーム得点との相関が高い指標として注目されるようになりました。
         </p>
         <p className="text-sm text-zinc-300 leading-6 mt-3">
-          NPB（日本プロ野球）やMLB（メジャーリーグ）のデータ分析においても、打者の貢献度を測る基本指標として広く活用されています。
+          NPB（日本プロ野球）やMLB（メジャーリーグ）のデータ分析においても、打者の貢献度を測る基本指標として広く活用されています。リーグ平均は
+          MLB が長らく .700〜.730 のレンジ、NPB は歴史的に .700
+          前後とされてきましたが、近年の NPB は .660〜.700
+          まで低下しており、評価基準（.800で優秀／.900で強打者／1.000超えで超一流）は両リーグで概ね共通して通用します。
         </p>
       </section>
 
@@ -375,6 +418,45 @@ export default function OpsColumnPage() {
           >
             <p className="font-bold text-sm">打率（AVG）</p>
             <p className="text-xs text-zinc-400 mt-1">最も基本的な打撃指標</p>
+          </Link>
+        </div>
+      </section>
+
+      {/* 関連コラム */}
+      <section className="mt-10">
+        <h2 className="text-xl font-bold mb-4">関連コラム</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/column/ops-criteria"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">OPSの目安・基準</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              .700/.800/.900/1.000 の意味、カテゴリ別の現場感
+            </p>
+          </Link>
+          <Link
+            href="/column/ops-800"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">OPS .800 はどのレベル？</p>
+            <p className="text-xs text-zinc-400 mt-1">プロ・高校野球での意味</p>
+          </Link>
+          <Link
+            href="/column/ops-1000"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">OPS 1.000 を超える選手</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              歴代スラッガーと「1超え」の意味
+            </p>
+          </Link>
+          <Link
+            href="/column/ops-vs-batting-average"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">OPSと打率・長打率の違い</p>
+            <p className="text-xs text-zinc-400 mt-1">指標の使い分け方を整理</p>
           </Link>
         </div>
       </section>
