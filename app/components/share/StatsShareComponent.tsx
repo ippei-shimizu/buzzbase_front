@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import React, { useCallback } from "react";
 import { XIcon } from "@app/components/icon/XIcon";
+import { trackEvent } from "@app/lib/analytics";
 
 type Position = {
   id: string;
@@ -71,6 +72,7 @@ export default function StatsShareComponent({
   const lineShareUrl = `https://line.me/R/msg/text/?${encodedText} ${encodeURIComponent(shareUrl)}`;
 
   const handleShareMobile = () => {
+    trackEvent("share", { method: "navigator", content_type: "stats_card" });
     if (navigator.share) {
       navigator
         .share({
@@ -84,7 +86,16 @@ export default function StatsShareComponent({
     }
   };
 
+  const handleTwitterShare = () => {
+    trackEvent("share", { method: "twitter", content_type: "stats_card" });
+  };
+
+  const handleLineShare = () => {
+    trackEvent("share", { method: "line", content_type: "stats_card" });
+  };
+
   const handleDownloadImage = useCallback(async () => {
+    trackEvent("share", { method: "download", content_type: "stats_card" });
     try {
       const res = await fetch(cardImageUrl);
       const blob = await res.blob();
@@ -144,6 +155,7 @@ export default function StatsShareComponent({
                 href={twitterShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onPress={handleTwitterShare}
                 className="bg-transparent"
                 radius="sm"
                 isIconOnly
@@ -154,6 +166,7 @@ export default function StatsShareComponent({
                 href={lineShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onPress={handleLineShare}
                 className="bg-transparent"
                 radius="sm"
                 isIconOnly

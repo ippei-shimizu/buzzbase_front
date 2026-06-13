@@ -28,6 +28,7 @@ export default function OpsCalculator() {
       outputs={definition.outputs}
       calculate={definition.calculate}
       nextActions={nextActions}
+      analyticsSourceTool={definition.slug}
       renderExtraResult={(raw) => {
         if (!isOpsResult(raw)) return null;
         const ops = raw.ops;
