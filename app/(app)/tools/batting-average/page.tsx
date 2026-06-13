@@ -1,18 +1,79 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@app/constants/app";
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorPageContent from "../_components/CalculatorPageContent";
 import BattingAverageCalculator from "./_components/BattingAverageCalculator";
 
 const definition = getCalculatorDefinition("batting-average")!;
 
-export const metadata: Metadata = {
-  title: definition.metaTitle,
-  description: definition.metaDescription,
-  alternates: {
-    canonical: `https://buzzbase.jp/tools/${definition.slug}`,
-  },
+type BattingAverageSearchParams = {
+  avg?: string;
 };
+
+// 数値だけを許容する厳密な正規表現。Number.parseFloat は "0.3<script>" のような
+// 末尾ゴミ付き文字列も部分的にパースしてしまうため、metadata 注入を防ぐ目的で
+// 文字列全体が数値表現であることをチェックする。
+const NUMERIC_PARAM_RE = /^\d+(?:\.\d{1,3})?$/;
+
+/**
+ * シェア URL のクエリパラメータを安全な数値に正規化する。
+ * 0.0〜1.0 の範囲は打率の理論上の値域 (安打数 ÷ 打数) に合わせている。
+ */
+function parseShareAvg(value: string | undefined): number | null {
+  if (!value || !NUMERIC_PARAM_RE.test(value)) return null;
+  const parsed = Number.parseFloat(value);
+  if (Number.isNaN(parsed) || parsed < 0 || parsed > 1) return null;
+  return parsed;
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<BattingAverageSearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const avgValue = parseShareAvg(sp.avg);
+
+  const baseMetadata: Metadata = {
+    title: definition.metaTitle,
+    description: definition.metaDescription,
+    alternates: {
+      canonical: `${SITE_URL}/tools/${definition.slug}`,
+    },
+  };
+
+  if (avgValue === null) {
+    return baseMetadata;
+  }
+
+  // 以降は必ず正規化済みの数値文字列のみを使い、生クエリは description / alt に
+  // 一切流入させない。これにより metadata 注入の余地を構造的に消す。
+  const avgText = avgValue.toFixed(3);
+  const ogImageUrl = `${SITE_URL}/api/og/batting-average-card?avg=${avgText}`;
+
+  return {
+    ...baseMetadata,
+    openGraph: {
+      title: definition.metaTitle,
+      description: `打率 ${avgText} の計算結果。あなたも BUZZ BASE で打率を計算してシェアしよう。`,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `打率 ${avgText} の計算結果カード`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: definition.metaTitle,
+      description: `打率（AVG） ${avgText}`,
+      images: [ogImageUrl],
+    },
+  };
+}
 
 export default function BattingAveragePage() {
   return (
