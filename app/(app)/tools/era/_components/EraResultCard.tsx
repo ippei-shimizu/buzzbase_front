@@ -2,59 +2,20 @@
 
 import Link from "next/link";
 import { SITE_URL } from "@app/constants/app";
+import { classifyEra } from "@app/data/baseball-stats/eraLevel";
 import { trackEvent } from "@app/lib/analytics";
 
 type Props = {
   era: number;
 };
 
-type Level = {
-  key: "S" | "A" | "B" | "C" | "D";
-  label: string;
-  comment: string;
-  badgeClass: string;
-};
-
-function classifyEra(era: number): Level {
-  if (era < 1.5) {
-    return {
-      key: "S",
-      label: "歴代級",
-      comment: "防御率 1.50 以下。沢村賞・MVP 級の歴史的シーズン水準。",
-      badgeClass: "bg-amber-400 text-zinc-900",
-    };
-  }
-  if (era < 2.5) {
-    return {
-      key: "A",
-      label: "エース",
-      comment: "防御率 2.50 以下。リーグを代表する一線級エース。",
-      badgeClass: "bg-yellow-500 text-zinc-900",
-    };
-  }
-  if (era < 3.5) {
-    return {
-      key: "B",
-      label: "好投手",
-      comment: "防御率 3.50 以下。ローテーション中軸〜リーグ平均より上。",
-      badgeClass: "bg-yellow-600 text-white",
-    };
-  }
-  if (era < 4.5) {
-    return {
-      key: "C",
-      label: "平均的",
-      comment: "防御率 4.50 以下。リーグ平均前後の標準的なローテ投手。",
-      badgeClass: "bg-zinc-500 text-white",
-    };
-  }
-  return {
-    key: "D",
-    label: "要改善",
-    comment: "防御率 4.50 超。球種・制球力の改善余地あり。",
-    badgeClass: "bg-zinc-700 text-zinc-200",
-  };
-}
+const BADGE_CLASS = {
+  S: "bg-amber-400 text-zinc-900",
+  A: "bg-yellow-500 text-zinc-900",
+  B: "bg-yellow-600 text-white",
+  C: "bg-zinc-500 text-white",
+  D: "bg-zinc-700 text-zinc-200",
+} as const;
 
 function formatEra(value: number): string {
   if (Number.isNaN(value)) return "-";
@@ -91,7 +52,7 @@ export default function EraResultCard({ era }: Props) {
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-zinc-400">あなたの防御率評価</p>
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${level.badgeClass}`}
+          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${BADGE_CLASS[level.key]}`}
         >
           {level.key} ／ {level.label}
         </span>

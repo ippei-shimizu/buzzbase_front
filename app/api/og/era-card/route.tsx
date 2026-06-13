@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { type NextRequest } from "next/server";
+import { classifyEra } from "@app/data/baseball-stats/eraLevel";
 
 export const runtime = "nodejs";
 
@@ -73,20 +74,6 @@ function formatEra(value: number | null): string {
   return value.toFixed(2);
 }
 
-type LevelKey = "S" | "A" | "B" | "C" | "D";
-
-function classifyEraLevel(era: number): {
-  key: LevelKey;
-  label: string;
-  color: string;
-} {
-  if (era < 1.5) return { key: "S", label: "歴代級", color: "#f59e0b" };
-  if (era < 2.5) return { key: "A", label: "エース", color: "#fbbf24" };
-  if (era < 3.5) return { key: "B", label: "好投手", color: "#facc15" };
-  if (era < 4.5) return { key: "C", label: "平均的", color: "#a3a3a3" };
-  return { key: "D", label: "要改善", color: "#737373" };
-}
-
 function BgImage({ src }: { src: string }) {
   return (
     <img
@@ -129,7 +116,7 @@ export async function GET(request: NextRequest) {
     return new Response("Asset loading failed", { status: 500 });
   }
 
-  const level = era !== null ? classifyEraLevel(era) : null;
+  const level = era !== null ? classifyEra(era) : null;
 
   const response = new ImageResponse(
     (
@@ -169,7 +156,7 @@ export async function GET(request: NextRequest) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: level.color,
+                backgroundColor: level.ogColor,
                 color: "#1c1917",
                 padding: "8px 20px",
                 borderRadius: "999px",
