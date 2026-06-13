@@ -8,6 +8,7 @@ export const runtime = "nodejs";
 
 let bgImageBase64: string | null = null;
 let logoImageBase64: string | null = null;
+let cachedFonts: { data: ArrayBuffer; weight: 400 | 700 }[] | null = null;
 
 async function getStaticImage(
   fileName: string,
@@ -43,6 +44,7 @@ function getLogoImage(): Promise<string> {
 async function fetchFonts(): Promise<
   { data: ArrayBuffer; weight: 400 | 700 }[]
 > {
+  if (cachedFonts) return cachedFonts;
   const res = await fetch(
     "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap",
   );
@@ -62,6 +64,7 @@ async function fetchFonts(): Promise<
       return { data: await fontRes.arrayBuffer(), weight };
     }),
   );
+  cachedFonts = fonts;
   return fonts;
 }
 
@@ -71,7 +74,7 @@ function formatStat(value: number | null): string {
   return value < 1 ? fixed.replace(/^0/, "") : fixed;
 }
 
-type LevelKey = "S" | "A" | "B" | "C";
+type LevelKey = "S" | "A" | "B" | "C" | "D";
 
 function classifyOpsLevel(ops: number): {
   key: LevelKey;
@@ -82,7 +85,7 @@ function classifyOpsLevel(ops: number): {
   if (ops >= 0.9) return { key: "A", label: "中心打者級", color: "#fbbf24" };
   if (ops >= 0.8) return { key: "B", label: "好打者", color: "#facc15" };
   if (ops >= 0.7) return { key: "C", label: "平均的", color: "#a3a3a3" };
-  return { key: "C", label: "要改善", color: "#737373" };
+  return { key: "D", label: "要改善", color: "#737373" };
 }
 
 function StatBox({ label, value }: { label: string; value: string }) {
