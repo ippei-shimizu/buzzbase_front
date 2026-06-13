@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SITE_URL } from "@app/constants/app";
 import { trackEvent } from "@app/lib/analytics";
 
 type Props = {
@@ -62,8 +63,6 @@ function formatRate(value: number): string {
   const fixed = value.toFixed(3);
   return value < 1 ? fixed.replace(/^0/, "") : fixed;
 }
-
-const SITE_URL = "https://buzzbase.jp";
 
 function buildShareText(opsText: string, obpText: string, slgText: string) {
   return `OPS ${opsText}（出塁率 ${obpText} / 長打率 ${slgText}）
