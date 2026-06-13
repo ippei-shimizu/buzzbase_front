@@ -7,6 +7,7 @@ import CtaBanner from "@app/(app)/_components/CtaBanner";
 import SignIn from "@app/components/auth/SignIn";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import SignUpCompletionTracker from "./_components/SignUpCompletionTracker";
 
 function SignInContent() {
   const searchParams = useSearchParams();
@@ -40,6 +41,7 @@ function SignInContent() {
 
   return (
     <>
+      <SignUpCompletionTracker triggered={confirmationUrl === "true"} />
       {logoutSuccess && <ToastSuccess text={message} />}
       <Image
         src="/images/logo-bg.png"

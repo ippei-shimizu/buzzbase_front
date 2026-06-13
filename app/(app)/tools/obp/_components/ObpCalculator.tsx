@@ -21,6 +21,7 @@ export default function ObpCalculator() {
       outputs={definition.outputs}
       calculate={definition.calculate}
       nextActions={nextActions}
+      analyticsSourceTool={definition.slug}
     />
   );
 }

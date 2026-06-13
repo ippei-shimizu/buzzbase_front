@@ -21,6 +21,7 @@ export default function EraCalculator() {
       outputs={definition.outputs}
       calculate={definition.calculate}
       nextActions={nextActions}
+      analyticsSourceTool={definition.slug}
     />
   );
 }

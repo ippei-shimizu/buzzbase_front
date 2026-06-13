@@ -3,11 +3,12 @@
 import { Input, Button } from "@heroui/react";
 import Link from "next/link";
 import { useState, useCallback } from "react";
-import { APP_STORE_URL } from "@app/constants/app";
+import { buildAppStoreUrl } from "@app/constants/app";
 import {
   type CalculatorField,
   type CalculatorOutput,
 } from "@app/data/baseball-stats/types";
+import { trackEvent } from "@app/lib/analytics";
 
 type ResultItem = {
   label: string;
@@ -33,6 +34,11 @@ type Props = {
   renderExtraResult?: (
     rawResult: number | Record<string, number | null>,
   ) => React.ReactNode;
+  /**
+   * GA4 計装用のツール slug。渡すと `tool_calculate` / `app_store_click` イベントに
+   * `tool` パラメータとして付与される。未指定の場合は無印で送信される（既存ツールでの破壊を避けるため optional）。
+   */
+  analyticsSourceTool?: string;
 };
 
 export default function CalculatorForm({
@@ -41,6 +47,7 @@ export default function CalculatorForm({
   calculate,
   nextActions,
   renderExtraResult,
+  analyticsSourceTool,
 }: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [results, setResults] = useState<ResultItem[]>([]);
@@ -97,7 +104,11 @@ export default function CalculatorForm({
       setResults(formatted);
     }
     setRawResult(calculated);
-  }, [values, fields, outputs, calculate]);
+    trackEvent(
+      "tool_calculate",
+      analyticsSourceTool ? { tool: analyticsSourceTool } : undefined,
+    );
+  }, [values, fields, outputs, calculate, analyticsSourceTool]);
 
   const handleReset = useCallback(() => {
     setValues({});
@@ -105,6 +116,13 @@ export default function CalculatorForm({
     setRawResult(null);
     setError(null);
   }, []);
+
+  const handleAppStoreClick = useCallback(() => {
+    trackEvent("app_store_click", {
+      cta_location: "tool_calculator",
+      ...(analyticsSourceTool ? { tool: analyticsSourceTool } : {}),
+    });
+  }, [analyticsSourceTool]);
 
   return (
     <div className="rounded-xl border border-zinc-700 bg-zinc-900/50 p-5">
@@ -172,9 +190,10 @@ export default function CalculatorForm({
       {results.length > 0 ? (
         <div className="mt-4 text-center">
           <a
-            href={APP_STORE_URL}
+            href={buildAppStoreUrl("tool_calculator")}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleAppStoreClick}
             className="inline-block w-full rounded-lg bg-yellow-600 hover:bg-yellow-500 transition-colors px-6 py-3 text-sm font-bold text-white"
           >
             アプリで成績を記録する（無料）
