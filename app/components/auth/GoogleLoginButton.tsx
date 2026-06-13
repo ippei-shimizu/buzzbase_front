@@ -40,16 +40,16 @@ export default function GoogleLoginButton({
         router.push("/register-username");
         setIsLoggedIn(true);
       } else {
+        // requires_username=false はバックエンドが既存ユーザーと判断したことを意味する。
+        // getUserData() が user_id を返さない一時的失敗があっても sign_up ではなく login として記録する。
+        trackEvent("login", { method: "google" });
         const userData = await getUserData();
         if (userData && userData.user_id) {
-          trackEvent("login", { method: "google" });
           router.push(`/mypage/${userData.user_id}`);
-          setIsLoggedIn(true);
         } else {
-          trackEvent("sign_up", { method: "google" });
           router.push("/register-username");
-          setIsLoggedIn(true);
         }
+        setIsLoggedIn(true);
       }
     } catch {
       setErrors(["Googleログインに失敗しました"]);
