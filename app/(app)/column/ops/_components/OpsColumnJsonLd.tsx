@@ -11,9 +11,10 @@ export default function OpsColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "OPSとは？意味・計算方法・高校野球/プロ野球の目安を解説",
+    headline:
+      "OPSとは（オーピーエス）｜読み方・計算方法・高校野球/プロ野球の目安を解説",
     description:
-      "OPSの意味・計算式・評価基準を解説。NPB・高校野球・中学野球の目安値を一覧表で掲載。",
+      "OPS（オーピーエス）の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
     url: "https://buzzbase.jp/column/ops",
     publisher: {
       "@type": "Organization",
