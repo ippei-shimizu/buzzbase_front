@@ -104,7 +104,10 @@ export default function CalculatorForm({
       setResults(formatted);
     }
     setRawResult(calculated);
-    trackEvent("tool_calculate", { tool: analyticsSourceTool ?? "unknown" });
+    trackEvent(
+      "tool_calculate",
+      analyticsSourceTool ? { tool: analyticsSourceTool } : undefined,
+    );
   }, [values, fields, outputs, calculate, analyticsSourceTool]);
 
   const handleReset = useCallback(() => {
@@ -117,7 +120,7 @@ export default function CalculatorForm({
   const handleAppStoreClick = useCallback(() => {
     trackEvent("app_store_click", {
       cta_location: "tool_calculator",
-      tool: analyticsSourceTool ?? "unknown",
+      ...(analyticsSourceTool ? { tool: analyticsSourceTool } : {}),
     });
   }, [analyticsSourceTool]);
 
