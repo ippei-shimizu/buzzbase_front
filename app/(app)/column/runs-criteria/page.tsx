@@ -16,7 +16,7 @@ const faqItems = [
   {
     question: "失点率はいくつから良いと言える？",
     answer:
-      "NPB のリーグ平均失点率はおおむね 3.80〜4.20 で推移するため、3.50 を下回れば優秀、3.00 以下なら一線級です。防御率 + 0.3〜0.5 程度が一般的な失点率の上振れ幅です。",
+      "失点率は防御率より概ね 0.3〜0.5 高く出るので、NPB の平均防御率（年により 2.76〜4.10 のレンジ）から逆算すると、3.50 を下回れば優秀、3.00 以下なら一線級が目安です。",
   },
   {
     question: "失点率が高くて防御率が低い投手は？",
@@ -71,8 +71,11 @@ export default function RunsCriteriaColumnPage() {
       <section className="mt-8">
         <h2 className="text-xl font-bold mb-3">失点率の目安</h2>
         <p className="text-sm text-zinc-300 leading-6">
-          NPB のリーグ平均失点率は概ね <strong>3.80〜4.20</strong>
-          で推移しており、これを基準に評価します。
+          失点率は防御率より概ね <strong>0.3〜0.5 高く</strong>出るため、NPB
+          の平均防御率（年により 2.76〜4.10
+          のレンジ）から逆算するとリーグ平均失点率は概ね{" "}
+          <strong>3.20〜4.50</strong>{" "}
+          のレンジで推移します。これを基準に評価します。
         </p>
         <ul className="text-sm text-zinc-300 leading-6 list-disc ml-5 space-y-1 mt-3">
           <li>
