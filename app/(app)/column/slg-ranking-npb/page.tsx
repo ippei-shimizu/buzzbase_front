@@ -19,7 +19,7 @@ const historicalSeasons: RankingRow[] = [
   {
     player: "王 貞治",
     year: "1973",
-    slg: ".732",
+    slg: ".761",
     note: "三冠王 (.355/51HR/114打点)",
   },
   {
