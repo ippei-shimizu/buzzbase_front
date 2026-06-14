@@ -22,9 +22,7 @@ function buildShareText(kbbText: string) {
 export default function KBBResultCard({ kbb }: Props) {
   const level = classifyKbb(kbb);
   const kbbText = formatKbb(kbb);
-
-  const kbbQuery = kbb.toFixed(2);
-  const toolUrl = `${SITE_URL}/tools/k-bb?kbb=${kbbQuery}`;
+  const toolUrl = `${SITE_URL}/tools/k-bb?kbb=${kbbText}`;
   const shareText = buildShareText(kbbText);
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(toolUrl)}`;
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(toolUrl)}&text=${encodeURIComponent(shareText)}`;

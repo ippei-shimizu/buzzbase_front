@@ -22,9 +22,7 @@ function buildShareText(whipText: string) {
 export default function WhipResultCard({ whip }: Props) {
   const level = classifyWhip(whip);
   const whipText = formatWhip(whip);
-
-  const whipQuery = whip.toFixed(2);
-  const toolUrl = `${SITE_URL}/tools/whip?whip=${whipQuery}`;
+  const toolUrl = `${SITE_URL}/tools/whip?whip=${whipText}`;
   const shareText = buildShareText(whipText);
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(toolUrl)}`;
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(toolUrl)}&text=${encodeURIComponent(shareText)}`;
