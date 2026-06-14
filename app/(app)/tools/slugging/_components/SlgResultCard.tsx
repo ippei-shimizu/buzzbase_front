@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { SITE_URL } from "@app/constants/app";
-import { classifyObp } from "@app/data/baseball-stats/obpLevel";
+import { classifySlg } from "@app/data/baseball-stats/slgLevel";
 import { trackEvent } from "@app/lib/analytics";
 
 type Props = {
-  obp: number;
+  slg: number;
 };
 
 function formatRate(value: number): string {
@@ -15,29 +15,29 @@ function formatRate(value: number): string {
   return value < 1 ? fixed.replace(/^0/, "") : fixed;
 }
 
-function buildShareText(obpText: string) {
-  return `出塁率 ${obpText}
-あなたも BUZZ BASE で出塁率を計算してシェアしよう。`;
+function buildShareText(slgText: string) {
+  return `長打率 ${slgText}
+あなたも BUZZ BASE で長打率を計算してシェアしよう。`;
 }
 
-export default function ObpResultCard({ obp }: Props) {
-  const level = classifyObp(obp);
-  const obpText = formatRate(obp);
+export default function SlgResultCard({ slg }: Props) {
+  const level = classifySlg(slg);
+  const slgText = formatRate(slg);
 
-  const obpQuery = obp.toFixed(3);
-  const toolUrl = `${SITE_URL}/tools/obp?obp=${obpQuery}`;
-  const shareText = buildShareText(obpText);
+  const slgQuery = slg.toFixed(3);
+  const toolUrl = `${SITE_URL}/tools/slugging?slg=${slgQuery}`;
+  const shareText = buildShareText(slgText);
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(toolUrl)}`;
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(toolUrl)}&text=${encodeURIComponent(shareText)}`;
 
   const handleTwitterShare = () => {
-    trackEvent("share", { method: "twitter", content_type: "obp_result" });
+    trackEvent("share", { method: "twitter", content_type: "slg_result" });
   };
   const handleLineShare = () => {
-    trackEvent("share", { method: "line", content_type: "obp_result" });
+    trackEvent("share", { method: "line", content_type: "slg_result" });
   };
   const handleSignupClick = () => {
-    trackEvent("generate_lead", { source_tool: "obp" });
+    trackEvent("generate_lead", { source_tool: "slugging" });
   };
 
   const badgeClass: Record<typeof level.key, string> = {
@@ -51,7 +51,7 @@ export default function ObpResultCard({ obp }: Props) {
   return (
     <div className="space-y-5 rounded-xl border border-yellow-700/40 bg-gradient-to-br from-zinc-900 via-zinc-900 to-yellow-950/30 p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-zinc-400">あなたの出塁率評価</p>
+        <p className="text-sm text-zinc-400">あなたの長打率評価</p>
         <span
           className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${badgeClass[level.key]}`}
         >
@@ -92,7 +92,7 @@ export default function ObpResultCard({ obp }: Props) {
       <div className="rounded-lg border border-yellow-600/40 bg-yellow-900/20 px-4 py-4">
         <p className="text-sm text-zinc-200 leading-6">
           BUZZ BASE に無料登録すると、試合ごとに
-          出塁率・打率・OPS・長打率をまとめて記録できます。グラフで成績推移を確認したり、チーム内ランキングで比較したりも可能です。
+          長打率・打率・OPS・出塁率をまとめて記録できます。グラフで成績推移を確認したり、チーム内ランキングで比較したりも可能です。
         </p>
         <Link
           href="/signup"
