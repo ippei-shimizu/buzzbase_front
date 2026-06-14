@@ -26,7 +26,6 @@ export default function ObpResultCard({ obp }: Props) {
 
   const obpQuery = obp.toFixed(3);
   const toolUrl = `${SITE_URL}/tools/obp?obp=${obpQuery}`;
-  const ogUrl = `${SITE_URL}/api/og/obp-card?obp=${obpQuery}`;
   const shareText = buildShareText(obpText);
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(toolUrl)}`;
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(toolUrl)}&text=${encodeURIComponent(shareText)}`;
@@ -89,13 +88,6 @@ export default function ObpResultCard({ obp }: Props) {
           LINEでシェア
         </a>
       </div>
-
-      <details className="rounded-lg border border-zinc-700/60 bg-zinc-950/40">
-        <summary className="cursor-pointer px-4 py-2 text-xs text-zinc-400">
-          シェア用画像 URL を表示
-        </summary>
-        <p className="px-4 pb-3 text-xs break-all text-zinc-500">{ogUrl}</p>
-      </details>
 
       <div className="rounded-lg border border-yellow-600/40 bg-yellow-900/20 px-4 py-4">
         <p className="text-sm text-zinc-200 leading-6">
