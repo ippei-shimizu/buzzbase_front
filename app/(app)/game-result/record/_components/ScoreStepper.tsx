@@ -28,7 +28,7 @@ export default function ScoreStepper({
         isIconOnly
         size="sm"
         radius="full"
-        variant="light"
+        variant="solid"
         color="primary"
         aria-label={`${ariaLabel}を減らす`}
         isDisabled={decrementDisabled}
@@ -60,7 +60,7 @@ export default function ScoreStepper({
         isIconOnly
         size="sm"
         radius="full"
-        variant="light"
+        variant="solid"
         color="primary"
         aria-label={`${ariaLabel}を増やす`}
         onPress={() => onChange((value ?? 0) + 1)}
