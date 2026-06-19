@@ -55,11 +55,11 @@ export async function createPlateAppearanceV2(
       cache: "no-store",
       body: JSON.stringify({ plate_appearance: input }),
     });
-    const body = await response.json();
+    const body = await response.json().catch(() => null);
     if (!response.ok) {
       return {
         ok: false,
-        errors: body.errors ?? ["打席結果の保存に失敗しました"],
+        errors: body?.errors ?? ["打席結果の保存に失敗しました"],
       };
     }
     return { ok: true, data: body };
@@ -89,11 +89,11 @@ export async function updatePlateAppearanceV2(
         body: JSON.stringify({ plate_appearance: input }),
       },
     );
-    const body = await response.json();
+    const body = await response.json().catch(() => null);
     if (!response.ok) {
       return {
         ok: false,
-        errors: body.errors ?? ["打席結果の更新に失敗しました"],
+        errors: body?.errors ?? ["打席結果の更新に失敗しました"],
       };
     }
     return { ok: true, data: body };
@@ -121,7 +121,7 @@ export async function deletePlateAppearanceV2(
       const body = await response.json().catch(() => ({}));
       return {
         ok: false,
-        errors: body.errors ?? ["打席結果の削除に失敗しました"],
+        errors: body?.errors ?? ["打席結果の削除に失敗しました"],
       };
     }
     return { ok: true, data: null };

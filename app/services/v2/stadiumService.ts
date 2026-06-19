@@ -75,9 +75,12 @@ export async function createStadium(
       cache: "no-store",
       body: JSON.stringify({ stadium: payload }),
     });
-    const body = await response.json();
+    const body = await response.json().catch(() => null);
     if (!response.ok) {
-      return { ok: false, errors: body.errors ?? ["球場の作成に失敗しました"] };
+      return {
+        ok: false,
+        errors: body?.errors ?? ["球場の作成に失敗しました"],
+      };
     }
     return { ok: true, data: body };
   } catch (error) {

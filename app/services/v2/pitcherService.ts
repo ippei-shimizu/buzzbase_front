@@ -73,9 +73,12 @@ export async function createPitcher(
       cache: "no-store",
       body: JSON.stringify({ pitcher: input }),
     });
-    const body = await response.json();
+    const body = await response.json().catch(() => null);
     if (!response.ok) {
-      return { ok: false, errors: body.errors ?? ["投手の作成に失敗しました"] };
+      return {
+        ok: false,
+        errors: body?.errors ?? ["投手の作成に失敗しました"],
+      };
     }
     return { ok: true, data: body };
   } catch (error) {
@@ -101,9 +104,12 @@ export async function updatePitcher(
       cache: "no-store",
       body: JSON.stringify({ pitcher: input }),
     });
-    const body = await response.json();
+    const body = await response.json().catch(() => null);
     if (!response.ok) {
-      return { ok: false, errors: body.errors ?? ["投手の更新に失敗しました"] };
+      return {
+        ok: false,
+        errors: body?.errors ?? ["投手の更新に失敗しました"],
+      };
     }
     return { ok: true, data: body };
   } catch (error) {
