@@ -23,8 +23,8 @@ export type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; errors: string[] };
 
-// 認証欠落時の共通エラー。
-export const UNAUTHENTICATED_RESULT: { ok: false; errors: string[] } = {
-  ok: false,
-  errors: ["ログインが必要です"],
-};
+// 認証欠落時の共通エラー。呼び出しごとに新規オブジェクトを返し、
+// errors 配列の共有参照（呼び出し元の破壊的操作の波及）を避ける。
+export function unauthenticatedResult(): { ok: false; errors: string[] } {
+  return { ok: false, errors: ["ログインが必要です"] };
+}

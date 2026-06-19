@@ -10,7 +10,7 @@ import { captureServerActionError } from "../../../lib/sentry-helpers";
 import {
   type ActionResult,
   getAuthHeaders,
-  UNAUTHENTICATED_RESULT,
+  unauthenticatedResult,
 } from "./authHeaders";
 
 interface GetPitchersParams {
@@ -65,7 +65,7 @@ export async function createPitcher(
 ): Promise<ActionResult<Pitcher>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return UNAUTHENTICATED_RESULT;
+    if (!headers) return unauthenticatedResult();
 
     const response = await fetch(`${RAILS_API_URL}/api/v2/pitchers`, {
       method: "POST",
@@ -93,7 +93,7 @@ export async function updatePitcher(
 ): Promise<ActionResult<Pitcher>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return UNAUTHENTICATED_RESULT;
+    if (!headers) return unauthenticatedResult();
 
     const response = await fetch(`${RAILS_API_URL}/api/v2/pitchers/${id}`, {
       method: "PATCH",

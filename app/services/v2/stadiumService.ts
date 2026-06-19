@@ -10,7 +10,7 @@ import { captureServerActionError } from "../../../lib/sentry-helpers";
 import {
   type ActionResult,
   getAuthHeaders,
-  UNAUTHENTICATED_RESULT,
+  unauthenticatedResult,
 } from "./authHeaders";
 
 interface SearchStadiumsParams {
@@ -67,7 +67,7 @@ export async function createStadium(
 ): Promise<ActionResult<Stadium>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return UNAUTHENTICATED_RESULT;
+    if (!headers) return unauthenticatedResult();
 
     const response = await fetch(`${RAILS_API_URL}/api/v2/stadiums`, {
       method: "POST",

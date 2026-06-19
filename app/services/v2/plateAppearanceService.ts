@@ -10,7 +10,7 @@ import { captureServerActionError } from "../../../lib/sentry-helpers";
 import {
   type ActionResult,
   getAuthHeaders,
-  UNAUTHENTICATED_RESULT,
+  unauthenticatedResult,
 } from "./authHeaders";
 
 /**
@@ -47,7 +47,7 @@ export async function createPlateAppearanceV2(
 ): Promise<ActionResult<PlateAppearanceV2>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return UNAUTHENTICATED_RESULT;
+    if (!headers) return unauthenticatedResult();
 
     const response = await fetch(`${RAILS_API_URL}/api/v2/plate_appearances`, {
       method: "POST",
@@ -78,7 +78,7 @@ export async function updatePlateAppearanceV2(
 ): Promise<ActionResult<PlateAppearanceV2>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return UNAUTHENTICATED_RESULT;
+    if (!headers) return unauthenticatedResult();
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/plate_appearances/${id}`,
@@ -111,7 +111,7 @@ export async function deletePlateAppearanceV2(
 ): Promise<ActionResult<null>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return UNAUTHENTICATED_RESULT;
+    if (!headers) return unauthenticatedResult();
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/plate_appearances/${id}`,
