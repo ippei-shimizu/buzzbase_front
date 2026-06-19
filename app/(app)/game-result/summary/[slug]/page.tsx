@@ -27,6 +27,7 @@ import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { GAME_RECORD_EDIT_MODE_STORAGE_KEY } from "@app/constants/gameRecord";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getUserBattingAverage } from "@app/services/battingAveragesService";
 import { deleteGameResult } from "@app/services/gameResultsService";
@@ -277,6 +278,8 @@ export default function ResultsSummary() {
   };
 
   const handleResultComplete = () => {
+    // 既存試合の編集として試合情報入力画面へ入ることを記録する。
+    localStorage.setItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY, "true");
     router.push("/game-result/record");
   };
 

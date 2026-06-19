@@ -26,7 +26,10 @@ import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { APPEARANCE_TYPE_OPTIONS } from "@app/constants/appearanceType";
-import { RECORD_PATTERN_STORAGE_KEY } from "@app/constants/gameRecord";
+import {
+  GAME_RECORD_EDIT_MODE_STORAGE_KEY,
+  RECORD_PATTERN_STORAGE_KEY,
+} from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   createGameResult,
@@ -182,8 +185,7 @@ export default function GameRecord() {
         currentUserId,
       );
       if (existingMatchResult) {
-        setIsEditMode(true);
-        // 編集時は stadium_id を復元する。v1 レスポンスは球場名を含まないため、
+        // stadium_id を復元する。v1 レスポンスは球場名を含まないため、
         // 表示名は候補リストから id で best-effort に引き当てる（見つからなくても
         // stadium_id は保持され、保存時に球場が維持される）。
         if (existingMatchResult.stadium_id) {
@@ -229,12 +231,20 @@ export default function GameRecord() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
+    // 既存試合の編集として入ったときだけ編集モード。新規記録フロー（保存して
+    // 戻った場合を含む）はパターン選択を出すため false のままにする。
+    setIsEditMode(
+      localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true",
+    );
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
       fetchExistingMatchResult(JSON.parse(savedGameResultId));
     } else if (pathname === "/game-result/record") {
+      // gameResultId がない＝新規記録なので、編集フラグは確実に解除しておく。
+      localStorage.removeItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY);
+      setIsEditMode(false);
       // gameResultId がない場合は自動作成
       const createNew = async () => {
         try {
