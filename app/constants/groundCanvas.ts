@@ -16,19 +16,19 @@ export const GROUND_OUTFIELD_RY = 295;
 
 // HOME を通る ±45° のファウルライン上で外野楕円と交わる点までの距離。
 // (x-cx)² / rx² + (y-cy)² / ry² = 1 を傾き1の直線で解いて求める。
-const FAUL_LINE_DIST = Math.sqrt(
+const FOUL_LINE_DIST = Math.sqrt(
   (GROUND_OUTFIELD_RX ** 2 * GROUND_OUTFIELD_RY ** 2) /
     (GROUND_OUTFIELD_RX ** 2 + GROUND_OUTFIELD_RY ** 2),
 );
 
 // ファウルライン端点（外野楕円とファウルラインの交点）。
 export const GROUND_LEFT_END = {
-  x: GROUND_HOME.x - FAUL_LINE_DIST,
-  y: GROUND_HOME.y - FAUL_LINE_DIST,
+  x: GROUND_HOME.x - FOUL_LINE_DIST,
+  y: GROUND_HOME.y - FOUL_LINE_DIST,
 } as const;
 export const GROUND_RIGHT_END = {
-  x: GROUND_HOME.x + FAUL_LINE_DIST,
-  y: GROUND_HOME.y - FAUL_LINE_DIST,
+  x: GROUND_HOME.x + FOUL_LINE_DIST,
+  y: GROUND_HOME.y - FOUL_LINE_DIST,
 } as const;
 
 // 正規化座標の DB 保存精度。back の hit_location_x/y は decimal(4,3) のため
