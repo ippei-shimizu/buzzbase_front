@@ -30,6 +30,7 @@ export default function ScoreStepper({
         radius="full"
         variant="solid"
         color="primary"
+        className="h-7 w-7 min-w-7 text-base"
         aria-label={`${ariaLabel}を減らす`}
         isDisabled={decrementDisabled}
         onPress={() => onChange(Math.max(0, (value ?? 0) - 1))}
@@ -62,10 +63,11 @@ export default function ScoreStepper({
         radius="full"
         variant="solid"
         color="primary"
+        className="h-7 w-7 min-w-7 text-base"
         aria-label={`${ariaLabel}を増やす`}
         onPress={() => onChange((value ?? 0) + 1)}
       >
-        ＋
+        +
       </Button>
     </div>
   );
