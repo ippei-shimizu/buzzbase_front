@@ -155,6 +155,7 @@ const useBattingStatistics = (battingBoxes: BattingBox[]) => {
 
 export default function BattingRecord() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isBattingOnly, setIsBattingOnly] = useState(false);
   const [runsBattedIn, setRunsBattedIn] = useState(0);
   const [existingRunsBattedIn, setExistingRunsBattedIn] = useState(0);
   const [run, setRun] = useState(0);
@@ -290,6 +291,12 @@ export default function BattingRecord() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
+    // 記録パターンが「打撃のみ」かどうか（投手入力をスキップしてまとめへ進む）。
+    const recordPatternRaw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
+
+    setIsBattingOnly(
+      (recordPatternRaw ? JSON.parse(recordPatternRaw) : "both") === "batting",
+    );
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
@@ -773,7 +780,7 @@ export default function BattingRecord() {
                   endContent={<NextArrowIcon stroke="#F4F4F4" />}
                   isDisabled={isSubmitting}
                 >
-                  投手結果
+                  {isBattingOnly ? "試合結果まとめ" : "投手結果"}
                 </Button>
               </div>
             </form>
