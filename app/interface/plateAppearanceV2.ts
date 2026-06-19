@@ -66,6 +66,9 @@ export interface PlateAppearanceV2 {
 
 // POST/PATCH /api/v2/plate_appearances で送る属性。
 // 送信時の hit_location_x/y は数値（送信前に小数3桁へ丸める）。
+// opponent_memo は意図的に含めない。対戦相手メモは打席単位ではなく投手単位
+// （pitcher.memo）へ移行したため、打席記録からは送信しない。レスポンス型
+// PlateAppearanceV2.opponent_memo は既存データ読み出しのため残している。
 export interface PlateAppearanceV2Input {
   game_result_id: number;
   batter_box_number: number;
