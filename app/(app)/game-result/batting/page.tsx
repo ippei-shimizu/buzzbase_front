@@ -9,6 +9,7 @@ import HeaderResult from "@app/components/header/HeaderResult";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { RECORD_PATTERN_STORAGE_KEY } from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   checkExistingBattingAverage,
@@ -24,6 +25,16 @@ import {
   updatePlateAppearance,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
+
+// 記録パターンに応じた打撃入力後の遷移先。打撃のみ(batting)は投手入力を
+// スキップしてまとめへ、それ以外（both / pitching / 既定）は投手入力へ進む。
+const resolveBattingNextPath = (): string => {
+  const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
+  const pattern = raw ? JSON.parse(raw) : "both";
+  return pattern === "batting"
+    ? "/game-result/summary/"
+    : "/game-result/pitching/";
+};
 
 const battingResultsPositions = [
   { id: 0, direction: "-" },
@@ -458,7 +469,7 @@ export default function BattingRecord() {
       cs === 0;
 
     if (isBattingEmpty) {
-      router.push(`/game-result/pitching/`);
+      router.push(resolveBattingNextPath());
       return;
     }
 
@@ -553,7 +564,7 @@ export default function BattingRecord() {
           );
         }
       }
-      router.push(`/game-result/pitching/`);
+      router.push(resolveBattingNextPath());
     } catch {}
   };
   return (
