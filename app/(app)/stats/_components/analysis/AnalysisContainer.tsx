@@ -1,6 +1,10 @@
 "use client";
+import type { SeasonData, TournamentData } from "@app/interface";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { getSeasons } from "@app/services/seasonsService";
+import { getTournaments } from "@app/services/tournamentsService";
+import { getCurrentUserId } from "@app/services/userService";
 import {
   type AdditionalStats,
   type AnalysisFilters as Filters,
@@ -18,13 +22,21 @@ import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
 import { SprayChart } from "./SprayChart";
 
-function buildYears(): string[] {
+interface FilterOption {
+  key: string;
+  label: string;
+}
+
+const DEFAULT_OPTION: FilterOption = { key: "全て", label: "全て" };
+
+function buildYearOptions(): FilterOption[] {
   const currentYear = new Date().getFullYear();
-  const years = ["通算"];
+  const options: FilterOption[] = [{ key: "通算", label: "通算" }];
   for (let offset = 0; offset < 6; offset += 1) {
-    years.push(String(currentYear - offset));
+    const year = String(currentYear - offset);
+    options.push({ key: year, label: year });
   }
-  return years;
+  return options;
 }
 
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
@@ -43,7 +55,42 @@ export function AnalysisContainer() {
     home_runs: [],
   });
   const [isLoading, setIsLoading] = useState(true);
-  const years = buildYears();
+  const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
+    DEFAULT_OPTION,
+  ]);
+  const [tournamentOptions, setTournamentOptions] = useState<FilterOption[]>([
+    DEFAULT_OPTION,
+  ]);
+  const yearOptions = buildYearOptions();
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const userId = await getCurrentUserId();
+      const [seasons, tournaments] = await Promise.all([
+        getSeasons(userId ?? undefined),
+        getTournaments() as Promise<TournamentData[]>,
+      ]);
+      if (!active) return;
+      setSeasonOptions([
+        DEFAULT_OPTION,
+        ...seasons.map((season: SeasonData) => ({
+          key: String(season.id),
+          label: season.name,
+        })),
+      ]);
+      setTournamentOptions([
+        DEFAULT_OPTION,
+        ...tournaments.map((tournament) => ({
+          key: String(tournament.id),
+          label: tournament.name,
+        })),
+      ]);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -69,7 +116,13 @@ export function AnalysisContainer() {
 
   return (
     <div className="flex flex-col gap-y-5">
-      <AnalysisFilters filters={filters} onChange={setFilters} years={years} />
+      <AnalysisFilters
+        filters={filters}
+        onChange={setFilters}
+        yearOptions={yearOptions}
+        seasonOptions={seasonOptions}
+        tournamentOptions={tournamentOptions}
+      />
       {isLoading ? (
         <LoadingSpinner />
       ) : (

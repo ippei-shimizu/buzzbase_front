@@ -1,66 +1,78 @@
 "use client";
 import type { AnalysisFilters as Filters } from "../../analysisActions";
+import FilterChip from "@app/components/filter/FilterChip";
+import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+
+interface FilterOption {
+  key: string;
+  label: string;
+}
 
 interface AnalysisFiltersProps {
   filters: Filters;
   onChange: (filters: Filters) => void;
-  years: string[];
+  yearOptions: FilterOption[];
+  seasonOptions: FilterOption[];
+  tournamentOptions: FilterOption[];
 }
 
-const MATCH_TYPES: { value: string; label: string }[] = [
-  { value: "", label: "全試合" },
-  { value: "regular", label: "公式戦" },
-  { value: "open", label: "オープン戦" },
+const MATCH_TYPE_OPTIONS: FilterOption[] = [
+  { key: "全て", label: "全て" },
+  { key: "regular", label: "公式戦" },
+  { key: "open", label: "オープン戦" },
 ];
 
-/** 分析の絞り込み（年 / 試合種別）。 */
+/** 分析の絞り込み（年度 / 種別 / シーズン / 大会）。共通の FilterChip を使う。 */
 export function AnalysisFilters({
   filters,
   onChange,
-  years,
+  yearOptions,
+  seasonOptions,
+  tournamentOptions,
 }: AnalysisFiltersProps) {
   return (
-    <div className="flex flex-col gap-y-3">
-      <div className="flex flex-wrap gap-2">
-        {MATCH_TYPES.map((option) => {
-          const isSelected = (filters.matchType ?? "") === option.value;
-          return (
-            <button
-              key={option.label}
-              type="button"
-              aria-pressed={isSelected}
-              className={`rounded-full border px-3 py-1 text-sm transition-colors ${
-                isSelected
-                  ? "border-primary bg-primary text-white"
-                  : "border-zinc-600 text-zinc-200"
-              }`}
-              onClick={() => onChange({ ...filters, matchType: option.value })}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {years.map((year) => {
-          const isSelected = (filters.year ?? "通算") === year;
-          return (
-            <button
-              key={year}
-              type="button"
-              aria-pressed={isSelected}
-              className={`rounded-full border px-3 py-1 text-sm transition-colors ${
-                isSelected
-                  ? "border-primary bg-primary text-white"
-                  : "border-zinc-600 text-zinc-200"
-              }`}
-              onClick={() => onChange({ ...filters, year })}
-            >
-              {year}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <FilterChipGroup>
+      <FilterChip
+        label="年度"
+        value={filters.year ?? "通算"}
+        defaultValue="通算"
+        options={yearOptions}
+        onChange={(key) => onChange({ ...filters, year: key })}
+      />
+      <FilterChip
+        label="種別"
+        value={filters.matchType ? filters.matchType : "全て"}
+        defaultValue="全て"
+        options={MATCH_TYPE_OPTIONS}
+        onChange={(key) =>
+          onChange({ ...filters, matchType: key === "全て" ? "" : key })
+        }
+      />
+      {seasonOptions.length > 1 ? (
+        <FilterChip
+          label="シーズン"
+          value={filters.seasonId ?? "全て"}
+          defaultValue="全て"
+          options={seasonOptions}
+          onChange={(key) =>
+            onChange({ ...filters, seasonId: key === "全て" ? undefined : key })
+          }
+        />
+      ) : null}
+      {tournamentOptions.length > 1 ? (
+        <FilterChip
+          label="大会"
+          value={filters.tournamentId ?? "全て"}
+          defaultValue="全て"
+          options={tournamentOptions}
+          onChange={(key) =>
+            onChange({
+              ...filters,
+              tournamentId: key === "全て" ? undefined : key,
+            })
+          }
+        />
+      ) : null}
+    </FilterChipGroup>
   );
 }
