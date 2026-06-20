@@ -20,7 +20,7 @@ import {
   Textarea,
 } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
-import { type SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
@@ -148,28 +148,40 @@ export default function GameRecord() {
   const pathname = usePathname();
   const router = useRouter();
   useRequireAuth();
+  // 球場サジェスト検索のデバウンスタイマーと、最新リクエスト判定用のシーケンス番号。
+  const stadiumSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stadiumRequestId = useRef(0);
 
   const fetchData = async () => {
     try {
-      const currentUserData = await getUserData();
+      // 互いに独立した取得なので並列化して初期表示を速くする。
+      const [
+        currentUserData,
+        getTeamsList,
+        getTournamentList,
+        getSeasonsList,
+        positionDataList,
+        stadiumsResponse,
+      ] = await Promise.all([
+        getUserData(),
+        getTeams(),
+        getTournaments(),
+        getSeasons(),
+        getPositions(),
+        searchStadiums({}),
+      ]);
       setUserData(currentUserData);
-      const userTeamId = currentUserData.team_id;
-      const getTeamsList = await getTeams();
-      const getTournamentList = await getTournaments();
-      const getSeasonsList = await getSeasons();
       setTeamsData(getTeamsList);
       setSeasonsData(getSeasonsList);
       // マイチーム名取得
       const userTeam = getTeamsList.find(
-        (team: { id: string }) => team.id === userTeamId,
+        (team: { id: string }) => team.id === currentUserData.team_id,
       );
       if (userTeam) {
         setMyTeam(userTeam.name);
       }
-      const positionDataList = await getPositions();
       setPositionData(positionDataList);
       setTournamentData(getTournamentList);
-      const stadiumsResponse = await searchStadiums({});
       setStadiumData(stadiumsResponse.data);
     } catch (error) {
       throw error;
@@ -250,15 +262,12 @@ export default function GameRecord() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // 既存試合の編集として入ったときだけ編集モード。新規記録フロー（保存して
     // 戻った場合を含む）はパターン選択を出すため false のままにする。
-    setIsEditMode(
-      localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true",
-    );
     const isEdit =
       localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true";
+    setIsEditMode(isEdit);
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
@@ -304,7 +313,6 @@ export default function GameRecord() {
         (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyPosition(userPosition.id.toString());
       }
     }
@@ -315,7 +323,6 @@ export default function GameRecord() {
     if (existingMyTeam) {
       const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
       if (foundTeam) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyTeam(foundTeam.name);
       }
     }
@@ -376,10 +383,17 @@ export default function GameRecord() {
     setStadiumName(value);
     const matched = stadiumData.find((stadium) => stadium.name === value);
     setStadiumId(matched ? matched.id : null);
-    void (async () => {
-      const response = await searchStadiums(value ? { q: value } : {});
-      setStadiumData(response.data);
-    })();
+    // デバウンス + 最新リクエスト勝ちで、高速入力時の過剰リクエストとレースを防ぐ。
+    if (stadiumSearchTimer.current) clearTimeout(stadiumSearchTimer.current);
+    stadiumSearchTimer.current = setTimeout(() => {
+      const requestId = stadiumRequestId.current + 1;
+      stadiumRequestId.current = requestId;
+      searchStadiums(value ? { q: value } : {}).then((response) => {
+        if (requestId === stadiumRequestId.current) {
+          setStadiumData(response.data);
+        }
+      });
+    }, 250);
   };
   const handleStadiumSelectionChange = (key: React.Key | null) => {
     if (key == null) return;
@@ -670,7 +684,12 @@ export default function GameRecord() {
               : `/game-result/batting/`;
       router.push(nextPath);
     } catch (error) {
-      throw error;
+      console.error("試合結果の保存に失敗しました", error);
+      setErrorsWithTimeout([
+        "保存に失敗しました。時間をおいて再度お試しください。",
+      ]);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -813,7 +832,7 @@ export default function GameRecord() {
                   onInputChange={handleTournamentInputChange}
                   onSelectionChange={handleTournamentSelectionChange}
                   selectedKey={
-                    tournament !== undefined ? tournament?.toString() : null
+                    tournament !== null ? tournament.toString() : null
                   }
                 >
                   {tournamentData.map((data) => (
@@ -834,9 +853,7 @@ export default function GameRecord() {
                   onInputChange={handleSeasonInputChange}
                   onSelectionChange={handleSeasonSelectionChange}
                   selectedKey={
-                    selectedSeason !== undefined
-                      ? selectedSeason?.toString()
-                      : null
+                    selectedSeason !== null ? selectedSeason.toString() : null
                   }
                 >
                   {seasonsData.map((data) => (
