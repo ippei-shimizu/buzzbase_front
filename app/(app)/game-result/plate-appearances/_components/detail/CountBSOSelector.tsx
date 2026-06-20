@@ -7,6 +7,7 @@ interface CountBSOSelectorProps {
   strikes: number | null;
   outs: number | null;
   onChange: (key: DetailCountKey, value: number | null) => void;
+  description?: string;
 }
 
 const ROWS: {
@@ -29,6 +30,7 @@ export function CountBSOSelector({
   strikes,
   outs,
   onChange,
+  description,
 }: CountBSOSelectorProps) {
   const values: Record<DetailCountKey, number | null> = {
     finalBalls: balls,
@@ -38,7 +40,12 @@ export function CountBSOSelector({
 
   return (
     <div className="flex flex-col gap-y-2 rounded-lg bg-[#1f1f1f] p-3">
-      <p className="text-sm font-medium">最終カウント</p>
+      <div>
+        <p className="text-sm font-medium">最終カウント</p>
+        {description ? (
+          <p className="text-xs text-zinc-400">{description}</p>
+        ) : null}
+      </div>
       <div className="flex flex-col gap-y-2">
         {ROWS.map((row) => {
           const current = values[row.key] ?? 0;
