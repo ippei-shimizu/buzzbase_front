@@ -92,6 +92,8 @@ export function PlateResultButtons({
           >
             ヒット
           </Button>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
           {DIRECTION_ONLY_RESULT_OPTIONS.map((option) => {
             const isSelected = selectedPlateResultId === option.plate_result_id;
             return (
@@ -99,7 +101,11 @@ export function PlateResultButtons({
                 key={option.plate_result_id}
                 variant="bordered"
                 radius="sm"
-                className={`font-bold ${toneClass("orange", isSelected)}`}
+                size="sm"
+                className={`font-bold min-w-0 px-0 ${toneClass(
+                  "orange",
+                  isSelected,
+                )}`}
                 isDisabled={!hasHitLocation}
                 onPress={() => onSelectDirectionOnly(option.plate_result_id)}
               >
