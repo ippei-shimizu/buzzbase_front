@@ -1,4 +1,5 @@
 import type { StatsPeriod } from "./actions";
+import Link from "next/link";
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import Header from "@app/components/header/Header";
 import StatsContainer from "./_components/StatsContainer";
@@ -56,6 +57,14 @@ export default async function StatsPage({
       <main className="min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-12 px-4 lg:px-6 lg:pb-6">
+            <div className="mb-4 flex justify-end">
+              <Link
+                href="/stats/analysis"
+                className="text-sm text-primary font-medium underline-offset-2 hover:underline"
+              >
+                打撃分析を見る →
+              </Link>
+            </div>
             <StatsContainer tab={tab} period={period} rows={rows} />
           </div>
         </div>
