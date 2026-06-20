@@ -75,9 +75,10 @@ export function ScoreCounterInput({
                 value={String(value)}
                 onChange={(event) => {
                   const parsed = Number(event.target.value);
+                  // 整数のみ。小数入力は切り捨てる。
                   onChange(
                     row.key,
-                    Number.isNaN(parsed) ? 0 : Math.max(0, parsed),
+                    Number.isNaN(parsed) ? 0 : Math.max(0, Math.floor(parsed)),
                   );
                 }}
               />
