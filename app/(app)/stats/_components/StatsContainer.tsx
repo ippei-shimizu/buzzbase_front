@@ -6,6 +6,7 @@ import type {
   StatsPeriod,
 } from "../actions";
 import Link from "next/link";
+import { AnalysisContainer } from "./analysis/AnalysisContainer";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
@@ -58,8 +59,18 @@ export default function StatsContainer({
         </Link>
       </div>
 
+      {/* 打撃タブのみ: 打球チャート・打席分析をテーブルの上に表示 */}
+      {tab === "batting" ? (
+        <div className="mt-5">
+          <AnalysisContainer />
+        </div>
+      ) : null}
+
       {/* 期間トグル */}
-      <div className="flex justify-end mt-4 mb-2">
+      <div className="flex items-center justify-between mt-6 mb-2">
+        <p className="text-base font-bold">
+          {tab === "batting" ? "打撃成績" : "投球成績"}
+        </p>
         <div
           className="flex rounded-lg p-0.5 gap-0.5"
           style={{ backgroundColor: "#3A3A3A" }}
