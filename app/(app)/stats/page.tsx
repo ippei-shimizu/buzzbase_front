@@ -27,7 +27,7 @@ export default async function StatsPage({
     return (
       <>
         <Header />
-        <main className="min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
+        <main className="buzz-dark min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
           <div className="pt-20 px-4">
             <AuthRequiredOverlay message="成績を閲覧するにはログインが必要です" />
           </div>
@@ -53,7 +53,7 @@ export default async function StatsPage({
   return (
     <>
       <Header />
-      <main className="min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
+      <main className="buzz-dark min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-12 px-4 lg:px-6 lg:pb-6">
             <StatsContainer tab={tab} period={period} rows={rows} />
