@@ -6,7 +6,13 @@ import type {
   PitchTypeMaster,
   TimingMaster,
 } from "@app/interface/plateAppearanceMasters";
+import {
+  FlagIcon,
+  PencilSquareIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import { BallIcon } from "@app/components/icon/BallIcon";
 import {
   getAppearanceSituations,
   getContactQualities,
@@ -32,16 +38,21 @@ interface DetailDataFormProps {
 function Card({
   title,
   subtitle,
+  icon,
   children,
 }: {
   title: string;
   subtitle: string;
+  icon: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="rounded-xl bg-bg_sub p-4 flex flex-col gap-y-4">
       <div>
-        <h3 className="text-base font-bold">{title}</h3>
+        <div className="flex items-center gap-x-2">
+          <span className="text-[#d08000]">{icon}</span>
+          <h3 className="text-base font-bold">{title}</h3>
+        </div>
         <p className="text-xs text-zinc-400">{subtitle}</p>
       </div>
       {children}
@@ -76,7 +87,11 @@ export function DetailDataForm({
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Card title="打席の状況" subtitle="打席時の状況を記録します">
+      <Card
+        title="打席の状況"
+        subtitle="打席時の状況を記録します"
+        icon={<FlagIcon className="h-5 w-5" />}
+      >
         <CountBSOSelector
           balls={detail.finalBalls}
           strikes={detail.finalStrikes}
@@ -97,7 +112,11 @@ export function DetailDataForm({
         />
       </Card>
 
-      <Card title="打球" subtitle="打球の質感や対応した球種を記録します">
+      <Card
+        title="打球"
+        subtitle="打球の質感や対応した球種を記録します"
+        icon={<BallIcon width="20" height="20" fill="#d08000" />}
+      >
         <MasterChipSelector
           label="打球の質"
           options={contactQualities}
@@ -118,7 +137,11 @@ export function DetailDataForm({
         />
       </Card>
 
-      <Card title="相手投手" subtitle="自分が記録した投手のみ表示されます">
+      <Card
+        title="相手投手"
+        subtitle="自分が記録した投手のみ表示されます"
+        icon={<UserIcon className="h-5 w-5" />}
+      >
         <PitcherSelector
           value={detail.pitcherId}
           onChange={(id) => setDetail({ pitcherId: id })}
@@ -132,7 +155,11 @@ export function DetailDataForm({
         />
       </Card>
 
-      <Card title="メモ" subtitle="次の打席に活かしたい振り返り">
+      <Card
+        title="メモ"
+        subtitle="次の打席に活かしたい振り返り"
+        icon={<PencilSquareIcon className="h-5 w-5" />}
+      >
         <MemoTextArea
           value={detail.selfAnalysisMemo}
           onChange={(text) => setDetail({ selfAnalysisMemo: text || null })}
