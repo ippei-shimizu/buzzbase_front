@@ -128,7 +128,7 @@ export function PitcherFormModal({
             labelPlacement="outside"
             variant="bordered"
             placeholder="例: 田中投手"
-            classNames={{ inputWrapper: "border-zinc-600" }}
+            classNames={{ inputWrapper: "border-zinc-500" }}
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
@@ -179,7 +179,7 @@ export function PitcherFormModal({
             labelPlacement="outside"
             variant="bordered"
             placeholder="例: 初球はストレート / 決め球は外角スライダー"
-            classNames={{ inputWrapper: "border-zinc-600" }}
+            classNames={{ inputWrapper: "border-zinc-500" }}
             maxLength={1000}
             value={memo}
             onChange={(event) => setMemo(event.target.value)}

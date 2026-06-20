@@ -108,7 +108,7 @@ export function PitcherSelector({
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex items-center gap-x-2">
-        <div className="flex-1 rounded-lg border border-zinc-600 bg-bg_sub px-3 py-2 text-sm">
+        <div className="flex-1 rounded-lg border border-zinc-500 bg-bg_sub px-3 py-2 text-sm">
           {selected ? (
             <div>
               <p className="font-medium">{selected.name}</p>
@@ -156,7 +156,7 @@ export function PitcherSelector({
               variant="bordered"
               size="sm"
               placeholder="投手名で検索"
-              classNames={{ inputWrapper: "border-zinc-600" }}
+              classNames={{ inputWrapper: "border-zinc-500" }}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -164,10 +164,10 @@ export function PitcherSelector({
               {filtered.map((pitcher) => (
                 <div
                   key={pitcher.id}
-                  className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                  className={`flex items-center justify-between rounded-lg border-2 px-3 py-2 ${
                     value === pitcher.id
                       ? "border-[#d08000]"
-                      : "border-zinc-700"
+                      : "border-zinc-500"
                   }`}
                 >
                   <button
