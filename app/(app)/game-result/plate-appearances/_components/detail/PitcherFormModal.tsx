@@ -95,6 +95,7 @@ export function PitcherFormModal({
       placement="center"
       size="md"
       scrollBehavior="inside"
+      classNames={{ base: "buzz-dark" }}
     >
       <ModalContent>
         <ModalHeader>{isEdit ? "投手を編集" : "投手を新規登録"}</ModalHeader>

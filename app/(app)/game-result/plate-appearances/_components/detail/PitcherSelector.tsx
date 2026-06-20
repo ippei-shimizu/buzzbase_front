@@ -108,6 +108,7 @@ export function PitcherSelector({
         placement="center"
         size="md"
         scrollBehavior="inside"
+        classNames={{ base: "buzz-dark" }}
       >
         <ModalContent>
           <ModalHeader>投手を選択</ModalHeader>
