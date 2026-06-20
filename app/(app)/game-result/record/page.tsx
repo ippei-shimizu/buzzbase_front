@@ -20,7 +20,7 @@ import {
   Textarea,
 } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
-import { type SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
@@ -148,6 +148,9 @@ export default function GameRecord() {
   const pathname = usePathname();
   const router = useRouter();
   useRequireAuth();
+  // 球場サジェスト検索のデバウンスタイマーと、最新リクエスト判定用のシーケンス番号。
+  const stadiumSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stadiumRequestId = useRef(0);
 
   const fetchData = async () => {
     try {
@@ -380,10 +383,17 @@ export default function GameRecord() {
     setStadiumName(value);
     const matched = stadiumData.find((stadium) => stadium.name === value);
     setStadiumId(matched ? matched.id : null);
-    void (async () => {
-      const response = await searchStadiums(value ? { q: value } : {});
-      setStadiumData(response.data);
-    })();
+    // デバウンス + 最新リクエスト勝ちで、高速入力時の過剰リクエストとレースを防ぐ。
+    if (stadiumSearchTimer.current) clearTimeout(stadiumSearchTimer.current);
+    stadiumSearchTimer.current = setTimeout(() => {
+      const requestId = stadiumRequestId.current + 1;
+      stadiumRequestId.current = requestId;
+      searchStadiums(value ? { q: value } : {}).then((response) => {
+        if (requestId === stadiumRequestId.current) {
+          setStadiumData(response.data);
+        }
+      });
+    }, 250);
   };
   const handleStadiumSelectionChange = (key: React.Key | null) => {
     if (key == null) return;
