@@ -20,7 +20,13 @@ interface OutTypeModalProps {
 /** 「アウト」押下時のサブ選択モーダル。plate_result_id と out_type を親へ返す。 */
 export function OutTypeModal({ isOpen, onSelect, onClose }: OutTypeModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} placement="center" size="sm">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      placement="center"
+      size="sm"
+      classNames={{ base: "buzz-dark" }}
+    >
       <ModalContent>
         <ModalHeader className="justify-center">アウト種別</ModalHeader>
         <ModalBody className="pb-6">
