@@ -136,6 +136,8 @@ export function PlateAppearanceWizard({
       caught_stealing: scores.caughtStealing,
     });
     if (result.ok) {
+      // onCompleted が遷移しなかった場合でもボタンが永続 disabled にならないよう先に解除する。
+      setIsSubmitting(false);
       onCompleted();
     } else {
       setErrors(result.errors);
