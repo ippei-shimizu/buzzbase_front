@@ -5,6 +5,7 @@ import type {
   PitchingResult,
   PlateAppearanceSummary,
 } from "@app/interface";
+import type { PlateAppearanceV2 } from "@app/interface/plateAppearanceV2";
 import {
   Button,
   Chip,
@@ -41,6 +42,8 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
+import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
+import { PlateAppearanceSummaryCard } from "../_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
   id: number;
@@ -72,6 +75,9 @@ export default function ResultsSummary() {
   const [matchResult, setMatchResult] = useState<MatchResultDisplay[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
+  >([]);
+  const [plateAppearancesV2, setPlateAppearancesV2] = useState<
+    PlateAppearanceV2[]
   >([]);
   const [battingAverage, setBattingAverage] = useState<BattingAverage[]>([]);
   const [pitchingResult, setPitchingResult] = useState<PitchingResult[]>([]);
@@ -149,6 +155,10 @@ export default function ResultsSummary() {
       const plateAppearanceData = await getUserPlateAppearance(
         localStorageGameResultId,
       );
+      const plateAppearancesV2Data = await getPlateAppearancesByGame(
+        localStorageGameResultId,
+      );
+      setPlateAppearancesV2(plateAppearancesV2Data);
       const currentUserIdData = await getCurrentUserId();
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
@@ -479,6 +489,22 @@ export default function ResultsSummary() {
                   </>
                 )}
               </div>
+              {plateAppearancesV2.length > 0 && (
+                <>
+                  <Divider className="my-4" />
+                  <div>
+                    <p className="text-xs text-zinc-400 mb-2">打席詳細</p>
+                    <div className="flex flex-col gap-y-2">
+                      {plateAppearancesV2.map((plate) => (
+                        <PlateAppearanceSummaryCard
+                          key={plate.id}
+                          plateAppearance={plate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
               <Divider className="my-4" />
               {/* 投手成績 */}
               <div>
