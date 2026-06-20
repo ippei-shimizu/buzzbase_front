@@ -43,7 +43,7 @@ export function MasterChipSelector({
                 aria-pressed={isSelected}
                 className={`rounded-full border px-3 py-1 text-sm transition-colors ${
                   isSelected
-                    ? "border-primary bg-primary text-white"
+                    ? "border-[#d08000] bg-[#d08000] text-white"
                     : "border-zinc-600 text-zinc-200"
                 }`}
                 onClick={() => onChange(isSelected ? null : option.id)}

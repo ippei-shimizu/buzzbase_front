@@ -28,8 +28,12 @@ export function FirstPitchSwingToggle({
               key={option.label}
               size="sm"
               radius="sm"
-              color="primary"
               variant={isSelected ? "solid" : "bordered"}
+              className={
+                isSelected
+                  ? "border-2 border-[#d08000] bg-[#d08000] text-white"
+                  : "border-2 border-[#d08000] bg-transparent text-[#d08000]"
+              }
               onPress={() => onChange(isSelected ? null : option.value)}
             >
               {option.label}
@@ -64,7 +68,7 @@ export function RunnersStateSelector({
               aria-pressed={isSelected}
               className={`rounded-full border px-3 py-1 text-sm transition-colors ${
                 isSelected
-                  ? "border-primary bg-primary text-white"
+                  ? "border-[#d08000] bg-[#d08000] text-white"
                   : "border-zinc-600 text-zinc-200"
               }`}
               onClick={() => onChange(isSelected ? null : option.key)}
@@ -92,11 +96,13 @@ export function InningStepper({ value, onChange }: InningStepperProps) {
       <div className="flex items-center gap-x-1">
         <Button
           isIconOnly
-          size="sm"
           radius="full"
           variant="solid"
-          color="primary"
-          className="h-7 w-7 min-w-7 text-base"
+          className={`h-8 w-8 min-w-8 text-lg ${
+            decrementDisabled
+              ? "bg-zinc-600 text-zinc-400"
+              : "bg-[#d08000] text-white"
+          }`}
           aria-label="イニングを減らす"
           isDisabled={decrementDisabled}
           onPress={() => onChange(Math.max(1, (value ?? 1) - 1))}
@@ -123,11 +129,9 @@ export function InningStepper({ value, onChange }: InningStepperProps) {
         />
         <Button
           isIconOnly
-          size="sm"
           radius="full"
           variant="solid"
-          color="primary"
-          className="h-7 w-7 min-w-7 text-base"
+          className="h-8 w-8 min-w-8 text-lg bg-[#d08000] text-white"
           aria-label="イニングを増やす"
           onPress={() => onChange((value ?? 0) + 1)}
         >

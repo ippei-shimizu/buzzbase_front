@@ -109,10 +109,9 @@ export function PitcherSelector({
               onChange={(event) => setQuery(event.target.value)}
             />
             <Button
-              color="primary"
               variant="bordered"
               radius="sm"
-              className="font-bold"
+              className="font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
               onPress={() => {
                 setEditingPitcher(null);
                 setIsFormOpen(true);
@@ -125,7 +124,9 @@ export function PitcherSelector({
                 <div
                   key={pitcher.id}
                   className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
-                    value === pitcher.id ? "border-primary" : "border-zinc-700"
+                    value === pitcher.id
+                      ? "border-[#d08000]"
+                      : "border-zinc-700"
                   }`}
                 >
                   <button

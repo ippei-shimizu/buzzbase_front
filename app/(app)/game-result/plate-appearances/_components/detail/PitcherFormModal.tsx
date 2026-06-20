@@ -125,8 +125,12 @@ export function PitcherFormModal({
                     key={hand}
                     size="sm"
                     radius="sm"
-                    color="primary"
                     variant={isSelected ? "solid" : "bordered"}
+                    className={
+                      isSelected
+                        ? "border-2 border-[#d08000] bg-[#d08000] text-white"
+                        : "border-2 border-[#d08000] bg-transparent text-[#d08000]"
+                    }
                     onPress={() => setThrowHand(isSelected ? null : hand)}
                   >
                     {THROW_HAND_FULL_LABELS[hand]}
@@ -168,8 +172,7 @@ export function PitcherFormModal({
             キャンセル
           </Button>
           <Button
-            color="primary"
-            className="font-bold"
+            className="font-bold bg-[#d08000] text-white"
             onPress={handleSave}
             isDisabled={isSubmitting || !name.trim()}
           >
