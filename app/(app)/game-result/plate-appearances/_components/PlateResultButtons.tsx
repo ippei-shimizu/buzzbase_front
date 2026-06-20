@@ -102,7 +102,7 @@ export function PlateResultButtons({
                 variant="bordered"
                 radius="sm"
                 size="sm"
-                className={`font-bold min-w-0 px-0 ${toneClass(
+                className={`font-bold min-w-0 px-0 h-12 ${toneClass(
                   "orange",
                   isSelected,
                 )}`}
