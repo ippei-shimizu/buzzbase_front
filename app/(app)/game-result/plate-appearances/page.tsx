@@ -49,7 +49,14 @@ export default function PlateAppearanceListPage() {
 
   const handleComplete = () => {
     const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
-    const pattern = raw ? JSON.parse(raw) : "both";
+    // 壊れた値が入っていても遷移が止まらないよう既定 both にフォールバックする。
+    const pattern = (() => {
+      try {
+        return raw ? JSON.parse(raw) : "both";
+      } catch {
+        return "both";
+      }
+    })();
     router.push(
       pattern === "both" ? "/game-result/pitching/" : "/game-result/summary/",
     );
@@ -58,8 +65,8 @@ export default function PlateAppearanceListPage() {
   return (
     <>
       <HeaderResult />
-      <main className="h-full">
-        <div className="pb-40 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
+      <main className="buzz-dark min-h-full">
+        <div className="pb-52 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-12 px-4 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:px-6 lg:pb-6">
             <h2 className="text-base text-center mb-6">
               打席結果を記録しよう！

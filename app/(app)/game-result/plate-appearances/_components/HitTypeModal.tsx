@@ -20,7 +20,13 @@ interface HitTypeModalProps {
 /** 「ヒット」押下時のサブ選択モーダル。plate_result_id と hit_type を親へ返す。 */
 export function HitTypeModal({ isOpen, onSelect, onClose }: HitTypeModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} placement="center" size="sm">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      placement="center"
+      size="sm"
+      classNames={{ base: "buzz-dark" }}
+    >
       <ModalContent>
         <ModalHeader className="justify-center">ヒット種別</ModalHeader>
         <ModalBody className="pb-6">
@@ -29,10 +35,9 @@ export function HitTypeModal({ isOpen, onSelect, onClose }: HitTypeModalProps) {
               <Button
                 key={option.hit_type}
                 variant="bordered"
-                color="primary"
                 radius="sm"
                 size="sm"
-                className="font-bold min-w-0 px-0"
+                className="font-bold min-w-0 px-0 h-11 border-2 border-[#d08000] bg-transparent text-[#d08000]"
                 onPress={() => onSelect(option)}
               >
                 {option.label}

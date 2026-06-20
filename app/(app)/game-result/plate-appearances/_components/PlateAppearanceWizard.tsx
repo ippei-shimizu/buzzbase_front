@@ -214,6 +214,8 @@ export function PlateAppearanceWizard({
         ? await updatePlateAppearanceV2(editingPlateAppearance.id, input)
         : await createPlateAppearanceV2(input);
     if (result.ok) {
+      // onCompleted が遷移しなかった場合でもボタンが永続 disabled にならないよう先に解除する。
+      setIsSubmitting(false);
       onCompleted();
     } else {
       setErrors(result.errors);
@@ -282,7 +284,9 @@ export function PlateAppearanceWizard({
         </>
       ) : step === "score" ? (
         <>
-          <p className="text-center text-base font-medium">打点・得点を入力</p>
+          <p className="text-center text-base font-medium">
+            第{batterBoxNumber}打席 打点・得点を入力
+          </p>
           <ScoreCounterInput
             rbi={scores.rbi}
             runScored={scores.runScored}
@@ -291,71 +295,81 @@ export function PlateAppearanceWizard({
             onChange={handleScoreChange}
           />
           {!isEdit && (
-            <>
+            <div className="flex flex-col gap-y-3">
               <Button
-                variant="light"
+                variant="bordered"
                 radius="sm"
-                className="self-start text-zinc-400"
+                className="w-full font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
                 onPress={() => setStep("result")}
                 isDisabled={isSubmitting}
               >
                 打席結果に戻る
               </Button>
-              <div className="flex flex-col gap-y-2">
-                <Button
-                  color="primary"
-                  variant="bordered"
-                  radius="sm"
-                  className="font-bold"
-                  onPress={() => setStep("detail")}
-                  isDisabled={isSubmitting}
-                >
-                  詳細を入力する
-                </Button>
-                <Button
-                  color="primary"
-                  radius="sm"
-                  className="font-bold"
-                  onPress={handleSubmit}
-                  endContent={<NextArrowIcon stroke="#F4F4F4" />}
-                  isDisabled={isSubmitting}
-                >
-                  スキップして保存
-                </Button>
-              </div>
-            </>
+              <Button
+                radius="sm"
+                className="w-full font-bold bg-[#d08000] text-white"
+                onPress={() => setStep("detail")}
+                endContent={<NextArrowIcon stroke="#F4F4F4" />}
+                isDisabled={isSubmitting}
+              >
+                詳細を入力する
+              </Button>
+              <Button
+                variant="light"
+                radius="sm"
+                className="w-full font-bold text-[#d08000] underline"
+                onPress={handleSubmit}
+                isDisabled={isSubmitting}
+              >
+                スキップして保存
+              </Button>
+            </div>
           )}
         </>
       ) : (
         <>
-          <p className="text-center text-base font-medium">詳細データを入力</p>
+          <div className="flex items-center justify-between">
+            <p className="text-base font-bold">
+              第{batterBoxNumber}打席の詳細（すべて任意）
+            </p>
+            {!isEdit && (
+              <Button
+                variant="light"
+                radius="sm"
+                className="text-zinc-400 underline"
+                onPress={handleSubmit}
+                isDisabled={isSubmitting}
+              >
+                スキップして完了
+              </Button>
+            )}
+          </div>
           <DetailDataForm
             detail={detail}
             setDetail={setDetail}
             defaultTeamId={defaultTeamId}
           />
           {!isEdit && (
-            <>
+            <div className="flex flex-col gap-y-3">
               <Button
-                variant="light"
+                variant="bordered"
                 radius="sm"
-                className="self-start text-zinc-400"
+                className="w-full font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
                 onPress={() => setStep("score")}
                 isDisabled={isSubmitting}
               >
                 打点・得点に戻る
               </Button>
               <Button
-                color="primary"
                 radius="sm"
-                className="font-bold"
+                className="w-full font-bold bg-[#d08000] text-white"
                 onPress={handleSubmit}
                 endContent={<NextArrowIcon stroke="#F4F4F4" />}
                 isDisabled={isSubmitting}
               >
                 この打席を保存
               </Button>
-            </>
+            </div>
           )}
         </>
       )}
