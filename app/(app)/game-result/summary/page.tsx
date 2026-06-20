@@ -330,8 +330,10 @@ export default function ResultsSummary() {
                         {(plateAppearancesV2.length > 0
                           ? plateAppearancesV2
                           : (plateAppearance ?? [])
-                        ).map((plate) => (
-                          <li key={plate.batter_box_number}>
+                        ).map((plate, index) => (
+                          <li
+                            key={`${plate.batter_box_number ?? "na"}-${index}`}
+                          >
                             <p
                               className={`font-bold ${getBattingResultClassName(
                                 plate.batting_result,
