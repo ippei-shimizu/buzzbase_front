@@ -5,6 +5,8 @@ import HeaderResult from "@app/components/header/HeaderResult";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { RECORD_PATTERN_STORAGE_KEY } from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { checkExistingMatchResults } from "@app/services/matchResultsService";
+import { getCurrentUserId } from "@app/services/userService";
 import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
 import { PlateAppearanceWizard } from "./_components/PlateAppearanceWizard";
 
@@ -13,6 +15,7 @@ export default function PlateAppearanceRecordPage() {
   useRequireAuth();
   const [gameResultId, setGameResultId] = useState<number | null>(null);
   const [batterBoxNumber, setBatterBoxNumber] = useState<number | null>(null);
+  const [opponentTeamId, setOpponentTeamId] = useState<number | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("gameResultId");
@@ -26,6 +29,14 @@ export default function PlateAppearanceRecordPage() {
     // 既存打席数 +1 を打席番号として採番する。
     getPlateAppearancesByGame(id).then((plateAppearances) => {
       setBatterBoxNumber(plateAppearances.length + 1);
+    });
+    // 投手の新規登録で相手チームを自動セットするため、相手チーム id を取得する。
+    getCurrentUserId().then((userId) => {
+      checkExistingMatchResults(id, userId).then((matchResult) => {
+        if (matchResult?.opponent_team_id) {
+          setOpponentTeamId(matchResult.opponent_team_id);
+        }
+      });
     });
   }, [router]);
 
@@ -49,6 +60,7 @@ export default function PlateAppearanceRecordPage() {
                 batterBoxNumber={batterBoxNumber}
                 onCompleted={handleCompleted}
                 onCancel={() => router.push("/game-result/record")}
+                defaultTeamId={opponentTeamId}
               />
             ) : (
               <LoadingSpinner />

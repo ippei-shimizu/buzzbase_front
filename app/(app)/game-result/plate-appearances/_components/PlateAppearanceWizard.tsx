@@ -15,6 +15,8 @@ import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { createPlateAppearanceV2 } from "@app/services/v2/plateAppearanceService";
 import { roundHitLocation, type Point } from "@app/utils/groundZoneDetector";
+import { DetailDataForm } from "./detail/DetailDataForm";
+import { EMPTY_DETAIL, type DetailState } from "./detail/detailState";
 import { GroundTapField } from "./GroundTapField";
 import { HitTypeModal } from "./HitTypeModal";
 import { OutTypeModal } from "./OutTypeModal";
@@ -26,9 +28,10 @@ interface PlateAppearanceWizardProps {
   batterBoxNumber: number;
   onCompleted: () => void;
   onCancel?: () => void;
+  defaultTeamId?: number | null;
 }
 
-type WizardStep = "result" | "score";
+type WizardStep = "result" | "score" | "detail";
 
 /**
  * 1 打席分の記録ウィザード。
@@ -40,6 +43,7 @@ export function PlateAppearanceWizard({
   batterBoxNumber,
   onCompleted,
   onCancel,
+  defaultTeamId,
 }: PlateAppearanceWizardProps) {
   const [step, setStep] = useState<WizardStep>("result");
   const [hitLocation, setHitLocation] = useState<Point | null>(null);
@@ -56,10 +60,14 @@ export function PlateAppearanceWizard({
     stolenBases: 0,
     caughtStealing: 0,
   });
+  const [detail, setDetailState] = useState<DetailState>(EMPTY_DETAIL);
   const [isOutModalOpen, setIsOutModalOpen] = useState(false);
   const [isHitModalOpen, setIsHitModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+
+  const setDetail = (patch: Partial<DetailState>) =>
+    setDetailState((prev) => ({ ...prev, ...patch }));
 
   const goToScore = () => setStep("score");
 
@@ -134,6 +142,18 @@ export function PlateAppearanceWizard({
       run_scored: scores.runScored,
       stolen_bases: scores.stolenBases,
       caught_stealing: scores.caughtStealing,
+      final_balls: detail.finalBalls,
+      final_strikes: detail.finalStrikes,
+      final_outs: detail.finalOuts,
+      first_pitch_swing: detail.firstPitchSwing,
+      runners_state: detail.runnersState,
+      inning: detail.inning,
+      contact_quality_id: detail.contactQualityId,
+      timing_id: detail.timingId,
+      pitch_type_id: detail.pitchTypeId,
+      self_analysis_memo: detail.selfAnalysisMemo,
+      pitcher_id: detail.pitcherId,
+      appearance_situation_id: detail.appearanceSituationId,
     });
     if (result.ok) {
       onCompleted();
@@ -183,7 +203,7 @@ export function PlateAppearanceWizard({
             </Button>
           )}
         </>
-      ) : (
+      ) : step === "score" ? (
         <>
           <p className="text-center text-base font-medium">打点・得点を入力</p>
           <ScoreCounterInput
@@ -193,27 +213,65 @@ export function PlateAppearanceWizard({
             caughtStealing={scores.caughtStealing}
             onChange={handleScoreChange}
           />
-          <div className="flex items-center justify-between">
+          <Button
+            variant="light"
+            radius="sm"
+            className="self-start text-zinc-400"
+            onPress={() => setStep("result")}
+            isDisabled={isSubmitting}
+          >
+            打席結果に戻る
+          </Button>
+          <div className="flex flex-col gap-y-2">
             <Button
-              variant="light"
+              color="primary"
+              variant="bordered"
               radius="sm"
-              className="text-zinc-400"
-              onPress={() => setStep("result")}
+              className="font-bold"
+              onPress={() => setStep("detail")}
               isDisabled={isSubmitting}
             >
-              打席結果に戻る
+              詳細を入力する
             </Button>
             <Button
               color="primary"
               radius="sm"
-              className="px-6 font-bold"
+              className="font-bold"
               onPress={handleSubmit}
               endContent={<NextArrowIcon stroke="#F4F4F4" />}
               isDisabled={isSubmitting}
             >
-              この打席を保存
+              スキップして保存
             </Button>
           </div>
+        </>
+      ) : (
+        <>
+          <p className="text-center text-base font-medium">詳細データを入力</p>
+          <DetailDataForm
+            detail={detail}
+            setDetail={setDetail}
+            defaultTeamId={defaultTeamId}
+          />
+          <Button
+            variant="light"
+            radius="sm"
+            className="self-start text-zinc-400"
+            onPress={() => setStep("score")}
+            isDisabled={isSubmitting}
+          >
+            打点・得点に戻る
+          </Button>
+          <Button
+            color="primary"
+            radius="sm"
+            className="font-bold"
+            onPress={handleSubmit}
+            endContent={<NextArrowIcon stroke="#F4F4F4" />}
+            isDisabled={isSubmitting}
+          >
+            この打席を保存
+          </Button>
         </>
       )}
 
