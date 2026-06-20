@@ -147,23 +147,22 @@ export default function ResultsSummary() {
   // 試合データ取得
   const fetchCurrentResultData = async (localStorageGameResultId: number) => {
     try {
-      const matchResultData = await getUserMatchResult(
-        localStorageGameResultId,
-      );
-      const battingAverageData = await getUserBattingAverage(
-        localStorageGameResultId,
-      );
-      const pitchingResultData = await getUserPitchingResult(
-        localStorageGameResultId,
-      );
-      const plateAppearanceData = await getUserPlateAppearance(
-        localStorageGameResultId,
-      );
-      const plateAppearancesV2Data = await getPlateAppearancesByGame(
-        localStorageGameResultId,
-      );
+      const [
+        matchResultData,
+        battingAverageData,
+        pitchingResultData,
+        plateAppearanceData,
+        plateAppearancesV2Data,
+        currentUserIdData,
+      ] = await Promise.all([
+        getUserMatchResult(localStorageGameResultId),
+        getUserBattingAverage(localStorageGameResultId),
+        getUserPitchingResult(localStorageGameResultId),
+        getUserPlateAppearance(localStorageGameResultId),
+        getPlateAppearancesByGame(localStorageGameResultId),
+        getCurrentUserId(),
+      ]);
       setPlateAppearancesV2(plateAppearancesV2Data);
-      const currentUserIdData = await getCurrentUserId();
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
       }
