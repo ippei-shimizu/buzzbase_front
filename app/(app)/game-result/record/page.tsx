@@ -250,7 +250,7 @@ export default function GameRecord() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     fetchData();
     // 既存試合の編集として入ったときだけ編集モード。新規記録フロー（保存して
     // 戻った場合を含む）はパターン選択を出すため false のままにする。
@@ -304,7 +304,7 @@ export default function GameRecord() {
         (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setMyPosition(userPosition.id.toString());
       }
     }
@@ -315,7 +315,7 @@ export default function GameRecord() {
     if (existingMyTeam) {
       const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
       if (foundTeam) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setMyTeam(foundTeam.name);
       }
     }
@@ -667,7 +667,12 @@ export default function GameRecord() {
             : `/game-result/batting/`;
       router.push(nextPath);
     } catch (error) {
-      throw error;
+      console.error("試合結果の保存に失敗しました", error);
+      setErrorsWithTimeout([
+        "保存に失敗しました。時間をおいて再度お試しください。",
+      ]);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
