@@ -48,12 +48,12 @@ export function PlateAppearanceCard({
   const showMetaRow = metaItems.length > 0 || !hasDetail;
 
   return (
-    <div className="flex items-center gap-x-2 rounded-xl bg-bg_sub px-4 py-3">
-      <button
-        type="button"
-        className="flex-1 text-left flex flex-col gap-y-1.5"
-        onClick={onEdit}
-      >
+    <button
+      type="button"
+      className="flex w-full items-center gap-x-2 rounded-xl bg-bg_sub px-4 py-3 text-left"
+      onClick={onEdit}
+    >
+      <div className="flex-1 flex flex-col gap-y-1.5">
         <div className="flex items-center gap-x-2.5">
           <span className="text-xs text-zinc-400 shrink-0">
             第{plateAppearance.batter_box_number}打席
@@ -103,8 +103,8 @@ export function PlateAppearanceCard({
             ))}
           </div>
         )}
-      </button>
+      </div>
       <NextArrowIcon stroke="#A1A1AA" />
-    </div>
+    </button>
   );
 }
