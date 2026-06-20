@@ -5,6 +5,7 @@ import type {
   PitchingResult,
   PlateAppearanceSummary,
 } from "@app/interface";
+import type { PlateAppearanceV2 } from "@app/interface/plateAppearanceV2";
 import { Chip, Divider } from "@heroui/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,6 +26,12 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
+import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
+import {
+  getBattingResultColor,
+  HIT_RESULT_COLOR,
+} from "@app/utils/battingResultColor";
+import { PlateAppearanceSummaryCard } from "./_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
   id: number;
@@ -55,6 +62,9 @@ export default function ResultsSummary() {
   const [matchResult, setMatchResult] = useState<MatchResultDisplay[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
+  >([]);
+  const [plateAppearancesV2, setPlateAppearancesV2] = useState<
+    PlateAppearanceV2[]
   >([]);
   const [battingAverage, setBattingAverage] = useState<BattingAverage[]>([]);
   const [pitchingResult, setPitchingResult] = useState<PitchingResult[]>([]);
@@ -117,13 +127,16 @@ export default function ResultsSummary() {
         pitchingResultData,
         plateAppearanceData,
         currentUserIdData,
+        plateAppearancesV2Data,
       ] = await Promise.all([
         getCurrentMatchResult(localStorageGameResultId),
         getCurrentBattingAverage(localStorageGameResultId),
         getCurrentPitchingResult(localStorageGameResultId),
         getCurrentPlateAppearance(localStorageGameResultId),
         getCurrentUserId(),
+        getPlateAppearancesByGame(localStorageGameResultId),
       ]);
+      setPlateAppearancesV2(plateAppearancesV2Data);
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
       }
@@ -167,44 +180,10 @@ export default function ResultsSummary() {
 
   // 打席
   const getBattingResultClassName = (battingResult: string) => {
-    const hits = [
-      "投安",
-      "捕安",
-      "一安",
-      "二安",
-      "三安",
-      "遊安",
-      "左安",
-      "中安",
-      "右安",
-      "投二",
-      "捕二",
-      "一二",
-      "二二",
-      "三二",
-      "遊二",
-      "左二",
-      "中二",
-      "右二",
-      "投三",
-      "捕三",
-      "一三",
-      "二三",
-      "三三",
-      "遊三",
-      "左三",
-      "中三",
-      "右三",
-      "投本",
-      "捕本",
-      "一本",
-      "二本",
-      "三本",
-      "遊本",
-      "左本",
-      "中本",
-      "右本",
-    ];
+    // 安打系(右中/左中/線など全方向)は共通判定で赤に。四球/死球/犠打/犠飛/打妨は青。
+    if (getBattingResultColor(battingResult) === HIT_RESULT_COLOR) {
+      return "text-red-500";
+    }
     const walks = [
       "四球",
       "死球",
@@ -225,14 +204,10 @@ export default function ResultsSummary() {
       "右犠飛",
       "打妨",
     ];
-
-    if (hits.includes(battingResult)) {
-      return "text-red-500";
-    } else if (walks.includes(battingResult)) {
+    if (walks.includes(battingResult)) {
       return "text-blue-400";
-    } else {
-      return "";
     }
+    return "";
   };
 
   // 投球数
@@ -352,21 +327,22 @@ export default function ResultsSummary() {
                     <div key={batting.id}>
                       <p className="text-xs text-zinc-400">打撃</p>
                       <ul className="flex flex-wrap gap-2 mt-2">
-                        {plateAppearance ? (
-                          plateAppearance.map((plate) => (
-                            <li key={plate.batter_box_number}>
-                              <p
-                                className={`font-bold ${getBattingResultClassName(
-                                  plate.batting_result,
-                                )}`}
-                              >
-                                {plate.batting_result}
-                              </p>
-                            </li>
-                          ))
-                        ) : (
-                          <></>
-                        )}
+                        {(plateAppearancesV2.length > 0
+                          ? plateAppearancesV2
+                          : (plateAppearance ?? [])
+                        ).map((plate, index) => (
+                          <li
+                            key={`${plate.batter_box_number ?? "na"}-${index}`}
+                          >
+                            <p
+                              className={`font-bold ${getBattingResultClassName(
+                                plate.batting_result,
+                              )}`}
+                            >
+                              {plate.batting_result}
+                            </p>
+                          </li>
+                        ))}
                       </ul>
                       <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1">
                         <div className="flex items-center">
@@ -410,6 +386,22 @@ export default function ResultsSummary() {
                   </>
                 )}
               </div>
+              {plateAppearancesV2.length > 0 && (
+                <>
+                  <Divider className="my-4" />
+                  <div>
+                    <p className="text-xs text-zinc-400 mb-2">打席詳細</p>
+                    <div className="flex flex-col gap-y-2">
+                      {plateAppearancesV2.map((plate) => (
+                        <PlateAppearanceSummaryCard
+                          key={plate.id}
+                          plateAppearance={plate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
               <Divider className="my-4" />
               {/* 投手成績 */}
               <div>
