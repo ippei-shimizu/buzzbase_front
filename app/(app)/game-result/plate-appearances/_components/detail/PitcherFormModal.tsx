@@ -15,8 +15,13 @@ import {
   ModalHeader,
   Textarea,
 } from "@heroui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
+import {
+  getArmAngles,
+  getPitcherStyles,
+  getVelocityZones,
+} from "@app/services/v2/masterService";
 import { createPitcher, updatePitcher } from "@app/services/v2/pitcherService";
 import { MasterChipSelector } from "./MasterChipSelector";
 
@@ -27,9 +32,6 @@ interface PitcherFormModalProps {
   editingPitcher?: Pitcher | null;
   defaultTeamId?: number | null;
   teams?: { id: string; name: string }[];
-  armAngles: ArmAngleMaster[];
-  velocityZones: VelocityZoneMaster[];
-  pitcherStyles: PitcherStyleMaster[];
 }
 
 const THROW_HANDS: ThrowHand[] = ["right", "left"];
@@ -42,11 +44,17 @@ export function PitcherFormModal({
   editingPitcher,
   defaultTeamId,
   teams,
-  armAngles,
-  velocityZones,
-  pitcherStyles,
 }: PitcherFormModalProps) {
   const isEdit = !!editingPitcher;
+  // フォームでしか使わないマスタはモーダルを開いたとき（マウント時）に取得する。
+  const [armAngles, setArmAngles] = useState<ArmAngleMaster[]>([]);
+  const [velocityZones, setVelocityZones] = useState<VelocityZoneMaster[]>([]);
+  const [pitcherStyles, setPitcherStyles] = useState<PitcherStyleMaster[]>([]);
+  useEffect(() => {
+    getArmAngles().then(setArmAngles);
+    getVelocityZones().then(setVelocityZones);
+    getPitcherStyles().then(setPitcherStyles);
+  }, []);
   // 編集時のみ、紐づく所属チーム名を読み取り専用で表示する。
   const editingTeamName =
     isEdit && editingPitcher?.team_id != null
@@ -90,6 +98,8 @@ export function PitcherFormModal({
         ? await updatePitcher(editingPitcher.id, input)
         : await createPitcher(input);
     if (result.ok) {
+      // onSaved が閉じないケースでもボタンが永続 disabled にならないよう先に解除する。
+      setIsSubmitting(false);
       onSaved(result.data);
     } else {
       setErrors(result.errors);
