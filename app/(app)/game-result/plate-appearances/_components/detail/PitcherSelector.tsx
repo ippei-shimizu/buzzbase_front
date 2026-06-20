@@ -154,11 +154,17 @@ export function PitcherSelector({
           <ModalBody>
             <Input
               variant="bordered"
-              size="sm"
+              size="md"
+              radius="full"
               placeholder="投手名で検索"
-              classNames={{ inputWrapper: "border-zinc-500" }}
+              classNames={{ inputWrapper: "border-zinc-500 bg-zinc-800" }}
+              startContent={
+                <MagnifyingGlassIcon className="h-4 w-4 text-zinc-400" />
+              }
+              isClearable
               value={query}
               onChange={(event) => setQuery(event.target.value)}
+              onClear={() => setQuery("")}
             />
             <div className="flex flex-col gap-y-2">
               {filtered.map((pitcher) => (
