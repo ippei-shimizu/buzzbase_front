@@ -50,7 +50,7 @@ export default function PlateAppearanceListPage() {
       localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true";
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsEditMode(editMode);
-     
+
     void (async () => {
       const list = await getPlateAppearancesByGame(id);
       setPlateAppearances(list);
