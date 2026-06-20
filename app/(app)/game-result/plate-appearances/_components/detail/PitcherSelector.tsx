@@ -156,6 +156,7 @@ export function PitcherSelector({
               variant="bordered"
               size="sm"
               placeholder="投手名で検索"
+              classNames={{ inputWrapper: "border-zinc-600" }}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
