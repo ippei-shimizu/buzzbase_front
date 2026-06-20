@@ -81,15 +81,26 @@ export function PitcherSelector({
 
   return (
     <div className="flex flex-col gap-y-2">
-      <p className="text-sm font-medium">相手投手</p>
-      <Button
-        variant="bordered"
-        radius="sm"
-        className="justify-between"
-        onPress={() => setIsPickerOpen(true)}
-      >
-        {selected ? selected.name : "投手を選択 / 新規登録"}
-      </Button>
+      <div className="flex items-center gap-x-2">
+        <div className="flex-1 rounded-lg border border-zinc-600 px-3 py-2 text-sm">
+          {selected ? (
+            <span>{selected.name}</span>
+          ) : (
+            <span className="text-zinc-500">投手未選択</span>
+          )}
+        </div>
+        <Button
+          variant="bordered"
+          radius="sm"
+          className="font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
+          onPress={() => setIsPickerOpen(true)}
+        >
+          選択
+        </Button>
+      </div>
+      <p className="text-xs text-zinc-500">
+        自分が追加した投手だけ表示されます
+      </p>
 
       <Modal
         isOpen={isPickerOpen}
