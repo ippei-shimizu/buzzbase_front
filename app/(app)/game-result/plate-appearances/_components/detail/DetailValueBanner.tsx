@@ -4,7 +4,7 @@ import { LightBulbIcon } from "@heroicons/react/24/solid";
 /** 詳細入力の価値訴求バナー（mobile 同様、記録するメリットを伝える）。 */
 export function DetailValueBanner() {
   return (
-    <div className="flex items-start gap-x-3 rounded-xl border-2 border-[#d08000] bg-bg_sub p-4">
+    <div className="flex items-start gap-x-3 rounded-xl border-2 border-[#d08000] bg-[#3a3024] p-4">
       <LightBulbIcon className="h-6 w-6 text-[#d08000] shrink-0" />
       <div>
         <p className="text-sm">

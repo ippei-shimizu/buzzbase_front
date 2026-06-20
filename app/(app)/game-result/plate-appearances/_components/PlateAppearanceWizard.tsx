@@ -256,7 +256,7 @@ export function PlateAppearanceWizard({
             <Button
               variant="light"
               radius="sm"
-              className="text-[#d08000] underline"
+              className="text-zinc-400 underline"
               onPress={handleSubmit}
               isDisabled={isSubmitting}
             >
