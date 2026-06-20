@@ -54,7 +54,8 @@ export default function ScoreStepper({
             return;
           }
           const parsed = Number(raw);
-          if (!Number.isNaN(parsed)) onChange(Math.max(0, parsed));
+          // 点数は整数のみ。小数入力は切り捨てる。
+          if (!Number.isNaN(parsed)) onChange(Math.max(0, Math.floor(parsed)));
         }}
       />
       <Button
