@@ -22,7 +22,18 @@ interface PlateResultButtonsProps {
   onSelectDirectionOnly: (plateResultId: PlateResultId) => void;
 }
 
-// out 系（赤）で表示する plate_result_id（アウト/三振/振り逃げ）。それ以外は primary。
+// mobile に合わせた 2 階調配色。HeroUI のテーマ依存（primary が環境で青に解決される）を
+// 避けるため、リテラルの Tailwind クラスで色を固定する。
+// オレンジ #d08000: ヒット / 失策 / 野選 / 犠打 / 犠飛 / 四球 / 死球 / 打撃妨害
+// 赤 #f31260: アウト / 空振り三振 / 見逃し三振 / 振り逃げ
+const ORANGE = "#d08000";
+const RED = "#f31260";
+const ORANGE_BORDER = "border-2 border-[#d08000] bg-transparent text-[#d08000]";
+const ORANGE_SOLID = "border-2 border-[#d08000] bg-[#d08000] text-white";
+const RED_BORDER = "border-2 border-[#f31260] bg-transparent text-[#f31260]";
+const RED_SOLID = "border-2 border-[#f31260] bg-[#f31260] text-white";
+
+// out 系（赤）で表示する plate_result_id（アウト/三振/振り逃げ）。それ以外はオレンジ。
 const OUT_COLORED_IDS: readonly number[] = [
   PLATE_RESULT_IDS.GROUND_OUT,
   PLATE_RESULT_IDS.FLY_OUT,
@@ -33,8 +44,13 @@ const OUT_COLORED_IDS: readonly number[] = [
   PLATE_RESULT_IDS.STRIKEOUT_REACHED,
 ];
 
-const colorFor = (plateResultId: number): "danger" | "primary" =>
-  OUT_COLORED_IDS.includes(plateResultId) ? "danger" : "primary";
+const toneFor = (plateResultId: number): "orange" | "red" =>
+  OUT_COLORED_IDS.includes(plateResultId) ? "red" : "orange";
+
+const toneClass = (tone: "orange" | "red", selected: boolean): string => {
+  if (tone === "red") return selected ? RED_SOLID : RED_BORDER;
+  return selected ? ORANGE_SOLID : ORANGE_BORDER;
+};
 
 /**
  * 打席結果ボタン群。打球方向あり系（アウト/ヒット/失策/野選/犠打/犠飛）はグラウンド
@@ -57,24 +73,22 @@ export function PlateResultButtons({
         </p>
         <div className="grid grid-cols-2 gap-2">
           <Button
-            color="danger"
             variant="bordered"
             radius="sm"
-            className="font-bold justify-between"
+            className={`font-bold justify-between ${RED_BORDER}`}
             isDisabled={!hasHitLocation}
             onPress={onSelectOut}
-            endContent={<NextArrowIcon stroke="#f31260" />}
+            endContent={<NextArrowIcon stroke={RED} />}
           >
             アウト
           </Button>
           <Button
-            color="primary"
             variant="bordered"
             radius="sm"
-            className="font-bold justify-between"
+            className={`font-bold justify-between ${ORANGE_BORDER}`}
             isDisabled={!hasHitLocation}
             onPress={onSelectHit}
-            endContent={<NextArrowIcon stroke="#d08000" />}
+            endContent={<NextArrowIcon stroke={ORANGE} />}
           >
             ヒット
           </Button>
@@ -83,10 +97,9 @@ export function PlateResultButtons({
             return (
               <Button
                 key={option.plate_result_id}
-                color="primary"
-                variant={isSelected ? "solid" : "bordered"}
+                variant="bordered"
                 radius="sm"
-                className="font-bold"
+                className={`font-bold ${toneClass("orange", isSelected)}`}
                 isDisabled={!hasHitLocation}
                 onPress={() => onSelectDirectionOnly(option.plate_result_id)}
               >
@@ -108,10 +121,12 @@ export function PlateResultButtons({
             return (
               <Button
                 key={`${option.plate_result_id}-${option.label}`}
-                color={colorFor(option.plate_result_id)}
-                variant={isSelected ? "solid" : "bordered"}
+                variant="bordered"
                 radius="sm"
-                className="font-bold"
+                className={`font-bold ${toneClass(
+                  toneFor(option.plate_result_id),
+                  isSelected,
+                )}`}
                 isDisabled={hasHitLocation}
                 onPress={() =>
                   onSelectNoDirection(option.plate_result_id, option.swing_type)
