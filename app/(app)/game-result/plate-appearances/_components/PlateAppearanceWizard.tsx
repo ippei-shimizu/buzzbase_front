@@ -7,13 +7,17 @@ import type {
 import type {
   HitType,
   OutType,
+  PlateAppearanceV2,
   SwingType,
 } from "@app/interface/plateAppearanceV2";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { createPlateAppearanceV2 } from "@app/services/v2/plateAppearanceService";
+import {
+  createPlateAppearanceV2,
+  updatePlateAppearanceV2,
+} from "@app/services/v2/plateAppearanceService";
 import { roundHitLocation, type Point } from "@app/utils/groundZoneDetector";
 import { DetailDataForm } from "./detail/DetailDataForm";
 import { EMPTY_DETAIL, type DetailState } from "./detail/detailState";
@@ -29,9 +33,26 @@ interface PlateAppearanceWizardProps {
   onCompleted: () => void;
   onCancel?: () => void;
   defaultTeamId?: number | null;
+  // 指定時は編集モード（PATCH /api/v2/plate_appearances/:id）。
+  editingPlateAppearance?: PlateAppearanceV2 | null;
 }
 
 type WizardStep = "result" | "score" | "detail";
+
+const detailFromPlateAppearance = (pa: PlateAppearanceV2): DetailState => ({
+  finalBalls: pa.final_balls,
+  finalStrikes: pa.final_strikes,
+  finalOuts: pa.final_outs,
+  firstPitchSwing: pa.first_pitch_swing,
+  runnersState: pa.runners_state,
+  inning: pa.inning,
+  contactQualityId: pa.contact_quality?.id ?? null,
+  timingId: pa.timing?.id ?? null,
+  pitchTypeId: pa.pitch_type?.id ?? null,
+  selfAnalysisMemo: pa.self_analysis_memo,
+  pitcherId: pa.pitcher?.id ?? null,
+  appearanceSituationId: pa.appearance_situation?.id ?? null,
+});
 
 /**
  * 1 打席分の記録ウィザード。
@@ -44,23 +65,47 @@ export function PlateAppearanceWizard({
   onCompleted,
   onCancel,
   defaultTeamId,
+  editingPlateAppearance,
 }: PlateAppearanceWizardProps) {
+  const isEdit = !!editingPlateAppearance;
+  const initialHitLocation: Point | null =
+    editingPlateAppearance?.hit_location_x != null &&
+    editingPlateAppearance?.hit_location_y != null
+      ? {
+          x: Number(editingPlateAppearance.hit_location_x),
+          y: Number(editingPlateAppearance.hit_location_y),
+        }
+      : null;
   const [step, setStep] = useState<WizardStep>("result");
-  const [hitLocation, setHitLocation] = useState<Point | null>(null);
-  const [directionId, setDirectionId] = useState<number | null>(null);
-  const [plateResultId, setPlateResultId] = useState<PlateResultId | null>(
-    null,
+  const [hitLocation, setHitLocation] = useState<Point | null>(
+    initialHitLocation,
   );
-  const [outType, setOutType] = useState<OutType | null>(null);
-  const [hitType, setHitType] = useState<HitType | null>(null);
-  const [swingType, setSwingType] = useState<SwingType | null>(null);
+  const [directionId, setDirectionId] = useState<number | null>(
+    editingPlateAppearance?.hit_direction_id ?? null,
+  );
+  const [plateResultId, setPlateResultId] = useState<PlateResultId | null>(
+    (editingPlateAppearance?.plate_result_id as PlateResultId) ?? null,
+  );
+  const [outType, setOutType] = useState<OutType | null>(
+    editingPlateAppearance?.out_type ?? null,
+  );
+  const [hitType, setHitType] = useState<HitType | null>(
+    editingPlateAppearance?.hit_type ?? null,
+  );
+  const [swingType, setSwingType] = useState<SwingType | null>(
+    editingPlateAppearance?.swing_type ?? null,
+  );
   const [scores, setScores] = useState({
-    rbi: 0,
-    runScored: 0,
-    stolenBases: 0,
-    caughtStealing: 0,
+    rbi: editingPlateAppearance?.rbi ?? 0,
+    runScored: editingPlateAppearance?.run_scored ?? 0,
+    stolenBases: editingPlateAppearance?.stolen_bases ?? 0,
+    caughtStealing: editingPlateAppearance?.caught_stealing ?? 0,
   });
-  const [detail, setDetailState] = useState<DetailState>(EMPTY_DETAIL);
+  const [detail, setDetailState] = useState<DetailState>(
+    editingPlateAppearance
+      ? detailFromPlateAppearance(editingPlateAppearance)
+      : EMPTY_DETAIL,
+  );
   const [isOutModalOpen, setIsOutModalOpen] = useState(false);
   const [isHitModalOpen, setIsHitModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,7 +114,16 @@ export function PlateAppearanceWizard({
   const setDetail = (patch: Partial<DetailState>) =>
     setDetailState((prev) => ({ ...prev, ...patch }));
 
-  const goToScore = () => setStep("score");
+  // 編集モードはタブで自由に切り替えるため、結果選択での自動遷移はしない。
+  const goToScore = () => {
+    if (!isEdit) setStep("score");
+  };
+
+  const EDIT_TABS: { step: WizardStep; label: string }[] = [
+    { step: "result", label: "打席結果" },
+    { step: "score", label: "打点・得点" },
+    { step: "detail", label: "詳細" },
+  ];
 
   const handleGroundSelect = (args: {
     x: number;
@@ -128,7 +182,7 @@ export function PlateAppearanceWizard({
     if (plateResultId === null || isSubmitting) return;
     setIsSubmitting(true);
     setErrors([]);
-    const result = await createPlateAppearanceV2({
+    const input = {
       game_result_id: gameResultId,
       batter_box_number: batterBoxNumber,
       plate_result_id: plateResultId,
@@ -154,7 +208,11 @@ export function PlateAppearanceWizard({
       self_analysis_memo: detail.selfAnalysisMemo,
       pitcher_id: detail.pitcherId,
       appearance_situation_id: detail.appearanceSituationId,
-    });
+    };
+    const result =
+      isEdit && editingPlateAppearance
+        ? await updatePlateAppearanceV2(editingPlateAppearance.id, input)
+        : await createPlateAppearanceV2(input);
     if (result.ok) {
       onCompleted();
     } else {
@@ -172,6 +230,25 @@ export function PlateAppearanceWizard({
             <li key={error}>{error}</li>
           ))}
         </ul>
+      )}
+
+      {isEdit && (
+        <div className="flex border-b border-zinc-700">
+          {EDIT_TABS.map((tab) => (
+            <button
+              key={tab.step}
+              type="button"
+              className={`flex-1 pb-2 text-sm font-medium border-b-2 transition-colors ${
+                step === tab.step
+                  ? "border-primary text-primary"
+                  : "border-transparent text-zinc-400"
+              }`}
+              onClick={() => setStep(tab.step)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       )}
 
       {step === "result" ? (
@@ -213,37 +290,41 @@ export function PlateAppearanceWizard({
             caughtStealing={scores.caughtStealing}
             onChange={handleScoreChange}
           />
-          <Button
-            variant="light"
-            radius="sm"
-            className="self-start text-zinc-400"
-            onPress={() => setStep("result")}
-            isDisabled={isSubmitting}
-          >
-            打席結果に戻る
-          </Button>
-          <div className="flex flex-col gap-y-2">
-            <Button
-              color="primary"
-              variant="bordered"
-              radius="sm"
-              className="font-bold"
-              onPress={() => setStep("detail")}
-              isDisabled={isSubmitting}
-            >
-              詳細を入力する
-            </Button>
-            <Button
-              color="primary"
-              radius="sm"
-              className="font-bold"
-              onPress={handleSubmit}
-              endContent={<NextArrowIcon stroke="#F4F4F4" />}
-              isDisabled={isSubmitting}
-            >
-              スキップして保存
-            </Button>
-          </div>
+          {!isEdit && (
+            <>
+              <Button
+                variant="light"
+                radius="sm"
+                className="self-start text-zinc-400"
+                onPress={() => setStep("result")}
+                isDisabled={isSubmitting}
+              >
+                打席結果に戻る
+              </Button>
+              <div className="flex flex-col gap-y-2">
+                <Button
+                  color="primary"
+                  variant="bordered"
+                  radius="sm"
+                  className="font-bold"
+                  onPress={() => setStep("detail")}
+                  isDisabled={isSubmitting}
+                >
+                  詳細を入力する
+                </Button>
+                <Button
+                  color="primary"
+                  radius="sm"
+                  className="font-bold"
+                  onPress={handleSubmit}
+                  endContent={<NextArrowIcon stroke="#F4F4F4" />}
+                  isDisabled={isSubmitting}
+                >
+                  スキップして保存
+                </Button>
+              </div>
+            </>
+          )}
         </>
       ) : (
         <>
@@ -253,26 +334,42 @@ export function PlateAppearanceWizard({
             setDetail={setDetail}
             defaultTeamId={defaultTeamId}
           />
-          <Button
-            variant="light"
-            radius="sm"
-            className="self-start text-zinc-400"
-            onPress={() => setStep("score")}
-            isDisabled={isSubmitting}
-          >
-            打点・得点に戻る
-          </Button>
-          <Button
-            color="primary"
-            radius="sm"
-            className="font-bold"
-            onPress={handleSubmit}
-            endContent={<NextArrowIcon stroke="#F4F4F4" />}
-            isDisabled={isSubmitting}
-          >
-            この打席を保存
-          </Button>
+          {!isEdit && (
+            <>
+              <Button
+                variant="light"
+                radius="sm"
+                className="self-start text-zinc-400"
+                onPress={() => setStep("score")}
+                isDisabled={isSubmitting}
+              >
+                打点・得点に戻る
+              </Button>
+              <Button
+                color="primary"
+                radius="sm"
+                className="font-bold"
+                onPress={handleSubmit}
+                endContent={<NextArrowIcon stroke="#F4F4F4" />}
+                isDisabled={isSubmitting}
+              >
+                この打席を保存
+              </Button>
+            </>
+          )}
         </>
+      )}
+
+      {isEdit && (
+        <Button
+          color="primary"
+          radius="sm"
+          className="font-bold"
+          onPress={handleSubmit}
+          isDisabled={isSubmitting}
+        >
+          この打席を更新
+        </Button>
       )}
 
       <OutTypeModal
