@@ -31,7 +31,14 @@ export default function PlateAppearanceRecordPage() {
 
   const handleCompleted = () => {
     const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
-    const pattern = raw ? JSON.parse(raw) : "both";
+    // 壊れた値が入っていても遷移が止まらないよう既定 both にフォールバックする。
+    const pattern = (() => {
+      try {
+        return raw ? JSON.parse(raw) : "both";
+      } catch {
+        return "both";
+      }
+    })();
     router.push(
       pattern === "both" ? "/game-result/pitching/" : "/game-result/summary/",
     );
