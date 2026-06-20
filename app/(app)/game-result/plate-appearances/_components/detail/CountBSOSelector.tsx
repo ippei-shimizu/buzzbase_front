@@ -37,15 +37,15 @@ export function CountBSOSelector({
   };
 
   return (
-    <div className="flex flex-col gap-y-2">
+    <div className="flex flex-col gap-y-2 rounded-lg bg-[#1f1f1f] p-3">
       <p className="text-sm font-medium">最終カウント</p>
       <div className="flex flex-col gap-y-2">
         {ROWS.map((row) => {
           const current = values[row.key] ?? 0;
           return (
-            <div key={row.key} className="flex items-center justify-between">
+            <div key={row.key} className="flex items-center gap-x-4">
               <span className="text-xs text-zinc-300 w-24">{row.label}</span>
-              {/* ドット枠を固定幅にして左揃え。本数が違っても各行の先頭ドットが縦に揃う。 */}
+              {/* ラベルの直後にドットを左揃え。本数が違っても各行の先頭ドットが縦に揃う。 */}
               <div className="flex gap-x-2 w-24 justify-start">
                 {Array.from({ length: row.max }).map((_, index) => {
                   const lit = index < current;
