@@ -26,6 +26,7 @@ import {
   MemoTextArea,
   RunnersStateSelector,
 } from "./DetailFields";
+import { DetailValueBanner } from "./DetailValueBanner";
 import { MasterChipSelector } from "./MasterChipSelector";
 import { PitcherSelector } from "./PitcherSelector";
 
@@ -100,6 +101,7 @@ export function DetailDataForm({
 
   return (
     <div className="flex flex-col gap-y-4">
+      <DetailValueBanner />
       <Card
         title="打席の状況"
         subtitle="打席時の状況を記録します"

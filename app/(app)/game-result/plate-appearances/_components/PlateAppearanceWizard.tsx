@@ -249,9 +249,20 @@ export function PlateAppearanceWizard({
         </>
       ) : (
         <>
-          <p className="text-center text-base font-medium">
-            第{batterBoxNumber}打席 詳細を入力
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-base font-bold">
+              第{batterBoxNumber}打席の詳細（すべて任意）
+            </p>
+            <Button
+              variant="light"
+              radius="sm"
+              className="text-[#d08000] underline"
+              onPress={handleSubmit}
+              isDisabled={isSubmitting}
+            >
+              スキップして完了
+            </Button>
+          </div>
           <DetailDataForm
             detail={detail}
             setDetail={setDetail}
