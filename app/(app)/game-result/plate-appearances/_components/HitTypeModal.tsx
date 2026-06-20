@@ -31,7 +31,7 @@ export function HitTypeModal({ isOpen, onSelect, onClose }: HitTypeModalProps) {
                 variant="bordered"
                 radius="sm"
                 size="sm"
-                className="font-bold min-w-0 px-0 border-2 border-[#d08000] bg-transparent text-[#d08000]"
+                className="font-bold min-w-0 px-0 h-11 border-2 border-[#d08000] bg-transparent text-[#d08000]"
                 onPress={() => onSelect(option)}
               >
                 {option.label}
