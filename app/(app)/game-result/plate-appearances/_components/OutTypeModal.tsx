@@ -29,9 +29,8 @@ export function OutTypeModal({ isOpen, onSelect, onClose }: OutTypeModalProps) {
               <Button
                 key={option.out_type}
                 variant="bordered"
-                color="danger"
                 radius="sm"
-                className="font-bold"
+                className="font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
                 onPress={() => onSelect(option)}
               >
                 {option.label}
