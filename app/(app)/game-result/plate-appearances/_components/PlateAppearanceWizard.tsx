@@ -193,20 +193,19 @@ export function PlateAppearanceWizard({
             caughtStealing={scores.caughtStealing}
             onChange={handleScoreChange}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-y-3">
             <Button
-              variant="light"
+              variant="bordered"
               radius="sm"
-              className="text-zinc-400"
+              className="w-full font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
               onPress={() => setStep("result")}
               isDisabled={isSubmitting}
             >
               打席結果に戻る
             </Button>
             <Button
-              color="primary"
               radius="sm"
-              className="px-6 font-bold"
+              className="w-full font-bold bg-[#d08000] text-white"
               onPress={handleSubmit}
               endContent={<NextArrowIcon stroke="#F4F4F4" />}
               isDisabled={isSubmitting}

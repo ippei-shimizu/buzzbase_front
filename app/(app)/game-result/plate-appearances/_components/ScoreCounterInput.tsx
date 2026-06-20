@@ -47,15 +47,17 @@ export function ScoreCounterInput({
         const decrementDisabled = value <= 0;
         return (
           <div key={row.key} className="flex items-center justify-between">
-            <span className="text-sm">{row.label}</span>
-            <div className="flex items-center gap-x-1">
+            <span className="text-base">{row.label}</span>
+            <div className="flex items-center gap-x-2">
               <Button
                 isIconOnly
-                size="sm"
                 radius="full"
                 variant="solid"
-                color="primary"
-                className="h-7 w-7 min-w-7 text-base"
+                className={`h-8 w-8 min-w-8 text-lg ${
+                  decrementDisabled
+                    ? "bg-zinc-600 text-zinc-400"
+                    : "bg-[#d08000] text-white"
+                }`}
                 aria-label={`${row.label}を減らす`}
                 isDisabled={decrementDisabled}
                 onPress={() => onChange(row.key, Math.max(0, value - 1))}
@@ -68,7 +70,8 @@ export function ScoreCounterInput({
                 variant="bordered"
                 min={0}
                 aria-label={row.label}
-                className="w-16"
+                className="w-20"
+                classNames={{ input: "text-center" }}
                 value={String(value)}
                 onChange={(event) => {
                   const parsed = Number(event.target.value);
@@ -80,11 +83,9 @@ export function ScoreCounterInput({
               />
               <Button
                 isIconOnly
-                size="sm"
                 radius="full"
                 variant="solid"
-                color="primary"
-                className="h-7 w-7 min-w-7 text-base"
+                className="h-8 w-8 min-w-8 text-lg bg-[#d08000] text-white"
                 aria-label={`${row.label}を増やす`}
                 onPress={() => onChange(row.key, value + 1)}
               >
