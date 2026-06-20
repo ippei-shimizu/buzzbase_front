@@ -1,10 +1,5 @@
 "use client";
 import type { Pitcher } from "@app/interface/pitcher";
-import type {
-  ArmAngleMaster,
-  PitcherStyleMaster,
-  VelocityZoneMaster,
-} from "@app/interface/plateAppearanceMasters";
 import {
   MagnifyingGlassIcon,
   PencilSquareIcon,
@@ -22,11 +17,6 @@ import {
 import { useEffect, useState } from "react";
 import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
 import { getTeams } from "@app/services/teamsService";
-import {
-  getArmAngles,
-  getPitcherStyles,
-  getVelocityZones,
-} from "@app/services/v2/masterService";
 import { getPitchers } from "@app/services/v2/pitcherService";
 import { PitcherFormModal } from "./PitcherFormModal";
 
@@ -60,9 +50,6 @@ export function PitcherSelector({
 }: PitcherSelectorProps) {
   const [pitchers, setPitchers] = useState<Pitcher[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [armAngles, setArmAngles] = useState<ArmAngleMaster[]>([]);
-  const [velocityZones, setVelocityZones] = useState<VelocityZoneMaster[]>([]);
-  const [pitcherStyles, setPitcherStyles] = useState<PitcherStyleMaster[]>([]);
   const [query, setQuery] = useState("");
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -71,9 +58,6 @@ export function PitcherSelector({
   useEffect(() => {
     getPitchers({}).then((response) => setPitchers(response.data));
     getTeams().then(setTeams);
-    getArmAngles().then(setArmAngles);
-    getVelocityZones().then(setVelocityZones);
-    getPitcherStyles().then(setPitcherStyles);
   }, []);
 
   const teamNameById = new Map(
@@ -244,9 +228,6 @@ export function PitcherSelector({
           editingPitcher={editingPitcher}
           defaultTeamId={defaultTeamId}
           teams={teams}
-          armAngles={armAngles}
-          velocityZones={velocityZones}
-          pitcherStyles={pitcherStyles}
         />
       )}
     </div>
