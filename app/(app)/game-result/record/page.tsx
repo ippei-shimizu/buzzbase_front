@@ -151,25 +151,34 @@ export default function GameRecord() {
 
   const fetchData = async () => {
     try {
-      const currentUserData = await getUserData();
+      // 互いに独立した取得なので並列化して初期表示を速くする。
+      const [
+        currentUserData,
+        getTeamsList,
+        getTournamentList,
+        getSeasonsList,
+        positionDataList,
+        stadiumsResponse,
+      ] = await Promise.all([
+        getUserData(),
+        getTeams(),
+        getTournaments(),
+        getSeasons(),
+        getPositions(),
+        searchStadiums({}),
+      ]);
       setUserData(currentUserData);
-      const userTeamId = currentUserData.team_id;
-      const getTeamsList = await getTeams();
-      const getTournamentList = await getTournaments();
-      const getSeasonsList = await getSeasons();
       setTeamsData(getTeamsList);
       setSeasonsData(getSeasonsList);
       // マイチーム名取得
       const userTeam = getTeamsList.find(
-        (team: { id: string }) => team.id === userTeamId,
+        (team: { id: string }) => team.id === currentUserData.team_id,
       );
       if (userTeam) {
         setMyTeam(userTeam.name);
       }
-      const positionDataList = await getPositions();
       setPositionData(positionDataList);
       setTournamentData(getTournamentList);
-      const stadiumsResponse = await searchStadiums({});
       setStadiumData(stadiumsResponse.data);
     } catch (error) {
       throw error;
