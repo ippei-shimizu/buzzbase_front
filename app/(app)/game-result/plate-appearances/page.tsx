@@ -6,11 +6,28 @@ import { useEffect, useState } from "react";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { RECORD_PATTERN_STORAGE_KEY } from "@app/constants/gameRecord";
+import {
+  GAME_RECORD_EDIT_MODE_STORAGE_KEY,
+  RECORD_PATTERN_STORAGE_KEY,
+} from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { getCurrentPitchingResult } from "@app/services/pitchingResultsService";
 import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
 import { AddPlateAppearanceCard } from "./_components/AddPlateAppearanceCard";
 import { PlateAppearanceCard } from "./_components/PlateAppearanceCard";
+
+const PITCHING_PATH = "/game-result/pitching/";
+const SUMMARY_PATH = "/game-result/summary/";
+
+const readRecordPattern = (): string => {
+  const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
+  // 壊れた値が入っていても遷移が止まらないよう既定 both にフォールバックする。
+  try {
+    return raw ? JSON.parse(raw) : "both";
+  } catch {
+    return "both";
+  }
+};
 
 export default function PlateAppearanceListPage() {
   const router = useRouter();
@@ -18,13 +35,9 @@ export default function PlateAppearanceListPage() {
   const [plateAppearances, setPlateAppearances] = useState<PlateAppearanceV2[]>(
     [],
   );
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hasPitching, setHasPitching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  const reload = async (id: number) => {
-    const list = await getPlateAppearancesByGame(id);
-    setPlateAppearances(list);
-    setIsLoading(false);
-  };
 
   useEffect(() => {
     const saved = localStorage.getItem("gameResultId");
@@ -33,23 +46,25 @@ export default function PlateAppearanceListPage() {
       return;
     }
     const id = JSON.parse(saved) as number;
+    const editMode =
+      localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true";
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    reload(id);
+    setIsEditMode(editMode);
+     
+    void (async () => {
+      const list = await getPlateAppearancesByGame(id);
+      setPlateAppearances(list);
+      if (editMode) {
+        const pitching = await getCurrentPitchingResult(id);
+        setHasPitching(Array.isArray(pitching) && pitching.length > 0);
+      }
+      setIsLoading(false);
+    })();
   }, [router]);
 
-  const handleComplete = () => {
-    const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
-    // 壊れた値が入っていても遷移が止まらないよう既定 both にフォールバックする。
-    const pattern = (() => {
-      try {
-        return raw ? JSON.parse(raw) : "both";
-      } catch {
-        return "both";
-      }
-    })();
-    router.push(
-      pattern === "both" ? "/game-result/pitching/" : "/game-result/summary/",
-    );
+  // 新規記録時は「両方」パターンのときだけ投手成績入力へ進む。
+  const goNewComplete = () => {
+    router.push(readRecordPattern() === "both" ? PITCHING_PATH : SUMMARY_PATH);
   };
 
   return (
@@ -89,16 +104,40 @@ export default function PlateAppearanceListPage() {
                     router.push("/game-result/plate-appearances/new")
                   }
                 />
-                <Button
-                  color="primary"
-                  radius="sm"
-                  className="mt-6 font-bold"
-                  onPress={handleComplete}
-                  endContent={<NextArrowIcon stroke="#F4F4F4" />}
-                  isDisabled={plateAppearances.length === 0}
-                >
-                  入力を完了する
-                </Button>
+
+                {isEditMode ? (
+                  <div className="mt-6 flex flex-col gap-y-3">
+                    {/* 編集時は投手成績の有無に関わらず投手記録へ進める。 */}
+                    <Button
+                      color="primary"
+                      radius="sm"
+                      className="font-bold"
+                      onPress={() => router.push(PITCHING_PATH)}
+                      endContent={<NextArrowIcon stroke="#F4F4F4" />}
+                    >
+                      {hasPitching ? "投手成績編集へ" : "投手成績を追加"}
+                    </Button>
+                    <Button
+                      variant="bordered"
+                      radius="sm"
+                      className="font-bold border-2 border-[#d08000] bg-transparent text-[#d08000]"
+                      onPress={() => router.push(SUMMARY_PATH)}
+                    >
+                      試合結果まとめへ
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    color="primary"
+                    radius="sm"
+                    className="mt-6 font-bold"
+                    onPress={goNewComplete}
+                    endContent={<NextArrowIcon stroke="#F4F4F4" />}
+                    isDisabled={plateAppearances.length === 0}
+                  >
+                    入力を完了する
+                  </Button>
+                )}
               </div>
             )}
           </div>
