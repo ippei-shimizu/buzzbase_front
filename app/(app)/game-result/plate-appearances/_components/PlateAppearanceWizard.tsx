@@ -380,7 +380,7 @@ export function PlateAppearanceWizard({
           radius="sm"
           className="font-bold"
           onPress={handleSubmit}
-          isDisabled={isSubmitting}
+          isDisabled={isSubmitting || plateResultId === null}
         >
           この打席を更新
         </Button>
