@@ -58,7 +58,7 @@ export default function PlateAppearanceRecordPage() {
   return (
     <>
       <HeaderResult />
-      <main className="h-full">
+      <main className="buzz-dark h-full">
         <div className="pb-52 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-12 px-4 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:px-6 lg:pb-6">
             {gameResultId !== null && batterBoxNumber !== null ? (
