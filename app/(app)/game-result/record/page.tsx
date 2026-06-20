@@ -672,16 +672,14 @@ export default function GameRecord() {
         RECORD_PATTERN_STORAGE_KEY,
         JSON.stringify(effectivePattern),
       );
-      // 未出場はまとめへ、投手のみは投手入力へ、新規の打撃/両方は v2 打席ウィザードへ。
-      // 編集モード（pattern 未指定）は v2 打席編集が未実装のため当面 v1 打撃入力へ。
+      // 未出場はまとめへ、投手のみは投手入力へ、新規の打撃/両方と編集モードは
+      // 新仕様の v2 打席リストへ（旧仕様試合も保存時に新仕様カラムが埋まる）。
       const nextPath =
         appearanceType === "no_play"
           ? `/game-result/summary/`
           : pattern === "pitching"
             ? `/game-result/pitching/`
-            : pattern
-              ? `/game-result/plate-appearances/`
-              : `/game-result/batting/`;
+            : `/game-result/plate-appearances/`;
       router.push(nextPath);
     } catch (error) {
       console.error("試合結果の保存に失敗しました", error);
