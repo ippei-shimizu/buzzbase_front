@@ -168,3 +168,203 @@ export async function getHitDirections(
     { directions: [], home_runs: [] },
   );
 }
+
+// ---- 詳細分析（#399） ----
+
+export interface BreakdownCategory {
+  id?: number;
+  category?: string;
+  label?: string;
+  count: number;
+  percentage: number;
+}
+
+export interface BreakdownData {
+  breakdown: BreakdownCategory[];
+  total: number;
+}
+
+export interface CountSituation {
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+}
+
+export interface CountSituations {
+  first_pitch: CountSituation;
+  favorable_count: CountSituation;
+  pinch_count: CountSituation;
+  total_target_pa: number;
+}
+
+export interface RunnersSituationSummary {
+  batting_average: number;
+  at_bats: number;
+  hits: number;
+  two_base_hit: number;
+  three_base_hit: number;
+  home_run: number;
+}
+
+export interface PitchTypeRow {
+  id: number;
+  label: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+}
+
+export interface PitchTypeData {
+  rows: PitchTypeRow[];
+  total_target_pa: number;
+}
+
+export interface PitcherFaceoff {
+  pitcher_id: number;
+  pitcher_name: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  top_result: string;
+}
+
+export interface PitcherFaceoffData {
+  rows: PitcherFaceoff[];
+  total_target_pa: number;
+  min_plate_appearances: number;
+}
+
+export interface BattingTrendPoint {
+  key: string;
+  label: string;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  at_bats_in_period: number;
+  cumulative_at_bats: number;
+}
+
+export interface BattingTrendData {
+  granularity: string;
+  points: BattingTrendPoint[];
+}
+
+export async function getContactQualityStats(
+  filters: AnalysisFilters = {},
+): Promise<BreakdownData> {
+  return fetchAnalysis<BreakdownData>(
+    "contact_qualities",
+    filters,
+    "getContactQualityStats",
+    { breakdown: [], total: 0 },
+  );
+}
+
+export async function getTimingBreakdown(
+  filters: AnalysisFilters = {},
+): Promise<BreakdownData> {
+  return fetchAnalysis<BreakdownData>(
+    "timing_breakdown",
+    filters,
+    "getTimingBreakdown",
+    { breakdown: [], total: 0 },
+  );
+}
+
+export async function getOutTypeBreakdown(
+  filters: AnalysisFilters = {},
+): Promise<BreakdownData> {
+  return fetchAnalysis<BreakdownData>(
+    "out_type_breakdown",
+    filters,
+    "getOutTypeBreakdown",
+    { breakdown: [], total: 0 },
+  );
+}
+
+export async function getCountSituations(
+  filters: AnalysisFilters = {},
+): Promise<CountSituations> {
+  return fetchAnalysis<CountSituations>(
+    "count_situations",
+    filters,
+    "getCountSituations",
+    {
+      first_pitch: { at_bats: 0, hits: 0, batting_average: 0 },
+      favorable_count: { at_bats: 0, hits: 0, batting_average: 0 },
+      pinch_count: { at_bats: 0, hits: 0, batting_average: 0 },
+      total_target_pa: 0,
+    },
+  );
+}
+
+export async function getRunnersSituation(
+  filters: AnalysisFilters = {},
+): Promise<RunnersSituationSummary> {
+  return fetchAnalysis<RunnersSituationSummary>(
+    "runners_situation",
+    filters,
+    "getRunnersSituation",
+    {
+      batting_average: 0,
+      at_bats: 0,
+      hits: 0,
+      two_base_hit: 0,
+      three_base_hit: 0,
+      home_run: 0,
+    },
+  );
+}
+
+export async function getPitchTypeStats(
+  filters: AnalysisFilters = {},
+): Promise<PitchTypeData> {
+  return fetchAnalysis<PitchTypeData>(
+    "pitch_types",
+    filters,
+    "getPitchTypeStats",
+    { rows: [], total_target_pa: 0 },
+  );
+}
+
+export async function getPitcherFaceoffs(
+  filters: AnalysisFilters = {},
+): Promise<PitcherFaceoffData> {
+  return fetchAnalysis<PitcherFaceoffData>(
+    "pitcher_faceoffs",
+    filters,
+    "getPitcherFaceoffs",
+    { rows: [], total_target_pa: 0, min_plate_appearances: 0 },
+  );
+}
+
+export async function getBattingTrend(
+  filters: AnalysisFilters = {},
+  granularity: string = "game",
+): Promise<BattingTrendData> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return { granularity, points: [] };
+    const params = new URLSearchParams(buildQuery(filters));
+    params.set("granularity", granularity);
+    const response = await fetch(
+      `${RAILS_API_URL}/api/v2/stats/batting_trend?${params.toString()}`,
+      { headers, cache: "no-store" },
+    );
+    if (!response.ok) return { granularity, points: [] };
+    return (await response.json()) as BattingTrendData;
+  } catch (error) {
+    captureServerActionError(error, { action: "getBattingTrend" });
+    return { granularity, points: [] };
+  }
+}
