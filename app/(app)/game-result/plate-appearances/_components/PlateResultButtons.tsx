@@ -44,6 +44,21 @@ const OUT_COLORED_IDS: readonly number[] = [
   PLATE_RESULT_IDS.STRIKEOUT_REACHED,
 ];
 
+// 「アウト」「ヒット」ボタンの選択済み判定用（サブモーダルで確定する種別 id）。
+const OUT_MODAL_IDS: readonly number[] = [
+  PLATE_RESULT_IDS.GROUND_OUT,
+  PLATE_RESULT_IDS.FLY_OUT,
+  PLATE_RESULT_IDS.FOUL_FLY,
+  PLATE_RESULT_IDS.LINE_OUT,
+  PLATE_RESULT_IDS.DOUBLE_PLAY,
+];
+const HIT_IDS: readonly number[] = [
+  PLATE_RESULT_IDS.SINGLE,
+  PLATE_RESULT_IDS.DOUBLE,
+  PLATE_RESULT_IDS.TRIPLE,
+  PLATE_RESULT_IDS.HOME_RUN,
+];
+
 const toneFor = (plateResultId: number): "orange" | "red" =>
   OUT_COLORED_IDS.includes(plateResultId) ? "red" : "orange";
 
@@ -65,6 +80,11 @@ export function PlateResultButtons({
   onSelectHit,
   onSelectDirectionOnly,
 }: PlateResultButtonsProps) {
+  const isOutSelected =
+    selectedPlateResultId != null &&
+    OUT_MODAL_IDS.includes(selectedPlateResultId);
+  const isHitSelected =
+    selectedPlateResultId != null && HIT_IDS.includes(selectedPlateResultId);
   return (
     <div className="flex flex-col gap-y-5">
       <section className="flex flex-col gap-y-2">
@@ -75,20 +95,24 @@ export function PlateResultButtons({
           <Button
             variant="bordered"
             radius="sm"
-            className={`font-bold justify-between ${RED_BORDER}`}
+            className={`font-bold justify-between ${toneClass("red", isOutSelected)}`}
             isDisabled={!hasHitLocation}
             onPress={onSelectOut}
-            endContent={<NextArrowIcon stroke={RED} />}
+            endContent={
+              <NextArrowIcon stroke={isOutSelected ? "#F4F4F4" : RED} />
+            }
           >
             アウト
           </Button>
           <Button
             variant="bordered"
             radius="sm"
-            className={`font-bold justify-between ${ORANGE_BORDER}`}
+            className={`font-bold justify-between ${toneClass("orange", isHitSelected)}`}
             isDisabled={!hasHitLocation}
             onPress={onSelectHit}
-            endContent={<NextArrowIcon stroke={ORANGE} />}
+            endContent={
+              <NextArrowIcon stroke={isHitSelected ? "#F4F4F4" : ORANGE} />
+            }
           >
             ヒット
           </Button>
