@@ -8,17 +8,13 @@ import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { RECORD_PATTERN_STORAGE_KEY } from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import {
-  deletePlateAppearanceV2,
-  getPlateAppearancesByGame,
-} from "@app/services/v2/plateAppearanceService";
+import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
 import { AddPlateAppearanceCard } from "./_components/AddPlateAppearanceCard";
 import { PlateAppearanceCard } from "./_components/PlateAppearanceCard";
 
 export default function PlateAppearanceListPage() {
   const router = useRouter();
   useRequireAuth();
-  const [gameResultId, setGameResultId] = useState<number | null>(null);
   const [plateAppearances, setPlateAppearances] = useState<PlateAppearanceV2[]>(
     [],
   );
@@ -38,14 +34,8 @@ export default function PlateAppearanceListPage() {
     }
     const id = JSON.parse(saved) as number;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setGameResultId(id);
     reload(id);
   }, [router]);
-
-  const handleDelete = async (id: number) => {
-    const result = await deletePlateAppearanceV2(id);
-    if (result.ok && gameResultId !== null) reload(gameResultId);
-  };
 
   const handleComplete = () => {
     const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
@@ -84,7 +74,6 @@ export default function PlateAppearanceListPage() {
                         `/game-result/plate-appearances/${plateAppearance.id}/edit`,
                       )
                     }
-                    onDelete={() => handleDelete(plateAppearance.id)}
                   />
                 ))}
                 {plateAppearances.length === 0 ? (

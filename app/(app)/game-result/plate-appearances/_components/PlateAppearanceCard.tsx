@@ -1,7 +1,5 @@
 "use client";
 import type { PlateAppearanceV2 } from "@app/interface/plateAppearanceV2";
-import { Button } from "@heroui/react";
-import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import { getBattingResultColor } from "@app/utils/battingResultColor";
 import {
@@ -12,7 +10,6 @@ import {
 interface PlateAppearanceCardProps {
   plateAppearance: PlateAppearanceV2;
   onEdit: () => void;
-  onDelete: () => void;
 }
 
 interface MetaItem {
@@ -41,7 +38,6 @@ const buildMetaItems = (pa: PlateAppearanceV2): MetaItem[] => {
 export function PlateAppearanceCard({
   plateAppearance,
   onEdit,
-  onDelete,
 }: PlateAppearanceCardProps) {
   const resultText = plateAppearance.batting_result || "未入力";
   const resultColor = getBattingResultColor(resultText);
@@ -109,15 +105,6 @@ export function PlateAppearanceCard({
         )}
       </button>
       <NextArrowIcon stroke="#A1A1AA" />
-      <Button
-        isIconOnly
-        size="sm"
-        variant="light"
-        aria-label="この打席を削除"
-        onPress={onDelete}
-      >
-        <DeleteIcon />
-      </Button>
     </div>
   );
 }
