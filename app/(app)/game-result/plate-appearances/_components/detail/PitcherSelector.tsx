@@ -5,7 +5,11 @@ import type {
   PitcherStyleMaster,
   VelocityZoneMaster,
 } from "@app/interface/plateAppearanceMasters";
-import { PencilSquareIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  PencilSquareIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 import {
   Button,
   Input,
