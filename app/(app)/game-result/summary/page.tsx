@@ -5,6 +5,7 @@ import type {
   PitchingResult,
   PlateAppearanceSummary,
 } from "@app/interface";
+import type { PlateAppearanceV2 } from "@app/interface/plateAppearanceV2";
 import { Chip, Divider } from "@heroui/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,6 +26,7 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
+import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
 
 type MatchResultDisplay = MatchResult & {
   id: number;
@@ -55,6 +57,9 @@ export default function ResultsSummary() {
   const [matchResult, setMatchResult] = useState<MatchResultDisplay[]>([]);
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
+  >([]);
+  const [plateAppearancesV2, setPlateAppearancesV2] = useState<
+    PlateAppearanceV2[]
   >([]);
   const [battingAverage, setBattingAverage] = useState<BattingAverage[]>([]);
   const [pitchingResult, setPitchingResult] = useState<PitchingResult[]>([]);
@@ -117,13 +122,16 @@ export default function ResultsSummary() {
         pitchingResultData,
         plateAppearanceData,
         currentUserIdData,
+        plateAppearancesV2Data,
       ] = await Promise.all([
         getCurrentMatchResult(localStorageGameResultId),
         getCurrentBattingAverage(localStorageGameResultId),
         getCurrentPitchingResult(localStorageGameResultId),
         getCurrentPlateAppearance(localStorageGameResultId),
         getCurrentUserId(),
+        getPlateAppearancesByGame(localStorageGameResultId),
       ]);
+      setPlateAppearancesV2(plateAppearancesV2Data);
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
       }
@@ -352,21 +360,20 @@ export default function ResultsSummary() {
                     <div key={batting.id}>
                       <p className="text-xs text-zinc-400">打撃</p>
                       <ul className="flex flex-wrap gap-2 mt-2">
-                        {plateAppearance ? (
-                          plateAppearance.map((plate) => (
-                            <li key={plate.batter_box_number}>
-                              <p
-                                className={`font-bold ${getBattingResultClassName(
-                                  plate.batting_result,
-                                )}`}
-                              >
-                                {plate.batting_result}
-                              </p>
-                            </li>
-                          ))
-                        ) : (
-                          <></>
-                        )}
+                        {(plateAppearancesV2.length > 0
+                          ? plateAppearancesV2
+                          : (plateAppearance ?? [])
+                        ).map((plate) => (
+                          <li key={plate.batter_box_number}>
+                            <p
+                              className={`font-bold ${getBattingResultClassName(
+                                plate.batting_result,
+                              )}`}
+                            >
+                              {plate.batting_result}
+                            </p>
+                          </li>
+                        ))}
                       </ul>
                       <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1">
                         <div className="flex items-center">
