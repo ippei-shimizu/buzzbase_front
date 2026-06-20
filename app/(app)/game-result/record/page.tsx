@@ -250,15 +250,12 @@ export default function GameRecord() {
   };
 
   useEffect(() => {
-     
     fetchData();
     // 既存試合の編集として入ったときだけ編集モード。新規記録フロー（保存して
     // 戻った場合を含む）はパターン選択を出すため false のままにする。
-    setIsEditMode(
-      localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true",
-    );
     const isEdit =
       localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true";
+    setIsEditMode(isEdit);
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
@@ -304,7 +301,6 @@ export default function GameRecord() {
         (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
-         
         setMyPosition(userPosition.id.toString());
       }
     }
@@ -315,7 +311,6 @@ export default function GameRecord() {
     if (existingMyTeam) {
       const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
       if (foundTeam) {
-         
         setMyTeam(foundTeam.name);
       }
     }
@@ -815,7 +810,7 @@ export default function GameRecord() {
                   onInputChange={handleTournamentInputChange}
                   onSelectionChange={handleTournamentSelectionChange}
                   selectedKey={
-                    tournament !== undefined ? tournament?.toString() : null
+                    tournament !== null ? tournament.toString() : null
                   }
                 >
                   {tournamentData.map((data) => (
@@ -836,9 +831,7 @@ export default function GameRecord() {
                   onInputChange={handleSeasonInputChange}
                   onSelectionChange={handleSeasonSelectionChange}
                   selectedKey={
-                    selectedSeason !== undefined
-                      ? selectedSeason?.toString()
-                      : null
+                    selectedSeason !== null ? selectedSeason.toString() : null
                   }
                 >
                   {seasonsData.map((data) => (
