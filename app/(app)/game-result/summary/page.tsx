@@ -27,6 +27,7 @@ import {
   getCurrentUsersUserId,
 } from "@app/services/userService";
 import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
+import { PlateAppearanceSummaryCard } from "./_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
   id: number;
@@ -417,6 +418,22 @@ export default function ResultsSummary() {
                   </>
                 )}
               </div>
+              {plateAppearancesV2.length > 0 && (
+                <>
+                  <Divider className="my-4" />
+                  <div>
+                    <p className="text-xs text-zinc-400 mb-2">打席詳細</p>
+                    <div className="flex flex-col gap-y-2">
+                      {plateAppearancesV2.map((plate) => (
+                        <PlateAppearanceSummaryCard
+                          key={plate.id}
+                          plateAppearance={plate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
               <Divider className="my-4" />
               {/* 投手成績 */}
               <div>
