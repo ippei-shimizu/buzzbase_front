@@ -207,7 +207,9 @@ export function PlateAppearanceWizard({
         </>
       ) : step === "score" ? (
         <>
-          <p className="text-center text-base font-medium">打点・得点を入力</p>
+          <p className="text-center text-base font-medium">
+            第{batterBoxNumber}打席 打点・得点を入力
+          </p>
           <ScoreCounterInput
             rbi={scores.rbi}
             runScored={scores.runScored}
@@ -247,7 +249,9 @@ export function PlateAppearanceWizard({
         </>
       ) : (
         <>
-          <p className="text-center text-base font-medium">詳細データを入力</p>
+          <p className="text-center text-base font-medium">
+            第{batterBoxNumber}打席 詳細を入力
+          </p>
           <DetailDataForm
             detail={detail}
             setDetail={setDetail}
