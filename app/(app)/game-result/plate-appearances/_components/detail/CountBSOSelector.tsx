@@ -44,8 +44,9 @@ export function CountBSOSelector({
           const current = values[row.key] ?? 0;
           return (
             <div key={row.key} className="flex items-center justify-between">
-              <span className="text-xs text-zinc-300 w-20">{row.label}</span>
-              <div className="flex gap-x-2">
+              <span className="text-xs text-zinc-300 w-24">{row.label}</span>
+              {/* ドット枠を固定幅にして左揃え。本数が違っても各行の先頭ドットが縦に揃う。 */}
+              <div className="flex gap-x-2 w-24 justify-start">
                 {Array.from({ length: row.max }).map((_, index) => {
                   const lit = index < current;
                   const isLastLit = index === current - 1;
