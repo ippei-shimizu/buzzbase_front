@@ -34,15 +34,20 @@ export default function EditPlateAppearancePage() {
   const [notFound, setNotFound] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setDeleteError(null);
     const result = await deletePlateAppearanceV2(plateAppearanceId);
     if (result.ok) {
       router.push(LIST_PATH);
     } else {
       setIsDeleting(false);
-      setIsConfirmOpen(false);
+      setDeleteError(
+        result.errors[0] ??
+          "削除に失敗しました。時間をおいて再度お試しください。",
+      );
     }
   };
 
@@ -107,7 +112,10 @@ export default function EditPlateAppearancePage() {
 
       <Modal
         isOpen={isConfirmOpen}
-        onClose={() => setIsConfirmOpen(false)}
+        onClose={() => {
+          setIsConfirmOpen(false);
+          setDeleteError(null);
+        }}
         placement="center"
         size="sm"
         classNames={{ base: "buzz-dark" }}
@@ -116,6 +124,9 @@ export default function EditPlateAppearancePage() {
           <ModalHeader>打席を削除しますか？</ModalHeader>
           <ModalBody>
             <p className="text-sm text-zinc-300">この操作は取り消せません。</p>
+            {deleteError !== null ? (
+              <p className="text-sm text-danger">{deleteError}</p>
+            ) : null}
           </ModalBody>
           <ModalFooter>
             <Button
