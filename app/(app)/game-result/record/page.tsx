@@ -176,8 +176,11 @@ export default function GameRecord() {
     }
   };
 
-  // 既に同じgame_result_idが存在する場合
-  const fetchExistingMatchResult = async (gameResultId: number) => {
+  // 既に同じ game_result_id の試合記録が存在すれば各フィールドへ反映し、
+  // 見つかったかどうかを boolean で返す（新規記録時のデフォルト適用判定に使う）。
+  const fetchExistingMatchResult = async (
+    gameResultId: number,
+  ): Promise<boolean> => {
     try {
       const currentUserId = await getCurrentUserId();
       const existingMatchResult = await checkExistingMatchResults(
@@ -223,8 +226,26 @@ export default function GameRecord() {
         // ランタイムガードは不要。inning_format と同様にそのまま反映する。
         setAppearanceType(existingMatchResult.appearance_type);
       }
+      return Boolean(existingMatchResult);
     } catch (error) {
       console.error("Error fetching existing match result:", error);
+      return false;
+    }
+  };
+
+  // 新規記録時のフォーム初期値（直近試合の inning_format / 打順）を適用する。
+  const applyFormDefaults = async () => {
+    try {
+      const defaults = await getMatchResultFormDefaults();
+      if (defaults?.inning_format === 7 || defaults?.inning_format === 9) {
+        setInningFormat(defaults.inning_format);
+      }
+      if (defaults?.batting_order) {
+        setMatchBattingOrder(defaults.batting_order);
+        setExistingMatchBattingOrder(defaults.batting_order);
+      }
+    } catch (error) {
+      console.error("フォーム初期値の取得に失敗しました", error);
     }
   };
 
@@ -236,11 +257,16 @@ export default function GameRecord() {
     setIsEditMode(
       localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true",
     );
+    const isEdit =
+      localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true";
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchExistingMatchResult(JSON.parse(savedGameResultId));
+      // 既存試合がなければ（＝新規記録フロー）直近試合のデフォルトを適用する。
+      fetchExistingMatchResult(JSON.parse(savedGameResultId)).then((found) => {
+        if (!found && !isEdit) applyFormDefaults();
+      });
     } else if (pathname === "/game-result/record") {
       // gameResultId がない＝新規記録なので、編集フラグは確実に解除しておく。
       localStorage.removeItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY);
@@ -259,18 +285,7 @@ export default function GameRecord() {
         }
       };
       createNew();
-      // 新規作成時は直近試合のイニング制を初期値として読み込む（履歴なしは 9）
-      const loadInningFormatDefault = async () => {
-        try {
-          const defaults = await getMatchResultFormDefaults();
-          if (defaults?.inning_format === 7 || defaults?.inning_format === 9) {
-            setInningFormat(defaults.inning_format);
-          }
-        } catch (error) {
-          console.error("フォーム初期値の取得に失敗しました", error);
-        }
-      };
-      loadInningFormatDefault();
+      applyFormDefaults();
     }
     if (
       !(pathname === "/game-result/battings") &&
