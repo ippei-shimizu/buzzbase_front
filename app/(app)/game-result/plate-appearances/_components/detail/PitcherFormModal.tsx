@@ -26,6 +26,7 @@ interface PitcherFormModalProps {
   onSaved: (pitcher: Pitcher) => void;
   editingPitcher?: Pitcher | null;
   defaultTeamId?: number | null;
+  teams?: { id: string; name: string }[];
   armAngles: ArmAngleMaster[];
   velocityZones: VelocityZoneMaster[];
   pitcherStyles: PitcherStyleMaster[];
@@ -40,11 +41,19 @@ export function PitcherFormModal({
   onSaved,
   editingPitcher,
   defaultTeamId,
+  teams,
   armAngles,
   velocityZones,
   pitcherStyles,
 }: PitcherFormModalProps) {
   const isEdit = !!editingPitcher;
+  // 編集時のみ、紐づく所属チーム名を読み取り専用で表示する。
+  const editingTeamName =
+    isEdit && editingPitcher?.team_id != null
+      ? teams?.find(
+          (team) => String(team.id) === String(editingPitcher.team_id),
+        )?.name
+      : undefined;
   const [name, setName] = useState(editingPitcher?.name ?? "");
   const [throwHand, setThrowHand] = useState<ThrowHand | null>(
     editingPitcher?.throw_hand ?? null,
@@ -98,7 +107,7 @@ export function PitcherFormModal({
       classNames={{ base: "buzz-dark" }}
     >
       <ModalContent>
-        <ModalHeader>{isEdit ? "投手を編集" : "投手を新規登録"}</ModalHeader>
+        <ModalHeader>{isEdit ? "投手を編集" : "相手投手を追加"}</ModalHeader>
         <ModalBody>
           {errors.length > 0 && (
             <ul className="text-red-500 text-sm list-disc pl-5">
@@ -107,12 +116,18 @@ export function PitcherFormModal({
               ))}
             </ul>
           )}
+          {editingTeamName ? (
+            <div className="flex flex-col gap-y-1">
+              <p className="text-sm font-medium">所属チーム</p>
+              <p className="text-sm text-zinc-300">{editingTeamName}</p>
+            </div>
+          ) : null}
           <Input
             isRequired
-            label="名前"
+            label="投手名（必須）"
             labelPlacement="outside"
             variant="bordered"
-            placeholder="投手名を入力"
+            placeholder="例: 田中投手"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
@@ -159,10 +174,10 @@ export function PitcherFormModal({
             onChange={setPitcherStyleId}
           />
           <Textarea
-            label="メモ"
+            label="メモ（配球傾向・特徴など）"
             labelPlacement="outside"
             variant="bordered"
-            placeholder="配球の傾向や特徴など"
+            placeholder="例: 初球はストレート / 決め球は外角スライダー"
             maxLength={1000}
             value={memo}
             onChange={(event) => setMemo(event.target.value)}
@@ -177,7 +192,7 @@ export function PitcherFormModal({
             onPress={handleSave}
             isDisabled={isSubmitting || !name.trim()}
           >
-            保存
+            {isEdit ? "更新" : "登録"}
           </Button>
         </ModalFooter>
       </ModalContent>
