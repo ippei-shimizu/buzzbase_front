@@ -3,7 +3,7 @@ import type {
   BattingTrendGranularity,
   BattingTrendPoint,
 } from "../../analysisActions";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 interface BattingTrendChartProps {
   points: BattingTrendPoint[];
@@ -101,6 +101,12 @@ export function BattingTrendChart({
     lineKey: LineKey;
     pointIndex: number;
   } | null>(null);
+
+  // points 差し替え（フィルタ/粒度変更）時に古い pointIndex のハイライトが残らないようリセットする。
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedDot(null);
+  }, [points]);
 
   const allActive = activeLines.size === LINES.length;
   const filterLabel = (() => {
