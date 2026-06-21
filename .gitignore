@@ -40,3 +40,9 @@ next-env.d.ts
 
 # Ruby LSP cache
 .ruby-lsp/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
