@@ -456,3 +456,62 @@ export async function getHitDirections(
     { directions: [], home_runs: [] },
   );
 }
+
+/** SSR で初期描画する打撃分析ブロック群（coming soon ゲートの3種は含めない）。 */
+export interface AnalysisInitialData {
+  headline: HeadlineStats | null;
+  runnersSituation: RunnersSituationSummary | null;
+  additional: AdditionalStats | null;
+  hitLocations: HitLocationData;
+  hitDirections: HitDirectionData;
+  plateBreakdown: PlateAppearanceCategory[];
+  contactQualities: ContactQualityData;
+  timingBreakdown: TimingBreakdownData;
+  pitcherAttributes: PitcherAttributeSummaryData;
+  battingTrend: BattingTrendData;
+}
+
+/**
+ * 打撃分析の初期表示ブロックをまとめて取得する（Server Component から SSR で呼ぶ）。
+ * フィルタ既定は通算・全試合、推移は試合単位。coming soon の3種は取得しない。
+ */
+export async function getInitialAnalysisData(
+  filters: AnalysisFilters = { year: "通算", matchType: "" },
+  granularity: BattingTrendGranularity = "game",
+): Promise<AnalysisInitialData> {
+  const [
+    headline,
+    runnersSituation,
+    additional,
+    hitLocations,
+    hitDirections,
+    plateBreakdown,
+    contactQualities,
+    timingBreakdown,
+    pitcherAttributes,
+    battingTrend,
+  ] = await Promise.all([
+    getHeadlineStats(filters),
+    getRunnersSituation(filters),
+    getAdditionalStats(filters),
+    getHitLocations(filters),
+    getHitDirections(filters),
+    getPlateAppearanceBreakdown(filters),
+    getContactQualities(filters),
+    getTimingBreakdown(filters),
+    getPitcherAttributeSummary(filters),
+    getBattingTrend(filters, granularity),
+  ]);
+  return {
+    headline,
+    runnersSituation,
+    additional,
+    hitLocations,
+    hitDirections,
+    plateBreakdown,
+    contactQualities,
+    timingBreakdown,
+    pitcherAttributes,
+    battingTrend,
+  };
+}

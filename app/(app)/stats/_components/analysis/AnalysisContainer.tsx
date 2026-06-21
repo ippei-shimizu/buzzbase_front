@@ -1,16 +1,13 @@
 "use client";
 import type { SeasonData, TournamentData } from "@app/interface";
-import { Spinner } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { getSeasons } from "@app/services/seasonsService";
 import { getTournaments } from "@app/services/tournamentsService";
 import { getCurrentUserId } from "@app/services/userService";
 import {
-  type AdditionalStats,
   type AnalysisFilters as Filters,
-  type BattingTrendData,
+  type AnalysisInitialData,
   type BattingTrendGranularity,
-  type ContactQualityData,
   type CountSituations,
   getAdditionalStats,
   getBattingTrend,
@@ -25,15 +22,8 @@ import {
   getPlateAppearanceBreakdown,
   getRunnersSituation,
   getTimingBreakdown,
-  type HeadlineStats,
-  type HitDirectionData,
-  type HitLocationData,
   type PitchTypeData,
-  type PitcherAttributeSummaryData,
   type PitcherFaceoffData,
-  type PlateAppearanceCategory,
-  type RunnersSituationSummary,
-  type TimingBreakdownData,
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
 import { AnalysisFilters } from "./AnalysisFilters";
@@ -77,34 +67,33 @@ function buildYearOptions(): FilterOption[] {
   return options;
 }
 
+interface AnalysisContainerProps {
+  /** SSR で取得した初期表示データ。マウント時はこれを使い再取得しない。 */
+  initialData: AnalysisInitialData;
+}
+
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
-export function AnalysisContainer() {
+export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
     matchType: "",
   });
-  const [headline, setHeadline] = useState<HeadlineStats | null>(null);
-  const [runnersSituation, setRunnersSituation] =
-    useState<RunnersSituationSummary | null>(null);
-  const [additional, setAdditional] = useState<AdditionalStats | null>(null);
-  const [hitLocations, setHitLocations] = useState<HitLocationData>({
-    points: [],
-  });
-  const [hitDirections, setHitDirections] = useState<HitDirectionData>({
-    directions: [],
-    home_runs: [],
-  });
-  const [plateBreakdown, setPlateBreakdown] = useState<
-    PlateAppearanceCategory[]
-  >([]);
-  const [contactQualities, setContactQualities] = useState<ContactQualityData>({
-    breakdown: [],
-    total: 0,
-  });
-  const [timingBreakdown, setTimingBreakdown] = useState<TimingBreakdownData>({
-    breakdown: [],
-    total: 0,
-  });
+  const [headline, setHeadline] = useState(initialData.headline);
+  const [runnersSituation, setRunnersSituation] = useState(
+    initialData.runnersSituation,
+  );
+  const [additional, setAdditional] = useState(initialData.additional);
+  const [hitLocations, setHitLocations] = useState(initialData.hitLocations);
+  const [hitDirections, setHitDirections] = useState(initialData.hitDirections);
+  const [plateBreakdown, setPlateBreakdown] = useState(
+    initialData.plateBreakdown,
+  );
+  const [contactQualities, setContactQualities] = useState(
+    initialData.contactQualities,
+  );
+  const [timingBreakdown, setTimingBreakdown] = useState(
+    initialData.timingBreakdown,
+  );
   const [countSituations, setCountSituations] = useState<CountSituations>({
     first_pitch: { at_bats: 0, hits: 0, batting_average: 0 },
     favorable_count: { at_bats: 0, hits: 0, batting_average: 0 },
@@ -120,17 +109,15 @@ export function AnalysisContainer() {
     min_plate_appearances: 0,
     total_target_pa: 0,
   });
-  const [pitcherAttributes, setPitcherAttributes] =
-    useState<PitcherAttributeSummaryData | null>(null);
+  const [pitcherAttributes, setPitcherAttributes] = useState(
+    initialData.pitcherAttributes,
+  );
   const [granularity, setGranularity] =
     useState<BattingTrendGranularity>("game");
   const [sprayChartMode, setSprayChartMode] =
     useState<SprayChartMode>("scatter");
-  const [battingTrend, setBattingTrend] = useState<BattingTrendData>({
-    granularity: "game",
-    points: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [battingTrend, setBattingTrend] = useState(initialData.battingTrend);
+  const [isRefetching, startRefetch] = useTransition();
   const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
     DEFAULT_OPTION,
   ]);
@@ -168,51 +155,47 @@ export function AnalysisContainer() {
     };
   }, []);
 
+  // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
+  const didInitRef = useRef(false);
+  const didInitTrendRef = useRef(false);
+
+  // フィルタ変更時のみ、メイン指標と打球詳細系（coming soon ゲートの3種を除く）を
+  // まとめて再取得する。useTransition の isPending でカードを薄く表示する。
   useEffect(() => {
+    if (!didInitRef.current) {
+      didInitRef.current = true;
+      return;
+    }
     let active = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    Promise.all([
-      getHeadlineStats(filters),
-      getRunnersSituation(filters),
-      getAdditionalStats(filters),
-      getHitLocations(filters),
-      getHitDirections(filters),
-      getPlateAppearanceBreakdown(filters),
-    ]).then(
-      ([
+    startRefetch(async () => {
+      const [
         headlineData,
         runnersData,
         additionalData,
         locations,
         directions,
         breakdown,
-      ]) => {
-        if (!active) return;
-        setHeadline(headlineData);
-        setRunnersSituation(runnersData);
-        setAdditional(additionalData);
-        setHitLocations(locations);
-        setHitDirections(directions);
-        setPlateBreakdown(breakdown);
-        setIsLoading(false);
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [filters]);
-
-  // 投手・打球詳細系のカードはメインのローディングを止めずに並列取得する。
-  // coming soon でゲートする3種（カウント別/球種別/対戦投手別）は取得しない。
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      getContactQualities(filters),
-      getTimingBreakdown(filters),
-      getPitcherAttributeSummary(filters),
-    ]).then(([contact, timing, attributes]) => {
+        contact,
+        timing,
+        attributes,
+      ] = await Promise.all([
+        getHeadlineStats(filters),
+        getRunnersSituation(filters),
+        getAdditionalStats(filters),
+        getHitLocations(filters),
+        getHitDirections(filters),
+        getPlateAppearanceBreakdown(filters),
+        getContactQualities(filters),
+        getTimingBreakdown(filters),
+        getPitcherAttributeSummary(filters),
+      ]);
       if (!active) return;
+      setHeadline(headlineData);
+      setRunnersSituation(runnersData);
+      setAdditional(additionalData);
+      setHitLocations(locations);
+      setHitDirections(directions);
+      setPlateBreakdown(breakdown);
       setContactQualities(contact);
       setTimingBreakdown(timing);
       setPitcherAttributes(attributes);
@@ -220,8 +203,9 @@ export function AnalysisContainer() {
     return () => {
       active = false;
     };
-  }, [filters]);
+  }, [filters, startRefetch]);
 
+  // coming soon でゲートする3種は SSR せず、解禁時のみクライアントで取得する。
   useEffect(() => {
     if (PRO_FEATURES_COMING_SOON) return;
     let active = true;
@@ -240,8 +224,12 @@ export function AnalysisContainer() {
     };
   }, [filters]);
 
-  // 推移グラフは粒度切替で独立に再取得する（他カードは再取得しない）。
+  // 推移グラフは粒度/フィルタ切替で独立に再取得する（初回は initialData を使う）。
   useEffect(() => {
+    if (!didInitTrendRef.current) {
+      didInitTrendRef.current = true;
+      return;
+    }
     let active = true;
     getBattingTrend(filters, granularity).then((data) => {
       if (active) setBattingTrend(data);
@@ -260,92 +248,90 @@ export function AnalysisContainer() {
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
       />
-      {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner color="primary" labelColor="primary" label="Loading" />
-        </div>
-      ) : (
-        <>
-          <HeadlineStatsCard stats={headline} />
-          <RunnersSituationCard stats={runnersSituation} />
-          <AdditionalStatsCard stats={additional} />
-          <BattingTrendChart
-            points={battingTrend.points}
-            granularity={granularity}
-            onGranularityChange={setGranularity}
-          />
-          <SprayChart
-            directions={hitDirections.directions}
-            homeRuns={hitDirections.home_runs}
-            points={hitLocations.points}
-            mode={sprayChartMode}
-            onModeChange={setSprayChartMode}
-          />
-          {PRO_FEATURES_COMING_SOON ? (
-            <ProComingSoonCard
-              title="方向別の打率"
-              description="打球を打った方向ごとの打率をヒートマップで可視化します"
-            >
-              <ProComingSoonHitDirectionField />
-            </ProComingSoonCard>
-          ) : (
-            <HitDirectionTable directions={hitDirections.directions} />
+      <div
+        className={`flex flex-col gap-y-5${
+          isRefetching ? " opacity-50 transition-opacity" : ""
+        }`}
+      >
+        <HeadlineStatsCard stats={headline} />
+        <RunnersSituationCard stats={runnersSituation} />
+        <AdditionalStatsCard stats={additional} />
+        <BattingTrendChart
+          points={battingTrend.points}
+          granularity={granularity}
+          onGranularityChange={setGranularity}
+        />
+        <SprayChart
+          directions={hitDirections.directions}
+          homeRuns={hitDirections.home_runs}
+          points={hitLocations.points}
+          mode={sprayChartMode}
+          onModeChange={setSprayChartMode}
+        />
+        {PRO_FEATURES_COMING_SOON ? (
+          <ProComingSoonCard
+            title="方向別の打率"
+            description="打球を打った方向ごとの打率をヒートマップで可視化します"
+          >
+            <ProComingSoonHitDirectionField />
+          </ProComingSoonCard>
+        ) : (
+          <HitDirectionTable directions={hitDirections.directions} />
+        )}
+        <PlateAppearanceDonut
+          breakdown={plateBreakdown}
+          totalPlateAppearances={plateBreakdown.reduce(
+            (sum, category) => sum + category.count,
+            0,
           )}
-          <PlateAppearanceDonut
-            breakdown={plateBreakdown}
-            totalPlateAppearances={plateBreakdown.reduce(
-              (sum, category) => sum + category.count,
-              0,
-            )}
+        />
+        <ContactQualityCard
+          breakdown={contactQualities.breakdown}
+          total={contactQualities.total}
+        />
+        <TimingCard
+          breakdown={timingBreakdown.breakdown}
+          total={timingBreakdown.total}
+        />
+        {PRO_FEATURES_COMING_SOON ? (
+          <ProComingSoonCard
+            title="カウント別の打率"
+            description="初球・有利カウント・追い込みなど、カウント状況別の打率がわかります"
+          >
+            <CountSituationDummy />
+          </ProComingSoonCard>
+        ) : (
+          <CountSituationCards data={countSituations} />
+        )}
+        {PRO_FEATURES_COMING_SOON ? (
+          <ProComingSoonCard
+            title="球種別の打率"
+            description="ストレートや変化球など、球種ごとの得意・苦手が分析できます"
+          >
+            <PitchTypeDummy />
+          </ProComingSoonCard>
+        ) : (
+          <PitchTypeCard
+            rows={pitchTypes.rows}
+            totalTargetPa={pitchTypes.total_target_pa}
           />
-          <ContactQualityCard
-            breakdown={contactQualities.breakdown}
-            total={contactQualities.total}
+        )}
+        {PRO_FEATURES_COMING_SOON ? (
+          <ProComingSoonCard
+            title="対戦投手別"
+            description="対戦した投手ごとの打撃成績を一覧で確認できます"
+          >
+            <PitcherFaceoffDummy />
+          </ProComingSoonCard>
+        ) : (
+          <PitcherFaceoffList
+            rows={pitcherFaceoffs.rows}
+            minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
+            totalTargetPa={pitcherFaceoffs.total_target_pa}
           />
-          <TimingCard
-            breakdown={timingBreakdown.breakdown}
-            total={timingBreakdown.total}
-          />
-          {PRO_FEATURES_COMING_SOON ? (
-            <ProComingSoonCard
-              title="カウント別の打率"
-              description="初球・有利カウント・追い込みなど、カウント状況別の打率がわかります"
-            >
-              <CountSituationDummy />
-            </ProComingSoonCard>
-          ) : (
-            <CountSituationCards data={countSituations} />
-          )}
-          {PRO_FEATURES_COMING_SOON ? (
-            <ProComingSoonCard
-              title="球種別の打率"
-              description="ストレートや変化球など、球種ごとの得意・苦手が分析できます"
-            >
-              <PitchTypeDummy />
-            </ProComingSoonCard>
-          ) : (
-            <PitchTypeCard
-              rows={pitchTypes.rows}
-              totalTargetPa={pitchTypes.total_target_pa}
-            />
-          )}
-          {PRO_FEATURES_COMING_SOON ? (
-            <ProComingSoonCard
-              title="対戦投手別"
-              description="対戦した投手ごとの打撃成績を一覧で確認できます"
-            >
-              <PitcherFaceoffDummy />
-            </ProComingSoonCard>
-          ) : (
-            <PitcherFaceoffList
-              rows={pitcherFaceoffs.rows}
-              minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
-              totalTargetPa={pitcherFaceoffs.total_target_pa}
-            />
-          )}
-          <PitcherAttributeSummary data={pitcherAttributes} />
-        </>
-      )}
+        )}
+        <PitcherAttributeSummary data={pitcherAttributes} />
+      </div>
     </div>
   );
 }

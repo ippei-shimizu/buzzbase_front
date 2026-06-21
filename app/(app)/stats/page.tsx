@@ -1,5 +1,6 @@
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import Header from "@app/components/header/Header";
+import { AnalysisSection } from "./_components/analysis/AnalysisSection";
 import StatsContainer from "./_components/StatsContainer";
 import { getBattingStats, getIsAuthenticated } from "./actions";
 
@@ -35,7 +36,10 @@ export default async function StatsPage() {
       <main className="buzz-dark min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-12 px-4 lg:px-6 lg:pb-6">
-            <StatsContainer initialRows={initialRows} />
+            <StatsContainer
+              initialRows={initialRows}
+              analysisSlot={<AnalysisSection />}
+            />
           </div>
         </div>
       </main>
