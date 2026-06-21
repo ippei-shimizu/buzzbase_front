@@ -93,6 +93,120 @@ export interface PlateAppearanceCategory {
   percentage: number;
 }
 
+export interface ContactQualityCategory {
+  id: number;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ContactQualityData {
+  breakdown: ContactQualityCategory[];
+  total: number;
+}
+
+export interface TimingBreakdownCategory {
+  id: number;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TimingBreakdownData {
+  breakdown: TimingBreakdownCategory[];
+  total: number;
+}
+
+export interface CountSituation {
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+}
+
+export interface CountSituations {
+  first_pitch: CountSituation;
+  favorable_count: CountSituation;
+  pinch_count: CountSituation;
+  total_target_pa: number;
+}
+
+export interface PitcherResultCount {
+  plate_result_id: number;
+  plate_result_name: string;
+  count: number;
+}
+
+export interface PitchTypeRow {
+  id: number;
+  label: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_fly: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  result_counts: PitcherResultCount[];
+}
+
+export interface PitchTypeData {
+  rows: PitchTypeRow[];
+  total_target_pa: number;
+}
+
+export interface PitcherFaceoff {
+  pitcher_id: number;
+  pitcher_name: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_fly: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  top_result: string;
+  result_counts: PitcherResultCount[];
+}
+
+export interface PitcherFaceoffData {
+  rows: PitcherFaceoff[];
+  min_plate_appearances: number;
+  total_target_pa: number;
+}
+
+export interface PitcherAttributeBucket {
+  key: string | number | null;
+  label: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_fly: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  result_counts: PitcherResultCount[];
+  display_order: number;
+}
+
+export interface PitcherAttributeSummaryData {
+  by_throw_hand: PitcherAttributeBucket[];
+  by_arm_angle: PitcherAttributeBucket[];
+  by_velocity_zone: PitcherAttributeBucket[];
+  by_pitcher_style: PitcherAttributeBucket[];
+}
+
 export type BattingTrendGranularity =
   | "game"
   | "month"
@@ -212,6 +326,80 @@ export async function getBattingTrend(
     "getBattingTrend",
     { granularity, points: [] },
     { granularity },
+  );
+}
+
+export async function getContactQualities(
+  filters: AnalysisFilters = {},
+): Promise<ContactQualityData> {
+  return fetchAnalysis<ContactQualityData>(
+    "contact_qualities",
+    filters,
+    "getContactQualities",
+    { breakdown: [], total: 0 },
+  );
+}
+
+export async function getTimingBreakdown(
+  filters: AnalysisFilters = {},
+): Promise<TimingBreakdownData> {
+  return fetchAnalysis<TimingBreakdownData>(
+    "timing_breakdown",
+    filters,
+    "getTimingBreakdown",
+    { breakdown: [], total: 0 },
+  );
+}
+
+export async function getCountSituations(
+  filters: AnalysisFilters = {},
+): Promise<CountSituations> {
+  return fetchAnalysis<CountSituations>(
+    "count_situations",
+    filters,
+    "getCountSituations",
+    {
+      first_pitch: { at_bats: 0, hits: 0, batting_average: 0 },
+      favorable_count: { at_bats: 0, hits: 0, batting_average: 0 },
+      pinch_count: { at_bats: 0, hits: 0, batting_average: 0 },
+      total_target_pa: 0,
+    },
+  );
+}
+
+export async function getPitchTypes(
+  filters: AnalysisFilters = {},
+): Promise<PitchTypeData> {
+  return fetchAnalysis<PitchTypeData>("pitch_types", filters, "getPitchTypes", {
+    rows: [],
+    total_target_pa: 0,
+  });
+}
+
+export async function getPitcherFaceoffs(
+  filters: AnalysisFilters = {},
+): Promise<PitcherFaceoffData> {
+  return fetchAnalysis<PitcherFaceoffData>(
+    "pitcher_faceoffs",
+    filters,
+    "getPitcherFaceoffs",
+    { rows: [], min_plate_appearances: 0, total_target_pa: 0 },
+  );
+}
+
+export async function getPitcherAttributeSummary(
+  filters: AnalysisFilters = {},
+): Promise<PitcherAttributeSummaryData> {
+  return fetchAnalysis<PitcherAttributeSummaryData>(
+    "pitcher_attribute_summary",
+    filters,
+    "getPitcherAttributeSummary",
+    {
+      by_throw_hand: [],
+      by_arm_angle: [],
+      by_velocity_zone: [],
+      by_pitcher_style: [],
+    },
   );
 }
 

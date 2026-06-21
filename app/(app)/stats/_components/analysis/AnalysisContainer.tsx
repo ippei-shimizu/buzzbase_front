@@ -10,27 +10,45 @@ import {
   type AnalysisFilters as Filters,
   type BattingTrendData,
   type BattingTrendGranularity,
+  type ContactQualityData,
+  type CountSituations,
   getAdditionalStats,
   getBattingTrend,
+  getContactQualities,
+  getCountSituations,
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getPitcherAttributeSummary,
+  getPitcherFaceoffs,
+  getPitchTypes,
   getPlateAppearanceBreakdown,
   getRunnersSituation,
+  getTimingBreakdown,
   type HeadlineStats,
   type HitDirectionData,
   type HitLocationData,
+  type PitchTypeData,
+  type PitcherAttributeSummaryData,
+  type PitcherFaceoffData,
   type PlateAppearanceCategory,
   type RunnersSituationSummary,
+  type TimingBreakdownData,
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
 import { AnalysisFilters } from "./AnalysisFilters";
 import { BattingTrendChart } from "./BattingTrendChart";
+import { ContactQualityCard } from "./ContactQualityCard";
+import { CountSituationCards } from "./CountSituationCards";
 import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
+import { PitcherAttributeSummary } from "./PitcherAttributeSummary";
+import { PitcherFaceoffList } from "./PitcherFaceoffList";
+import { PitchTypeCard } from "./PitchTypeCard";
 import { PlateAppearanceDonut } from "./PlateAppearanceDonut";
 import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
+import { TimingCard } from "./TimingCard";
 
 interface FilterOption {
   key: string;
@@ -69,6 +87,31 @@ export function AnalysisContainer() {
   const [plateBreakdown, setPlateBreakdown] = useState<
     PlateAppearanceCategory[]
   >([]);
+  const [contactQualities, setContactQualities] = useState<ContactQualityData>({
+    breakdown: [],
+    total: 0,
+  });
+  const [timingBreakdown, setTimingBreakdown] = useState<TimingBreakdownData>({
+    breakdown: [],
+    total: 0,
+  });
+  const [countSituations, setCountSituations] = useState<CountSituations>({
+    first_pitch: { at_bats: 0, hits: 0, batting_average: 0 },
+    favorable_count: { at_bats: 0, hits: 0, batting_average: 0 },
+    pinch_count: { at_bats: 0, hits: 0, batting_average: 0 },
+    total_target_pa: 0,
+  });
+  const [pitchTypes, setPitchTypes] = useState<PitchTypeData>({
+    rows: [],
+    total_target_pa: 0,
+  });
+  const [pitcherFaceoffs, setPitcherFaceoffs] = useState<PitcherFaceoffData>({
+    rows: [],
+    min_plate_appearances: 0,
+    total_target_pa: 0,
+  });
+  const [pitcherAttributes, setPitcherAttributes] =
+    useState<PitcherAttributeSummaryData | null>(null);
   const [granularity, setGranularity] =
     useState<BattingTrendGranularity>("game");
   const [sprayChartMode, setSprayChartMode] =
@@ -150,6 +193,30 @@ export function AnalysisContainer() {
     };
   }, [filters]);
 
+  // 投手・打球詳細系のカードはメインのローディングを止めずに並列取得する。
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      getContactQualities(filters),
+      getTimingBreakdown(filters),
+      getCountSituations(filters),
+      getPitchTypes(filters),
+      getPitcherFaceoffs(filters),
+      getPitcherAttributeSummary(filters),
+    ]).then(([contact, timing, counts, pitches, faceoffs, attributes]) => {
+      if (!active) return;
+      setContactQualities(contact);
+      setTimingBreakdown(timing);
+      setCountSituations(counts);
+      setPitchTypes(pitches);
+      setPitcherFaceoffs(faceoffs);
+      setPitcherAttributes(attributes);
+    });
+    return () => {
+      active = false;
+    };
+  }, [filters]);
+
   // 推移グラフは粒度切替で独立に再取得する（他カードは再取得しない）。
   useEffect(() => {
     let active = true;
@@ -197,6 +264,25 @@ export function AnalysisContainer() {
               0,
             )}
           />
+          <ContactQualityCard
+            breakdown={contactQualities.breakdown}
+            total={contactQualities.total}
+          />
+          <TimingCard
+            breakdown={timingBreakdown.breakdown}
+            total={timingBreakdown.total}
+          />
+          <CountSituationCards data={countSituations} />
+          <PitchTypeCard
+            rows={pitchTypes.rows}
+            totalTargetPa={pitchTypes.total_target_pa}
+          />
+          <PitcherFaceoffList
+            rows={pitcherFaceoffs.rows}
+            minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
+            totalTargetPa={pitcherFaceoffs.total_target_pa}
+          />
+          <PitcherAttributeSummary data={pitcherAttributes} />
         </>
       )}
     </div>
