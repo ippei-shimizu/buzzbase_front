@@ -262,7 +262,7 @@ export function AnalysisContainer() {
       />
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <Spinner color="primary" label="読み込み中..." />
+          <Spinner color="primary" labelColor="primary" label="Loading" />
         </div>
       ) : (
         <>
