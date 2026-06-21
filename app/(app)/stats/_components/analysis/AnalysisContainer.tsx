@@ -137,7 +137,7 @@ export function AnalysisContainer() {
   const [tournamentOptions, setTournamentOptions] = useState<FilterOption[]>([
     DEFAULT_OPTION,
   ]);
-  const yearOptions = buildYearOptions();
+  const [yearOptions] = useState(buildYearOptions);
 
   useEffect(() => {
     let active = true;
