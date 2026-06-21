@@ -1,6 +1,7 @@
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import Header from "@app/components/header/Header";
 import { AnalysisSection } from "./_components/analysis/AnalysisSection";
+import { PitchingAnalysisSection } from "./_components/analysis/PitchingAnalysisSection";
 import StatsContainer from "./_components/StatsContainer";
 import { getBattingStats, getIsAuthenticated } from "./actions";
 
@@ -39,6 +40,7 @@ export default async function StatsPage() {
             <StatsContainer
               initialRows={initialRows}
               analysisSlot={<AnalysisSection />}
+              pitchingAnalysisSlot={<PitchingAnalysisSection />}
             />
           </div>
         </div>

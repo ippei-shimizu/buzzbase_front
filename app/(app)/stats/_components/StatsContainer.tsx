@@ -13,7 +13,6 @@ import { getSeasons } from "@app/services/seasonsService";
 import { getTournaments } from "@app/services/tournamentsService";
 import { getCurrentUserId } from "@app/services/userService";
 import { getBattingStats, getPitchingStats } from "../actions";
-import { PitchingAnalysisContainer } from "./analysis/PitchingAnalysisContainer";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
@@ -49,11 +48,14 @@ interface StatsContainerProps {
   initialRows: BattingStatsRow[];
   /** 打撃タブの分析セクション（SSR + Suspense ストリーミングの Server サブツリー）。 */
   analysisSlot: ReactNode;
+  /** 投手タブの分析セクション（同上）。 */
+  pitchingAnalysisSlot: ReactNode;
 }
 
 export default function StatsContainer({
   initialRows,
   analysisSlot,
+  pitchingAnalysisSlot,
 }: StatsContainerProps) {
   const [tab, setTab] = useState<ActiveTab>("batting");
   const [period, setPeriod] = useState<StatsPeriod>("yearly");
@@ -176,9 +178,7 @@ export default function StatsContainer({
 
       {/* 投手タブ: 防御率推移をテーブルの上に表示 */}
       {tab === "pitching" ? (
-        <div className="mt-5">
-          <PitchingAnalysisContainer />
-        </div>
+        <div className="mt-5">{pitchingAnalysisSlot}</div>
       ) : null}
 
       {/* 期間トグル */}

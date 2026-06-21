@@ -1,6 +1,6 @@
 "use client";
 import type { SeasonData, TournamentData } from "@app/interface";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { getSeasons } from "@app/services/seasonsService";
 import { getTournaments } from "@app/services/tournamentsService";
 import { getCurrentUserId } from "@app/services/userService";
@@ -29,13 +29,21 @@ function buildYearOptions(): FilterOption[] {
   return options;
 }
 
+interface PitchingAnalysisContainerProps {
+  /** SSR で取得した防御率推移の初期データ。マウント時はこれを使い再取得しない。 */
+  initialEraTrend: EraTrendPoint[];
+}
+
 /** 投手タブの分析（フィルタ + 防御率推移グラフ）コンテナ。 */
-export function PitchingAnalysisContainer() {
+export function PitchingAnalysisContainer({
+  initialEraTrend,
+}: PitchingAnalysisContainerProps) {
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
     matchType: "",
   });
-  const [eraTrend, setEraTrend] = useState<EraTrendPoint[]>([]);
+  const [eraTrend, setEraTrend] = useState<EraTrendPoint[]>(initialEraTrend);
+  const [isRefetching, startRefetch] = useTransition();
   const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
     DEFAULT_OPTION,
   ]);
@@ -73,20 +81,27 @@ export function PitchingAnalysisContainer() {
     };
   }, []);
 
+  // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ変更時のみ取得）。
+  const didInitRef = useRef(false);
   useEffect(() => {
+    if (!didInitRef.current) {
+      didInitRef.current = true;
+      return;
+    }
     let active = true;
     // 防御率推移は year/season/tournament のみで絞る（種別は対象外）。
-    void getEraTrend({
-      year: filters.year,
-      seasonId: filters.seasonId,
-      tournamentId: filters.tournamentId,
-    }).then((trend) => {
+    startRefetch(async () => {
+      const trend = await getEraTrend({
+        year: filters.year,
+        seasonId: filters.seasonId,
+        tournamentId: filters.tournamentId,
+      });
       if (active) setEraTrend(trend);
     });
     return () => {
       active = false;
     };
-  }, [filters.year, filters.seasonId, filters.tournamentId]);
+  }, [filters.year, filters.seasonId, filters.tournamentId, startRefetch]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -98,7 +113,11 @@ export function PitchingAnalysisContainer() {
         tournamentOptions={tournamentOptions}
         hideMatchType
       />
-      <EraTrendChart data={eraTrend} />
+      <div
+        className={isRefetching ? "opacity-50 transition-opacity" : undefined}
+      >
+        <EraTrendChart data={eraTrend} />
+      </div>
     </div>
   );
 }
