@@ -4,6 +4,7 @@ import { AnalysisSection } from "./_components/analysis/AnalysisSection";
 import { PitchingAnalysisSection } from "./_components/analysis/PitchingAnalysisSection";
 import StatsContainer from "./_components/StatsContainer";
 import { getBattingStats, getIsAuthenticated } from "./actions";
+import { getStatsFilterOptions } from "./filterOptions";
 
 export const metadata = {
   title: "成績 | BUZZ BASE",
@@ -28,8 +29,12 @@ export default async function StatsPage() {
   }
 
   // タブ/期間/フィルタの切替はクライアント側 state で行うため、ここでは
-  // デフォルト（打撃・年別）の初期データのみ SSR で取得して渡す。
-  const initialRows = await getBattingStats("yearly");
+  // デフォルト（打撃・年別）の初期データとフィルタ選択肢のみ SSR で取得して渡す。
+  // getStatsFilterOptions は cache() 済みで、各分析セクションと取得が集約される。
+  const [initialRows, filterOptions] = await Promise.all([
+    getBattingStats("yearly"),
+    getStatsFilterOptions(),
+  ]);
 
   return (
     <>
@@ -41,6 +46,8 @@ export default async function StatsPage() {
               initialRows={initialRows}
               analysisSlot={<AnalysisSection />}
               pitchingAnalysisSlot={<PitchingAnalysisSection />}
+              seasonOptions={filterOptions.seasonOptions}
+              tournamentOptions={filterOptions.tournamentOptions}
             />
           </div>
         </div>

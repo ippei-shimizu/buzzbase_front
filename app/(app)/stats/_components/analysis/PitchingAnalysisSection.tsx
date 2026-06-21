@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getEraTrend } from "../../analysisActions";
+import { getStatsFilterOptions } from "../../filterOptions";
 import { AnalysisLoading } from "./AnalysisLoading";
 import { PitchingAnalysisContainer } from "./PitchingAnalysisContainer";
 
@@ -18,6 +19,15 @@ export function PitchingAnalysisSection() {
 
 async function PitchingAnalysisDataProvider() {
   // 防御率推移は year/season/tournament のみで絞る（既定は通算）。
-  const initialEraTrend = await getEraTrend({ year: "通算" });
-  return <PitchingAnalysisContainer initialEraTrend={initialEraTrend} />;
+  const [initialEraTrend, filterOptions] = await Promise.all([
+    getEraTrend({ year: "通算" }),
+    getStatsFilterOptions(),
+  ]);
+  return (
+    <PitchingAnalysisContainer
+      initialEraTrend={initialEraTrend}
+      seasonOptions={filterOptions.seasonOptions}
+      tournamentOptions={filterOptions.tournamentOptions}
+    />
+  );
 }

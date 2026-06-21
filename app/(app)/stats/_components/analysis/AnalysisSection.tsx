@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getInitialAnalysisData } from "../../analysisActions";
+import { getStatsFilterOptions } from "../../filterOptions";
 import { AnalysisContainer } from "./AnalysisContainer";
 import { AnalysisLoading } from "./AnalysisLoading";
 
@@ -18,6 +19,15 @@ export function AnalysisSection() {
 }
 
 async function AnalysisDataProvider() {
-  const initialData = await getInitialAnalysisData();
-  return <AnalysisContainer initialData={initialData} />;
+  const [initialData, filterOptions] = await Promise.all([
+    getInitialAnalysisData(),
+    getStatsFilterOptions(),
+  ]);
+  return (
+    <AnalysisContainer
+      initialData={initialData}
+      seasonOptions={filterOptions.seasonOptions}
+      tournamentOptions={filterOptions.tournamentOptions}
+    />
+  );
 }
