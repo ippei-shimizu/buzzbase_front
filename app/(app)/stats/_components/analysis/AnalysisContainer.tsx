@@ -118,6 +118,8 @@ export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
     useState<SprayChartMode>("scatter");
   const [battingTrend, setBattingTrend] = useState(initialData.battingTrend);
   const [isRefetching, startRefetch] = useTransition();
+  // 推移グラフは粒度切替で単独再取得もあるため、専用の pending でグラフだけ dim する。
+  const [isTrendPending, startTrendTransition] = useTransition();
   const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
     DEFAULT_OPTION,
   ]);
@@ -128,7 +130,7 @@ export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
 
   useEffect(() => {
     let active = true;
-    (async () => {
+    void (async () => {
       const userId = await getCurrentUserId();
       const [seasons, tournaments] = await Promise.all([
         getSeasons(userId ?? undefined),
@@ -225,19 +227,21 @@ export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
   }, [filters]);
 
   // 推移グラフは粒度/フィルタ切替で独立に再取得する（初回は initialData を使う）。
+  // 専用 transition で更新が終わるまでグラフを dim し、古い値が一瞬出るのを防ぐ。
   useEffect(() => {
     if (!didInitTrendRef.current) {
       didInitTrendRef.current = true;
       return;
     }
     let active = true;
-    getBattingTrend(filters, granularity).then((data) => {
+    startTrendTransition(async () => {
+      const data = await getBattingTrend(filters, granularity);
       if (active) setBattingTrend(data);
     });
     return () => {
       active = false;
     };
-  }, [filters, granularity]);
+  }, [filters, granularity, startTrendTransition]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -256,11 +260,17 @@ export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
         <HeadlineStatsCard stats={headline} />
         <RunnersSituationCard stats={runnersSituation} />
         <AdditionalStatsCard stats={additional} />
-        <BattingTrendChart
-          points={battingTrend.points}
-          granularity={granularity}
-          onGranularityChange={setGranularity}
-        />
+        <div
+          className={
+            isTrendPending ? "opacity-50 transition-opacity" : undefined
+          }
+        >
+          <BattingTrendChart
+            points={battingTrend.points}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+          />
+        </div>
         <SprayChart
           directions={hitDirections.directions}
           homeRuns={hitDirections.home_runs}
