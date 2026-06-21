@@ -17,27 +17,32 @@ const PLOT_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
 /** 防御率推移の折れ線グラフ（月別 ERA をエリア塗りつぶし付きで描画）。 */
 export function EraTrendChart({ data }: EraTrendChartProps) {
-  if (data.length === 0) return null;
+  // 投球が無い月などで era が null/Infinity でも安全に描けるよう有限値だけ残し、
+  // 月昇順に並べる（API のソート順に依存しない）。
+  const points = data
+    .filter((point) => Number.isFinite(point.era))
+    .sort((a, b) => a.month - b.month);
+  if (points.length === 0) return null;
 
-  const maxEra = Math.max(...data.map((point) => point.era), 1);
-  const eraRange = maxEra || 1;
+  // Math.max(..., 1) で maxEra は常に 1 以上になる。
+  const maxEra = Math.max(...points.map((point) => point.era), 1);
   const yTicks = [0, Math.round((maxEra / 2) * 10) / 10, Math.ceil(maxEra)];
 
   const getX = (index: number) =>
     PADDING_LEFT +
-    (data.length === 1
+    (points.length === 1
       ? PLOT_WIDTH / 2
-      : (index / (data.length - 1)) * PLOT_WIDTH);
+      : (index / (points.length - 1)) * PLOT_WIDTH);
   const getY = (era: number) =>
-    PADDING_TOP + PLOT_HEIGHT - (era / eraRange) * PLOT_HEIGHT;
+    PADDING_TOP + PLOT_HEIGHT - (era / maxEra) * PLOT_HEIGHT;
 
-  const linePath = data
+  const linePath = points
     .map(
       (point, index) =>
         `${index === 0 ? "M" : "L"} ${getX(index)},${getY(point.era)}`,
     )
     .join(" ");
-  const areaPath = `${linePath} L ${getX(data.length - 1)},${PADDING_TOP + PLOT_HEIGHT} L ${getX(0)},${PADDING_TOP + PLOT_HEIGHT} Z`;
+  const areaPath = `${linePath} L ${getX(points.length - 1)},${PADDING_TOP + PLOT_HEIGHT} L ${getX(0)},${PADDING_TOP + PLOT_HEIGHT} Z`;
 
   return (
     <section className="rounded-xl bg-[#3A3A3A] p-4">
@@ -88,7 +93,7 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
             strokeLinejoin="round"
           />
 
-          {data.map((point, index) => (
+          {points.map((point, index) => (
             <Fragment key={`pt-${point.month}`}>
               <circle
                 cx={getX(index)}
@@ -105,7 +110,7 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
             </Fragment>
           ))}
 
-          {data.map((point, index) => (
+          {points.map((point, index) => (
             <text
               key={`xl-${point.month}`}
               x={getX(index)}
@@ -118,11 +123,12 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
             </text>
           ))}
 
-          {data.map((point, index) => (
+          {points.map((point, index) => (
             <text
               key={`val-${point.month}`}
               x={getX(index)}
-              y={getY(point.era) - 10}
+              // 最大値の点では getY が上端付近になりラベルが見切れるため下限を設ける。
+              y={Math.max(getY(point.era) - 10, PADDING_TOP + 9)}
               textAnchor="middle"
               fill="#F4F4F4"
               fontSize={9}
