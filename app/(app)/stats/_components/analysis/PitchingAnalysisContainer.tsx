@@ -96,6 +96,7 @@ export function PitchingAnalysisContainer() {
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        hideMatchType
       />
       <EraTrendChart data={eraTrend} />
     </div>
