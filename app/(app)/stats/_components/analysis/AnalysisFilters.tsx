@@ -14,6 +14,8 @@ interface AnalysisFiltersProps {
   yearOptions: FilterOption[];
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  /** 種別フィルタを隠す（絞り込みに種別を使わない投手タブ向け）。 */
+  hideMatchType?: boolean;
 }
 
 const MATCH_TYPE_OPTIONS: FilterOption[] = [
@@ -39,6 +41,7 @@ export function AnalysisFilters({
   yearOptions,
   seasonOptions,
   tournamentOptions,
+  hideMatchType = false,
 }: AnalysisFiltersProps) {
   const handleReset = () =>
     onChange({
@@ -57,15 +60,17 @@ export function AnalysisFilters({
         options={yearOptions}
         onChange={(key) => onChange({ ...filters, year: key })}
       />
-      <FilterChip
-        label="種別"
-        value={filters.matchType ? filters.matchType : "全て"}
-        defaultValue="全て"
-        options={MATCH_TYPE_OPTIONS}
-        onChange={(key) =>
-          onChange({ ...filters, matchType: key === "全て" ? "" : key })
-        }
-      />
+      {hideMatchType ? null : (
+        <FilterChip
+          label="種別"
+          value={filters.matchType ? filters.matchType : "全て"}
+          defaultValue="全て"
+          options={MATCH_TYPE_OPTIONS}
+          onChange={(key) =>
+            onChange({ ...filters, matchType: key === "全て" ? "" : key })
+          }
+        />
+      )}
       {seasonOptions.length > 1 ? (
         <FilterChip
           label="シーズン"
