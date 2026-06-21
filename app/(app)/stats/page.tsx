@@ -1,12 +1,7 @@
-import type { StatsPeriod } from "./actions";
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import Header from "@app/components/header/Header";
 import StatsContainer from "./_components/StatsContainer";
-import {
-  getBattingStats,
-  getIsAuthenticated,
-  getPitchingStats,
-} from "./actions";
+import { getBattingStats, getIsAuthenticated } from "./actions";
 
 export const metadata = {
   title: "成績 | BUZZ BASE",
@@ -14,13 +9,7 @@ export const metadata = {
   robots: { index: false },
 };
 
-type ActiveTab = "batting" | "pitching";
-
-export default async function StatsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: string; period?: string }>;
-}) {
+export default async function StatsPage() {
   const isAuthenticated = await getIsAuthenticated();
 
   if (!isAuthenticated) {
@@ -36,19 +25,9 @@ export default async function StatsPage({
     );
   }
 
-  const params = await searchParams;
-  const tab: ActiveTab = params.tab === "pitching" ? "pitching" : "batting";
-  const period: StatsPeriod =
-    params.period === "monthly"
-      ? "monthly"
-      : params.period === "daily"
-        ? "daily"
-        : "yearly";
-
-  const rows =
-    tab === "batting"
-      ? await getBattingStats(period)
-      : await getPitchingStats(period);
+  // タブ/期間/フィルタの切替はクライアント側 state で行うため、ここでは
+  // デフォルト（打撃・年別）の初期データのみ SSR で取得して渡す。
+  const initialRows = await getBattingStats("yearly");
 
   return (
     <>
@@ -56,7 +35,7 @@ export default async function StatsPage({
       <main className="buzz-dark min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-12 px-4 lg:px-6 lg:pb-6">
-            <StatsContainer tab={tab} period={period} rows={rows} />
+            <StatsContainer initialRows={initialRows} />
           </div>
         </div>
       </main>
