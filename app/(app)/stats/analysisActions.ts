@@ -44,6 +44,15 @@ export interface AdditionalStats {
   bb_per_k: number;
 }
 
+export interface RunnersSituationSummary {
+  batting_average: number;
+  at_bats: number;
+  hits: number;
+  two_base_hit: number;
+  three_base_hit: number;
+  home_run: number;
+}
+
 export interface HitLocationPoint {
   x: number;
   y: number;
@@ -143,6 +152,17 @@ export async function getAdditionalStats(
     "additional_stats",
     filters,
     "getAdditionalStats",
+    null,
+  );
+}
+
+export async function getRunnersSituation(
+  filters: AnalysisFilters = {},
+): Promise<RunnersSituationSummary | null> {
+  return fetchAnalysis<RunnersSituationSummary | null>(
+    "runners_situation",
+    filters,
+    "getRunnersSituation",
     null,
   );
 }

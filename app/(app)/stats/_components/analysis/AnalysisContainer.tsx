@@ -12,14 +12,17 @@ import {
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getRunnersSituation,
   type HeadlineStats,
   type HitDirectionData,
   type HitLocationData,
+  type RunnersSituationSummary,
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
 import { AnalysisFilters } from "./AnalysisFilters";
 import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
+import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart } from "./SprayChart";
 
 interface FilterOption {
@@ -46,6 +49,8 @@ export function AnalysisContainer() {
     matchType: "",
   });
   const [headline, setHeadline] = useState<HeadlineStats | null>(null);
+  const [runnersSituation, setRunnersSituation] =
+    useState<RunnersSituationSummary | null>(null);
   const [additional, setAdditional] = useState<AdditionalStats | null>(null);
   const [hitLocations, setHitLocations] = useState<HitLocationData>({
     points: [],
@@ -98,17 +103,21 @@ export function AnalysisContainer() {
     setIsLoading(true);
     Promise.all([
       getHeadlineStats(filters),
+      getRunnersSituation(filters),
       getAdditionalStats(filters),
       getHitLocations(filters),
       getHitDirections(filters),
-    ]).then(([headlineData, additionalData, locations, directions]) => {
-      if (!active) return;
-      setHeadline(headlineData);
-      setAdditional(additionalData);
-      setHitLocations(locations);
-      setHitDirections(directions);
-      setIsLoading(false);
-    });
+    ]).then(
+      ([headlineData, runnersData, additionalData, locations, directions]) => {
+        if (!active) return;
+        setHeadline(headlineData);
+        setRunnersSituation(runnersData);
+        setAdditional(additionalData);
+        setHitLocations(locations);
+        setHitDirections(directions);
+        setIsLoading(false);
+      },
+    );
     return () => {
       active = false;
     };
@@ -128,6 +137,8 @@ export function AnalysisContainer() {
       ) : (
         <>
           <HeadlineStatsCard stats={headline} />
+          <RunnersSituationCard stats={runnersSituation} />
+          <AdditionalStatsCard stats={additional} />
           <section className="rounded-xl bg-bg_sub p-4 flex flex-col gap-y-3">
             <h3 className="text-sm font-bold">打球チャート</h3>
             <SprayChart points={hitLocations.points} />
@@ -136,7 +147,6 @@ export function AnalysisContainer() {
             <h3 className="text-sm font-bold">打球方向</h3>
             <HitDirectionTable directions={hitDirections.directions} />
           </section>
-          <AdditionalStatsCard stats={additional} />
         </>
       )}
     </div>
