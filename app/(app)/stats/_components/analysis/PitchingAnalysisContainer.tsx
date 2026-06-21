@@ -1,5 +1,5 @@
 "use client";
-import type { FilterOption } from "../../filterOptions";
+import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   type AnalysisFilters as Filters,

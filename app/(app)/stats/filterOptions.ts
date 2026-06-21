@@ -1,38 +1,20 @@
 import type { SeasonData, TournamentData } from "@app/interface";
-import { cookies } from "next/headers";
 import { cache } from "react";
+import { getAuthHeaders } from "@app/services/v2/authHeaders";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
-
-export interface FilterOption {
-  key: string;
-  label: string;
-}
+import { DEFAULT_OPTION, type FilterOption } from "./statsFilterOption";
 
 export interface StatsFilterOptions {
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
 }
 
-const DEFAULT_OPTION: FilterOption = { key: "全て", label: "全て" };
-const EMPTY_OPTIONS: StatsFilterOptions = {
+// cache() で同一結果を共有するため、フォールバックは呼び出しごとに新規配列を返す。
+const emptyOptions = (): StatsFilterOptions => ({
   seasonOptions: [DEFAULT_OPTION],
   tournamentOptions: [DEFAULT_OPTION],
-};
-
-async function getAuthHeaders(): Promise<Record<string, string> | null> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access-token")?.value;
-  const client = cookieStore.get("client")?.value;
-  const uid = cookieStore.get("uid")?.value;
-  if (!accessToken || !client || !uid) return null;
-  return {
-    "Content-Type": "application/json",
-    "access-token": accessToken,
-    client,
-    uid,
-  };
-}
+});
 
 /**
  * 成績画面のフィルタ選択肢（シーズン / 大会）をサーバーで取得する。
@@ -44,7 +26,7 @@ export const getStatsFilterOptions = cache(
   async (): Promise<StatsFilterOptions> => {
     try {
       const headers = await getAuthHeaders();
-      if (!headers) return EMPTY_OPTIONS;
+      if (!headers) return emptyOptions();
 
       const [seasonsResponse, tournamentsResponse] = await Promise.all([
         fetch(`${RAILS_API_URL}/api/v1/seasons`, {
@@ -82,7 +64,7 @@ export const getStatsFilterOptions = cache(
       };
     } catch (error) {
       captureServerActionError(error, { action: "getStatsFilterOptions" });
-      return EMPTY_OPTIONS;
+      return emptyOptions();
     }
   },
 );

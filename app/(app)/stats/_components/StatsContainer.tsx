@@ -5,17 +5,15 @@ import type {
   PitchingStatsRow,
   StatsPeriod,
 } from "../actions";
-import type { FilterOption } from "../filterOptions";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import { getBattingStats, getPitchingStats } from "../actions";
+import { DEFAULT_OPTION, type FilterOption } from "../statsFilterOption";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
 type ActiveTab = "batting" | "pitching";
-
-const DEFAULT_OPTION: FilterOption = { key: "全て", label: "全て" };
 
 const PERIOD_OPTIONS: { value: StatsPeriod; label: string }[] = [
   { value: "yearly", label: "年" },
