@@ -14,6 +14,7 @@ import { getTournaments } from "@app/services/tournamentsService";
 import { getCurrentUserId } from "@app/services/userService";
 import { getBattingStats, getPitchingStats } from "../actions";
 import { AnalysisContainer } from "./analysis/AnalysisContainer";
+import { PitchingAnalysisContainer } from "./analysis/PitchingAnalysisContainer";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
@@ -166,10 +167,17 @@ export default function StatsContainer({ initialRows }: StatsContainerProps) {
         </button>
       </div>
 
-      {/* 打撃タブのみ: 打球チャート・打席分析をテーブルの上に表示 */}
+      {/* 打撃タブ: 打球チャート・打席分析をテーブルの上に表示 */}
       {tab === "batting" ? (
         <div className="mt-5">
           <AnalysisContainer />
+        </div>
+      ) : null}
+
+      {/* 投手タブ: 防御率推移をテーブルの上に表示 */}
+      {tab === "pitching" ? (
+        <div className="mt-5">
+          <PitchingAnalysisContainer />
         </div>
       ) : null}
 

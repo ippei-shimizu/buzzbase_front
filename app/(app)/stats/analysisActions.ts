@@ -93,6 +93,11 @@ export interface PlateAppearanceCategory {
   percentage: number;
 }
 
+export interface EraTrendPoint {
+  month: number;
+  era: number;
+}
+
 export interface ContactQualityCategory {
   id: number;
   label: string;
@@ -401,6 +406,19 @@ export async function getPitcherAttributeSummary(
       by_pitcher_style: [],
     },
   );
+}
+
+export async function getEraTrend(
+  filters: AnalysisFilters = {},
+): Promise<EraTrendPoint[]> {
+  // era_trend は year/season/tournament のみで絞る（match_type は送らない）。
+  const result = await fetchAnalysis<{ trend: EraTrendPoint[] }>(
+    "era_trend",
+    filters,
+    "getEraTrend",
+    { trend: [] },
+  );
+  return result.trend ?? [];
 }
 
 export async function getPlateAppearanceBreakdown(
