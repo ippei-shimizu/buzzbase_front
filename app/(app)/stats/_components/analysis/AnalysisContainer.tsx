@@ -15,10 +15,12 @@ import {
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getPlateAppearanceBreakdown,
   getRunnersSituation,
   type HeadlineStats,
   type HitDirectionData,
   type HitLocationData,
+  type PlateAppearanceCategory,
   type RunnersSituationSummary,
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
@@ -26,6 +28,7 @@ import { AnalysisFilters } from "./AnalysisFilters";
 import { BattingTrendChart } from "./BattingTrendChart";
 import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
+import { PlateAppearanceDonut } from "./PlateAppearanceDonut";
 import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
 
@@ -63,6 +66,9 @@ export function AnalysisContainer() {
     directions: [],
     home_runs: [],
   });
+  const [plateBreakdown, setPlateBreakdown] = useState<
+    PlateAppearanceCategory[]
+  >([]);
   const [granularity, setGranularity] =
     useState<BattingTrendGranularity>("game");
   const [sprayChartMode, setSprayChartMode] =
@@ -119,14 +125,23 @@ export function AnalysisContainer() {
       getAdditionalStats(filters),
       getHitLocations(filters),
       getHitDirections(filters),
+      getPlateAppearanceBreakdown(filters),
     ]).then(
-      ([headlineData, runnersData, additionalData, locations, directions]) => {
+      ([
+        headlineData,
+        runnersData,
+        additionalData,
+        locations,
+        directions,
+        breakdown,
+      ]) => {
         if (!active) return;
         setHeadline(headlineData);
         setRunnersSituation(runnersData);
         setAdditional(additionalData);
         setHitLocations(locations);
         setHitDirections(directions);
+        setPlateBreakdown(breakdown);
         setIsLoading(false);
       },
     );
@@ -175,6 +190,13 @@ export function AnalysisContainer() {
             onModeChange={setSprayChartMode}
           />
           <HitDirectionTable directions={hitDirections.directions} />
+          <PlateAppearanceDonut
+            breakdown={plateBreakdown}
+            totalPlateAppearances={plateBreakdown.reduce(
+              (sum, category) => sum + category.count,
+              0,
+            )}
+          />
         </>
       )}
     </div>

@@ -87,6 +87,12 @@ export interface HitDirectionData {
   home_runs: HomeRunDirection[];
 }
 
+export interface PlateAppearanceCategory {
+  category: string;
+  count: number;
+  percentage: number;
+}
+
 export type BattingTrendGranularity =
   | "game"
   | "month"
@@ -207,6 +213,18 @@ export async function getBattingTrend(
     { granularity, points: [] },
     { granularity },
   );
+}
+
+export async function getPlateAppearanceBreakdown(
+  filters: AnalysisFilters = {},
+): Promise<PlateAppearanceCategory[]> {
+  const result = await fetchAnalysis<{ breakdown: PlateAppearanceCategory[] }>(
+    "plate_appearance_breakdown",
+    filters,
+    "getPlateAppearanceBreakdown",
+    { breakdown: [] },
+  );
+  return result.breakdown ?? [];
 }
 
 export async function getHitLocations(
