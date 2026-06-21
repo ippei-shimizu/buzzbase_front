@@ -5,23 +5,15 @@ import type {
   PitchingStatsRow,
   StatsPeriod,
 } from "../actions";
-import type { SeasonData, TournamentData } from "@app/interface";
+import type { FilterOption } from "../filterOptions";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
-import { getSeasons } from "@app/services/seasonsService";
-import { getTournaments } from "@app/services/tournamentsService";
-import { getCurrentUserId } from "@app/services/userService";
 import { getBattingStats, getPitchingStats } from "../actions";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
 type ActiveTab = "batting" | "pitching";
-
-interface FilterOption {
-  key: string;
-  label: string;
-}
 
 const DEFAULT_OPTION: FilterOption = { key: "全て", label: "全て" };
 
@@ -50,12 +42,17 @@ interface StatsContainerProps {
   analysisSlot: ReactNode;
   /** 投手タブの分析セクション（同上）。 */
   pitchingAnalysisSlot: ReactNode;
+  /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
+  seasonOptions: FilterOption[];
+  tournamentOptions: FilterOption[];
 }
 
 export default function StatsContainer({
   initialRows,
   analysisSlot,
   pitchingAnalysisSlot,
+  seasonOptions,
+  tournamentOptions,
 }: StatsContainerProps) {
   const [tab, setTab] = useState<ActiveTab>("batting");
   const [period, setPeriod] = useState<StatsPeriod>("yearly");
@@ -70,42 +67,7 @@ export default function StatsContainer({
     useState<BattingStatsRow[]>(initialRows);
   const [pitchingRows, setPitchingRows] = useState<PitchingStatsRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
-    DEFAULT_OPTION,
-  ]);
-  const [tournamentOptions, setTournamentOptions] = useState<FilterOption[]>([
-    DEFAULT_OPTION,
-  ]);
   const [yearOptions] = useState(buildYearOptions);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const userId = await getCurrentUserId();
-      const [seasons, tournaments] = await Promise.all([
-        getSeasons(userId ?? undefined),
-        getTournaments() as Promise<TournamentData[]>,
-      ]);
-      if (!active) return;
-      setSeasonOptions([
-        DEFAULT_OPTION,
-        ...seasons.map((season: SeasonData) => ({
-          key: String(season.id),
-          label: season.name,
-        })),
-      ]);
-      setTournamentOptions([
-        DEFAULT_OPTION,
-        ...tournaments.map((tournament) => ({
-          key: String(tournament.id),
-          label: tournament.name,
-        })),
-      ]);
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // 初回マウントは SSR の initialRows（打撃/年別）を使うため取得しない。
   const didInitRef = useRef(false);

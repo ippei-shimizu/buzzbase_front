@@ -1,9 +1,6 @@
 "use client";
-import type { SeasonData, TournamentData } from "@app/interface";
+import type { FilterOption } from "../../filterOptions";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { getSeasons } from "@app/services/seasonsService";
-import { getTournaments } from "@app/services/tournamentsService";
-import { getCurrentUserId } from "@app/services/userService";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
@@ -47,13 +44,6 @@ import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
 import { TimingCard } from "./TimingCard";
 
-interface FilterOption {
-  key: string;
-  label: string;
-}
-
-const DEFAULT_OPTION: FilterOption = { key: "全て", label: "全て" };
-
 // Pro プラン機能のリリース前は coming soon 表示にする（mobile と同じ運用）。
 const PRO_FEATURES_COMING_SOON: boolean = true;
 
@@ -70,10 +60,17 @@ function buildYearOptions(): FilterOption[] {
 interface AnalysisContainerProps {
   /** SSR で取得した初期表示データ。マウント時はこれを使い再取得しない。 */
   initialData: AnalysisInitialData;
+  /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
+  seasonOptions: FilterOption[];
+  tournamentOptions: FilterOption[];
 }
 
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
-export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
+export function AnalysisContainer({
+  initialData,
+  seasonOptions,
+  tournamentOptions,
+}: AnalysisContainerProps) {
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
     matchType: "",
@@ -120,42 +117,7 @@ export function AnalysisContainer({ initialData }: AnalysisContainerProps) {
   const [isRefetching, startRefetch] = useTransition();
   // 推移グラフは粒度切替で単独再取得もあるため、専用の pending でグラフだけ dim する。
   const [isTrendPending, startTrendTransition] = useTransition();
-  const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
-    DEFAULT_OPTION,
-  ]);
-  const [tournamentOptions, setTournamentOptions] = useState<FilterOption[]>([
-    DEFAULT_OPTION,
-  ]);
   const [yearOptions] = useState(buildYearOptions);
-
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const userId = await getCurrentUserId();
-      const [seasons, tournaments] = await Promise.all([
-        getSeasons(userId ?? undefined),
-        getTournaments() as Promise<TournamentData[]>,
-      ]);
-      if (!active) return;
-      setSeasonOptions([
-        DEFAULT_OPTION,
-        ...seasons.map((season: SeasonData) => ({
-          key: String(season.id),
-          label: season.name,
-        })),
-      ]);
-      setTournamentOptions([
-        DEFAULT_OPTION,
-        ...tournaments.map((tournament) => ({
-          key: String(tournament.id),
-          label: tournament.name,
-        })),
-      ]);
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
