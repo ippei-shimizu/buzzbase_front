@@ -174,10 +174,7 @@ export function AnalysisContainer() {
             mode={sprayChartMode}
             onModeChange={setSprayChartMode}
           />
-          <section className="rounded-xl bg-bg_sub p-4 flex flex-col gap-y-3">
-            <h3 className="text-sm font-bold">打球方向</h3>
-            <HitDirectionTable directions={hitDirections.directions} />
-          </section>
+          <HitDirectionTable directions={hitDirections.directions} />
         </>
       )}
     </div>
