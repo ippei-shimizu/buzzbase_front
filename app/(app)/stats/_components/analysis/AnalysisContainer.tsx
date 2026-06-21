@@ -27,7 +27,7 @@ import { BattingTrendChart } from "./BattingTrendChart";
 import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
 import { RunnersSituationCard } from "./RunnersSituationCard";
-import { SprayChart } from "./SprayChart";
+import { SprayChart, type SprayChartMode } from "./SprayChart";
 
 interface FilterOption {
   key: string;
@@ -65,6 +65,8 @@ export function AnalysisContainer() {
   });
   const [granularity, setGranularity] =
     useState<BattingTrendGranularity>("game");
+  const [sprayChartMode, setSprayChartMode] =
+    useState<SprayChartMode>("scatter");
   const [battingTrend, setBattingTrend] = useState<BattingTrendData>({
     granularity: "game",
     points: [],
@@ -165,10 +167,13 @@ export function AnalysisContainer() {
             granularity={granularity}
             onGranularityChange={setGranularity}
           />
-          <section className="rounded-xl bg-bg_sub p-4 flex flex-col gap-y-3">
-            <h3 className="text-sm font-bold">打球チャート</h3>
-            <SprayChart points={hitLocations.points} />
-          </section>
+          <SprayChart
+            directions={hitDirections.directions}
+            homeRuns={hitDirections.home_runs}
+            points={hitLocations.points}
+            mode={sprayChartMode}
+            onModeChange={setSprayChartMode}
+          />
           <section className="rounded-xl bg-bg_sub p-4 flex flex-col gap-y-3">
             <h3 className="text-sm font-bold">打球方向</h3>
             <HitDirectionTable directions={hitDirections.directions} />
