@@ -455,6 +455,8 @@ export function SprayChart({
             ? directions.map((direction) => {
                 const pos = DIRECTION_POSITIONS[direction.id];
                 if (!pos || direction.count === 0) return null;
+                // バブルは方向単位なので最多カテゴリ(top_category)でフィルタする。
+                // 同じ方向に複数カテゴリが混在しても top_category だけで表示可否が決まる。
                 if (!activeCategories.has(direction.top_category)) return null;
                 const r = getBubbleRadius(direction.count, maxCount);
                 const color = getBubbleColor(direction.top_category);
