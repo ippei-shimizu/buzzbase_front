@@ -1,7 +1,7 @@
 "use client";
 import type { SeasonData, TournamentData } from "@app/interface";
+import { Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { getSeasons } from "@app/services/seasonsService";
 import { getTournaments } from "@app/services/tournamentsService";
 import { getCurrentUserId } from "@app/services/userService";
@@ -261,7 +261,9 @@ export function AnalysisContainer() {
         tournamentOptions={tournamentOptions}
       />
       {isLoading ? (
-        <LoadingSpinner />
+        <div className="flex justify-center py-16">
+          <Spinner color="primary" labelColor="primary" label="Loading" />
+        </div>
       ) : (
         <>
           <HeadlineStatsCard stats={headline} />
