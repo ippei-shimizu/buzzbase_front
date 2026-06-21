@@ -6,15 +6,13 @@ import type {
   StatsPeriod,
 } from "../actions";
 import type { SeasonData, TournamentData } from "@app/interface";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import { getSeasons } from "@app/services/seasonsService";
 import { getTournaments } from "@app/services/tournamentsService";
 import { getCurrentUserId } from "@app/services/userService";
 import { getBattingStats, getPitchingStats } from "../actions";
-import { AnalysisContainer } from "./analysis/AnalysisContainer";
-import { PitchingAnalysisContainer } from "./analysis/PitchingAnalysisContainer";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
@@ -48,9 +46,17 @@ const CURRENT_YEAR = String(new Date().getFullYear());
 interface StatsContainerProps {
   /** SSR で取得した打撃・年別の初期行。マウント時はこれを使い再取得しない。 */
   initialRows: BattingStatsRow[];
+  /** 打撃タブの分析セクション（SSR + Suspense ストリーミングの Server サブツリー）。 */
+  analysisSlot: ReactNode;
+  /** 投手タブの分析セクション（同上）。 */
+  pitchingAnalysisSlot: ReactNode;
 }
 
-export default function StatsContainer({ initialRows }: StatsContainerProps) {
+export default function StatsContainer({
+  initialRows,
+  analysisSlot,
+  pitchingAnalysisSlot,
+}: StatsContainerProps) {
   const [tab, setTab] = useState<ActiveTab>("batting");
   const [period, setPeriod] = useState<StatsPeriod>("yearly");
   const [tableYear, setTableYear] = useState<string | undefined>(undefined);
@@ -168,17 +174,11 @@ export default function StatsContainer({ initialRows }: StatsContainerProps) {
       </div>
 
       {/* 打撃タブ: 打球チャート・打席分析をテーブルの上に表示 */}
-      {tab === "batting" ? (
-        <div className="mt-5">
-          <AnalysisContainer />
-        </div>
-      ) : null}
+      {tab === "batting" ? <div className="mt-5">{analysisSlot}</div> : null}
 
       {/* 投手タブ: 防御率推移をテーブルの上に表示 */}
       {tab === "pitching" ? (
-        <div className="mt-5">
-          <PitchingAnalysisContainer />
-        </div>
+        <div className="mt-5">{pitchingAnalysisSlot}</div>
       ) : null}
 
       {/* 期間トグル */}
