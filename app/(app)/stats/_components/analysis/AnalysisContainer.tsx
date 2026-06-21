@@ -46,6 +46,13 @@ import { PitcherAttributeSummary } from "./PitcherAttributeSummary";
 import { PitcherFaceoffList } from "./PitcherFaceoffList";
 import { PitchTypeCard } from "./PitchTypeCard";
 import { PlateAppearanceDonut } from "./PlateAppearanceDonut";
+import { ProComingSoonCard } from "./ProComingSoonCard";
+import {
+  CountSituationDummy,
+  PitcherFaceoffDummy,
+  PitchTypeDummy,
+} from "./ProComingSoonDummies";
+import { ProComingSoonHitDirectionField } from "./ProComingSoonHitDirectionField";
 import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
 import { TimingCard } from "./TimingCard";
@@ -56,6 +63,9 @@ interface FilterOption {
 }
 
 const DEFAULT_OPTION: FilterOption = { key: "全て", label: "全て" };
+
+// Pro プラン機能のリリース前は coming soon 表示にする（mobile と同じ運用）。
+const PRO_FEATURES_COMING_SOON: boolean = true;
 
 function buildYearOptions(): FilterOption[] {
   const currentYear = new Date().getFullYear();
@@ -194,23 +204,36 @@ export function AnalysisContainer() {
   }, [filters]);
 
   // 投手・打球詳細系のカードはメインのローディングを止めずに並列取得する。
+  // coming soon でゲートする3種（カウント別/球種別/対戦投手別）は取得しない。
   useEffect(() => {
     let active = true;
     Promise.all([
       getContactQualities(filters),
       getTimingBreakdown(filters),
-      getCountSituations(filters),
-      getPitchTypes(filters),
-      getPitcherFaceoffs(filters),
       getPitcherAttributeSummary(filters),
-    ]).then(([contact, timing, counts, pitches, faceoffs, attributes]) => {
+    ]).then(([contact, timing, attributes]) => {
       if (!active) return;
       setContactQualities(contact);
       setTimingBreakdown(timing);
+      setPitcherAttributes(attributes);
+    });
+    return () => {
+      active = false;
+    };
+  }, [filters]);
+
+  useEffect(() => {
+    if (PRO_FEATURES_COMING_SOON) return;
+    let active = true;
+    Promise.all([
+      getCountSituations(filters),
+      getPitchTypes(filters),
+      getPitcherFaceoffs(filters),
+    ]).then(([counts, pitches, faceoffs]) => {
+      if (!active) return;
       setCountSituations(counts);
       setPitchTypes(pitches);
       setPitcherFaceoffs(faceoffs);
-      setPitcherAttributes(attributes);
     });
     return () => {
       active = false;
@@ -256,7 +279,16 @@ export function AnalysisContainer() {
             mode={sprayChartMode}
             onModeChange={setSprayChartMode}
           />
-          <HitDirectionTable directions={hitDirections.directions} />
+          {PRO_FEATURES_COMING_SOON ? (
+            <ProComingSoonCard
+              title="方向別の打率"
+              description="打球を打った方向ごとの打率をヒートマップで可視化します"
+            >
+              <ProComingSoonHitDirectionField />
+            </ProComingSoonCard>
+          ) : (
+            <HitDirectionTable directions={hitDirections.directions} />
+          )}
           <PlateAppearanceDonut
             breakdown={plateBreakdown}
             totalPlateAppearances={plateBreakdown.reduce(
@@ -272,16 +304,43 @@ export function AnalysisContainer() {
             breakdown={timingBreakdown.breakdown}
             total={timingBreakdown.total}
           />
-          <CountSituationCards data={countSituations} />
-          <PitchTypeCard
-            rows={pitchTypes.rows}
-            totalTargetPa={pitchTypes.total_target_pa}
-          />
-          <PitcherFaceoffList
-            rows={pitcherFaceoffs.rows}
-            minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
-            totalTargetPa={pitcherFaceoffs.total_target_pa}
-          />
+          {PRO_FEATURES_COMING_SOON ? (
+            <ProComingSoonCard
+              title="カウント別の打率"
+              description="初球・有利カウント・追い込みなど、カウント状況別の打率がわかります"
+            >
+              <CountSituationDummy />
+            </ProComingSoonCard>
+          ) : (
+            <CountSituationCards data={countSituations} />
+          )}
+          {PRO_FEATURES_COMING_SOON ? (
+            <ProComingSoonCard
+              title="球種別の打率"
+              description="ストレートや変化球など、球種ごとの得意・苦手が分析できます"
+            >
+              <PitchTypeDummy />
+            </ProComingSoonCard>
+          ) : (
+            <PitchTypeCard
+              rows={pitchTypes.rows}
+              totalTargetPa={pitchTypes.total_target_pa}
+            />
+          )}
+          {PRO_FEATURES_COMING_SOON ? (
+            <ProComingSoonCard
+              title="対戦投手別"
+              description="対戦した投手ごとの打撃成績を一覧で確認できます"
+            >
+              <PitcherFaceoffDummy />
+            </ProComingSoonCard>
+          ) : (
+            <PitcherFaceoffList
+              rows={pitcherFaceoffs.rows}
+              minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
+              totalTargetPa={pitcherFaceoffs.total_target_pa}
+            />
+          )}
           <PitcherAttributeSummary data={pitcherAttributes} />
         </>
       )}
