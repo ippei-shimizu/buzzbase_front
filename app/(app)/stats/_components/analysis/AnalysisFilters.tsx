@@ -52,7 +52,7 @@ export function AnalysisFilters({
     });
 
   return (
-    <FilterChipGroup>
+    <FilterChipGroup wrap>
       <FilterChip
         label="年度"
         value={filters.year ?? "通算"}
