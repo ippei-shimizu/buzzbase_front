@@ -411,10 +411,12 @@ export async function getPitcherAttributeSummary(
 export async function getEraTrend(
   filters: AnalysisFilters = {},
 ): Promise<EraTrendPoint[]> {
-  // era_trend は year/season/tournament のみで絞る（match_type は送らない）。
+  // era_trend は year/season/tournament のみで絞る。match_type は構造的に除外し、
+  // 誤って matchType 付きで呼ばれても送信されないことを関数自身で保証する。
+  const { matchType: _matchType, ...eraFilters } = filters;
   const result = await fetchAnalysis<{ trend: EraTrendPoint[] }>(
     "era_trend",
-    filters,
+    eraFilters,
     "getEraTrend",
     { trend: [] },
   );
