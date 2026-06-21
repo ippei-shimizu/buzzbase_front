@@ -87,6 +87,28 @@ export interface HitDirectionData {
   home_runs: HomeRunDirection[];
 }
 
+export type BattingTrendGranularity =
+  | "game"
+  | "month"
+  | "year"
+  | "recent_games";
+
+export interface BattingTrendPoint {
+  key: string;
+  label: string;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  at_bats_in_period: number;
+  cumulative_at_bats: number;
+}
+
+export interface BattingTrendData {
+  granularity: BattingTrendGranularity;
+  points: BattingTrendPoint[];
+}
+
 async function getAuthHeaders(): Promise<Record<string, string> | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access-token")?.value;
@@ -117,11 +139,18 @@ async function fetchAnalysis<T>(
   filters: AnalysisFilters,
   action: string,
   fallback: T,
+  extra?: Record<string, string>,
 ): Promise<T> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return fallback;
-    const query = buildQuery(filters);
+    const params = new URLSearchParams(buildQuery(filters));
+    if (extra) {
+      for (const [key, value] of Object.entries(extra)) {
+        params.append(key, value);
+      }
+    }
+    const query = params.toString();
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/stats/${path}?${query}`,
       { headers, cache: "no-store" },
@@ -164,6 +193,19 @@ export async function getRunnersSituation(
     filters,
     "getRunnersSituation",
     null,
+  );
+}
+
+export async function getBattingTrend(
+  filters: AnalysisFilters = {},
+  granularity: BattingTrendGranularity = "game",
+): Promise<BattingTrendData> {
+  return fetchAnalysis<BattingTrendData>(
+    "batting_trend",
+    filters,
+    "getBattingTrend",
+    { granularity, points: [] },
+    { granularity },
   );
 }
 

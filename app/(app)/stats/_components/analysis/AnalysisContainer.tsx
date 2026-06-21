@@ -8,7 +8,10 @@ import { getCurrentUserId } from "@app/services/userService";
 import {
   type AdditionalStats,
   type AnalysisFilters as Filters,
+  type BattingTrendData,
+  type BattingTrendGranularity,
   getAdditionalStats,
+  getBattingTrend,
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
@@ -20,6 +23,7 @@ import {
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
 import { AnalysisFilters } from "./AnalysisFilters";
+import { BattingTrendChart } from "./BattingTrendChart";
 import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
 import { RunnersSituationCard } from "./RunnersSituationCard";
@@ -58,6 +62,12 @@ export function AnalysisContainer() {
   const [hitDirections, setHitDirections] = useState<HitDirectionData>({
     directions: [],
     home_runs: [],
+  });
+  const [granularity, setGranularity] =
+    useState<BattingTrendGranularity>("game");
+  const [battingTrend, setBattingTrend] = useState<BattingTrendData>({
+    granularity: "game",
+    points: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([
@@ -123,6 +133,17 @@ export function AnalysisContainer() {
     };
   }, [filters]);
 
+  // 推移グラフは粒度切替で独立に再取得する（他カードは再取得しない）。
+  useEffect(() => {
+    let active = true;
+    getBattingTrend(filters, granularity).then((data) => {
+      if (active) setBattingTrend(data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [filters, granularity]);
+
   return (
     <div className="flex flex-col gap-y-5">
       <AnalysisFilters
@@ -139,6 +160,11 @@ export function AnalysisContainer() {
           <HeadlineStatsCard stats={headline} />
           <RunnersSituationCard stats={runnersSituation} />
           <AdditionalStatsCard stats={additional} />
+          <BattingTrendChart
+            points={battingTrend.points}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+          />
           <section className="rounded-xl bg-bg_sub p-4 flex flex-col gap-y-3">
             <h3 className="text-sm font-bold">打球チャート</h3>
             <SprayChart points={hitLocations.points} />
