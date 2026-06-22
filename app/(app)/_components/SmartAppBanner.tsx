@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { APP_STORE_URL } from "@app/constants/app";
+import AppStoreLink from "@app/components/cta/AppStoreLink";
 
 const STORAGE_KEY = "smart_app_banner_dismissed_at";
 const RESHOW_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7日
@@ -75,20 +75,13 @@ export default function SmartAppBanner() {
             アプリで成績を記録しよう
           </p>
         </div>
-        <a
-          href={APP_STORE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <AppStoreLink
+          ctaLocation="smart_banner"
           className="shrink-0"
-        >
-          <Image
-            src="/images/download_app_store_badge_jp.svg"
-            alt="App Storeからダウンロード"
-            width={120}
-            height={40}
-            className="h-[34px] w-auto"
-          />
-        </a>
+          width={120}
+          height={40}
+          imageClassName="h-[34px] w-auto"
+        />
       </div>
     </div>
   );

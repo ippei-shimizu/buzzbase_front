@@ -2,6 +2,7 @@
 
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorForm from "../../_components/CalculatorForm";
+import SlgResultCard from "./SlgResultCard";
 
 const definition = getCalculatorDefinition("slugging")!;
 
@@ -21,6 +22,11 @@ export default function SluggingCalculator() {
       outputs={definition.outputs}
       calculate={definition.calculate}
       nextActions={nextActions}
+      analyticsSourceTool={definition.slug}
+      renderExtraResult={(raw) => {
+        if (typeof raw !== "number" || Number.isNaN(raw)) return null;
+        return <SlgResultCard slg={raw} />;
+      }}
     />
   );
 }

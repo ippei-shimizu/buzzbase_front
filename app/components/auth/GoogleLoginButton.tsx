@@ -7,6 +7,7 @@ import { useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import { trackEvent } from "@app/lib/analytics";
 import { googleSignIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
 
@@ -35,17 +36,20 @@ export default function GoogleLoginButton({
       const response = await googleSignIn(credentialResponse.credential);
 
       if (response.data.requires_username) {
+        trackEvent("sign_up", { method: "google" });
         router.push("/register-username");
         setIsLoggedIn(true);
       } else {
+        // requires_username=false はバックエンドが既存ユーザーと判断したことを意味する。
+        // getUserData() が user_id を返さない一時的失敗があっても sign_up ではなく login として記録する。
+        trackEvent("login", { method: "google" });
         const userData = await getUserData();
         if (userData && userData.user_id) {
           router.push(`/mypage/${userData.user_id}`);
-          setIsLoggedIn(true);
         } else {
           router.push("/register-username");
-          setIsLoggedIn(true);
         }
+        setIsLoggedIn(true);
       }
     } catch {
       setErrors(["Googleログインに失敗しました"]);
