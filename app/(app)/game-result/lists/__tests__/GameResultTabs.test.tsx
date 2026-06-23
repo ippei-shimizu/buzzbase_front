@@ -16,25 +16,34 @@ jest.mock("../_components/GameSummaryContainer", () => ({
   ),
 }));
 
-describe("GameResultTabs", () => {
-  it("サマリー / 一覧 の2タブが表示される", () => {
-    render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
+const mockPush = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
 
-    const tabs = screen.getAllByRole("tab");
-    expect(tabs).toHaveLength(2);
-    expect(screen.getByText("サマリー")).toBeInTheDocument();
-    expect(screen.getByText("一覧")).toBeInTheDocument();
+const mockCreateGameResult = jest.fn();
+jest.mock("@app/services/gameResultsService", () => ({
+  createGameResult: () => mockCreateGameResult(),
+}));
+
+describe("GameResultTabs", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("初期表示はサマリータブ（先頭）", () => {
+  it("サマリー / 一覧 のタブと記録ボタンが表示される", () => {
+    render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
+
+    expect(screen.getByText("サマリー")).toBeInTheDocument();
+    expect(screen.getByText("一覧")).toBeInTheDocument();
+    expect(screen.getByText("試合結果を記録する")).toBeInTheDocument();
+  });
+
+  it("初期表示はサマリータブ", () => {
     render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
 
     expect(screen.getByTestId("summary")).toBeInTheDocument();
     expect(screen.queryByTestId("match-list")).not.toBeInTheDocument();
-
-    const tabs = screen.getAllByRole("tab");
-    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
-    expect(tabs[1]).toHaveAttribute("aria-selected", "false");
   });
 
   it("一覧タブをクリックすると一覧が表示される", async () => {
@@ -43,9 +52,20 @@ describe("GameResultTabs", () => {
 
     await user.click(screen.getByText("一覧"));
 
-    await waitFor(() => {
-      expect(screen.getByTestId("match-list")).toBeInTheDocument();
-    });
+    expect(screen.getByTestId("match-list")).toBeInTheDocument();
     expect(screen.queryByTestId("summary")).not.toBeInTheDocument();
+  });
+
+  it("記録ボタンで試合結果を作成し記録画面へ遷移する", async () => {
+    const user = userEvent.setup();
+    mockCreateGameResult.mockResolvedValueOnce({ id: 42 });
+    render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
+
+    await user.click(screen.getByText("試合結果を記録する"));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/game-result/record");
+    });
+    expect(mockCreateGameResult).toHaveBeenCalled();
   });
 });

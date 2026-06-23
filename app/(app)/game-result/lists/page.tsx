@@ -1,26 +1,15 @@
 "use client";
 
-import { Button } from "@heroui/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
-import { PlusIcon } from "@app/components/icon/PlusIcon";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import {
-  GAME_RECORD_EDIT_MODE_STORAGE_KEY,
-  RECORD_PATTERN_STORAGE_KEY,
-} from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import { createGameResult } from "@app/services/gameResultsService";
 import { getCurrentUserId } from "@app/services/userService";
 import { GameResultTabs } from "./_components/GameResultTabs";
 
 export default function GameResultList() {
   const [currentUserId, setCurrentUserId] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
   useRequireAuth();
 
   const fetchData = async () => {
@@ -35,47 +24,21 @@ export default function GameResultList() {
     fetchData();
   }, []);
 
-  const handleNewRecord = async () => {
-    setIsSubmitting(true);
-    try {
-      const newGameResult = await createGameResult();
-      localStorage.setItem("gameResultId", JSON.stringify(newGameResult.id));
-      // 新規記録フローなので編集フラグと前回のパターンをクリアする。
-      localStorage.removeItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY);
-      localStorage.removeItem(RECORD_PATTERN_STORAGE_KEY);
-      router.push(`/game-result/record`);
-    } catch {}
-  };
   return (
     <>
       <Header />
-      {isSubmitting && <LoadingSpinner />}
       <main className="h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-16 px-4 lg:px-6 lg:pb-6">
-            <h2 className="text-2xl font-bold mt-10">試合一覧</h2>
-            <Button
-              color="primary"
-              variant="solid"
-              radius="full"
-              endContent={<PlusIcon width="22" height="22" fill="#F4F4F4" />}
-              className="fixed top-[calc(var(--smart-banner-height,0px)+4rem)] right-4 z-50 font-medium lg:absolute lg:top-16 lg:z-10"
-              onPress={handleNewRecord}
-              isDisabled={isSubmitting}
-            >
-              新規追加
-            </Button>
-            <div className="mt-5 grid gap-y-5">
-              <GameResultTabs
-                userId={currentUserId}
-                adSlot={adSlots.gameResultListMiddleInFeed}
-                adLayoutKey="-6t+ed+2i-1n-4w"
-              />
-              <AdInFeed
-                slot={adSlots.gameResultListInFeed}
-                layoutKey="-6t+ed+2i-1n-4w"
-              />
-            </div>
+          <div className="pt-12 px-4 lg:px-6 lg:pb-6">
+            <GameResultTabs
+              userId={currentUserId}
+              adSlot={adSlots.gameResultListMiddleInFeed}
+              adLayoutKey="-6t+ed+2i-1n-4w"
+            />
+            <AdInFeed
+              slot={adSlots.gameResultListInFeed}
+              layoutKey="-6t+ed+2i-1n-4w"
+            />
           </div>
         </div>
       </main>
