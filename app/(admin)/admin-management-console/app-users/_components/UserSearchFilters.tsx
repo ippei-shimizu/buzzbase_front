@@ -69,22 +69,27 @@ export default function UserSearchFilters() {
     <div className="mb-4 space-y-3">
       {/* 検索 + ステータス + ソート */}
       <div className="flex flex-col sm:flex-row gap-2">
-        <div className="flex flex-1">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="名前、メール、ユーザーIDで検索..."
-            className="flex-1 min-w-0 rounded-l-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={handleSearch}
-            className="rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-gray-500 hover:bg-gray-100 text-sm"
-          >
-            検索
-          </button>
+        <div className="flex flex-1 flex-col">
+          <div className="flex">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="ID、名前、メール、ユーザーIDで検索..."
+              className="flex-1 min-w-0 rounded-l-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-gray-500 hover:bg-gray-100 text-sm"
+            >
+              検索
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-gray-400">
+            ID（PostHog の ID）でも検索できます
+          </p>
         </div>
 
         <select

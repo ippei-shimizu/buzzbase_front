@@ -69,6 +69,10 @@ export default function UserDetailCard({ user }: UserDetailCardProps) {
       <div className="px-6 py-5">
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
           <div>
+            <dt className="text-sm font-medium text-gray-500">ID</dt>
+            <dd className="mt-1 text-sm text-gray-900 font-mono">{user.id}</dd>
+          </div>
+          <div>
             <dt className="text-sm font-medium text-gray-500">
               メールアドレス
             </dt>
