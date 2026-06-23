@@ -47,7 +47,11 @@ export function GameResultTabs({
       localStorage.removeItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY);
       localStorage.removeItem(RECORD_PATTERN_STORAGE_KEY);
       router.push(`/game-result/record`);
-    } catch {}
+    } catch {
+      // 失敗時はスピナー・無効状態を解除して再操作できるようにする
+      // （成功時は遷移で unmount するため解除不要）。
+      setIsSubmitting(false);
+    }
   };
 
   return (

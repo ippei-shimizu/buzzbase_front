@@ -68,4 +68,20 @@ describe("GameResultTabs", () => {
     });
     expect(mockCreateGameResult).toHaveBeenCalled();
   });
+
+  it("記録作成に失敗してもボタンが再操作可能に戻る", async () => {
+    const user = userEvent.setup();
+    mockCreateGameResult.mockRejectedValueOnce(new Error("failed"));
+    render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
+
+    const recordButton = screen.getByRole("button", {
+      name: "試合結果を記録する",
+    });
+    await user.click(recordButton);
+
+    await waitFor(() => {
+      expect(recordButton).not.toBeDisabled();
+    });
+    expect(mockPush).not.toHaveBeenCalled();
+  });
 });
