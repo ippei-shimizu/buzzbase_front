@@ -51,6 +51,7 @@ export default function AppUserTable({ users }: AppUserTableProps) {
       <table className="min-w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 text-left text-xs text-gray-500">
+            <th className="pb-2 pr-4 font-medium">ID</th>
             <th className="pb-2 pr-4 font-medium">ユーザー</th>
             <th className="pb-2 pr-4 font-medium">状態</th>
             <th className="pb-2 pr-4 font-medium">最終ログイン</th>
@@ -66,6 +67,9 @@ export default function AppUserTable({ users }: AppUserTableProps) {
               key={user.id}
               className="border-b border-gray-100 hover:bg-gray-50"
             >
+              <td className="py-3 pr-4 whitespace-nowrap font-mono text-gray-500 tabular-nums">
+                {user.id}
+              </td>
               <td className="py-3 pr-4">
                 <div className="flex items-center gap-3">
                   <Image
