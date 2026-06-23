@@ -21,6 +21,7 @@ const SORT_OPTIONS = [
 export default function UserSearchFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [id, setId] = useState(searchParams.get("id") || "");
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
   const updateParams = useCallback(
@@ -40,8 +41,8 @@ export default function UserSearchFilters() {
   );
 
   const handleSearch = useCallback(() => {
-    updateParams({ search });
-  }, [search, updateParams]);
+    updateParams({ id, search });
+  }, [id, search, updateParams]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -53,11 +54,13 @@ export default function UserSearchFilters() {
   );
 
   const handleReset = useCallback(() => {
+    setId("");
     setSearch("");
     router.push("/admin-management-console/app-users");
   }, [router]);
 
   const hasFilters =
+    searchParams.get("id") ||
     searchParams.get("search") ||
     searchParams.get("status") ||
     searchParams.get("date_from") ||
@@ -67,29 +70,35 @@ export default function UserSearchFilters() {
 
   return (
     <div className="mb-4 space-y-3">
-      {/* 検索 + ステータス + ソート */}
+      {/* ID + 検索 + ステータス + ソート */}
       <div className="flex flex-col sm:flex-row gap-2">
-        <div className="flex flex-1 flex-col">
-          <div className="flex">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="ID、名前、メール、ユーザーIDで検索..."
-              className="flex-1 min-w-0 rounded-l-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={handleSearch}
-              className="rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-gray-500 hover:bg-gray-100 text-sm"
-            >
-              検索
-            </button>
-          </div>
-          <p className="mt-1 text-xs text-gray-400">
-            ID（PostHog の ID）でも検索できます
-          </p>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="ID"
+          aria-label="IDで検索"
+          className="w-full sm:w-28 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+        />
+
+        <div className="flex flex-1">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="名前、メール、ユーザーIDで検索..."
+            className="flex-1 min-w-0 rounded-l-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={handleSearch}
+            className="rounded-r-md border border-l-0 border-gray-300 bg-gray-50 px-3 py-2 text-gray-500 hover:bg-gray-100 text-sm"
+          >
+            検索
+          </button>
         </div>
 
         <select
