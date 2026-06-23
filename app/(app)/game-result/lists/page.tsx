@@ -8,7 +8,6 @@ import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import MatchResultList from "@app/components/user/MatchResultList";
 import {
   GAME_RECORD_EDIT_MODE_STORAGE_KEY,
   RECORD_PATTERN_STORAGE_KEY,
@@ -16,6 +15,7 @@ import {
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { createGameResult } from "@app/services/gameResultsService";
 import { getCurrentUserId } from "@app/services/userService";
+import { GameResultTabs } from "./_components/GameResultTabs";
 
 export default function GameResultList() {
   const [currentUserId, setCurrentUserId] = useState(0);
@@ -66,7 +66,7 @@ export default function GameResultList() {
               新規追加
             </Button>
             <div className="mt-5 grid gap-y-5">
-              <MatchResultList
+              <GameResultTabs
                 userId={currentUserId}
                 adSlot={adSlots.gameResultListMiddleInFeed}
                 adLayoutKey="-6t+ed+2i-1n-4w"
