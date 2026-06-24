@@ -28,7 +28,14 @@ export default function NewPlateAppearancePage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setGameResultId(id);
     getPlateAppearancesByGame(id).then((plateAppearances) => {
-      setBatterBoxNumber(plateAppearances.length + 1);
+      // 件数ベースだと途中の打席を削除した際に既存番号と衝突するため、
+      // 既存の最大 batter_box_number + 1 で採番する。
+      const maxBatterBoxNumber = plateAppearances.reduce(
+        (max, plateAppearance) =>
+          Math.max(max, plateAppearance.batter_box_number),
+        0,
+      );
+      setBatterBoxNumber(maxBatterBoxNumber + 1);
     });
     getCurrentUserId().then((userId) => {
       checkExistingMatchResults(id, userId).then((matchResult) => {

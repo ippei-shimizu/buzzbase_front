@@ -62,6 +62,15 @@ export default function PlateAppearanceListPage() {
     })();
   }, [router]);
 
+  // 件数ベースだと途中の打席を削除した際に既存番号と衝突するため、
+  // 既存の最大 batter_box_number + 1 を次の採番に使う。
+  const nextBatterBoxNumber =
+    plateAppearances.reduce(
+      (max, plateAppearance) =>
+        Math.max(max, plateAppearance.batter_box_number),
+      0,
+    ) + 1;
+
   // 新規記録時は「両方」パターンのときだけ投手成績入力へ進む。
   const goNewComplete = () => {
     router.push(readRecordPattern() === "both" ? PITCHING_PATH : SUMMARY_PATH);
@@ -99,7 +108,7 @@ export default function PlateAppearanceListPage() {
                   </p>
                 ) : null}
                 <AddPlateAppearanceCard
-                  batterBoxNumber={plateAppearances.length + 1}
+                  batterBoxNumber={nextBatterBoxNumber}
                   onAdd={() =>
                     router.push("/game-result/plate-appearances/new")
                   }
