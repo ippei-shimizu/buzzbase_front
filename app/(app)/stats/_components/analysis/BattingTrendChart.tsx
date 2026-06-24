@@ -184,6 +184,17 @@ export function BattingTrendChart({
   const getY = (value: number) =>
     PADDING_TOP + PLOT_HEIGHT - (value / valueRange) * PLOT_HEIGHT;
 
+  // タップ領域の縦帯。隣接点との X 中点で分割し、両端はプロット境界にクランプする。
+  // 点が 1 個のときはプロット幅全体を 1 帯とする。
+  const PLOT_RIGHT = CHART_WIDTH - PADDING_RIGHT;
+  const PLOT_BOTTOM = PADDING_TOP + PLOT_HEIGHT;
+  const getBandX = (index: number) =>
+    index === 0 ? PADDING_LEFT : (getX(index - 1) + getX(index)) / 2;
+  const getBandRight = (index: number) =>
+    index === points.length - 1
+      ? PLOT_RIGHT
+      : (getX(index) + getX(index + 1)) / 2;
+
   const linePaths = visibleLines.map((line) => ({
     ...line,
     d: points
@@ -333,10 +344,17 @@ export function BattingTrendChart({
                 selectedDot?.pointIndex === index;
               return (
                 <Fragment key={`pt-${line.key}-${index}`}>
-                  <circle
-                    cx={getX(index)}
-                    cy={getY(point[line.key])}
-                    r={10}
+                  {/* 点とその真下（Y 軸方向の縦帯）をタップ領域にして、点だけより
+                      クリックしやすくする。複数ライン表示時は描画順で後のラインの帯が
+                      前面に来る（重なり領域は後勝ち）。 */}
+                  <rect
+                    x={getBandX(index)}
+                    y={Math.max(PADDING_TOP, getY(point[line.key]) - 8)}
+                    width={getBandRight(index) - getBandX(index)}
+                    height={
+                      PLOT_BOTTOM -
+                      Math.max(PADDING_TOP, getY(point[line.key]) - 8)
+                    }
                     fill="transparent"
                     className="cursor-pointer"
                     onClick={() => handleDotPress(line.key, index)}
