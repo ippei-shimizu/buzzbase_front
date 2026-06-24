@@ -342,19 +342,19 @@ export function BattingTrendChart({
               const isSelected =
                 selectedDot?.lineKey === line.key &&
                 selectedDot?.pointIndex === index;
+              const bandX = getBandX(index);
+              const bandWidth = getBandRight(index) - bandX;
+              const bandY = Math.max(PADDING_TOP, getY(point[line.key]) - 8);
               return (
                 <Fragment key={`pt-${line.key}-${index}`}>
                   {/* 点とその真下（Y 軸方向の縦帯）をタップ領域にして、点だけより
                       クリックしやすくする。複数ライン表示時は描画順で後のラインの帯が
                       前面に来る（重なり領域は後勝ち）。 */}
                   <rect
-                    x={getBandX(index)}
-                    y={Math.max(PADDING_TOP, getY(point[line.key]) - 8)}
-                    width={getBandRight(index) - getBandX(index)}
-                    height={
-                      PLOT_BOTTOM -
-                      Math.max(PADDING_TOP, getY(point[line.key]) - 8)
-                    }
+                    x={bandX}
+                    y={bandY}
+                    width={bandWidth}
+                    height={PLOT_BOTTOM - bandY}
                     fill="transparent"
                     className="cursor-pointer"
                     onClick={() => handleDotPress(line.key, index)}
