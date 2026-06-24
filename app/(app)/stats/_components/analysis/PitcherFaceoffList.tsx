@@ -10,6 +10,14 @@ interface PitcherFaceoffListProps {
   totalTargetPa: number;
 }
 
+const formatThrowHand = (
+  throwHand: PitcherFaceoff["throw_hand"],
+): string | null => {
+  if (throwHand === "right") return "右投げ";
+  if (throwHand === "left") return "左投げ";
+  return null;
+};
+
 /** 対戦投手別の打撃成績一覧。各行タップで詳細グリッドを展開する。 */
 export function PitcherFaceoffList({
   rows,
@@ -46,6 +54,12 @@ export function PitcherFaceoffList({
 
       {rows.map((row) => {
         const isExpanded = expandedId === row.pitcher_id;
+        const attributes = [
+          row.team_name,
+          formatThrowHand(row.throw_hand),
+          row.pitcher_style,
+          row.velocity_zone,
+        ].filter(Boolean);
         return (
           <div key={row.pitcher_id}>
             <button
@@ -58,6 +72,11 @@ export function PitcherFaceoffList({
                 <p className="mb-0.5 truncate text-sm font-semibold text-[#F4F4F4]">
                   {isExpanded ? "▼" : "▶"} {row.pitcher_name}
                 </p>
+                {attributes.length > 0 ? (
+                  <p className="mb-0.5 truncate text-[11px] text-[#A1A1AA]">
+                    {attributes.join("・")}
+                  </p>
+                ) : null}
                 <p className="text-[11px] text-[#A1A1AA]">
                   {row.plate_appearances}対戦
                 </p>
