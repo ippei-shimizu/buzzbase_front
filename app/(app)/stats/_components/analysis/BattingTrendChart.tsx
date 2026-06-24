@@ -38,6 +38,8 @@ const PADDING_TOP = 16;
 const PADDING_BOTTOM = 24;
 const PLOT_WIDTH = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
 const PLOT_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+const PLOT_RIGHT = CHART_WIDTH - PADDING_RIGHT;
+const PLOT_BOTTOM = PADDING_TOP + PLOT_HEIGHT;
 
 // X 軸ラベルは混雑回避のため最大 6 本に間引く。
 const MAX_X_LABELS = 6;
@@ -183,6 +185,15 @@ export function BattingTrendChart({
       : (index / (points.length - 1)) * PLOT_WIDTH);
   const getY = (value: number) =>
     PADDING_TOP + PLOT_HEIGHT - (value / valueRange) * PLOT_HEIGHT;
+
+  // タップ領域の縦帯。隣接点との X 中点で分割し、両端はプロット境界にクランプする。
+  // 点が 1 個のときはプロット幅全体を 1 帯とする。
+  const getBandX = (index: number) =>
+    index === 0 ? PADDING_LEFT : (getX(index - 1) + getX(index)) / 2;
+  const getBandRight = (index: number) =>
+    index === points.length - 1
+      ? PLOT_RIGHT
+      : (getX(index) + getX(index + 1)) / 2;
 
   const linePaths = visibleLines.map((line) => ({
     ...line,
@@ -331,12 +342,19 @@ export function BattingTrendChart({
               const isSelected =
                 selectedDot?.lineKey === line.key &&
                 selectedDot?.pointIndex === index;
+              const bandX = getBandX(index);
+              const bandWidth = getBandRight(index) - bandX;
+              const bandY = Math.max(PADDING_TOP, getY(point[line.key]) - 8);
               return (
                 <Fragment key={`pt-${line.key}-${index}`}>
-                  <circle
-                    cx={getX(index)}
-                    cy={getY(point[line.key])}
-                    r={10}
+                  {/* 点とその真下（Y 軸方向の縦帯）をタップ領域にして、点だけより
+                      クリックしやすくする。複数ライン表示時は描画順で後のラインの帯が
+                      前面に来る（重なり領域は後勝ち）。 */}
+                  <rect
+                    x={bandX}
+                    y={bandY}
+                    width={bandWidth}
+                    height={PLOT_BOTTOM - bandY}
                     fill="transparent"
                     className="cursor-pointer"
                     onClick={() => handleDotPress(line.key, index)}
