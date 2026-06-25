@@ -56,7 +56,12 @@ export function PitcherSelector({
   const [editingPitcher, setEditingPitcher] = useState<Pitcher | null>(null);
 
   useEffect(() => {
-    getPitchers({}).then((response) => setPitchers(response.data));
+    // クライアント側で名前検索するため、ページネーション先頭のみだと投手が多いユーザーで
+    // 取りこぼす。1ユーザーの登録投手は 200 件を超えない想定で全件取得とみなす
+    // （超える運用が出たらサーバーサイド検索へ移行する）。
+    getPitchers({ per_page: 200 }).then((response) =>
+      setPitchers(response.data),
+    );
     getTeams().then(setTeams);
   }, []);
 
