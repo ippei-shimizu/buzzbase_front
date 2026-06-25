@@ -180,31 +180,16 @@ export default function ResultsSummary() {
 
   // 打席
   const getBattingResultClassName = (battingResult: string) => {
-    // 安打系(右中/左中/線など全方向)は共通判定で赤に。四球/死球/犠打/犠飛/打妨は青。
-    if (getBattingResultColor(battingResult) === HIT_RESULT_COLOR) {
+    // 安打系(右中/左中/線など全方向)は赤、犠打・犠飛は共通の部分一致判定で青にする。
+    const resultColor = getBattingResultColor(battingResult);
+    if (resultColor === HIT_RESULT_COLOR) {
       return "text-red-500";
     }
-    const walks = [
-      "四球",
-      "死球",
-      "投犠打",
-      "捕犠打",
-      "一犠打",
-      "二犠打",
-      "三犠打",
-      "遊犠打",
-      "投犠飛",
-      "捕犠飛",
-      "一犠飛",
-      "二犠飛",
-      "三犠飛",
-      "遊犠飛",
-      "左犠飛",
-      "中犠飛",
-      "右犠飛",
-      "打妨",
-    ];
-    if (walks.includes(battingResult)) {
+    if (resultColor === SACRIFICE_RESULT_COLOR) {
+      return "text-blue-400";
+    }
+    // 四球・死球・打妨は安打でも犠打でもないが青で表示する。
+    if (["四球", "死球", "打妨"].some((walk) => battingResult.includes(walk))) {
       return "text-blue-400";
     }
     return "";
