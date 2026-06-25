@@ -359,7 +359,9 @@ export default function GameRecord() {
   // 相手チーム設定
   const handleOpponentTeamChange = (teamKey: React.Key | null) => {
     if (teamKey === null) {
+      // クリア時は id と名前の両方を空にして、選択済みチーム名が残らないようにする。
       setExistingOpponentTeam(undefined);
+      setOpponentTeam("");
       return;
     }
     // teamKey は選択された既存チームの id。id 文字列をそのまま opponentTeam に
