@@ -46,6 +46,7 @@ import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceServi
 import {
   getBattingResultColor,
   HIT_RESULT_COLOR,
+  SACRIFICE_RESULT_COLOR,
 } from "@app/utils/battingResultColor";
 import { PlateAppearanceSummaryCard } from "../_components/PlateAppearanceSummaryCard";
 
@@ -390,21 +391,22 @@ export default function ResultsSummary() {
                     <div key={batting.id}>
                       <p className="text-xs text-zinc-400">打撃</p>
                       <ul className="flex flex-wrap gap-2 mt-2">
-                        {plateAppearance ? (
-                          plateAppearance.map((plate) => (
-                            <li key={plate.batter_box_number}>
-                              <p
-                                className={`font-bold ${getBattingResultClassName(
-                                  plate.batting_result,
-                                )}`}
-                              >
-                                {plate.batting_result}
-                              </p>
-                            </li>
-                          ))
-                        ) : (
-                          <></>
-                        )}
+                        {(plateAppearancesV2.length > 0
+                          ? plateAppearancesV2
+                          : (plateAppearance ?? [])
+                        ).map((plate, index) => (
+                          <li
+                            key={`${plate.batter_box_number ?? "na"}-${index}`}
+                          >
+                            <p
+                              className={`font-bold ${getBattingResultClassName(
+                                plate.batting_result,
+                              )}`}
+                            >
+                              {plate.batting_result}
+                            </p>
+                          </li>
+                        ))}
                       </ul>
                       <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1">
                         <div className="flex items-center">

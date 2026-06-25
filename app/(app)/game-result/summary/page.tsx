@@ -30,6 +30,7 @@ import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceServi
 import {
   getBattingResultColor,
   HIT_RESULT_COLOR,
+  SACRIFICE_RESULT_COLOR,
 } from "@app/utils/battingResultColor";
 import { PlateAppearanceSummaryCard } from "./_components/PlateAppearanceSummaryCard";
 
