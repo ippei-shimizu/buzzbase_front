@@ -133,13 +133,14 @@ export default function StatsContainer({
         </button>
       </div>
 
-      {/* 打撃タブ: 打球チャート・打席分析をテーブルの上に表示 */}
-      {tab === "batting" ? <div className="mt-5">{analysisSlot}</div> : null}
-
-      {/* 投手タブ: 防御率推移をテーブルの上に表示 */}
-      {tab === "pitching" ? (
-        <div className="mt-5">{pitchingAnalysisSlot}</div>
-      ) : null}
+      {/* 分析セクションはタブ切替で非表示にするだけにし、アンマウントによる
+          フィルタ state のリセットを防ぐ（条件 null だと往復で初期値に戻る）。 */}
+      <div className={tab === "batting" ? "mt-5" : "hidden"}>
+        {analysisSlot}
+      </div>
+      <div className={tab === "pitching" ? "mt-5" : "hidden"}>
+        {pitchingAnalysisSlot}
+      </div>
 
       {/* 期間トグル */}
       <div className="flex items-center justify-between mt-6 mb-2">
