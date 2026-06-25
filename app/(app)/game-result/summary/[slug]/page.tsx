@@ -89,7 +89,7 @@ export default function ResultsSummary() {
   const [isDetailDataFetched, setIsDetailDataFetched] = useState(false);
   const [currentUsersUserId, setCurrentUsersUserId] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [memo, setMemo] = useState();
+  const [memo, setMemo] = useState<string | null>();
   const [currentUserPage, setCurrentUserPage] = useState(false);
   const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
     number | null
