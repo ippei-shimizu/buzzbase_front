@@ -465,7 +465,9 @@ export default function GameRecord() {
       setIsMyTeamValid(true);
     }
 
-    if (!opponentTeam) {
+    // 既存試合の編集時は opponentTeam（名前）が空でも existingOpponentTeam（id）で
+    // 相手チームが確定しているため、どちらかがあれば入力済みとみなす。
+    if (!opponentTeam && !existingOpponentTeam) {
       setIsOpponentTeamValid(false);
       isValid = false;
       newErrors.push("相手チーム名が未入力です。");
