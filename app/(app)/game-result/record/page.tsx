@@ -357,9 +357,19 @@ export default function GameRecord() {
   };
 
   // 相手チーム設定
-  const handleOpponentTeamChange = (teamName: React.Key | null) => {
-    setExistingOpponentTeam(Number(teamName));
-    setOpponentTeam(teamName as string);
+  const handleOpponentTeamChange = (teamKey: React.Key | null) => {
+    if (teamKey === null) {
+      setExistingOpponentTeam(undefined);
+      return;
+    }
+    // teamKey は選択された既存チームの id。id 文字列をそのまま opponentTeam に
+    // 入れると保存時に名前として createOrUpdateTeam へ渡り不正なチームが作られるため、
+    // id を保持しつつ表示名はチーム一覧から解決する。
+    setExistingOpponentTeam(Number(teamKey));
+    const selectedTeam = teamsData.find(
+      (team) => String(team.id) === String(teamKey),
+    );
+    setOpponentTeam(selectedTeam?.name ?? "");
   };
 
   const handleTournamentInputChange = (value: string) => {
@@ -582,9 +592,10 @@ export default function GameRecord() {
         }
       }
 
-      // 相手チーム保存
-      let opponentTeamId;
-      if (typeof opponentTeam === "string") {
+      // 相手チーム保存。既存チームを選択済み（existingOpponentTeam あり）の場合は
+      // 新規作成せず id をそのまま使い、手入力で新しいチーム名を入れた場合のみ作成する。
+      let opponentTeamId = existingOpponentTeam;
+      if (!opponentTeamId && opponentTeam.trim() !== "") {
         const newTeamResponse = await createOrUpdateTeam({
           team: {
             name: opponentTeam,
@@ -593,10 +604,6 @@ export default function GameRecord() {
           },
         });
         opponentTeamId = newTeamResponse.data.id;
-      } else {
-        opponentTeamId = teamsData.find(
-          (team) => team.name === opponentTeam,
-        )?.id;
       }
       const matchResultData = {
         match_result: {
