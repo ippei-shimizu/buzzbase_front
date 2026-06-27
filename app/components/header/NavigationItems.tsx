@@ -23,7 +23,7 @@ const NavigationItems = (): NavigationItem[] => {
     },
     {
       href: isLoggedIn ? "/game-result/lists" : "/signup?auth_required=true",
-      label: "試合一覧",
+      label: "試合結果",
       icon: BallIcon,
       authRequired: !isLoggedIn,
     },
