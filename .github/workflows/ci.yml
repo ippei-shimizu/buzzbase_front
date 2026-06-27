@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - stg
+      - "release/**"
   pull_request:
     branches:
       - main
       - stg
+      - "release/**"
 
 jobs:
   lint-and-test:

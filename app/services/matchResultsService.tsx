@@ -105,12 +105,15 @@ export const getUserMatchResult = async (gameResultId: number | null) => {
 };
 
 /**
- * 試合作成・編集フォームの初期値を取得する。
- * 直近試合の inning_format（試合のイニング制: 7 or 9）が返る。
- * 履歴がない場合は 9。
+ * 試合作成フォームの初期値を取得する。直近試合をもとに
+ * inning_format（イニング制: 7 or 9。履歴なしは 9）、
+ * batting_order（直近試合の打順。履歴なしは null）、
+ * defensive_position（プロフィール最優先 → 直近試合 → null）が返る。
  */
 export const getMatchResultFormDefaults = async (): Promise<{
   inning_format: number;
+  batting_order: string | null;
+  defensive_position: string | null;
 }> => {
   try {
     const response = await axiosInstance.get(

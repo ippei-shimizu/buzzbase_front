@@ -1,12 +1,10 @@
-import type { StatsPeriod } from "./actions";
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import Header from "@app/components/header/Header";
+import { AnalysisSection } from "./_components/analysis/AnalysisSection";
+import { PitchingAnalysisSection } from "./_components/analysis/PitchingAnalysisSection";
 import StatsContainer from "./_components/StatsContainer";
-import {
-  getBattingStats,
-  getIsAuthenticated,
-  getPitchingStats,
-} from "./actions";
+import { getBattingStats, getIsAuthenticated } from "./actions";
+import { getStatsFilterOptions } from "./filterOptions";
 
 export const metadata = {
   title: "成績 | BUZZ BASE",
@@ -14,20 +12,14 @@ export const metadata = {
   robots: { index: false },
 };
 
-type ActiveTab = "batting" | "pitching";
-
-export default async function StatsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: string; period?: string }>;
-}) {
+export default async function StatsPage() {
   const isAuthenticated = await getIsAuthenticated();
 
   if (!isAuthenticated) {
     return (
       <>
         <Header />
-        <main className="min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
+        <main className="buzz-dark min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
           <div className="pt-20 px-4">
             <AuthRequiredOverlay message="成績を閲覧するにはログインが必要です" />
           </div>
@@ -36,27 +28,27 @@ export default async function StatsPage({
     );
   }
 
-  const params = await searchParams;
-  const tab: ActiveTab = params.tab === "pitching" ? "pitching" : "batting";
-  const period: StatsPeriod =
-    params.period === "monthly"
-      ? "monthly"
-      : params.period === "daily"
-        ? "daily"
-        : "yearly";
-
-  const rows =
-    tab === "batting"
-      ? await getBattingStats(period)
-      : await getPitchingStats(period);
+  // タブ/期間/フィルタの切替はクライアント側 state で行うため、ここでは
+  // デフォルト（打撃・年別）の初期データとフィルタ選択肢のみ SSR で取得して渡す。
+  // getStatsFilterOptions は cache() 済みで、各分析セクションと取得が集約される。
+  const [initialRows, filterOptions] = await Promise.all([
+    getBattingStats("yearly"),
+    getStatsFilterOptions(),
+  ]);
 
   return (
     <>
       <Header />
-      <main className="min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
+      <main className="buzz-dark min-h-full max-w-[720px] mx-auto w-full lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-12 px-4 lg:px-6 lg:pb-6">
-            <StatsContainer tab={tab} period={period} rows={rows} />
+            <StatsContainer
+              initialRows={initialRows}
+              analysisSlot={<AnalysisSection />}
+              pitchingAnalysisSlot={<PitchingAnalysisSection />}
+              seasonOptions={filterOptions.seasonOptions}
+              tournamentOptions={filterOptions.tournamentOptions}
+            />
           </div>
         </div>
       </main>
