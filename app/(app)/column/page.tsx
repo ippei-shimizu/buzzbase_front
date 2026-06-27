@@ -4,74 +4,595 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "コラム一覧｜野球の指標・用語をわかりやすく解説",
   description:
-    "OPS・出塁率・長打率など、野球の指標や用語をわかりやすく解説するコラム一覧。計算方法や目安値も掲載。",
+    "OPS・打率・出塁率・防御率・失点など、野球の指標や用語をわかりやすく解説するコラム一覧。計算方法や目安値、ランキングまでカテゴリ別に整理。",
   alternates: {
     canonical: "https://buzzbase.jp/column",
   },
 };
 
-const columns = [
+type Article = {
+  slug: string;
+  title: string;
+  description: string;
+};
+
+type StatGroup = {
+  label: string | null;
+  articles: Article[];
+};
+
+type Stat = {
+  name: string;
+  description: string;
+  groups: StatGroup[];
+};
+
+type Category = {
+  name: string;
+  description: string;
+  stats: Stat[];
+};
+
+const categories: Category[] = [
   {
-    slug: "ops",
-    title: "OPSとは？意味・計算方法・目安を解説",
-    description:
-      "OPSの意味・計算式・評価基準を解説。NPB・高校野球・中学野球の目安値を一覧表で掲載。",
+    name: "打撃指標",
+    description: "打者の評価に使う指標群（OPS・打率など）",
+    stats: [
+      {
+        name: "OPS",
+        description: "出塁率＋長打率で打者の総合的な攻撃力を評価する指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "ops",
+                title: "OPSとは（オーピーエス）？意味・計算方法・目安を解説",
+                description:
+                  "OPSの読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "ops-criteria",
+                title: "OPSはいくつから良い？レベル別の目安・基準を解説",
+                description:
+                  "OPS .700/.800/.900/1.000 の意味と、中学・高校・大学・社会人・プロのカテゴリ別目安テーブル、4 番を任される現場感まで整理。",
+              },
+            ],
+          },
+          {
+            label: "数値別解説",
+            articles: [
+              {
+                slug: "ops-800",
+                title: "OPS .800 はどのレベル？プロ・高校野球での意味",
+                description:
+                  "クリーンアップを任される好打者の目安。リーグ平均との比較や、達成するための OBP / SLG バランスを解説。",
+              },
+              {
+                slug: "ops-1000",
+                title: "OPS 1.000 を超える選手の特徴と「1超え」の意味",
+                description:
+                  "OPS 1超えの難易度、達成に必要な OBP / SLG、NPB・MLB 歴代の 1.000 超えスラッガーを整理。",
+              },
+              {
+                slug: "ops-700",
+                title: "OPS .700 は平均？高校野球・プロ野球での位置づけ",
+                description:
+                  "リーグ平均水準でレギュラー定着の最低ライン。プロ・高校野球での意味と .700 を超えるための課題を解説。",
+              },
+              {
+                slug: "ops-max",
+                title: "OPS の最大値（マックス）は？理論値と歴代最高記録",
+                description:
+                  "OPS の理論上の最大値（5.000）と実戦での天井、NPB・MLB 歴代シーズン最高 OPS を整理。",
+              },
+            ],
+          },
+          {
+            label: "比較",
+            articles: [
+              {
+                slug: "ops-vs-batting-average",
+                title: "OPSと打率・出塁率・長打率の違いをわかりやすく解説",
+                description:
+                  "4 指標の使い分け方を、打率が高いのに OPS が低い／逆のケースなど具体例で整理。",
+              },
+            ],
+          },
+          {
+            label: "ランキング・データ",
+            articles: [
+              {
+                slug: "ops-ranking-npb",
+                title:
+                  "NPB OPSランキング｜歴代シーズン上位と現役主要選手の目安",
+                description:
+                  "NPB 歴代シーズン OPS ランキングと現役主力打者の OPS 水準を整理。",
+              },
+              {
+                slug: "ops-ranking-mlb",
+                title:
+                  "MLB OPS歴代TOP｜バリー・ボンズから現役まで歴代シーズン最高 OPS",
+                description:
+                  "MLB 歴代シーズン最高 OPS ランキングと近年のトップ選手の水準を整理。",
+              },
+              {
+                slug: "npb-ops-average",
+                title:
+                  "NPB OPS平均値の推移｜セ・パ両リーグの平均と歴代スラッガーの比較",
+                description:
+                  "NPB のリーグ平均 OPS の推移、セ・パの違い、歴代スラッガーとの差を整理。",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "打率",
+        description: "安打数÷打数で算出する、最も基本的な打撃指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "batting-average",
+                title:
+                  "打率（AVG・だりつ）とは？計算方法・打率の出し方・目安値を解説",
+                description:
+                  "打率の読み方・意味・計算式・打率の出し方を解説。NPB・MLB・高校野球・中学野球の目安値、ポジション別の基準も掲載。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "batting-average-criteria",
+                title: "打率はいくつから良い？レベル別の目安・基準を解説",
+                description:
+                  "打率 .250 / .280 / .300 / .350 の意味と、中学・高校・大学・社会人・プロのカテゴリ別目安テーブル、ポジション別の基準まで整理。",
+              },
+            ],
+          },
+          {
+            label: "数値別解説",
+            articles: [
+              {
+                slug: "batting-average-300",
+                title:
+                  "打率 3 割の意味｜「3割打者」がすごい理由とプロ・高校での難易度",
+                description:
+                  ".300 が好打者の代名詞とされる理由、NPB・MLB の歴代 3 割打者、達成に必要な打席ごとの安打ペース。",
+              },
+              {
+                slug: "batting-average-350",
+                title: "打率 .350 はどのレベル？歴代首位打者と達成条件",
+                description:
+                  "首位打者の上位ライン。バース・イチロー・落合博満ら歴代の .350 越え打者と達成条件。",
+              },
+              {
+                slug: "batting-average-250",
+                title: "打率 .250 は平均？高校野球・プロ野球での位置づけ",
+                description:
+                  "リーグ平均水準。プロ・高校野球での意味と .250 から .280 / .300 へ上げる改善ポイント。",
+              },
+            ],
+          },
+          {
+            label: "比較",
+            articles: [
+              {
+                slug: "batting-average-vs-obp",
+                title:
+                  "打率と出塁率の違いをわかりやすく解説｜AVG と OBP の使い分け",
+                description:
+                  "四球・死球の扱いの違いを、打率は高いのに出塁率が低い／逆のケースなど具体例で整理。",
+              },
+            ],
+          },
+          {
+            label: "ランキング・データ",
+            articles: [
+              {
+                slug: "batting-average-ranking-npb",
+                title: "NPB 打率ランキング｜歴代シーズン上位の名打者",
+                description:
+                  "バース・イチロー・落合博満・青木宣親ら歴代上位の名打者を整理。",
+              },
+              {
+                slug: "batting-average-ranking-mlb",
+                title:
+                  "MLB 打率歴代 TOP｜テッド・ウィリアムズ・イチローら歴代名打者",
+                description:
+                  "最後の 4 割打者ウィリアムズ、イチローの .372、歴代名打者の記録を整理。",
+              },
+              {
+                slug: "npb-batting-average-average",
+                title:
+                  "NPB 打率平均値の推移｜セ・パ両リーグの平均と歴代名打者の比較",
+                description:
+                  "NPB のリーグ平均打率の推移、セ・パの違い、歴代名打者との差を整理。",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "出塁率（OBP）",
+        description:
+          "（安打＋四球＋死球）÷（打数＋四球＋死球＋犠飛）で算出する、打者の出塁能力を示す指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "obp",
+                title:
+                  "出塁率（OBP・しゅつるいりつ）とは？意味・計算方法・目安を解説",
+                description:
+                  "出塁率の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、ポジション別の基準まで整理。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "obp-criteria",
+                title:
+                  "出塁率はいくつから良い？レベル別の目安・基準・ポジション別を解説",
+                description:
+                  "出塁率 .310 / .350 / .380 / .420 の意味と、レベル別・ポジション別の目安、現場感を整理。",
+              },
+            ],
+          },
+          {
+            label: "数値別解説",
+            articles: [
+              {
+                slug: "obp-400",
+                title: "出塁率 .400 とは？最高出塁率タイトル争いラインを解説",
+                description:
+                  "最高出塁率タイトル獲得圏。リーグ平均との比較と、.400 達成に必要な打率・四球率のバランスを解説。",
+              },
+              {
+                slug: "obp-380",
+                title: "出塁率 .380 とは？好打者上位ラインの目安と達成選手",
+                description:
+                  "各球団のクリーンアップ・リードオフマンを任される標準値。.380 達成に必要な指標バランス。",
+              },
+              {
+                slug: "obp-350",
+                title:
+                  "出塁率 .350 とは？中堅レギュラー上位ラインの意味と達成条件",
+                description:
+                  "リーグ平均を一段上回る数値で、安定してスタメンを任される打者の標準値。達成条件を解説。",
+              },
+            ],
+          },
+          {
+            label: "ランキング・データ",
+            articles: [
+              {
+                slug: "obp-ranking-npb",
+                title:
+                  "NPB 出塁率ランキング｜歴代シーズン上位と最高出塁率タイトル獲得者",
+                description:
+                  "NPB 歴代シーズン出塁率上位と、最高出塁率タイトル獲得者・現役主力打者の水準を整理。",
+              },
+              {
+                slug: "obp-ranking-mlb",
+                title:
+                  "MLB 出塁率ランキング｜歴代シーズン上位とキャリア通算 TOP",
+                description:
+                  "MLB の歴代シーズン出塁率と通算出塁率の TOP 級を整理。テッド・ウィリアムズ、ベーブ・ルース、バリー・ボンズらの記録。",
+              },
+              {
+                slug: "npb-obp-average",
+                title:
+                  "NPB 出塁率平均値の推移｜セ・パ両リーグ平均と最高出塁率の関係",
+                description:
+                  "NPB のリーグ平均出塁率の推移、セ・パの違い、最高出塁率タイトル獲得ラインとの関係を整理。",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "長打率（SLG）",
+        description:
+          "塁打数÷打数で算出する、打者の長打力を示す指標。OPS の構成要素。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "slg",
+                title:
+                  "長打率（SLG・ちょうだりつ）とは？意味・計算方法・目安を解説",
+                description:
+                  "長打率の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、打率・OPS との違い、ポジション別の基準まで整理。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "slg-criteria",
+                title:
+                  "長打率はいくつから良い？レベル別の目安・基準・ポジション別を解説",
+                description:
+                  "長打率 .380 / .450 / .500 / .550 の意味と、レベル別・ポジション別の目安、現場感を整理。",
+              },
+            ],
+          },
+          {
+            label: "数値別解説",
+            articles: [
+              {
+                slug: "slg-500",
+                title: "長打率 .500 とは？中心打者ラインの意味と達成条件を解説",
+                description:
+                  "クリーンアップ標準。年間 20 本塁打以上が見える長打力。達成に必要な指標バランスを解説。",
+              },
+              {
+                slug: "slg-450",
+                title: "長打率 .450 とは？好打者ラインの意味と達成条件を解説",
+                description:
+                  "上位レギュラー水準。アベレージと長打のバランスが取れた打者の標準値。",
+              },
+              {
+                slug: "slg-400",
+                title:
+                  "長打率 .400 とは？リーグ平均を超えるラインの意味と達成条件",
+                description:
+                  "リーグ平均を上回る最低ライン。レギュラーの最低基準として意識すべき数値。",
+              },
+            ],
+          },
+          {
+            label: "ランキング・データ",
+            articles: [
+              {
+                slug: "slg-ranking-npb",
+                title:
+                  "NPB 長打率ランキング｜歴代シーズン上位と本塁打王・MVP 級スラッガー",
+                description:
+                  "NPB 歴代シーズン長打率上位と、本塁打王・MVP 級スラッガー・現役主力打者の水準を整理。",
+              },
+              {
+                slug: "slg-ranking-mlb",
+                title:
+                  "MLB 長打率ランキング｜歴代シーズン上位とキャリア通算 TOP",
+                description:
+                  "MLB の歴代シーズン長打率と通算長打率の TOP 級を整理。バリー・ボンズ、ベーブ・ルース、テッド・ウィリアムズらの記録。",
+              },
+              {
+                slug: "npb-slg-average",
+                title:
+                  "NPB 長打率平均値の推移｜セ・パ両リーグ平均と歴代スラッガーの比較",
+                description:
+                  "NPB のリーグ平均長打率の推移、セ・パの違い、歴代スラッガーとの差を整理。",
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
-    slug: "batting-average",
-    title: "打率とは？計算方法・打率の出し方・目安値を解説",
-    description:
-      "打率の意味・計算式・打率の出し方を解説。NPB・高校野球の目安値を一覧表で掲載。",
-  },
-  {
-    slug: "era",
-    title: "防御率（ERA）とは？計算方法・目安値を解説",
-    description:
-      "防御率の意味・計算式・評価基準を解説。NPB・高校野球の目安値を一覧表で掲載。",
-  },
-  {
-    slug: "runs",
-    title: "野球の失点とは？自責点との違い・失点率の計算方法",
-    description:
-      "失点の意味・自責点との違い・失点率の計算方法を解説。防御率との関係もわかりやすく説明。",
+    name: "投手指標",
+    description: "投手の評価に使う指標群（防御率・失点など）",
+    stats: [
+      {
+        name: "防御率（ERA）",
+        description:
+          "9 イニング換算で自責点をどれだけ許すかを示す投手の代表指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "era",
+                title:
+                  "防御率（ERA・ぼうぎょりつ）とは？計算方法・目安値を解説",
+                description:
+                  "防御率の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、先発・中継ぎ別の基準も掲載。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "era-criteria",
+                title: "防御率はいくつから良い？レベル別の目安・基準を解説",
+                description:
+                  "防御率 1.00 / 2.00 / 3.00 / 4.00 の意味と、中学・高校・大学・社会人・プロのカテゴリ別目安テーブル、先発・中継ぎ・抑え別の基準まで整理。",
+              },
+            ],
+          },
+          {
+            label: "数値別解説",
+            articles: [
+              {
+                slug: "era-1",
+                title: "防御率 1 点台はどのレベル？歴代エースと達成条件",
+                description:
+                  "リーグ歴代でも数えるほどのレジェンド水準。NPB・MLB 歴代の 1 点台投手と達成条件を解説。",
+              },
+              {
+                slug: "era-2",
+                title: "防御率 2 点台はどのレベル？プロ・高校野球での意味",
+                description:
+                  "リーグ代表エース・タイトル争いライン。NPB タイトル争い、MLB Cy Young 級、高校野球での意味。",
+              },
+              {
+                slug: "era-3",
+                title: "防御率 3 点台はどのレベル？リーグ平均ラインの位置づけ",
+                description:
+                  "NPB のリーグ平均ライン。先発ローテーション中堅・ローテ維持の最低ライン。",
+              },
+            ],
+          },
+          {
+            label: "比較",
+            articles: [
+              {
+                slug: "era-vs-runs",
+                title:
+                  "防御率と失点率の違いをわかりやすく解説｜自責点・失点の使い分け",
+                description:
+                  "自責点と失点の定義から具体例で解説。投手評価で両者をどう見るべきかを整理。",
+              },
+            ],
+          },
+          {
+            label: "ランキング・データ",
+            articles: [
+              {
+                slug: "era-ranking-npb",
+                title: "NPB 防御率ランキング｜歴代シーズン上位の名投手",
+                description:
+                  "村山実・稲尾和久・金田正一・斉藤雅樹・山本由伸ら歴代上位の名投手を整理。",
+              },
+              {
+                slug: "era-ranking-mlb",
+                title:
+                  "MLB 防御率歴代 TOP｜ボブ・ギブソンから現役まで歴代シーズン最低 ERA",
+                description:
+                  "ボブ・ギブソン 1968 年の 1.12、ペドロ・マルティネス、グレッグ・マダックスら歴代名投手。",
+              },
+              {
+                slug: "npb-era-average",
+                title:
+                  "NPB 防御率平均値の推移｜セ・パ両リーグの平均と歴代エースの比較",
+                description:
+                  "NPB のリーグ平均防御率の推移、セ・パの違い、歴代エースとの差を整理。",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "失点",
+        description: "失点と自責点の違い、失点率（RA）の意味と計算方法。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "runs",
+                title: "野球の失点とは？自責点との違い・失点率の計算方法",
+                description:
+                  "失点の意味・自責点との違い・失点率の計算方法を解説。防御率との関係もわかりやすく説明。",
+              },
+            ],
+          },
+          {
+            label: "目安・基準",
+            articles: [
+              {
+                slug: "runs-criteria",
+                title:
+                  "失点率（RA）はいくつから良い？目安・計算方法・防御率との違い",
+                description:
+                  "失点率（RA）の計算方法、レベル別の目安、防御率との使い分けを整理。",
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
 ];
+
+function ArrowRightIcon() {
+  return (
+    <svg
+      className="w-4 h-4 shrink-0 text-zinc-500 group-hover:text-yellow-600 transition-colors"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function ArticleCard({ article }: { article: Article }) {
+  return (
+    <Link
+      key={article.slug}
+      href={`/column/${article.slug}`}
+      className="group rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3 flex items-center justify-between gap-3"
+    >
+      <div>
+        <p className="font-bold text-sm text-white">{article.title}</p>
+        <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
+          {article.description}
+        </p>
+      </div>
+      <ArrowRightIcon />
+    </Link>
+  );
+}
 
 export default function ColumnIndexPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-2">コラム一覧</h1>
       <p className="text-sm text-zinc-400 mb-8">
-        野球の指標や用語をわかりやすく解説するコラムです。
+        野球の指標や用語をわかりやすく解説するコラムです。カテゴリ別に整理しています。
       </p>
 
-      <div className="grid grid-cols-1 gap-3">
-        {columns.map((column) => (
-          <Link
-            key={column.slug}
-            href={`/column/${column.slug}`}
-            className="group rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3 flex items-center justify-between gap-3"
-          >
-            <div>
-              <p className="font-bold text-sm text-white">{column.title}</p>
-              <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
-                {column.description}
-              </p>
+      <div className="space-y-12">
+        {categories.map((category) => (
+          <section key={category.name}>
+            <h2 className="text-xl font-bold text-white border-b border-zinc-700 pb-2">
+              {category.name}
+            </h2>
+            <p className="text-xs text-zinc-400 mt-2 mb-6">
+              {category.description}
+            </p>
+
+            <div className="space-y-8">
+              {category.stats.map((stat) => (
+                <div key={stat.name}>
+                  <h3 className="text-base font-bold text-yellow-500">
+                    {stat.name}
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-1 mb-4">
+                    {stat.description}
+                  </p>
+
+                  <div className="space-y-5">
+                    {stat.groups.map((group, index) => (
+                      <div key={group.label ?? `${stat.name}-default-${index}`}>
+                        {group.label ? (
+                          <p className="text-xs font-bold text-zinc-300 mb-2 ml-1">
+                            {group.label}
+                          </p>
+                        ) : null}
+                        <div className="grid grid-cols-1 gap-2">
+                          {group.articles.map((article) => (
+                            <ArticleCard key={article.slug} article={article} />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-            <svg
-              className="w-4 h-4 shrink-0 text-zinc-500 group-hover:text-yellow-600 transition-colors"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </Link>
+          </section>
         ))}
       </div>
     </div>

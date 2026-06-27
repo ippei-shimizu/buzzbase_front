@@ -86,6 +86,7 @@ export interface AppUserDetailResponse {
 export interface UserSearchParams {
   page?: string;
   per_page?: string;
+  id?: string;
   search?: string;
   sort_by?: string;
   sort_order?: string;

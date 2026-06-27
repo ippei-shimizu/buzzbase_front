@@ -9,14 +9,13 @@ import HeaderBackLink from "@app/components/header/HeaderBackLink";
 import { CopyIcon } from "@app/components/icon/CopyIcon";
 import { GroupIcon } from "@app/components/icon/GroupIcon";
 import { ShareIcon } from "@app/components/icon/ShareIcon";
+import { buildAppStoreUrl } from "@app/constants/app";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getOrCreateInviteLink } from "@app/services/groupInviteLinksService";
 import ShareInviteFallbackModal from "./_components/ShareInviteFallbackModal";
 
-const APP_STORE_URL = "https://apps.apple.com/jp/app/buzz-base/id6761011816";
-
 const buildShareMessage = (groupName: string, code: string) =>
-  `BUZZ BASEで「${groupName}」に参加しよう！\n\n招待コード: ${code}\n\nアプリをダウンロード\n${APP_STORE_URL}\n\nアプリをインストールして、招待コードを入力してね！`;
+  `BUZZ BASEで「${groupName}」に参加しよう！\n\n招待コード: ${code}\n\nアプリをダウンロード\n${buildAppStoreUrl("group_invite")}\n\nアプリをインストールして、招待コードを入力してね！`;
 
 export default function ShareInvitePage(props: {
   params: Promise<{ slug: string }>;

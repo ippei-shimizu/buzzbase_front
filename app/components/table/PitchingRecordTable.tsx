@@ -16,6 +16,7 @@ type PersonalPitchingResults = {
   hit_by_pitch: number;
   run_allowed: number;
   earned_run: number;
+  number_of_pitches: number;
 };
 
 type PersonalPitchingStatus = {
@@ -205,8 +206,10 @@ export default function PitchingRecordTable(props: Props) {
               </span>
             </div>
             <div className={styleTableBox}>
-              <p className={styleTableTitle}>---</p>
-              <span className={`${styleTableData} rounded-br-md`}>---</span>
+              <p className={styleTableTitle}>総投球数</p>
+              <span className={`${styleTableData} rounded-br-md`}>
+                {displayValue(pitchingResult?.number_of_pitches)}
+              </span>
             </div>
           </div>
         </div>
