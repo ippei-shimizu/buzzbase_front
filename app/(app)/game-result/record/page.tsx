@@ -199,16 +199,12 @@ export default function GameRecord() {
         currentUserId,
       );
       if (existingMatchResult) {
-        // stadium_id を復元する。v1 レスポンスは球場名を含まないため、
-        // 表示名は候補リストから id で best-effort に引き当てる（見つからなくても
-        // stadium_id は保持され、保存時に球場が維持される）。
+        // stadium_id と、back が解決済みで返す stadium_name を復元する。
         if (existingMatchResult.stadium_id) {
           setStadiumId(existingMatchResult.stadium_id);
-          const stadiumList = await searchStadiums({ per_page: 100 });
-          const foundStadium = stadiumList.data.find(
-            (stadium) => stadium.id === existingMatchResult.stadium_id,
-          );
-          if (foundStadium) setStadiumName(foundStadium.name);
+          if (existingMatchResult.stadium_name) {
+            setStadiumName(existingMatchResult.stadium_name);
+          }
         }
         const date = new Date(existingMatchResult.date_and_time);
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
