@@ -103,7 +103,7 @@ function StatsFilter({
   onPeriodRangeChange,
 }: FilterProps) {
   return (
-    <FilterChipGroup>
+    <FilterChipGroup wrap>
       <FilterChip
         label="年度"
         value={selectedYear}
