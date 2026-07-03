@@ -3,8 +3,15 @@ export interface MonthOption {
   label: string;
 }
 
-/** 期間フィルタ用の「指定なし」選択肢。key は空文字（= 未指定 / 開放端）。 */
-export const UNSET_MONTH_OPTION: MonthOption = { key: "", label: "指定なし" };
+/**
+ * 期間フィルタ用の「指定なし」選択肢（= 未指定 / 開放端）。
+ * key は空文字にしない: 共有 FilterChip の onChange が falsy な key を無視するため、
+ * 空文字だと「指定なし」に戻せなくなる。非空のセンチネル値を使う。
+ */
+export const UNSET_MONTH_OPTION: MonthOption = {
+  key: "none",
+  label: "指定なし",
+};
 
 /**
  * 期間フィルタ（開始年月 / 終了年月）のセレクタに渡す "YYYY-MM" 選択肢を生成する。

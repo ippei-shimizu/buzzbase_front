@@ -24,10 +24,10 @@ describe("buildMonthOptions", () => {
     global.Date = RealDate;
   });
 
-  it("先頭に「指定なし」（key 空文字）を含む", () => {
+  it("先頭に「指定なし」（非空のセンチネル key）を含む", () => {
     const options = buildMonthOptions([2026]);
     expect(options[0]).toEqual(UNSET_MONTH_OPTION);
-    expect(options[0].key).toBe("");
+    expect(options[0].key).toBe("none");
   });
 
   it("当年は当月までしか生成しない（未来月を出さない）", () => {

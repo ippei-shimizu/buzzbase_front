@@ -24,11 +24,16 @@ interface PeriodRangeFilterProps {
  * 終了未指定→同月補完により、開始を選ぶだけで単月がワンタップで作れる。
  * ("YYYY-MM" は文字列比較で時系列順になる)
  */
+/** ドロップダウンの選択 key を月値へ正規化する（「指定なし」センチネルは undefined）。 */
+function toMonth(key: string): string | undefined {
+  return key && key !== UNSET_MONTH_OPTION.key ? key : undefined;
+}
+
 export function resolveStartChange(
   key: string,
   endMonth?: string,
 ): PeriodRange {
-  const startMonth = key || undefined;
+  const startMonth = toMonth(key);
   if (!startMonth) return { startMonth: undefined, endMonth };
 
   const nextEnd = !endMonth || endMonth < startMonth ? startMonth : endMonth;
@@ -44,7 +49,7 @@ export function resolveEndChange(
   key: string,
   startMonth?: string,
 ): PeriodRange {
-  const endMonth = key || undefined;
+  const endMonth = toMonth(key);
   if (!endMonth) return { startMonth, endMonth: undefined };
 
   const nextStart = startMonth && startMonth > endMonth ? endMonth : startMonth;

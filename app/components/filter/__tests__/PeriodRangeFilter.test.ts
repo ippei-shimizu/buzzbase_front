@@ -2,6 +2,7 @@ import {
   resolveEndChange,
   resolveStartChange,
 } from "@app/components/filter/PeriodRangeFilter";
+import { UNSET_MONTH_OPTION } from "@app/utils/buildMonthOptions";
 
 describe("resolveStartChange", () => {
   it("終了が未指定なら終了を開始へ補完し単月にする（単月ワンタップ）", () => {
@@ -25,8 +26,8 @@ describe("resolveStartChange", () => {
     });
   });
 
-  it("開始をクリアしても終了は維持する（開放端）", () => {
-    expect(resolveStartChange("", "2026-07")).toEqual({
+  it("開始を「指定なし」に戻しても終了は維持する（開放端）", () => {
+    expect(resolveStartChange(UNSET_MONTH_OPTION.key, "2026-07")).toEqual({
       startMonth: undefined,
       endMonth: "2026-07",
     });
@@ -55,8 +56,8 @@ describe("resolveEndChange", () => {
     });
   });
 
-  it("終了をクリアしても開始は維持する（開放端）", () => {
-    expect(resolveEndChange("", "2026-05")).toEqual({
+  it("終了を「指定なし」に戻しても開始は維持する（開放端）", () => {
+    expect(resolveEndChange(UNSET_MONTH_OPTION.key, "2026-05")).toEqual({
       startMonth: "2026-05",
       endMonth: undefined,
     });
