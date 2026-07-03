@@ -305,7 +305,7 @@ export default function MatchResultList(props: MatchResultListProps) {
     <>
       <div ref={listTopRef} className="bg-bg_sub p-4 rounded-xl lg:p-6">
         <div className="mb-5 overflow-hidden flex flex-col gap-3">
-          <FilterChipGroup>
+          <FilterChipGroup wrap>
             <FilterChip
               label="年度"
               value={selectedYear}

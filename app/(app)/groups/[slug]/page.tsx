@@ -399,7 +399,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                 個人成績ランキング
               </h2>
               <div className="mt-3">
-                <FilterChipGroup>
+                <FilterChipGroup wrap>
                   <FilterChip
                     label="年度"
                     value={selectedYear}

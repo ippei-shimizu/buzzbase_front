@@ -200,7 +200,7 @@ export default function IndividualResultsList(props: UserId) {
     <>
       <div className="bg-bg_sub p-4 rounded-xl lg:p-6">
         <div className="mb-5 overflow-hidden">
-          <FilterChipGroup>
+          <FilterChipGroup wrap>
             <FilterChip
               label="年度"
               value={selectedYear}

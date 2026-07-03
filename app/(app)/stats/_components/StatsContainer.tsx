@@ -221,7 +221,7 @@ export default function StatsContainer({
       {/* テーブル専用フィルタ（年/月以外＝年度/シーズン/大会で絞る） */}
       {showTableFilters ? (
         <div className="mb-3 flex justify-end">
-          <FilterChipGroup>
+          <FilterChipGroup wrap>
             <FilterChip
               label="年度"
               value={tableYear ?? "全て"}
