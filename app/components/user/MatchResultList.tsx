@@ -139,12 +139,11 @@ export default function MatchResultList(props: MatchResultListProps) {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        let matchResultData;
-        if (userId) {
-          matchResultData = await getMatchResultsUserId(userId);
-        } else {
-          matchResultData = await getMatchResults();
-        }
+        // 試合一覧と記録月は互いに独立なので並列取得して初回のフィルタ確定を早める。
+        const [matchResultData, months] = await Promise.all([
+          userId ? getMatchResultsUserId(userId) : getMatchResults(),
+          getAvailableMonths(userId),
+        ]);
         // 年度抽出
         const yearArray: AvailableYear[] = matchResultData.map(
           (result: { date_and_time: string }) =>
@@ -174,7 +173,7 @@ export default function MatchResultList(props: MatchResultListProps) {
         ];
         setMatchTypeOptions(mtOpts);
         // 期間フィルタは記録のある年月だけを候補にする
-        setAvailableMonths(await getAvailableMonths(userId));
+        setAvailableMonths(months);
       } catch {}
     };
     fetchMeta();

@@ -72,7 +72,11 @@ export default function IndividualResultsList(props: UserId) {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        const matchResultData = await getMatchResultsUserId(userId);
+        // 試合一覧と記録月は互いに独立なので並列取得して初回のフィルタ確定を早める。
+        const [matchResultData, months] = await Promise.all([
+          getMatchResultsUserId(userId),
+          getAvailableMonths(userId),
+        ]);
         // 年度抽出
         const yearArray: AvailableYear[] = matchResultData.map(
           (result: { date_and_time: string }) =>
@@ -102,7 +106,7 @@ export default function IndividualResultsList(props: UserId) {
         ];
         setMatchTypeOptions(mtOpts);
         // 期間フィルタは記録のある年月だけを候補にする
-        setAvailableMonths(await getAvailableMonths(userId));
+        setAvailableMonths(months);
       } catch (error) {
         console.error("Failed to fetch meta:", error);
       }
