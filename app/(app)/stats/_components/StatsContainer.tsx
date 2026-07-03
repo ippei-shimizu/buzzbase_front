@@ -8,6 +8,8 @@ import type {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
+import { buildMonthOptions } from "@app/utils/buildMonthOptions";
 import { getBattingStats, getPitchingStats } from "../actions";
 import { DEFAULT_OPTION, type FilterOption } from "../statsFilterOption";
 import BattingStatsTable from "./BattingStatsTable";
@@ -61,11 +63,18 @@ export default function StatsContainer({
   const [tableTournamentId, setTableTournamentId] = useState<
     string | undefined
   >(undefined);
+  const [tableStartMonth, setTableStartMonth] = useState<string | undefined>(
+    undefined,
+  );
+  const [tableEndMonth, setTableEndMonth] = useState<string | undefined>(
+    undefined,
+  );
   const [battingRows, setBattingRows] =
     useState<BattingStatsRow[]>(initialRows);
   const [pitchingRows, setPitchingRows] = useState<PitchingStatsRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() => buildMonthOptions());
 
   // 初回マウントは SSR の initialRows（打撃/年別）を使うため取得しない。
   const didInitRef = useRef(false);
@@ -78,18 +87,53 @@ export default function StatsContainer({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     const fetcher = tab === "batting" ? getBattingStats : getPitchingStats;
-    void fetcher(period, tableYear, tableSeasonId, tableTournamentId).then(
-      (rows) => {
-        if (!active) return;
-        if (tab === "batting") setBattingRows(rows as BattingStatsRow[]);
-        else setPitchingRows(rows as PitchingStatsRow[]);
-        setIsLoading(false);
-      },
-    );
+    void fetcher(
+      period,
+      tableYear,
+      tableSeasonId,
+      tableTournamentId,
+      tableStartMonth,
+      tableEndMonth,
+    ).then((rows) => {
+      if (!active) return;
+      if (tab === "batting") setBattingRows(rows as BattingStatsRow[]);
+      else setPitchingRows(rows as PitchingStatsRow[]);
+      setIsLoading(false);
+    });
     return () => {
       active = false;
     };
-  }, [tab, period, tableYear, tableSeasonId, tableTournamentId]);
+  }, [
+    tab,
+    period,
+    tableYear,
+    tableSeasonId,
+    tableTournamentId,
+    tableStartMonth,
+    tableEndMonth,
+  ]);
+
+  // 期間（開始/終了）と年度は排他。期間を指定したら年度を通算（未指定）に戻す。
+  const handlePeriodRangeChange = (range: {
+    startMonth?: string;
+    endMonth?: string;
+  }) => {
+    setTableStartMonth(range.startMonth);
+    setTableEndMonth(range.endMonth);
+    if (range.startMonth || range.endMonth) {
+      setTableYear(undefined);
+    }
+  };
+
+  // 実年を選んだら期間指定をクリアする（排他）。
+  const handleTableYearChange = (key: string) => {
+    const nextYear = key === "全て" ? undefined : key;
+    setTableYear(nextYear);
+    if (nextYear) {
+      setTableStartMonth(undefined);
+      setTableEndMonth(undefined);
+    }
+  };
 
   const handlePeriodChange = (next: StatsPeriod) => {
     setPeriod(next);
@@ -178,7 +222,13 @@ export default function StatsContainer({
               value={tableYear ?? "全て"}
               defaultValue="全て"
               options={yearOptions}
-              onChange={(key) => setTableYear(key === "全て" ? undefined : key)}
+              onChange={handleTableYearChange}
+            />
+            <PeriodRangeFilter
+              startMonth={tableStartMonth}
+              endMonth={tableEndMonth}
+              monthOptions={monthOptions}
+              onChange={handlePeriodRangeChange}
             />
             {seasonOptions.length > 1 ? (
               <FilterChip

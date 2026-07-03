@@ -39,11 +39,15 @@ export const getGroupDetail = async (
   id: number,
   year?: string,
   matchType?: string,
+  startMonth?: string,
+  endMonth?: string,
 ) => {
   try {
     const params = new URLSearchParams();
     if (year) params.append("year", year);
     if (matchType) params.append("match_type", matchType);
+    if (startMonth) params.append("start_month", startMonth);
+    if (endMonth) params.append("end_month", endMonth);
     const query = params.toString();
     const response = await axiosInstance.get(
       `/api/v1/groups/${id}${query ? `?${query}` : ""}`,

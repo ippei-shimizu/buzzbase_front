@@ -1,6 +1,7 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { buildMonthOptions } from "@app/utils/buildMonthOptions";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
@@ -118,6 +119,7 @@ export function AnalysisContainer({
   // 推移グラフは粒度切替で単独再取得もあるため、専用の pending でグラフだけ dim する。
   const [isTrendPending, startTrendTransition] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() => buildMonthOptions());
 
   // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -213,6 +215,7 @@ export function AnalysisContainer({
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        monthOptions={monthOptions}
       />
       <div
         className={`flex flex-col gap-y-5${

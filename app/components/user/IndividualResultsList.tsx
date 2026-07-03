@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
 import BattingAverageTable from "@app/components/table/BattingAverageTable";
 import PitchingRecordTable from "@app/components/table/PitchingRecordTable";
 import { usePersonalBattingAverage } from "@app/hooks/batting/getPersonalBattingAverage";
@@ -14,6 +15,7 @@ import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchi
 import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
 import { getMatchResultsUserId } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { buildMonthOptions } from "@app/utils/buildMonthOptions";
 import { formatRate, formatEra } from "@app/utils/formatStats";
 
 type UserId = {
@@ -38,6 +40,9 @@ export default function IndividualResultsList(props: UserId) {
   const [seasonOptions, setSeasonOptions] = useState<
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
+  const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
+  const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
 
   // シーズンデータ取得
   useEffect(() => {
@@ -76,6 +81,7 @@ export default function IndividualResultsList(props: UserId) {
           ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
         ];
         setYearOptions(yOpts);
+        setAvailableYears(uniqueYears.map(Number));
         // 試合タイプ抽出（keyにAPI値、labelに日本語）
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
           (type: { match_type: string }) => type.match_type,
@@ -106,6 +112,31 @@ export default function IndividualResultsList(props: UserId) {
       : undefined;
   }, [selectedSeason, seasonsData]);
 
+  const monthOptions = useMemo(
+    () => buildMonthOptions(availableYears),
+    [availableYears],
+  );
+
+  // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）
+  const handleYearChange = (value: string) => {
+    setSelectedYear(value);
+    if (value !== "通算") {
+      setStartMonth(undefined);
+      setEndMonth(undefined);
+    }
+  };
+  // 期間を設定したら年度を通算へ戻す（両端クリア時は年度を据え置く）
+  const handlePeriodChange = (range: {
+    startMonth?: string;
+    endMonth?: string;
+  }) => {
+    setStartMonth(range.startMonth);
+    setEndMonth(range.endMonth);
+    if (range.startMonth || range.endMonth) {
+      setSelectedYear("通算");
+    }
+  };
+
   // API送信用の値
   const yearParam = selectedYear !== "通算" ? selectedYear : undefined;
   const matchTypeParam =
@@ -116,21 +147,34 @@ export default function IndividualResultsList(props: UserId) {
     seasonId,
     yearParam,
     matchTypeParam,
+    startMonth,
+    endMonth,
   );
   const { personalBattingStatus, isLoadingBS } = usePersonalBattingStatus(
     userId,
     seasonId,
     yearParam,
     matchTypeParam,
+    startMonth,
+    endMonth,
   );
   const { personalPitchingResults, isLoadingPR } = usePersonalPitchingResult(
     userId,
     seasonId,
     yearParam,
     matchTypeParam,
+    startMonth,
+    endMonth,
   );
   const { personalPitchingStatus, isLoadingPS } =
-    usePersonalPitchingResultStats(userId, seasonId, yearParam, matchTypeParam);
+    usePersonalPitchingResultStats(
+      userId,
+      seasonId,
+      yearParam,
+      matchTypeParam,
+      startMonth,
+      endMonth,
+    );
 
   const isLoading = isLoadingBA || isLoadingBS || isLoadingPR || isLoadingPS;
 
@@ -154,7 +198,7 @@ export default function IndividualResultsList(props: UserId) {
               value={selectedYear}
               defaultValue="通算"
               options={yearOptions}
-              onChange={setSelectedYear}
+              onChange={handleYearChange}
             />
             <FilterChip
               label="種別"
@@ -169,6 +213,12 @@ export default function IndividualResultsList(props: UserId) {
               defaultValue="全て"
               options={seasonOptions}
               onChange={setSelectedSeason}
+            />
+            <PeriodRangeFilter
+              startMonth={startMonth}
+              endMonth={endMonth}
+              monthOptions={monthOptions}
+              onChange={handlePeriodChange}
             />
           </FilterChipGroup>
         </div>

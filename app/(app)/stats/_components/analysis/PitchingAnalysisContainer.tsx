@@ -1,6 +1,7 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { buildMonthOptions } from "@app/utils/buildMonthOptions";
 import {
   type AnalysisFilters as Filters,
   type EraTrendPoint,
@@ -40,6 +41,7 @@ export function PitchingAnalysisContainer({
   const [eraTrend, setEraTrend] = useState<EraTrendPoint[]>(initialEraTrend);
   const [isRefetching, startRefetch] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() => buildMonthOptions());
 
   // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -55,13 +57,22 @@ export function PitchingAnalysisContainer({
         year: filters.year,
         seasonId: filters.seasonId,
         tournamentId: filters.tournamentId,
+        startMonth: filters.startMonth,
+        endMonth: filters.endMonth,
       });
       if (active) setEraTrend(trend);
     });
     return () => {
       active = false;
     };
-  }, [filters.year, filters.seasonId, filters.tournamentId, startRefetch]);
+  }, [
+    filters.year,
+    filters.seasonId,
+    filters.tournamentId,
+    filters.startMonth,
+    filters.endMonth,
+    startRefetch,
+  ]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -71,6 +82,7 @@ export function PitchingAnalysisContainer({
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        monthOptions={monthOptions}
         hideMatchType
       />
       <div

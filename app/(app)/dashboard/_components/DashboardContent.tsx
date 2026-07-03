@@ -35,8 +35,16 @@ export default function DashboardContent({
     year: string,
     matchType: string,
     seasonId?: string,
+    startMonth?: string,
+    endMonth?: string,
   ) => {
-    const filtered = await getFilteredBattingStats(year, matchType, seasonId);
+    const filtered = await getFilteredBattingStats(
+      year,
+      matchType,
+      seasonId,
+      startMonth,
+      endMonth,
+    );
     if (filtered) {
       setBattingStats(filtered);
     }
@@ -46,8 +54,16 @@ export default function DashboardContent({
     year: string,
     matchType: string,
     seasonId?: string,
+    startMonth?: string,
+    endMonth?: string,
   ) => {
-    const filtered = await getFilteredPitchingStats(year, matchType, seasonId);
+    const filtered = await getFilteredPitchingStats(
+      year,
+      matchType,
+      seasonId,
+      startMonth,
+      endMonth,
+    );
     if (filtered) {
       setPitchingStats(filtered);
     }

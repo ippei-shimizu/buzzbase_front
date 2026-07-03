@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
 import GamePagination from "@app/components/game/GamePagination";
 import GameSearchInput from "@app/components/game/GameSearchInput";
 import GameSortSelect from "@app/components/game/GameSortSelect";
@@ -20,6 +21,7 @@ import {
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { buildMonthOptions } from "@app/utils/buildMonthOptions";
 
 type GameResult = {
   game_result_id: number;
@@ -76,6 +78,9 @@ export default function MatchResultList(props: MatchResultListProps) {
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
   const [selectedSeason, setSelectedSeason] = useState("全て");
+  const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
+  const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -150,6 +155,7 @@ export default function MatchResultList(props: MatchResultListProps) {
           ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
         ];
         setYearOptions(yOpts);
+        setAvailableYears(uniqueYears.map(Number));
         // 試合タイプ抽出（keyにAPI値、labelに日本語）
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
           (type: { match_type: string }) => type.match_type,
@@ -177,9 +183,31 @@ export default function MatchResultList(props: MatchResultListProps) {
   const apiMatchType =
     selectedMatchType === "全て" ? "全て" : selectedMatchType;
 
+  const monthOptions = useMemo(
+    () => buildMonthOptions(availableYears),
+    [availableYears],
+  );
+
   // フィルター変更時にページを1にリセットするラッパー
+  // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）
   const handleYearChange = (value: string) => {
     setSelectedYear(value);
+    if (value !== "通算") {
+      setStartMonth(undefined);
+      setEndMonth(undefined);
+    }
+    setCurrentPage(1);
+  };
+  // 期間を設定したら年度を通算へ戻す（両端クリア時は年度を据え置く）
+  const handlePeriodChange = (range: {
+    startMonth?: string;
+    endMonth?: string;
+  }) => {
+    setStartMonth(range.startMonth);
+    setEndMonth(range.endMonth);
+    if (range.startMonth || range.endMonth) {
+      setSelectedYear("通算");
+    }
     setCurrentPage(1);
   };
   const handleMatchTypeChange = (value: string) => {
@@ -223,6 +251,8 @@ export default function MatchResultList(props: MatchResultListProps) {
             debouncedSearch || undefined,
             apiSortBy,
             apiSortOrder,
+            startMonth,
+            endMonth,
           );
         } else {
           response = await getFilterGameResultsV2(
@@ -234,6 +264,8 @@ export default function MatchResultList(props: MatchResultListProps) {
             debouncedSearch || undefined,
             apiSortBy,
             apiSortOrder,
+            startMonth,
+            endMonth,
           );
         }
         if (cancelled) return;
@@ -264,6 +296,8 @@ export default function MatchResultList(props: MatchResultListProps) {
     sortOrder,
     apiSortBy,
     apiSortOrder,
+    startMonth,
+    endMonth,
   ]);
 
   return (
@@ -291,6 +325,12 @@ export default function MatchResultList(props: MatchResultListProps) {
               defaultValue="全て"
               options={seasonOptions}
               onChange={handleSeasonChange}
+            />
+            <PeriodRangeFilter
+              startMonth={startMonth}
+              endMonth={endMonth}
+              monthOptions={monthOptions}
+              onChange={handlePeriodChange}
             />
           </FilterChipGroup>
           <div className="flex items-center gap-2">

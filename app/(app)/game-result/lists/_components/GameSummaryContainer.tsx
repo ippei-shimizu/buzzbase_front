@@ -7,6 +7,7 @@ import type {
 } from "../gameSummaryTypes";
 import { Spinner } from "@heroui/react";
 import { useEffect, useState, useTransition } from "react";
+import { buildMonthOptions } from "@app/utils/buildMonthOptions";
 import { AnalysisFilters } from "../../../stats/_components/analysis/AnalysisFilters";
 import {
   getGameSummary,
@@ -36,6 +37,7 @@ export function GameSummaryContainer() {
   );
   const [isRefetching, startRefetch] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() => buildMonthOptions());
 
   // シーズン / 大会の選択肢はマウント時に1度だけ取得する。
   useEffect(() => {
@@ -94,6 +96,7 @@ export function GameSummaryContainer() {
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        monthOptions={monthOptions}
       />
       {result.status === "error" ? (
         <p className="py-10 text-center text-sm text-[#A1A1AA]">
