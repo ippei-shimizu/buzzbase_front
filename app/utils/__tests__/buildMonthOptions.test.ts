@@ -1,27 +1,35 @@
 import {
   buildMonthOptions,
+  monthOptionsFromRecorded,
   UNSET_MONTH_OPTION,
 } from "@app/utils/buildMonthOptions";
 
-describe("buildMonthOptions", () => {
-  const RealDate = Date;
+describe("monthOptionsFromRecorded", () => {
+  it("記録のある年月だけを先頭「指定なし」付きで、渡された順に返す", () => {
+    expect(monthOptionsFromRecorded(["2026-06", "2026-05", "2025-12"])).toEqual(
+      [
+        UNSET_MONTH_OPTION,
+        { key: "2026-06", label: "2026年6月" },
+        { key: "2026-05", label: "2026年5月" },
+        { key: "2025-12", label: "2025年12月" },
+      ],
+    );
+  });
 
+  it("記録が無いときは「指定なし」のみ返す", () => {
+    expect(monthOptionsFromRecorded([])).toEqual([UNSET_MONTH_OPTION]);
+  });
+});
+
+describe("buildMonthOptions", () => {
   beforeAll(() => {
     // 当月を 2026-07 に固定して、当年は当月までしか出さない挙動を検証する。
-    const fixedNow = new RealDate("2026-07-15T00:00:00+09:00");
-    global.Date = class extends RealDate {
-      constructor(...args: ConstructorParameters<typeof RealDate>) {
-        if (args.length === 0) {
-          super(fixedNow.getTime());
-          return;
-        }
-        super(...args);
-      }
-    } as DateConstructor;
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-07-15T00:00:00+09:00"));
   });
 
   afterAll(() => {
-    global.Date = RealDate;
+    jest.useRealTimers();
   });
 
   it("先頭に「指定なし」（非空のセンチネル key）を含む", () => {

@@ -9,7 +9,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
 import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
-import { buildMonthOptions } from "@app/utils/buildMonthOptions";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import { getBattingStats, getPitchingStats } from "../actions";
 import { DEFAULT_OPTION, type FilterOption } from "../statsFilterOption";
 import BattingStatsTable from "./BattingStatsTable";
@@ -45,6 +45,8 @@ interface StatsContainerProps {
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  /** 試合を記録した年月（"YYYY-MM" の降順）。期間フィルタの月候補に使う。 */
+  availableMonths: string[];
 }
 
 export default function StatsContainer({
@@ -53,6 +55,7 @@ export default function StatsContainer({
   pitchingAnalysisSlot,
   seasonOptions,
   tournamentOptions,
+  availableMonths,
 }: StatsContainerProps) {
   const [tab, setTab] = useState<ActiveTab>("batting");
   const [period, setPeriod] = useState<StatsPeriod>("yearly");
@@ -74,7 +77,9 @@ export default function StatsContainer({
   const [pitchingRows, setPitchingRows] = useState<PitchingStatsRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [yearOptions] = useState(buildYearOptions);
-  const [monthOptions] = useState(() => buildMonthOptions());
+  const [monthOptions] = useState(() =>
+    monthOptionsFromRecorded(availableMonths),
+  );
 
   // 初回マウントは SSR の initialRows（打撃/年別）を使うため取得しない。
   const didInitRef = useRef(false);

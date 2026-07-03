@@ -17,11 +17,12 @@ import {
   getFilterGameResultsUserIdV2,
 } from "@app/services/gameResultsService";
 import {
+  getAvailableMonths,
   getMatchResults,
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
-import { buildMonthOptions } from "@app/utils/buildMonthOptions";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 
 type GameResult = {
   game_result_id: number;
@@ -80,7 +81,7 @@ export default function MatchResultList(props: MatchResultListProps) {
   const [selectedSeason, setSelectedSeason] = useState("全て");
   const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
   const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -155,7 +156,6 @@ export default function MatchResultList(props: MatchResultListProps) {
           ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
         ];
         setYearOptions(yOpts);
-        setAvailableYears(uniqueYears.map(Number));
         // 試合タイプ抽出（keyにAPI値、labelに日本語）
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
           (type: { match_type: string }) => type.match_type,
@@ -173,6 +173,8 @@ export default function MatchResultList(props: MatchResultListProps) {
           })),
         ];
         setMatchTypeOptions(mtOpts);
+        // 期間フィルタは記録のある年月だけを候補にする
+        setAvailableMonths(await getAvailableMonths(userId));
       } catch {}
     };
     fetchMeta();
@@ -184,8 +186,8 @@ export default function MatchResultList(props: MatchResultListProps) {
     selectedMatchType === "全て" ? "全て" : selectedMatchType;
 
   const monthOptions = useMemo(
-    () => buildMonthOptions(availableYears),
-    [availableYears],
+    () => monthOptionsFromRecorded(availableMonths),
+    [availableMonths],
   );
 
   // フィルター変更時にページを1にリセットするラッパー

@@ -115,6 +115,7 @@ export interface DashboardData {
   pitching_stats: PitchingStats;
   group_rankings: GroupRanking[];
   available_years: number[];
+  available_months?: string[];
 }
 
 export async function getDashboardData(

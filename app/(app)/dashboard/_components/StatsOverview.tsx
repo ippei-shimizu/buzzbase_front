@@ -10,7 +10,7 @@ import PeriodRangeFilter, {
 import StatTooltipLabel from "@app/components/table/StatTooltipLabel";
 import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import {
-  buildMonthOptions,
+  monthOptionsFromRecorded,
   type MonthOption,
 } from "@app/utils/buildMonthOptions";
 import { formatRate, formatRate2, formatEra } from "@app/utils/formatStats";
@@ -26,6 +26,7 @@ interface StatsOverviewProps {
   hasBattingRecord: boolean;
   hasPitchingRecord: boolean;
   availableYears: number[];
+  availableMonths: string[];
   availableSeasons: SeasonOption[];
   onBattingFilterChange: (
     year: string,
@@ -500,6 +501,7 @@ export default function StatsOverview({
   hasBattingRecord,
   hasPitchingRecord,
   availableYears,
+  availableMonths,
   availableSeasons,
   onBattingFilterChange,
   onPitchingFilterChange,
@@ -533,7 +535,7 @@ export default function StatsOverview({
     ...availableSeasons.map((s) => ({ key: String(s.id), label: s.name })),
   ];
 
-  const monthOptions: MonthOption[] = buildMonthOptions(availableYears);
+  const monthOptions: MonthOption[] = monthOptionsFromRecorded(availableMonths);
 
   const handleBattingYearChange = (year: string) => {
     setBattingYear(year);

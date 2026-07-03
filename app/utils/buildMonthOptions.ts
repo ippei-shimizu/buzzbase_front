@@ -21,6 +21,25 @@ export const UNSET_MONTH_OPTION: MonthOption = {
  * @param years データが存在する年のリスト（省略時は当年から過去6年）
  * @returns 先頭が「指定なし」、以降が新しい順の年月選択肢
  */
+/**
+ * 実際に試合を記録した年月（"YYYY-MM" の降順リスト、バックエンドの available_months）から
+ * 期間フィルタの選択肢を作る。記録のある年月だけを候補に出したい画面で使う。
+ * 先頭は「指定なし」。入力の並び順（新しい順）をそのまま保つ。
+ *
+ * @param months 記録のある年月（例 ["2026-06", "2026-05"]）
+ */
+export function monthOptionsFromRecorded(months: string[]): MonthOption[] {
+  const options: MonthOption[] = [UNSET_MONTH_OPTION];
+  for (const month of months) {
+    const [year, monthNumber] = month.split("-");
+    options.push({
+      key: month,
+      label: `${Number(year)}年${Number(monthNumber)}月`,
+    });
+  }
+  return options;
+}
+
 export function buildMonthOptions(years?: number[]): MonthOption[] {
   const now = new Date();
   const currentYear = now.getFullYear();

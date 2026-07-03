@@ -13,9 +13,12 @@ import { usePersonalBattingAverage } from "@app/hooks/batting/getPersonalBatting
 import { usePersonalBattingStatus } from "@app/hooks/batting/getPersonalBattingStatus";
 import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchingResult";
 import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
-import { getMatchResultsUserId } from "@app/services/matchResultsService";
+import {
+  getAvailableMonths,
+  getMatchResultsUserId,
+} from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
-import { buildMonthOptions } from "@app/utils/buildMonthOptions";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import { formatRate, formatEra } from "@app/utils/formatStats";
 
 type UserId = {
@@ -42,7 +45,7 @@ export default function IndividualResultsList(props: UserId) {
   >([{ key: "全て", label: "全て" }]);
   const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
   const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
 
   // シーズンデータ取得
   useEffect(() => {
@@ -81,7 +84,6 @@ export default function IndividualResultsList(props: UserId) {
           ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
         ];
         setYearOptions(yOpts);
-        setAvailableYears(uniqueYears.map(Number));
         // 試合タイプ抽出（keyにAPI値、labelに日本語）
         const matchTypeData: AvailableMatchType[] = matchResultData.map(
           (type: { match_type: string }) => type.match_type,
@@ -99,6 +101,8 @@ export default function IndividualResultsList(props: UserId) {
           })),
         ];
         setMatchTypeOptions(mtOpts);
+        // 期間フィルタは記録のある年月だけを候補にする
+        setAvailableMonths(await getAvailableMonths(userId));
       } catch (error) {
         console.error("Failed to fetch meta:", error);
       }
@@ -113,8 +117,8 @@ export default function IndividualResultsList(props: UserId) {
   }, [selectedSeason, seasonsData]);
 
   const monthOptions = useMemo(
-    () => buildMonthOptions(availableYears),
-    [availableYears],
+    () => monthOptionsFromRecorded(availableMonths),
+    [availableMonths],
   );
 
   // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）

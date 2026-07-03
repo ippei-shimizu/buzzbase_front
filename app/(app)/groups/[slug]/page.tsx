@@ -24,7 +24,7 @@ import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingT
 import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroupDetail } from "@app/services/groupService";
-import { buildMonthOptions } from "@app/utils/buildMonthOptions";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 
 type GroupDetailProps = {
   params: Promise<{
@@ -87,6 +87,7 @@ type GroupsDetailData = {
   };
   id: number;
   available_years: number[];
+  available_months?: string[];
 };
 
 const MATCH_TYPE_OPTIONS = [
@@ -203,6 +204,7 @@ export default function GroupDetail(props: GroupDetailProps) {
   const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
   const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const router = useRouter();
   useRequireAuth();
 
@@ -221,6 +223,7 @@ export default function GroupDetail(props: GroupDetailProps) {
         );
         setGroupData(responseGroupDetail);
         setAvailableYears(responseGroupDetail.available_years ?? []);
+        setAvailableMonths(responseGroupDetail.available_months ?? []);
 
         if (responseGroupDetail) {
           const battingStatsWithUsersData =
@@ -316,8 +319,8 @@ export default function GroupDetail(props: GroupDetailProps) {
   ]);
 
   const monthOptions = useMemo(
-    () => buildMonthOptions(availableYears),
-    [availableYears],
+    () => monthOptionsFromRecorded(availableMonths),
+    [availableMonths],
   );
 
   // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）

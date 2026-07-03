@@ -79,6 +79,7 @@ export default function DashboardContent({
         hasBattingRecord={!!data?.batting_stats?.calculated}
         hasPitchingRecord={!!data?.pitching_stats?.calculated}
         availableYears={data?.available_years ?? []}
+        availableMonths={data?.available_months ?? []}
         availableSeasons={seasons}
         onBattingFilterChange={handleBattingFilterChange}
         onPitchingFilterChange={handlePitchingFilterChange}
