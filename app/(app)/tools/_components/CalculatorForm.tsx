@@ -2,7 +2,7 @@
 
 import { Input, Button } from "@heroui/react";
 import Link from "next/link";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import {
   type CalculatorField,
   type CalculatorOutput,
@@ -41,25 +41,6 @@ type Props = {
   analyticsSourceTool?: string;
 };
 
-const NUMERIC_IN_TEXT = /-?\d*\.?\d+/;
-
-/**
- * placeholder（例: "例: 12"）から数値例を抽出する。
- * 全フィールドに数値例がある場合のみプリフィル用の値を返す（1つでも欠ければ null）。
- * 空フォームの摩擦を下げ、入力の仕方を即座に示すことで計算率を上げる狙い。
- */
-function buildExampleValues(
-  fields: CalculatorField[],
-): Record<string, string> | null {
-  const values: Record<string, string> = {};
-  for (const field of fields) {
-    const matched = field.placeholder?.match(NUMERIC_IN_TEXT);
-    if (!matched) return null;
-    values[field.name] = matched[0];
-  }
-  return values;
-}
-
 export default function CalculatorForm({
   fields,
   outputs,
@@ -68,10 +49,7 @@ export default function CalculatorForm({
   renderExtraResult,
   analyticsSourceTool,
 }: Props) {
-  const exampleValues = useMemo(() => buildExampleValues(fields), [fields]);
-  const [values, setValues] = useState<Record<string, string>>(
-    () => exampleValues ?? {},
-  );
+  const [values, setValues] = useState<Record<string, string>>({});
   const [results, setResults] = useState<ResultItem[]>([]);
   const [rawResult, setRawResult] = useState<
     number | Record<string, number | null> | null
@@ -175,12 +153,6 @@ export default function CalculatorForm({
           リセット
         </Button>
       </div>
-
-      {exampleValues && results.length === 0 && !error ? (
-        <p className="mt-3 text-xs text-zinc-400">
-          サンプルの数字が入っています。あなたの成績に置き換えて「計算する」を押してください。
-        </p>
-      ) : null}
 
       {error ? (
         <div className="mt-4 rounded-lg bg-red-900/30 border border-red-700 px-4 py-3">
