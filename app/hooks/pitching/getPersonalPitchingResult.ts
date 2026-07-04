@@ -9,10 +9,14 @@ export function usePersonalPitchingResult(
   matchType?: string,
   startMonth?: string,
   endMonth?: string,
+  tournamentId?: number,
 ) {
   const params = new URLSearchParams({ user_id: String(userId) });
   if (seasonId) {
     params.append("season_id", String(seasonId));
+  }
+  if (tournamentId) {
+    params.append("tournament_id", String(tournamentId));
   }
   if (year) {
     params.append("year", year);
