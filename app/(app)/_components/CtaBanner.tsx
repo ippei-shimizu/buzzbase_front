@@ -1,5 +1,6 @@
 import Image from "next/image";
 import AppStoreLink from "@app/components/cta/AppStoreLink";
+import AppStoreQr from "@app/components/cta/AppStoreQr";
 import WebSignupLink from "@app/components/cta/WebSignupLink";
 
 type Props = {
@@ -38,11 +39,14 @@ export default function CtaBanner({
           }
         />
       </div>
-      <WebSignupLink
-        ctaLocation="cta_banner"
-        sourceTool={sourceTool}
-        className="hidden sm:inline-flex items-center justify-center rounded-lg bg-yellow-500 px-6 py-3 text-sm font-bold text-zinc-900 transition-colors hover:bg-yellow-400"
-      />
+      <div className="hidden sm:block">
+        <WebSignupLink
+          ctaLocation="cta_banner"
+          sourceTool={sourceTool}
+          className="inline-flex items-center justify-center rounded-lg bg-yellow-500 px-6 py-3 text-sm font-bold text-zinc-900 transition-colors hover:bg-yellow-400"
+        />
+        <AppStoreQr className="mt-3" />
+      </div>
       <p className="text-xs text-zinc-400 mt-2">
         登録30秒・クレジットカード不要・完全無料
       </p>

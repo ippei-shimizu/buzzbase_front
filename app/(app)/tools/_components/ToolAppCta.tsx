@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import AppStoreLink from "@app/components/cta/AppStoreLink";
+import AppStoreQr from "@app/components/cta/AppStoreQr";
 import { trackEvent } from "@app/lib/analytics";
 
 type Props = {
@@ -51,20 +51,7 @@ export default function ToolAppCta({ sourceTool, ctaLocation }: Props) {
           無料登録して成績を記録する
         </Link>
 
-        <div className="mt-3 flex items-center justify-center gap-3">
-          <Image
-            src="/images/app-store-qr.svg"
-            alt="App Store で BUZZ BASE を開くQRコード"
-            width={80}
-            height={80}
-            className="rounded-md"
-          />
-          <p className="text-left text-xs text-zinc-400 leading-5">
-            スマホのカメラで読み取って
-            <br />
-            アプリを入手（App Store）
-          </p>
-        </div>
+        <AppStoreQr className="mt-3 justify-center" />
       </div>
     </div>
   );
