@@ -23,7 +23,7 @@ const emptyOptions = (): StatsFilterOptions => ({
  * 成績画面のフィルタ選択肢（シーズン / 大会 / 記録月）をサーバーで取得する。
  * `cache()` でラップしているため、同一リクエスト内で page / 各 Section から
  * 複数回呼ばれても実取得は1回（seasons + tournaments + available_months の3コール）に集約される。
- * 認証ヘッダがあれば user_id は不要（バックエンドが current_user にフォールバック）。
+ * 大会は user_tournaments を叩き、current_user が記録した大会のみに絞る。
  */
 export const getStatsFilterOptions = cache(
   async (): Promise<StatsFilterOptions> => {
@@ -37,7 +37,7 @@ export const getStatsFilterOptions = cache(
             headers,
             cache: "no-store",
           }),
-          fetch(`${RAILS_API_URL}/api/v1/tournaments`, {
+          fetch(`${RAILS_API_URL}/api/v1/tournaments/user_tournaments`, {
             headers,
             cache: "no-store",
           }),
