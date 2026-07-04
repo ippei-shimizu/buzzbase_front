@@ -12,7 +12,7 @@ type Props = {
  */
 export default function AppStoreQr({ className = "" }: Props) {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`inline-flex items-center gap-3 ${className}`}>
       <Image
         src="/images/app-store-qr.svg"
         alt="App Store で BUZZ BASE を開くQRコード"
