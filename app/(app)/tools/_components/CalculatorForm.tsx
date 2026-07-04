@@ -176,10 +176,6 @@ export default function CalculatorForm({
         </div>
       ) : null}
 
-      {results.length > 0 && renderExtraResult && rawResult !== null ? (
-        <div className="mt-4">{renderExtraResult(rawResult)}</div>
-      ) : null}
-
       {results.length > 0 ? (
         <div className="mt-4">
           <ToolAppCta
@@ -187,6 +183,10 @@ export default function CalculatorForm({
             ctaLocation="tool_calculator"
           />
         </div>
+      ) : null}
+
+      {results.length > 0 && renderExtraResult && rawResult !== null ? (
+        <div className="mt-4">{renderExtraResult(rawResult)}</div>
       ) : null}
 
       {results.length > 0 && nextActions && nextActions.length > 0 ? (
