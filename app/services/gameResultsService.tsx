@@ -203,6 +203,8 @@ export const getFilterGameResultsV2 = async (
   search?: string,
   sortBy?: string,
   sortOrder?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     let url = `/api/v2/game_results/filtered_index?year=${year}&match_type=${matchType}`;
@@ -223,6 +225,12 @@ export const getFilterGameResultsV2 = async (
     }
     if (sortOrder) {
       url += `&sort_order=${sortOrder}`;
+    }
+    if (startMonth) {
+      url += `&start_month=${startMonth}`;
+    }
+    if (endMonth) {
+      url += `&end_month=${endMonth}`;
     }
     const response = await axiosInstance.get(url);
     return response.data;
@@ -245,6 +253,8 @@ export const getFilterGameResultsUserIdV2 = async (
   search?: string,
   sortBy?: string,
   sortOrder?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     let url = `/api/v2/game_results/filtered_user/${userId}?year=${year}&match_type=${matchType}`;
@@ -265,6 +275,12 @@ export const getFilterGameResultsUserIdV2 = async (
     }
     if (sortOrder) {
       url += `&sort_order=${sortOrder}`;
+    }
+    if (startMonth) {
+      url += `&start_month=${startMonth}`;
+    }
+    if (endMonth) {
+      url += `&end_month=${endMonth}`;
     }
     const response = await axiosInstance.get(url);
     return response.data;

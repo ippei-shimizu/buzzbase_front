@@ -21,6 +21,8 @@ function buildQuery(filters: GameSummaryFilters): string {
   if (filters.seasonId) params.append("season_id", filters.seasonId);
   if (filters.tournamentId)
     params.append("tournament_id", filters.tournamentId);
+  if (filters.startMonth) params.append("start_month", filters.startMonth);
+  if (filters.endMonth) params.append("end_month", filters.endMonth);
   return params.toString();
 }
 

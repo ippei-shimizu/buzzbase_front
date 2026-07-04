@@ -7,6 +7,8 @@ export function usePersonalPitchingResultStats(
   seasonId?: number,
   year?: string,
   matchType?: string,
+  startMonth?: string,
+  endMonth?: string,
 ) {
   const params = new URLSearchParams({ user_id: String(userId) });
   if (seasonId) {
@@ -17,6 +19,12 @@ export function usePersonalPitchingResultStats(
   }
   if (matchType) {
     params.append("match_type", matchType);
+  }
+  if (startMonth) {
+    params.append("start_month", startMonth);
+  }
+  if (endMonth) {
+    params.append("end_month", endMonth);
   }
   const { data, error } = useSWR(
     userId

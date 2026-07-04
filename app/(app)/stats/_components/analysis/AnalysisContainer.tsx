@@ -1,6 +1,7 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
@@ -63,6 +64,8 @@ interface AnalysisContainerProps {
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  /** 試合を記録した年月（"YYYY-MM" の降順）。期間フィルタの月候補に使う。 */
+  availableMonths: string[];
 }
 
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
@@ -70,6 +73,7 @@ export function AnalysisContainer({
   initialData,
   seasonOptions,
   tournamentOptions,
+  availableMonths,
 }: AnalysisContainerProps) {
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
@@ -118,6 +122,9 @@ export function AnalysisContainer({
   // 推移グラフは粒度切替で単独再取得もあるため、専用の pending でグラフだけ dim する。
   const [isTrendPending, startTrendTransition] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() =>
+    monthOptionsFromRecorded(availableMonths),
+  );
 
   // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -213,6 +220,7 @@ export function AnalysisContainer({
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        monthOptions={monthOptions}
       />
       <div
         className={`flex flex-col gap-y-5${

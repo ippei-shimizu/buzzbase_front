@@ -7,6 +7,7 @@ import type {
 } from "../gameSummaryTypes";
 import { Spinner } from "@heroui/react";
 import { useEffect, useState, useTransition } from "react";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import { AnalysisFilters } from "../../../stats/_components/analysis/AnalysisFilters";
 import {
   getGameSummary,
@@ -34,16 +35,19 @@ export function GameSummaryContainer() {
   const [tournamentOptions, setTournamentOptions] = useState<FilterOption[]>(
     [],
   );
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [isRefetching, startRefetch] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const monthOptions = monthOptionsFromRecorded(availableMonths);
 
-  // シーズン / 大会の選択肢はマウント時に1度だけ取得する。
+  // シーズン / 大会 / 記録月の選択肢はマウント時に1度だけ取得する。
   useEffect(() => {
     let active = true;
     getGameSummaryFilterOptions().then((options) => {
       if (!active) return;
       setSeasonOptions(options.seasonOptions);
       setTournamentOptions(options.tournamentOptions);
+      setAvailableMonths(options.availableMonths);
     });
     return () => {
       active = false;
@@ -94,6 +98,7 @@ export function GameSummaryContainer() {
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        monthOptions={monthOptions}
       />
       {result.status === "error" ? (
         <p className="py-10 text-center text-sm text-[#A1A1AA]">

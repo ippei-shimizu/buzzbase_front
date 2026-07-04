@@ -85,6 +85,8 @@ export async function getBattingStats(
   year?: string,
   seasonId?: string,
   tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<BattingStatsRow[]> {
   try {
     const headers = await getAuthHeaders();
@@ -94,6 +96,8 @@ export async function getBattingStats(
     if (year && year !== "通算") params.append("year", year);
     if (seasonId) params.append("season_id", seasonId);
     if (tournamentId) params.append("tournament_id", tournamentId);
+    if (startMonth) params.append("start_month", startMonth);
+    if (endMonth) params.append("end_month", endMonth);
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/stats/batting?${params}`,
@@ -114,6 +118,8 @@ export async function getPitchingStats(
   year?: string,
   seasonId?: string,
   tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<PitchingStatsRow[]> {
   try {
     const headers = await getAuthHeaders();
@@ -123,6 +129,8 @@ export async function getPitchingStats(
     if (year && year !== "通算") params.append("year", year);
     if (seasonId) params.append("season_id", seasonId);
     if (tournamentId) params.append("tournament_id", tournamentId);
+    if (startMonth) params.append("start_month", startMonth);
+    if (endMonth) params.append("end_month", endMonth);
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/stats/pitching?${params}`,
