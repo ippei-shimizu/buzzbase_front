@@ -3,12 +3,12 @@
 import { Input, Button } from "@heroui/react";
 import Link from "next/link";
 import { useState, useCallback } from "react";
-import { buildAppStoreUrl } from "@app/constants/app";
 import {
   type CalculatorField,
   type CalculatorOutput,
 } from "@app/data/baseball-stats/types";
 import { trackEvent } from "@app/lib/analytics";
+import ToolAppCta from "./ToolAppCta";
 
 type ResultItem = {
   label: string;
@@ -117,13 +117,6 @@ export default function CalculatorForm({
     setError(null);
   }, []);
 
-  const handleAppStoreClick = useCallback(() => {
-    trackEvent("app_store_click", {
-      cta_location: "tool_calculator",
-      ...(analyticsSourceTool ? { tool: analyticsSourceTool } : {}),
-    });
-  }, [analyticsSourceTool]);
-
   return (
     <div className="rounded-xl border border-zinc-700 bg-zinc-900/50 p-5">
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
@@ -188,19 +181,11 @@ export default function CalculatorForm({
       ) : null}
 
       {results.length > 0 ? (
-        <div className="mt-4 text-center">
-          <a
-            href={buildAppStoreUrl("tool_calculator")}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleAppStoreClick}
-            className="inline-block w-full rounded-lg bg-yellow-600 hover:bg-yellow-500 transition-colors px-6 py-3 text-sm font-bold text-white"
-          >
-            アプリで成績を記録する（無料）
-          </a>
-          <p className="text-xs text-zinc-400 mt-2">
-            アプリなら成績推移グラフやランキングも見られます
-          </p>
+        <div className="mt-4">
+          <ToolAppCta
+            sourceTool={analyticsSourceTool}
+            ctaLocation="tool_calculator"
+          />
         </div>
       ) : null}
 
