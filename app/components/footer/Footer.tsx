@@ -53,6 +53,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/guide" className="text-sm">
+                  記録・練習ガイド
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-sm">
                   お問い合わせ
                 </Link>
