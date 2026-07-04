@@ -1,9 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { QRCodeSVG } from "qrcode.react";
 import AppStoreLink from "@app/components/cta/AppStoreLink";
-import { buildAppStoreUrl } from "@app/constants/app";
 import { trackEvent } from "@app/lib/analytics";
 
 type Props = {
@@ -18,6 +17,7 @@ type Props = {
  * 「手計算はもう不要＝アプリが毎試合自動算出」という検索意図に接続した訴求にする。
  * App Store バッジはデスクトップでは行き止まりになるため、画面幅で導線を出し分ける:
  * 狭幅は公式 App Store バッジ、広幅は Web 登録(/signup)＋QR(スマホへ橋渡し)。
+ * QR は App Store URL(?ct=tool_qr) を指す静的 SVG（ランタイム依存なし）。
  * クリックは source_tool / cta_location 付きで計測し、ツール別の送客を可視化する。
  */
 export default function ToolAppCta({ sourceTool, ctaLocation }: Props) {
@@ -52,12 +52,13 @@ export default function ToolAppCta({ sourceTool, ctaLocation }: Props) {
         </Link>
 
         <div className="mt-3 flex items-center justify-center gap-3">
-          <div className="rounded-md bg-white p-1.5">
-            <QRCodeSVG
-              value={buildAppStoreUrl(`${ctaLocation}_qr`)}
-              size={80}
-            />
-          </div>
+          <Image
+            src="/images/app-store-qr.svg"
+            alt="App Store で BUZZ BASE を開くQRコード"
+            width={80}
+            height={80}
+            className="rounded-md"
+          />
           <p className="text-left text-xs text-zinc-400 leading-5">
             スマホのカメラで読み取って
             <br />
