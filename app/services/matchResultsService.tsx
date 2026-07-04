@@ -21,6 +21,27 @@ export const getMatchResultsUserId = async (userId: number) => {
   }
 };
 
+/**
+ * 対象ユーザーが試合を記録した年月一覧を取得する。
+ * 期間フィルタの月候補（記録のある年月だけ）を作るために使う。
+ *
+ * @param userId 省略時はログインユーザー
+ * @returns "YYYY-MM" の降順配列。取得失敗時は空配列
+ */
+export const getAvailableMonths = async (
+  userId?: number,
+): Promise<string[]> => {
+  try {
+    const params = userId ? `?user_id=${userId}` : "";
+    const response = await axiosInstance.get(
+      `/api/v1/match_results/available_months${params}`,
+    );
+    return response.data as string[];
+  } catch {
+    return [];
+  }
+};
+
 export const createMatchResults = async (
   matchResultsData: MatchResultsData,
 ) => {

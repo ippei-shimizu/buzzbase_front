@@ -60,6 +60,8 @@ export interface GameSummaryFilters {
   matchType?: string;
   seasonId?: string;
   tournamentId?: string;
+  startMonth?: string;
+  endMonth?: string;
 }
 
 /**

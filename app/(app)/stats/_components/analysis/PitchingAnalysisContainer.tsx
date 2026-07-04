@@ -1,6 +1,7 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import {
   type AnalysisFilters as Filters,
   type EraTrendPoint,
@@ -25,6 +26,8 @@ interface PitchingAnalysisContainerProps {
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  /** 試合を記録した年月（"YYYY-MM" の降順）。期間フィルタの月候補に使う。 */
+  availableMonths: string[];
 }
 
 /** 投手タブの分析（フィルタ + 防御率推移グラフ）コンテナ。 */
@@ -32,6 +35,7 @@ export function PitchingAnalysisContainer({
   initialEraTrend,
   seasonOptions,
   tournamentOptions,
+  availableMonths,
 }: PitchingAnalysisContainerProps) {
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
@@ -40,6 +44,9 @@ export function PitchingAnalysisContainer({
   const [eraTrend, setEraTrend] = useState<EraTrendPoint[]>(initialEraTrend);
   const [isRefetching, startRefetch] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() =>
+    monthOptionsFromRecorded(availableMonths),
+  );
 
   // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -55,13 +62,22 @@ export function PitchingAnalysisContainer({
         year: filters.year,
         seasonId: filters.seasonId,
         tournamentId: filters.tournamentId,
+        startMonth: filters.startMonth,
+        endMonth: filters.endMonth,
       });
       if (active) setEraTrend(trend);
     });
     return () => {
       active = false;
     };
-  }, [filters.year, filters.seasonId, filters.tournamentId, startRefetch]);
+  }, [
+    filters.year,
+    filters.seasonId,
+    filters.tournamentId,
+    filters.startMonth,
+    filters.endMonth,
+    startRefetch,
+  ]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -71,6 +87,7 @@ export function PitchingAnalysisContainer({
         yearOptions={yearOptions}
         seasonOptions={seasonOptions}
         tournamentOptions={tournamentOptions}
+        monthOptions={monthOptions}
         hideMatchType
       />
       <div

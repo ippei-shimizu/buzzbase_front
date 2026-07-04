@@ -2,6 +2,10 @@
 import type { AnalysisFilters as Filters } from "../../analysisActions";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter, {
+  type PeriodRange,
+} from "@app/components/filter/PeriodRangeFilter";
+import { type MonthOption } from "@app/utils/buildMonthOptions";
 
 interface FilterOption {
   key: string;
@@ -14,6 +18,7 @@ interface AnalysisFiltersProps {
   yearOptions: FilterOption[];
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  monthOptions: MonthOption[];
   /** 種別フィルタを隠す（絞り込みに種別を使わない投手タブ向け）。 */
   hideMatchType?: boolean;
 }
@@ -30,7 +35,9 @@ function hasActiveFilter(filters: Filters): boolean {
     (filters.year ?? "通算") !== "通算" ||
     Boolean(filters.matchType) ||
     Boolean(filters.seasonId) ||
-    Boolean(filters.tournamentId)
+    Boolean(filters.tournamentId) ||
+    Boolean(filters.startMonth) ||
+    Boolean(filters.endMonth)
   );
 }
 
@@ -41,6 +48,7 @@ export function AnalysisFilters({
   yearOptions,
   seasonOptions,
   tournamentOptions,
+  monthOptions,
   hideMatchType = false,
 }: AnalysisFiltersProps) {
   const handleReset = () =>
@@ -49,7 +57,27 @@ export function AnalysisFilters({
       matchType: "",
       seasonId: undefined,
       tournamentId: undefined,
+      startMonth: undefined,
+      endMonth: undefined,
     });
+
+  // 年度と期間は排他。実年を選んだら期間を、期間を指定したら年度をクリアする。
+  const handleYearChange = (key: string) =>
+    onChange(
+      key === "通算"
+        ? { ...filters, year: key }
+        : { ...filters, year: key, startMonth: undefined, endMonth: undefined },
+    );
+
+  const handlePeriodChange = (range: PeriodRange) => {
+    const hasPeriod = Boolean(range.startMonth || range.endMonth);
+    onChange({
+      ...filters,
+      startMonth: range.startMonth,
+      endMonth: range.endMonth,
+      year: hasPeriod ? "通算" : filters.year,
+    });
+  };
 
   return (
     <FilterChipGroup wrap>
@@ -58,7 +86,13 @@ export function AnalysisFilters({
         value={filters.year ?? "通算"}
         defaultValue="通算"
         options={yearOptions}
-        onChange={(key) => onChange({ ...filters, year: key })}
+        onChange={handleYearChange}
+      />
+      <PeriodRangeFilter
+        startMonth={filters.startMonth}
+        endMonth={filters.endMonth}
+        monthOptions={monthOptions}
+        onChange={handlePeriodChange}
       />
       {hideMatchType ? null : (
         <FilterChip

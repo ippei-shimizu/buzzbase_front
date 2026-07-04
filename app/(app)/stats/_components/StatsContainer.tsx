@@ -8,6 +8,8 @@ import type {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import { getBattingStats, getPitchingStats } from "../actions";
 import { DEFAULT_OPTION, type FilterOption } from "../statsFilterOption";
 import BattingStatsTable from "./BattingStatsTable";
@@ -43,6 +45,8 @@ interface StatsContainerProps {
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  /** 試合を記録した年月（"YYYY-MM" の降順）。期間フィルタの月候補に使う。 */
+  availableMonths: string[];
 }
 
 export default function StatsContainer({
@@ -51,6 +55,7 @@ export default function StatsContainer({
   pitchingAnalysisSlot,
   seasonOptions,
   tournamentOptions,
+  availableMonths,
 }: StatsContainerProps) {
   const [tab, setTab] = useState<ActiveTab>("batting");
   const [period, setPeriod] = useState<StatsPeriod>("yearly");
@@ -61,11 +66,20 @@ export default function StatsContainer({
   const [tableTournamentId, setTableTournamentId] = useState<
     string | undefined
   >(undefined);
+  const [tableStartMonth, setTableStartMonth] = useState<string | undefined>(
+    undefined,
+  );
+  const [tableEndMonth, setTableEndMonth] = useState<string | undefined>(
+    undefined,
+  );
   const [battingRows, setBattingRows] =
     useState<BattingStatsRow[]>(initialRows);
   const [pitchingRows, setPitchingRows] = useState<PitchingStatsRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [yearOptions] = useState(buildYearOptions);
+  const [monthOptions] = useState(() =>
+    monthOptionsFromRecorded(availableMonths),
+  );
 
   // 初回マウントは SSR の initialRows（打撃/年別）を使うため取得しない。
   const didInitRef = useRef(false);
@@ -78,18 +92,53 @@ export default function StatsContainer({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     const fetcher = tab === "batting" ? getBattingStats : getPitchingStats;
-    void fetcher(period, tableYear, tableSeasonId, tableTournamentId).then(
-      (rows) => {
-        if (!active) return;
-        if (tab === "batting") setBattingRows(rows as BattingStatsRow[]);
-        else setPitchingRows(rows as PitchingStatsRow[]);
-        setIsLoading(false);
-      },
-    );
+    void fetcher(
+      period,
+      tableYear,
+      tableSeasonId,
+      tableTournamentId,
+      tableStartMonth,
+      tableEndMonth,
+    ).then((rows) => {
+      if (!active) return;
+      if (tab === "batting") setBattingRows(rows as BattingStatsRow[]);
+      else setPitchingRows(rows as PitchingStatsRow[]);
+      setIsLoading(false);
+    });
     return () => {
       active = false;
     };
-  }, [tab, period, tableYear, tableSeasonId, tableTournamentId]);
+  }, [
+    tab,
+    period,
+    tableYear,
+    tableSeasonId,
+    tableTournamentId,
+    tableStartMonth,
+    tableEndMonth,
+  ]);
+
+  // 期間（開始/終了）と年度は排他。期間を指定したら年度を通算（未指定）に戻す。
+  const handlePeriodRangeChange = (range: {
+    startMonth?: string;
+    endMonth?: string;
+  }) => {
+    setTableStartMonth(range.startMonth);
+    setTableEndMonth(range.endMonth);
+    if (range.startMonth || range.endMonth) {
+      setTableYear(undefined);
+    }
+  };
+
+  // 実年を選んだら期間指定をクリアする（排他）。
+  const handleTableYearChange = (key: string) => {
+    const nextYear = key === "全て" ? undefined : key;
+    setTableYear(nextYear);
+    if (nextYear) {
+      setTableStartMonth(undefined);
+      setTableEndMonth(undefined);
+    }
+  };
 
   const handlePeriodChange = (next: StatsPeriod) => {
     setPeriod(next);
@@ -172,13 +221,19 @@ export default function StatsContainer({
       {/* テーブル専用フィルタ（年/月以外＝年度/シーズン/大会で絞る） */}
       {showTableFilters ? (
         <div className="mb-3 flex justify-end">
-          <FilterChipGroup>
+          <FilterChipGroup wrap>
             <FilterChip
               label="年度"
               value={tableYear ?? "全て"}
               defaultValue="全て"
               options={yearOptions}
-              onChange={(key) => setTableYear(key === "全て" ? undefined : key)}
+              onChange={handleTableYearChange}
+            />
+            <PeriodRangeFilter
+              startMonth={tableStartMonth}
+              endMonth={tableEndMonth}
+              monthOptions={monthOptions}
+              onChange={handlePeriodRangeChange}
             />
             {seasonOptions.length > 1 ? (
               <FilterChip

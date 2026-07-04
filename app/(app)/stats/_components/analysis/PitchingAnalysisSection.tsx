@@ -28,6 +28,7 @@ async function PitchingAnalysisDataProvider() {
       initialEraTrend={initialEraTrend}
       seasonOptions={filterOptions.seasonOptions}
       tournamentOptions={filterOptions.tournamentOptions}
+      availableMonths={filterOptions.availableMonths}
     />
   );
 }

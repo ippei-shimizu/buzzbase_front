@@ -28,6 +28,7 @@ async function AnalysisDataProvider() {
       initialData={initialData}
       seasonOptions={filterOptions.seasonOptions}
       tournamentOptions={filterOptions.tournamentOptions}
+      availableMonths={filterOptions.availableMonths}
     />
   );
 }

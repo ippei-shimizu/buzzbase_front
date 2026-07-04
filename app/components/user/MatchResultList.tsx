@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
 import GamePagination from "@app/components/game/GamePagination";
 import GameSearchInput from "@app/components/game/GameSearchInput";
 import GameSortSelect from "@app/components/game/GameSortSelect";
@@ -16,10 +17,12 @@ import {
   getFilterGameResultsUserIdV2,
 } from "@app/services/gameResultsService";
 import {
+  getAvailableMonths,
   getMatchResults,
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 
 type GameResult = {
   game_result_id: number;
@@ -76,6 +79,9 @@ export default function MatchResultList(props: MatchResultListProps) {
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
   const [selectedSeason, setSelectedSeason] = useState("全て");
+  const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
+  const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [gameResultIndex, setGameResultIndex] = useState<GameResult[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -133,12 +139,11 @@ export default function MatchResultList(props: MatchResultListProps) {
   useEffect(() => {
     const fetchMeta = async () => {
       try {
-        let matchResultData;
-        if (userId) {
-          matchResultData = await getMatchResultsUserId(userId);
-        } else {
-          matchResultData = await getMatchResults();
-        }
+        // 試合一覧と記録月は互いに独立なので並列取得して初回のフィルタ確定を早める。
+        const [matchResultData, months] = await Promise.all([
+          userId ? getMatchResultsUserId(userId) : getMatchResults(),
+          getAvailableMonths(userId),
+        ]);
         // 年度抽出
         const yearArray: AvailableYear[] = matchResultData.map(
           (result: { date_and_time: string }) =>
@@ -167,6 +172,8 @@ export default function MatchResultList(props: MatchResultListProps) {
           })),
         ];
         setMatchTypeOptions(mtOpts);
+        // 期間フィルタは記録のある年月だけを候補にする
+        setAvailableMonths(months);
       } catch {}
     };
     fetchMeta();
@@ -177,9 +184,31 @@ export default function MatchResultList(props: MatchResultListProps) {
   const apiMatchType =
     selectedMatchType === "全て" ? "全て" : selectedMatchType;
 
+  const monthOptions = useMemo(
+    () => monthOptionsFromRecorded(availableMonths),
+    [availableMonths],
+  );
+
   // フィルター変更時にページを1にリセットするラッパー
+  // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）
   const handleYearChange = (value: string) => {
     setSelectedYear(value);
+    if (value !== "通算") {
+      setStartMonth(undefined);
+      setEndMonth(undefined);
+    }
+    setCurrentPage(1);
+  };
+  // 期間を設定したら年度を通算へ戻す（両端クリア時は年度を据え置く）
+  const handlePeriodChange = (range: {
+    startMonth?: string;
+    endMonth?: string;
+  }) => {
+    setStartMonth(range.startMonth);
+    setEndMonth(range.endMonth);
+    if (range.startMonth || range.endMonth) {
+      setSelectedYear("通算");
+    }
     setCurrentPage(1);
   };
   const handleMatchTypeChange = (value: string) => {
@@ -223,6 +252,8 @@ export default function MatchResultList(props: MatchResultListProps) {
             debouncedSearch || undefined,
             apiSortBy,
             apiSortOrder,
+            startMonth,
+            endMonth,
           );
         } else {
           response = await getFilterGameResultsV2(
@@ -234,6 +265,8 @@ export default function MatchResultList(props: MatchResultListProps) {
             debouncedSearch || undefined,
             apiSortBy,
             apiSortOrder,
+            startMonth,
+            endMonth,
           );
         }
         if (cancelled) return;
@@ -264,13 +297,15 @@ export default function MatchResultList(props: MatchResultListProps) {
     sortOrder,
     apiSortBy,
     apiSortOrder,
+    startMonth,
+    endMonth,
   ]);
 
   return (
     <>
       <div ref={listTopRef} className="bg-bg_sub p-4 rounded-xl lg:p-6">
         <div className="mb-5 overflow-hidden flex flex-col gap-3">
-          <FilterChipGroup>
+          <FilterChipGroup wrap>
             <FilterChip
               label="年度"
               value={selectedYear}
@@ -291,6 +326,12 @@ export default function MatchResultList(props: MatchResultListProps) {
               defaultValue="全て"
               options={seasonOptions}
               onChange={handleSeasonChange}
+            />
+            <PeriodRangeFilter
+              startMonth={startMonth}
+              endMonth={endMonth}
+              monthOptions={monthOptions}
+              onChange={handlePeriodChange}
             />
           </FilterChipGroup>
           <div className="flex items-center gap-2">

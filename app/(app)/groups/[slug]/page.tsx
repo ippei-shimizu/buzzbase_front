@@ -10,12 +10,13 @@ import {
 } from "@heroui/react";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState, use } from "react";
+import React, { useEffect, useMemo, useState, use } from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
 import HeaderBackLink from "@app/components/header/HeaderBackLink";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -23,6 +24,7 @@ import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingT
 import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroupDetail } from "@app/services/groupService";
+import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 
 type GroupDetailProps = {
   params: Promise<{
@@ -85,6 +87,7 @@ type GroupsDetailData = {
   };
   id: number;
   available_years: number[];
+  available_months?: string[];
 };
 
 const MATCH_TYPE_OPTIONS = [
@@ -198,7 +201,10 @@ export default function GroupDetail(props: GroupDetailProps) {
   const [pitchingStats, setPitchingStats] = useState<PitchingStats[]>();
   const [selectedYear, setSelectedYear] = useState("通算");
   const [selectedMatchType, setSelectedMatchType] = useState("全て");
+  const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
+  const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const router = useRouter();
   useRequireAuth();
 
@@ -212,9 +218,12 @@ export default function GroupDetail(props: GroupDetailProps) {
           params.slug,
           year,
           matchType,
+          startMonth,
+          endMonth,
         );
         setGroupData(responseGroupDetail);
         setAvailableYears(responseGroupDetail.available_years ?? []);
+        setAvailableMonths(responseGroupDetail.available_months ?? []);
 
         if (responseGroupDetail) {
           const battingStatsWithUsersData =
@@ -300,7 +309,41 @@ export default function GroupDetail(props: GroupDetailProps) {
     };
 
     fetchData();
-  }, [selectedYear, selectedMatchType, params.slug, router]);
+  }, [
+    selectedYear,
+    selectedMatchType,
+    startMonth,
+    endMonth,
+    params.slug,
+    router,
+  ]);
+
+  const monthOptions = useMemo(
+    () => monthOptionsFromRecorded(availableMonths),
+    [availableMonths],
+  );
+
+  // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）
+  const handleYearChange = (value: string) => {
+    setSelectedYear(value);
+    if (value !== "通算") {
+      setStartMonth(undefined);
+      setEndMonth(undefined);
+    }
+  };
+  // 期間を設定したら年度を通算へ戻す（両端クリア時は年度を据え置く）
+  const handlePeriodChange = (range: {
+    startMonth?: string;
+    endMonth?: string;
+  }) => {
+    setStartMonth(range.startMonth);
+    setEndMonth(range.endMonth);
+    if (range.startMonth || range.endMonth) {
+      setSelectedYear("通算");
+    }
+  };
+
+  const hideRankChange = Boolean(startMonth || endMonth);
 
   if (!groupData) {
     return <LoadingSpinner />;
@@ -356,7 +399,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                 個人成績ランキング
               </h2>
               <div className="mt-3">
-                <FilterChipGroup>
+                <FilterChipGroup wrap>
                   <FilterChip
                     label="年度"
                     value={selectedYear}
@@ -368,7 +411,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                         label: `${y}年`,
                       })),
                     ]}
-                    onChange={setSelectedYear}
+                    onChange={handleYearChange}
                   />
                   <FilterChip
                     label="種別"
@@ -376,6 +419,12 @@ export default function GroupDetail(props: GroupDetailProps) {
                     defaultValue="全て"
                     options={MATCH_TYPE_OPTIONS}
                     onChange={setSelectedMatchType}
+                  />
+                  <PeriodRangeFilter
+                    startMonth={startMonth}
+                    endMonth={endMonth}
+                    monthOptions={monthOptions}
+                    onChange={handlePeriodChange}
                   />
                 </FilterChipGroup>
               </div>
@@ -412,6 +461,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                       <GroupBattingRankingTable
                         battingAverage={battingAverage}
                         battingStats={battingStats}
+                        hideRankChange={hideRankChange}
                       />
                     </div>
                   </Tab>
@@ -439,6 +489,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                       <GroupPitchingRankingTable
                         pitchingAggregate={pitchingAggregate}
                         pitchingStats={pitchingStats}
+                        hideRankChange={hideRankChange}
                       />
                     </div>
                   </Tab>
