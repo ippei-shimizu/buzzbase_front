@@ -1,6 +1,6 @@
 "use client";
 
-import type { SeasonData, TournamentData } from "@app/interface";
+import type { SeasonData } from "@app/interface";
 import { Skeleton } from "@heroui/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -45,7 +45,6 @@ export default function IndividualResultsList(props: UserId) {
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
   const [selectedTournament, setSelectedTournament] = useState("全て");
-  const [tournamentsData, setTournamentsData] = useState<TournamentData[]>([]);
   const [tournamentOptions, setTournamentOptions] = useState<
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
@@ -124,11 +123,11 @@ export default function IndividualResultsList(props: UserId) {
   useEffect(() => {
     const fetchTournaments = async () => {
       const list = await getUserTournaments(userId);
-      setTournamentsData(list);
+      // 大会名は年ごとに重複しうるため id をキーにする（name だと衝突・取りこぼし）。
       setTournamentOptions([
         { key: "全て", label: "全て" },
         ...list.map((tournament) => ({
-          key: tournament.name,
+          key: String(tournament.id),
           label: tournament.name,
         })),
       ]);
@@ -144,9 +143,9 @@ export default function IndividualResultsList(props: UserId) {
 
   const tournamentId = useMemo(() => {
     return selectedTournament !== "全て"
-      ? tournamentsData.find((t) => t.name === selectedTournament)?.id
+      ? Number(selectedTournament)
       : undefined;
-  }, [selectedTournament, tournamentsData]);
+  }, [selectedTournament]);
 
   const monthOptions = useMemo(
     () => monthOptionsFromRecorded(availableMonths),

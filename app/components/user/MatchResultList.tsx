@@ -1,6 +1,6 @@
 "use client";
 
-import type { SeasonData, TournamentData } from "@app/interface";
+import type { SeasonData } from "@app/interface";
 import type { PaginationInfo } from "@app/services/gameResultsService";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -80,7 +80,6 @@ export default function MatchResultList(props: MatchResultListProps) {
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
   const [selectedSeason, setSelectedSeason] = useState("全て");
-  const [tournamentsData, setTournamentsData] = useState<TournamentData[]>([]);
   const [tournamentOptions, setTournamentOptions] = useState<
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
@@ -146,11 +145,11 @@ export default function MatchResultList(props: MatchResultListProps) {
     if (!userId) return;
     const fetchTournaments = async () => {
       const list = await getUserTournaments(userId);
-      setTournamentsData(list);
+      // 大会名は年ごとに重複しうるため id をキーにする（name だと衝突・取りこぼし）。
       setTournamentOptions([
         { key: "全て", label: "全て" },
         ...list.map((tournament) => ({
-          key: tournament.name,
+          key: String(tournament.id),
           label: tournament.name,
         })),
       ]);
@@ -160,9 +159,9 @@ export default function MatchResultList(props: MatchResultListProps) {
 
   const tournamentId = useMemo(() => {
     return selectedTournament !== "全て"
-      ? tournamentsData.find((t) => t.name === selectedTournament)?.id
+      ? Number(selectedTournament)
       : undefined;
-  }, [selectedTournament, tournamentsData]);
+  }, [selectedTournament]);
 
   // 年度・試合タイプ一覧は初回のみ取得（userId依存）
   useEffect(() => {
