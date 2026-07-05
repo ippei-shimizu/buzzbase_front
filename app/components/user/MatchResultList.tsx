@@ -22,6 +22,7 @@ import {
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { getUserTournaments } from "@app/services/tournamentsService";
 import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 
 type GameResult = {
@@ -79,6 +80,10 @@ export default function MatchResultList(props: MatchResultListProps) {
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
   const [selectedSeason, setSelectedSeason] = useState("全て");
+  const [tournamentOptions, setTournamentOptions] = useState<
+    { key: string; label: string }[]
+  >([{ key: "全て", label: "全て" }]);
+  const [selectedTournament, setSelectedTournament] = useState("全て");
   const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
   const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
@@ -134,6 +139,29 @@ export default function MatchResultList(props: MatchResultListProps) {
       ? seasonsData.find((s) => s.name === selectedSeason)?.id
       : undefined;
   }, [selectedSeason, seasonsData]);
+
+  // 大会候補は初回のみ取得（記録した大会のみ・他ユーザーページのため userId 指定）。
+  useEffect(() => {
+    if (!userId) return;
+    const fetchTournaments = async () => {
+      const list = await getUserTournaments(userId);
+      // 大会名は年ごとに重複しうるため id をキーにする（name だと衝突・取りこぼし）。
+      setTournamentOptions([
+        { key: "全て", label: "全て" },
+        ...list.map((tournament) => ({
+          key: String(tournament.id),
+          label: tournament.name,
+        })),
+      ]);
+    };
+    fetchTournaments();
+  }, [userId]);
+
+  const tournamentId = useMemo(() => {
+    return selectedTournament !== "全て"
+      ? Number(selectedTournament)
+      : undefined;
+  }, [selectedTournament]);
 
   // 年度・試合タイプ一覧は初回のみ取得（userId依存）
   useEffect(() => {
@@ -219,6 +247,10 @@ export default function MatchResultList(props: MatchResultListProps) {
     setSelectedSeason(value);
     setCurrentPage(1);
   };
+  const handleTournamentChange = (value: string) => {
+    setSelectedTournament(value);
+    setCurrentPage(1);
+  };
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
@@ -254,6 +286,7 @@ export default function MatchResultList(props: MatchResultListProps) {
             apiSortOrder,
             startMonth,
             endMonth,
+            tournamentId,
           );
         } else {
           response = await getFilterGameResultsV2(
@@ -267,6 +300,7 @@ export default function MatchResultList(props: MatchResultListProps) {
             apiSortOrder,
             startMonth,
             endMonth,
+            tournamentId,
           );
         }
         if (cancelled) return;
@@ -299,6 +333,7 @@ export default function MatchResultList(props: MatchResultListProps) {
     apiSortOrder,
     startMonth,
     endMonth,
+    tournamentId,
   ]);
 
   return (
@@ -327,6 +362,15 @@ export default function MatchResultList(props: MatchResultListProps) {
               options={seasonOptions}
               onChange={handleSeasonChange}
             />
+            {tournamentOptions.length > 1 && (
+              <FilterChip
+                label="大会"
+                value={selectedTournament}
+                defaultValue="全て"
+                options={tournamentOptions}
+                onChange={handleTournamentChange}
+              />
+            )}
             <PeriodRangeFilter
               startMonth={startMonth}
               endMonth={endMonth}

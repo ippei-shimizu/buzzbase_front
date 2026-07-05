@@ -1,6 +1,11 @@
 "use client";
 
-import type { BattingStats, PitchingStats, SeasonOption } from "../actions";
+import type {
+  BattingStats,
+  PitchingStats,
+  SeasonOption,
+  TournamentOption,
+} from "../actions";
 import { useState } from "react";
 import FilterChip from "@app/components/filter/FilterChip";
 import FilterChipGroup from "@app/components/filter/FilterChipGroup";
@@ -28,10 +33,12 @@ interface StatsOverviewProps {
   availableYears: number[];
   availableMonths: string[];
   availableSeasons: SeasonOption[];
+  availableTournaments: TournamentOption[];
   onBattingFilterChange: (
     year: string,
     matchType: string,
     seasonId?: string,
+    tournamentId?: string,
     startMonth?: string,
     endMonth?: string,
   ) => void;
@@ -39,6 +46,7 @@ interface StatsOverviewProps {
     year: string,
     matchType: string,
     seasonId?: string,
+    tournamentId?: string,
     startMonth?: string,
     endMonth?: string,
   ) => void;
@@ -77,30 +85,36 @@ const styleTableData =
 interface FilterProps {
   availableYears: { key: string; label: string }[];
   availableSeasons: { key: string; label: string }[];
+  availableTournaments: { key: string; label: string }[];
   monthOptions: MonthOption[];
   selectedYear: string;
   selectedMatchType: string;
   selectedSeason: string;
+  selectedTournament: string;
   startMonth?: string;
   endMonth?: string;
   onYearChange: (key: string) => void;
   onMatchTypeChange: (key: string) => void;
   onSeasonChange: (key: string) => void;
+  onTournamentChange: (key: string) => void;
   onPeriodRangeChange: (range: PeriodRange) => void;
 }
 
 function StatsFilter({
   availableYears,
   availableSeasons,
+  availableTournaments,
   monthOptions,
   selectedYear,
   selectedMatchType,
   selectedSeason,
+  selectedTournament,
   startMonth,
   endMonth,
   onYearChange,
   onMatchTypeChange,
   onSeasonChange,
+  onTournamentChange,
   onPeriodRangeChange,
 }: FilterProps) {
   return (
@@ -126,6 +140,15 @@ function StatsFilter({
           defaultValue="全て"
           options={availableSeasons}
           onChange={onSeasonChange}
+        />
+      )}
+      {availableTournaments.length > 1 && (
+        <FilterChip
+          label="大会"
+          value={selectedTournament}
+          defaultValue="全て"
+          options={availableTournaments}
+          onChange={onTournamentChange}
         />
       )}
       <PeriodRangeFilter
@@ -503,12 +526,14 @@ export default function StatsOverview({
   availableYears,
   availableMonths,
   availableSeasons,
+  availableTournaments,
   onBattingFilterChange,
   onPitchingFilterChange,
 }: StatsOverviewProps) {
   const [battingYear, setBattingYear] = useState("通算");
   const [battingMatchType, setBattingMatchType] = useState("全て");
   const [battingSeason, setBattingSeason] = useState("全て");
+  const [battingTournament, setBattingTournament] = useState("全て");
   const [battingStartMonth, setBattingStartMonth] = useState<
     string | undefined
   >(undefined);
@@ -518,6 +543,7 @@ export default function StatsOverview({
   const [pitchingYear, setPitchingYear] = useState("通算");
   const [pitchingMatchType, setPitchingMatchType] = useState("全て");
   const [pitchingSeason, setPitchingSeason] = useState("全て");
+  const [pitchingTournament, setPitchingTournament] = useState("全て");
   const [pitchingStartMonth, setPitchingStartMonth] = useState<
     string | undefined
   >(undefined);
@@ -535,7 +561,15 @@ export default function StatsOverview({
     ...availableSeasons.map((s) => ({ key: String(s.id), label: s.name })),
   ];
 
+  const tournamentOptions = [
+    { key: "全て", label: "全て" },
+    ...availableTournaments.map((t) => ({ key: String(t.id), label: t.name })),
+  ];
+
   const monthOptions: MonthOption[] = monthOptionsFromRecorded(availableMonths);
+
+  const battingTournamentId =
+    battingTournament !== "全て" ? battingTournament : undefined;
 
   const handleBattingYearChange = (year: string) => {
     setBattingYear(year);
@@ -552,6 +586,7 @@ export default function StatsOverview({
       year,
       battingMatchType,
       seasonId,
+      battingTournamentId,
       nextStartMonth,
       nextEndMonth,
     );
@@ -564,6 +599,7 @@ export default function StatsOverview({
       battingYear,
       matchType,
       seasonId,
+      battingTournamentId,
       battingStartMonth,
       battingEndMonth,
     );
@@ -576,6 +612,21 @@ export default function StatsOverview({
       battingYear,
       battingMatchType,
       seasonId,
+      battingTournamentId,
+      battingStartMonth,
+      battingEndMonth,
+    );
+  };
+
+  const handleBattingTournamentChange = (tournament: string) => {
+    setBattingTournament(tournament);
+    const tournamentId = tournament !== "全て" ? tournament : undefined;
+    const seasonId = battingSeason !== "全て" ? battingSeason : undefined;
+    onBattingFilterChange(
+      battingYear,
+      battingMatchType,
+      seasonId,
+      tournamentId,
       battingStartMonth,
       battingEndMonth,
     );
@@ -593,10 +644,14 @@ export default function StatsOverview({
       nextYear,
       battingMatchType,
       seasonId,
+      battingTournamentId,
       range.startMonth,
       range.endMonth,
     );
   };
+
+  const pitchingTournamentId =
+    pitchingTournament !== "全て" ? pitchingTournament : undefined;
 
   const handlePitchingYearChange = (year: string) => {
     setPitchingYear(year);
@@ -612,6 +667,7 @@ export default function StatsOverview({
       year,
       pitchingMatchType,
       seasonId,
+      pitchingTournamentId,
       nextStartMonth,
       nextEndMonth,
     );
@@ -624,6 +680,7 @@ export default function StatsOverview({
       pitchingYear,
       matchType,
       seasonId,
+      pitchingTournamentId,
       pitchingStartMonth,
       pitchingEndMonth,
     );
@@ -636,6 +693,21 @@ export default function StatsOverview({
       pitchingYear,
       pitchingMatchType,
       seasonId,
+      pitchingTournamentId,
+      pitchingStartMonth,
+      pitchingEndMonth,
+    );
+  };
+
+  const handlePitchingTournamentChange = (tournament: string) => {
+    setPitchingTournament(tournament);
+    const tournamentId = tournament !== "全て" ? tournament : undefined;
+    const seasonId = pitchingSeason !== "全て" ? pitchingSeason : undefined;
+    onPitchingFilterChange(
+      pitchingYear,
+      pitchingMatchType,
+      seasonId,
+      tournamentId,
       pitchingStartMonth,
       pitchingEndMonth,
     );
@@ -652,6 +724,7 @@ export default function StatsOverview({
       nextYear,
       pitchingMatchType,
       seasonId,
+      pitchingTournamentId,
       range.startMonth,
       range.endMonth,
     );
@@ -692,15 +765,18 @@ export default function StatsOverview({
                 <StatsFilter
                   availableYears={yearOptions}
                   availableSeasons={seasonOptions}
+                  availableTournaments={tournamentOptions}
                   monthOptions={monthOptions}
                   selectedYear={battingYear}
                   selectedMatchType={battingMatchType}
                   selectedSeason={battingSeason}
+                  selectedTournament={battingTournament}
                   startMonth={battingStartMonth}
                   endMonth={battingEndMonth}
                   onYearChange={handleBattingYearChange}
                   onMatchTypeChange={handleBattingMatchTypeChange}
                   onSeasonChange={handleBattingSeasonChange}
+                  onTournamentChange={handleBattingTournamentChange}
                   onPeriodRangeChange={handleBattingPeriodRangeChange}
                 />
               </div>
@@ -735,15 +811,18 @@ export default function StatsOverview({
                 <StatsFilter
                   availableYears={yearOptions}
                   availableSeasons={seasonOptions}
+                  availableTournaments={tournamentOptions}
                   monthOptions={monthOptions}
                   selectedYear={pitchingYear}
                   selectedMatchType={pitchingMatchType}
                   selectedSeason={pitchingSeason}
+                  selectedTournament={pitchingTournament}
                   startMonth={pitchingStartMonth}
                   endMonth={pitchingEndMonth}
                   onYearChange={handlePitchingYearChange}
                   onMatchTypeChange={handlePitchingMatchTypeChange}
                   onSeasonChange={handlePitchingSeasonChange}
+                  onTournamentChange={handlePitchingTournamentChange}
                   onPeriodRangeChange={handlePitchingPeriodRangeChange}
                 />
               </div>

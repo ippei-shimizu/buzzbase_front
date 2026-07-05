@@ -4,7 +4,11 @@ import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import DashboardContent from "./_components/DashboardContent";
-import { getAvailableSeasons, getDashboardData } from "./actions";
+import {
+  getAvailableSeasons,
+  getAvailableTournaments,
+  getDashboardData,
+} from "./actions";
 
 export const metadata = {
   title: "ダッシュボード",
@@ -16,9 +20,10 @@ export default async function DashboardPage() {
     redirect("/signup?auth_required=true");
   }
 
-  const [data, seasons] = await Promise.all([
+  const [data, seasons, tournaments] = await Promise.all([
     getDashboardData(),
     getAvailableSeasons(),
+    getAvailableTournaments(),
   ]);
 
   return (
@@ -30,7 +35,11 @@ export default async function DashboardPage() {
             <div className="pt-20 px-4 lg:px-6">
               <h2 className="text-2xl font-bold">ダッシュボード</h2>
               <div className="my-6">
-                <DashboardContent data={data} seasons={seasons} />
+                <DashboardContent
+                  data={data}
+                  seasons={seasons}
+                  tournaments={tournaments}
+                />
                 <AdInFeed
                   slot={adSlots.dashboardInFeed}
                   layoutKey="-6t+ed+2i-1n-4w"
