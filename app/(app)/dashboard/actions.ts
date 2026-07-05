@@ -109,6 +109,11 @@ export interface SeasonOption {
   name: string;
 }
 
+export interface TournamentOption {
+  id: number;
+  name: string;
+}
+
 export interface DashboardData {
   recent_game_results: RecentGameResult[];
   batting_stats: BattingStats;
@@ -183,6 +188,7 @@ function buildFilterQuery(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
   startMonth?: string,
   endMonth?: string,
 ): string {
@@ -190,6 +196,7 @@ function buildFilterQuery(
   if (year && year !== "通算") params.append("year", year);
   if (matchType && matchType !== "全て") params.append("match_type", matchType);
   if (seasonId) params.append("season_id", seasonId);
+  if (tournamentId) params.append("tournament_id", tournamentId);
   if (startMonth) params.append("start_month", startMonth);
   if (endMonth) params.append("end_month", endMonth);
   const query = params.toString();
@@ -217,10 +224,33 @@ export async function getAvailableSeasons(): Promise<SeasonOption[]> {
   }
 }
 
+export async function getAvailableTournaments(): Promise<TournamentOption[]> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return [];
+
+    // 全大会ではなく、自分が記録した大会のみを候補にする。
+    const url = `${RAILS_API_URL}/api/v1/tournaments/user_tournaments`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    captureServerActionError(error, { action: "getAvailableTournaments" });
+    console.error("Error fetching tournaments:", error);
+    return [];
+  }
+}
+
 export async function getFilteredBattingStats(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
   startMonth?: string,
   endMonth?: string,
 ): Promise<BattingStats | null> {
@@ -232,6 +262,7 @@ export async function getFilteredBattingStats(
       year,
       matchType,
       seasonId,
+      tournamentId,
       startMonth,
       endMonth,
     );
@@ -256,6 +287,7 @@ export async function getFilteredPitchingStats(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
   startMonth?: string,
   endMonth?: string,
 ): Promise<PitchingStats | null> {
@@ -267,6 +299,7 @@ export async function getFilteredPitchingStats(
       year,
       matchType,
       seasonId,
+      tournamentId,
       startMonth,
       endMonth,
     );

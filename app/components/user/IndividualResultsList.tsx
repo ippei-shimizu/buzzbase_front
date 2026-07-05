@@ -18,6 +18,7 @@ import {
   getMatchResultsUserId,
 } from "@app/services/matchResultsService";
 import { getSeasons } from "@app/services/seasonsService";
+import { getUserTournaments } from "@app/services/tournamentsService";
 import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 import { formatRate, formatEra } from "@app/utils/formatStats";
 
@@ -41,6 +42,10 @@ export default function IndividualResultsList(props: UserId) {
   const [selectedSeason, setSelectedSeason] = useState("全て");
   const [seasonsData, setSeasonsData] = useState<SeasonData[]>([]);
   const [seasonOptions, setSeasonOptions] = useState<
+    { key: string; label: string }[]
+  >([{ key: "全て", label: "全て" }]);
+  const [selectedTournament, setSelectedTournament] = useState("全て");
+  const [tournamentOptions, setTournamentOptions] = useState<
     { key: string; label: string }[]
   >([{ key: "全て", label: "全て" }]);
   const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
@@ -114,11 +119,33 @@ export default function IndividualResultsList(props: UserId) {
     fetchMeta();
   }, [userId]);
 
+  // 大会候補は記録した大会のみ・他ユーザーページのため userId 指定で取得する。
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      const list = await getUserTournaments(userId);
+      // 大会名は年ごとに重複しうるため id をキーにする（name だと衝突・取りこぼし）。
+      setTournamentOptions([
+        { key: "全て", label: "全て" },
+        ...list.map((tournament) => ({
+          key: String(tournament.id),
+          label: tournament.name,
+        })),
+      ]);
+    };
+    fetchTournaments();
+  }, [userId]);
+
   const seasonId = useMemo(() => {
     return selectedSeason !== "全て"
       ? seasonsData.find((s) => s.name === selectedSeason)?.id
       : undefined;
   }, [selectedSeason, seasonsData]);
+
+  const tournamentId = useMemo(() => {
+    return selectedTournament !== "全て"
+      ? Number(selectedTournament)
+      : undefined;
+  }, [selectedTournament]);
 
   const monthOptions = useMemo(
     () => monthOptionsFromRecorded(availableMonths),
@@ -157,6 +184,7 @@ export default function IndividualResultsList(props: UserId) {
     matchTypeParam,
     startMonth,
     endMonth,
+    tournamentId,
   );
   const { personalBattingStatus, isLoadingBS } = usePersonalBattingStatus(
     userId,
@@ -165,6 +193,7 @@ export default function IndividualResultsList(props: UserId) {
     matchTypeParam,
     startMonth,
     endMonth,
+    tournamentId,
   );
   const { personalPitchingResults, isLoadingPR } = usePersonalPitchingResult(
     userId,
@@ -173,6 +202,7 @@ export default function IndividualResultsList(props: UserId) {
     matchTypeParam,
     startMonth,
     endMonth,
+    tournamentId,
   );
   const { personalPitchingStatus, isLoadingPS } =
     usePersonalPitchingResultStats(
@@ -182,6 +212,7 @@ export default function IndividualResultsList(props: UserId) {
       matchTypeParam,
       startMonth,
       endMonth,
+      tournamentId,
     );
 
   const isLoading = isLoadingBA || isLoadingBS || isLoadingPR || isLoadingPS;
@@ -222,6 +253,15 @@ export default function IndividualResultsList(props: UserId) {
               options={seasonOptions}
               onChange={setSelectedSeason}
             />
+            {tournamentOptions.length > 1 && (
+              <FilterChip
+                label="大会"
+                value={selectedTournament}
+                defaultValue="全て"
+                options={tournamentOptions}
+                onChange={setSelectedTournament}
+              />
+            )}
             <PeriodRangeFilter
               startMonth={startMonth}
               endMonth={endMonth}

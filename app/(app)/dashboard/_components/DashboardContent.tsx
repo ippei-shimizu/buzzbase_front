@@ -5,6 +5,7 @@ import type {
   DashboardData,
   PitchingStats,
   SeasonOption,
+  TournamentOption,
 } from "../actions";
 import { useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
@@ -18,11 +19,13 @@ import StatsOverview from "./StatsOverview";
 interface DashboardContentProps {
   data: DashboardData | null;
   seasons: SeasonOption[];
+  tournaments: TournamentOption[];
 }
 
 export default function DashboardContent({
   data,
   seasons,
+  tournaments,
 }: DashboardContentProps) {
   const [battingStats, setBattingStats] = useState<BattingStats | null>(
     data?.batting_stats ?? null,
@@ -35,6 +38,7 @@ export default function DashboardContent({
     year: string,
     matchType: string,
     seasonId?: string,
+    tournamentId?: string,
     startMonth?: string,
     endMonth?: string,
   ) => {
@@ -42,6 +46,7 @@ export default function DashboardContent({
       year,
       matchType,
       seasonId,
+      tournamentId,
       startMonth,
       endMonth,
     );
@@ -54,6 +59,7 @@ export default function DashboardContent({
     year: string,
     matchType: string,
     seasonId?: string,
+    tournamentId?: string,
     startMonth?: string,
     endMonth?: string,
   ) => {
@@ -61,6 +67,7 @@ export default function DashboardContent({
       year,
       matchType,
       seasonId,
+      tournamentId,
       startMonth,
       endMonth,
     );
@@ -81,6 +88,7 @@ export default function DashboardContent({
         availableYears={data?.available_years ?? []}
         availableMonths={data?.available_months ?? []}
         availableSeasons={seasons}
+        availableTournaments={tournaments}
         onBattingFilterChange={handleBattingFilterChange}
         onPitchingFilterChange={handlePitchingFilterChange}
       />

@@ -205,11 +205,15 @@ export const getFilterGameResultsV2 = async (
   sortOrder?: string,
   startMonth?: string,
   endMonth?: string,
+  tournamentId?: number,
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     let url = `/api/v2/game_results/filtered_index?year=${year}&match_type=${matchType}`;
     if (seasonId) {
       url += `&season_id=${seasonId}`;
+    }
+    if (tournamentId) {
+      url += `&tournament_id=${tournamentId}`;
     }
     if (page) {
       url += `&page=${page}`;
@@ -255,11 +259,15 @@ export const getFilterGameResultsUserIdV2 = async (
   sortOrder?: string,
   startMonth?: string,
   endMonth?: string,
+  tournamentId?: number,
 ): Promise<PaginatedResponse<unknown>> => {
   try {
     let url = `/api/v2/game_results/filtered_user/${userId}?year=${year}&match_type=${matchType}`;
     if (seasonId) {
       url += `&season_id=${seasonId}`;
+    }
+    if (tournamentId) {
+      url += `&tournament_id=${tournamentId}`;
     }
     if (page) {
       url += `&page=${page}`;
