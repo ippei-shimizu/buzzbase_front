@@ -73,9 +73,16 @@ export const resendConfirmation = async (email: string) => {
 };
 
 export const requestPasswordReset = async (email: string) => {
+  // 本番環境変数は末尾スラッシュ付きで設定される場合があり、単純な文字列結合だと
+  // "https://buzzbase.jp//reset-password" のような二重スラッシュになり
+  // devise_token_authのredirect_whitelistの完全一致チェックに失敗しうるため除去する。
+  const baseUrl = (process.env.NEXT_PUBLIC_METADATA_BASE_URL || "").replace(
+    /\/+$/,
+    "",
+  );
   const response = await axiosInstance.post("/api/v1/auth/password", {
     email,
-    redirect_url: `${process.env.NEXT_PUBLIC_METADATA_BASE_URL}/reset-password`,
+    redirect_url: `${baseUrl}/reset-password`,
   });
 
   return response;
