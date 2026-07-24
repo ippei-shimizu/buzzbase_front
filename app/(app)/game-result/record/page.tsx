@@ -453,7 +453,7 @@ export default function GameRecord() {
       setIsMatchDate(true);
     }
 
-    if (!myTeam) {
+    if (!myTeam.trim()) {
       setIsMyTeamValid(false);
       isValid = false;
       newErrors.push("自チーム名が未入力です。");
@@ -463,7 +463,7 @@ export default function GameRecord() {
 
     // 既存試合の編集時は opponentTeam（名前）が空でも existingOpponentTeam（id）で
     // 相手チームが確定しているため、どちらかがあれば入力済みとみなす。
-    if (!opponentTeam && !existingOpponentTeam) {
+    if (!opponentTeam.trim() && !existingOpponentTeam) {
       setIsOpponentTeamValid(false);
       isValid = false;
       newErrors.push("相手チーム名が未入力です。");
@@ -540,11 +540,12 @@ export default function GameRecord() {
           ]);
         }
       }
-      let myTeamId = teamsData.find((team) => team.name === myTeam)?.id;
+      const trimmedMyTeam = myTeam.trim();
+      let myTeamId = teamsData.find((team) => team.name === trimmedMyTeam)?.id;
       if (!myTeamId) {
         const newTeam = await createOrUpdateTeam({
           team: {
-            name: myTeam,
+            name: trimmedMyTeam,
             category_id: undefined,
             prefecture_id: undefined,
           },
@@ -577,14 +578,15 @@ export default function GameRecord() {
 
       // シーズン保存
       let seasonId = selectedSeason;
-      if (inputSeasonName && !selectedSeason) {
+      const trimmedSeasonName = inputSeasonName.trim();
+      if (trimmedSeasonName && !selectedSeason) {
         const existingSeason = seasonsData.find(
-          (s) => s.name === inputSeasonName,
+          (s) => s.name === trimmedSeasonName,
         );
         if (existingSeason) {
           seasonId = existingSeason.id;
         } else {
-          const newSeason = await createSeason(inputSeasonName);
+          const newSeason = await createSeason(trimmedSeasonName);
           if (newSeason) {
             setSeasonsData([...seasonsData, newSeason]);
             seasonId = newSeason.id;
@@ -595,10 +597,11 @@ export default function GameRecord() {
       // 相手チーム保存。既存チームを選択済み（existingOpponentTeam あり）の場合は
       // 新規作成せず id をそのまま使い、手入力で新しいチーム名を入れた場合のみ作成する。
       let opponentTeamId = existingOpponentTeam;
-      if (!opponentTeamId && opponentTeam.trim() !== "") {
+      const trimmedOpponentTeam = opponentTeam.trim();
+      if (!opponentTeamId && trimmedOpponentTeam !== "") {
         const newTeamResponse = await createOrUpdateTeam({
           team: {
-            name: opponentTeam,
+            name: trimmedOpponentTeam,
             category_id: undefined,
             prefecture_id: undefined,
           },
