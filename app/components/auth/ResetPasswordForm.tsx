@@ -59,8 +59,20 @@ export default function ResetPasswordForm({ authHeaders }: Props) {
       setIsCompleted(true);
       setTimeout(() => router.push("/signin"), 3000);
     } catch (error) {
-      if (error instanceof AxiosError && error.response?.data?.errors) {
-        setErrorsWithTimeout(error.response.data.errors);
+      // PUT /api/v1/auth/password のバリデーションエラーは devise_token_auth の
+      // resource_errors ヘルパーにより { フィールド名: [...], full_messages: [...] }
+      // というハッシュ形式で返るため、full_messages を優先的に取り出す
+      // （フラットな配列を前提にすると ErrorMessages 側の map でクラッシュする）。
+      if (error instanceof AxiosError) {
+        const responseErrors = error.response?.data?.errors;
+        const messages: string[] =
+          responseErrors?.full_messages ||
+          (Array.isArray(responseErrors) ? responseErrors : []);
+        setErrorsWithTimeout(
+          messages.length > 0
+            ? messages
+            : ["パスワードの再設定に失敗しました。もう一度お試しください。"],
+        );
       } else {
         setErrorsWithTimeout([
           "パスワードの再設定に失敗しました。もう一度お試しください。",
