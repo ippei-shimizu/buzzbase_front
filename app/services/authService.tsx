@@ -1,5 +1,11 @@
-import type { SignInData, SignUpData } from "@app/interface";
+import type {
+  ResetPasswordAuthHeaders,
+  ResetPasswordData,
+  SignInData,
+  SignUpData,
+} from "@app/interface";
 import type { AxiosResponseHeaders, RawAxiosResponseHeaders } from "axios";
+import axios from "axios";
 import Cookies from "js-cookie";
 import axiosInstance from "@app/utils/axiosInstance";
 
@@ -62,6 +68,46 @@ export const resendConfirmation = async (email: string) => {
     email: email,
     redirect_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
   });
+
+  return response;
+};
+
+export const requestPasswordReset = async (email: string) => {
+  // 本番環境変数は末尾スラッシュ付きで設定される場合があり、単純な文字列結合だと
+  // "https://buzzbase.jp//reset-password" のような二重スラッシュになり
+  // devise_token_authのredirect_whitelistの完全一致チェックに失敗しうるため除去する。
+  const baseUrl = (process.env.NEXT_PUBLIC_METADATA_BASE_URL || "").replace(
+    /\/+$/,
+    "",
+  );
+  const response = await axiosInstance.post("/api/v1/auth/password", {
+    email,
+    redirect_url: `${baseUrl}/reset-password`,
+  });
+
+  return response;
+};
+
+// パスワード再設定リンクのワンタイムトークンで認証するため、ログイン中セッションの
+// Cookieを自動付与するaxiosInstanceは使わず、素のaxiosでヘッダーを明示的に指定する。
+export const resetPassword = async (
+  data: ResetPasswordData,
+  authHeaders: ResetPasswordAuthHeaders,
+) => {
+  const response = await axios.put(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/password`,
+    {
+      password: data.password,
+      password_confirmation: data.passwordConfirmation,
+    },
+    {
+      headers: {
+        "access-token": authHeaders.accessToken,
+        client: authHeaders.client,
+        uid: authHeaders.uid,
+      },
+    },
+  );
 
   return response;
 };
