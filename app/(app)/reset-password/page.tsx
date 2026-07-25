@@ -1,13 +1,18 @@
-"use client";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import ResetPasswordForm from "@app/components/auth/ResetPasswordForm";
 
-function ResetPasswordContent() {
-  const searchParams = useSearchParams();
-  const accessToken = searchParams.get("access-token");
-  const client = searchParams.get("client");
-  const uid = searchParams.get("uid");
+interface PageProps {
+  searchParams: Promise<{
+    "access-token"?: string;
+    client?: string;
+    uid?: string;
+  }>;
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const accessToken = params["access-token"];
+  const client = params.client;
+  const uid = params.uid;
   const hasValidToken = !!(accessToken && client && uid);
 
   return (
@@ -23,19 +28,5 @@ function ResetPasswordContent() {
         )}
       </div>
     </div>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense
-      fallback={
-        <div className="h-full flex items-center justify-center">
-          読み込み中...
-        </div>
-      }
-    >
-      <ResetPasswordContent />
-    </Suspense>
   );
 }
