@@ -2,7 +2,7 @@
 import type { ResetPasswordAuthHeaders } from "@app/interface";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import PasswordConfirmInput from "@app/components/auth/PasswordConfirmInput";
 import PasswordInput from "@app/components/auth/PasswordInput";
@@ -22,6 +22,12 @@ export default function ResetPasswordForm({ authHeaders }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
+
+  // access-token/client/uidはprops経由で既に保持しているため、ブラウザ履歴・
+  // リファラにワンタイムトークンが残らないようマウント後にURLから除去する。
+  useEffect(() => {
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   const validatePassword = (value: string) => /^[a-zA-Z\d]{6,}$/.test(value);
 
