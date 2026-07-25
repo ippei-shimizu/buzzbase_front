@@ -4,6 +4,9 @@ import Header from "@app/components/header/Header";
 export const metadata: Metadata = {
   title: "新しいパスワードの設定",
   description: "「BUZZ BASE」の新しいパスワードを設定します。",
+  robots: {
+    index: false,
+  },
 };
 
 export default function ResetPasswordLayout({
