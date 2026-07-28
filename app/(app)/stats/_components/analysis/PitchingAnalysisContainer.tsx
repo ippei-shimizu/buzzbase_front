@@ -47,21 +47,6 @@ export function PitchingAnalysisContainer({
   const [yearOptions] = useState(buildYearOptions);
   const [seasonPaywallOpen, setSeasonPaywallOpen] = useState(false);
 
-  const fetchTrend = (next: Filters, nextGranularity: EraTrendGranularity) => {
-    startRefetch(async () => {
-      // 防御率推移は year/season/tournament のみで絞る（種別は対象外）。
-      const trend = await getEraTrend(
-        {
-          year: next.year,
-          seasonId: next.seasonId,
-          tournamentId: next.tournamentId,
-        },
-        nextGranularity,
-      );
-      setEraTrend(trend);
-    });
-  };
-
   // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
   useEffect(() => {
@@ -69,9 +54,29 @@ export function PitchingAnalysisContainer({
       didInitRef.current = true;
       return;
     }
-    fetchTrend(filters, granularity);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchTrendはfilters/granularityと同じ値を毎回内部で使うため依存に含めない
-  }, [filters.year, filters.seasonId, filters.tournamentId, granularity]);
+    let active = true;
+    startRefetch(async () => {
+      // 防御率推移は year/season/tournament のみで絞る（種別は対象外）。
+      const trend = await getEraTrend(
+        {
+          year: filters.year,
+          seasonId: filters.seasonId,
+          tournamentId: filters.tournamentId,
+        },
+        granularity,
+      );
+      if (active) setEraTrend(trend);
+    });
+    return () => {
+      active = false;
+    };
+  }, [
+    filters.year,
+    filters.seasonId,
+    filters.tournamentId,
+    granularity,
+    startRefetch,
+  ]);
 
   const handleGranularityChange = (next: EraTrendGranularity) => {
     if (next === "season" && !hasEntitlement("season_transition_graph")) {
