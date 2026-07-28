@@ -51,6 +51,7 @@ const GRANULARITY_OPTIONS: readonly {
   { key: "game", label: "試合" },
   { key: "month", label: "月" },
   { key: "year", label: "年" },
+  { key: "season", label: "シーズン" },
   { key: "recent_games", label: "直近10" },
 ];
 

@@ -1,9 +1,12 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
+import ProUpgradeModal from "@app/components/pro/ProUpgradeModal";
+import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import {
   type AnalysisFilters as Filters,
-  type EraTrendPoint,
+  type EraTrendData,
+  type EraTrendGranularity,
   getEraTrend,
 } from "../../analysisActions";
 import { AnalysisFilters } from "./AnalysisFilters";
@@ -21,7 +24,7 @@ function buildYearOptions(): FilterOption[] {
 
 interface PitchingAnalysisContainerProps {
   /** SSR で取得した防御率推移の初期データ。マウント時はこれを使い再取得しない。 */
-  initialEraTrend: EraTrendPoint[];
+  initialEraTrend: EraTrendData;
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
@@ -33,13 +36,31 @@ export function PitchingAnalysisContainer({
   seasonOptions,
   tournamentOptions,
 }: PitchingAnalysisContainerProps) {
+  const { hasEntitlement } = useEntitlement();
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
     matchType: "",
   });
-  const [eraTrend, setEraTrend] = useState<EraTrendPoint[]>(initialEraTrend);
+  const [granularity, setGranularity] = useState<EraTrendGranularity>("month");
+  const [eraTrend, setEraTrend] = useState<EraTrendData>(initialEraTrend);
   const [isRefetching, startRefetch] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
+  const [seasonPaywallOpen, setSeasonPaywallOpen] = useState(false);
+
+  const fetchTrend = (next: Filters, nextGranularity: EraTrendGranularity) => {
+    startRefetch(async () => {
+      // 防御率推移は year/season/tournament のみで絞る（種別は対象外）。
+      const trend = await getEraTrend(
+        {
+          year: next.year,
+          seasonId: next.seasonId,
+          tournamentId: next.tournamentId,
+        },
+        nextGranularity,
+      );
+      setEraTrend(trend);
+    });
+  };
 
   // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -48,20 +69,17 @@ export function PitchingAnalysisContainer({
       didInitRef.current = true;
       return;
     }
-    let active = true;
-    // 防御率推移は year/season/tournament のみで絞る（種別は対象外）。
-    startRefetch(async () => {
-      const trend = await getEraTrend({
-        year: filters.year,
-        seasonId: filters.seasonId,
-        tournamentId: filters.tournamentId,
-      });
-      if (active) setEraTrend(trend);
-    });
-    return () => {
-      active = false;
-    };
-  }, [filters.year, filters.seasonId, filters.tournamentId, startRefetch]);
+    fetchTrend(filters, granularity);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchTrendはfilters/granularityと同じ値を毎回内部で使うため依存に含めない
+  }, [filters.year, filters.seasonId, filters.tournamentId, granularity]);
+
+  const handleGranularityChange = (next: EraTrendGranularity) => {
+    if (next === "season" && !hasEntitlement("season_transition_graph")) {
+      setSeasonPaywallOpen(true);
+      return;
+    }
+    setGranularity(next);
+  };
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -76,8 +94,17 @@ export function PitchingAnalysisContainer({
       <div
         className={isRefetching ? "opacity-50 transition-opacity" : undefined}
       >
-        <EraTrendChart data={eraTrend} />
+        <EraTrendChart
+          points={eraTrend.points}
+          granularity={granularity}
+          onGranularityChange={handleGranularityChange}
+        />
       </div>
+      <ProUpgradeModal
+        isOpen={seasonPaywallOpen}
+        onClose={() => setSeasonPaywallOpen(false)}
+        trigger="season_transition_graph"
+      />
     </div>
   );
 }

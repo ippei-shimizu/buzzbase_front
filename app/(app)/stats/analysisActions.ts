@@ -93,9 +93,17 @@ export interface PlateAppearanceCategory {
   percentage: number;
 }
 
+export type EraTrendGranularity = "month" | "season";
+
 export interface EraTrendPoint {
-  month: number;
+  key: string;
+  label: string;
   era: number;
+}
+
+export interface EraTrendData {
+  granularity: EraTrendGranularity;
+  points: EraTrendPoint[];
 }
 
 export interface ContactQualityCategory {
@@ -220,6 +228,7 @@ export type BattingTrendGranularity =
   | "game"
   | "month"
   | "year"
+  | "season"
   | "recent_games";
 
 export interface BattingTrendPoint {
@@ -414,17 +423,18 @@ export async function getPitcherAttributeSummary(
 
 export async function getEraTrend(
   filters: AnalysisFilters = {},
-): Promise<EraTrendPoint[]> {
+  granularity: EraTrendGranularity = "month",
+): Promise<EraTrendData> {
   // era_trend は year/season/tournament のみで絞る。match_type は構造的に除外し、
   // 誤って matchType 付きで呼ばれても送信されないことを関数自身で保証する。
   const { matchType: _matchType, ...eraFilters } = filters;
-  const result = await fetchAnalysis<{ trend: EraTrendPoint[] }>(
+  return fetchAnalysis<EraTrendData>(
     "era_trend",
     eraFilters,
     "getEraTrend",
-    { trend: [] },
+    { granularity, points: [] },
+    { granularity },
   );
-  return result.trend ?? [];
 }
 
 export async function getPlateAppearanceBreakdown(

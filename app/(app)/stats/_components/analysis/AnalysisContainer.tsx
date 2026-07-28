@@ -1,6 +1,8 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
 import { useEffect, useRef, useState, useTransition } from "react";
+import ProUpgradeModal from "@app/components/pro/ProUpgradeModal";
+import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
@@ -71,6 +73,8 @@ export function AnalysisContainer({
   seasonOptions,
   tournamentOptions,
 }: AnalysisContainerProps) {
+  const { hasEntitlement } = useEntitlement();
+  const [seasonPaywallOpen, setSeasonPaywallOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     year: "通算",
     matchType: "",
@@ -230,7 +234,16 @@ export function AnalysisContainer({
           <BattingTrendChart
             points={battingTrend.points}
             granularity={granularity}
-            onGranularityChange={setGranularity}
+            onGranularityChange={(next) => {
+              if (
+                next === "season" &&
+                !hasEntitlement("season_transition_graph")
+              ) {
+                setSeasonPaywallOpen(true);
+                return;
+              }
+              setGranularity(next);
+            }}
           />
         </div>
         <SprayChart
@@ -304,6 +317,11 @@ export function AnalysisContainer({
         )}
         <PitcherAttributeSummary data={pitcherAttributes} />
       </div>
+      <ProUpgradeModal
+        isOpen={seasonPaywallOpen}
+        onClose={() => setSeasonPaywallOpen(false)}
+        trigger="season_transition_graph"
+      />
     </div>
   );
 }

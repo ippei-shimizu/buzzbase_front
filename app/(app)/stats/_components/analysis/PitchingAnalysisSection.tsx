@@ -18,9 +18,9 @@ export function PitchingAnalysisSection() {
 }
 
 async function PitchingAnalysisDataProvider() {
-  // 防御率推移は year/season/tournament のみで絞る（既定は通算）。
+  // 防御率推移は year/season/tournament のみで絞る（既定は通算・月粒度）。
   const [initialEraTrend, filterOptions] = await Promise.all([
-    getEraTrend({ year: "通算" }),
+    getEraTrend({ year: "通算" }, "month"),
     getStatsFilterOptions(),
   ]);
   return (

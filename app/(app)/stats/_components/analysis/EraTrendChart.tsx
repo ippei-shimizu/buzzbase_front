@@ -1,9 +1,11 @@
 "use client";
-import type { EraTrendPoint } from "../../analysisActions";
+import type { EraTrendGranularity, EraTrendPoint } from "../../analysisActions";
 import { Fragment } from "react";
 
 interface EraTrendChartProps {
-  data: EraTrendPoint[];
+  points: EraTrendPoint[];
+  granularity: EraTrendGranularity;
+  onGranularityChange: (granularity: EraTrendGranularity) => void;
 }
 
 const CHART_WIDTH = 300;
@@ -15,14 +17,70 @@ const PADDING_BOTTOM = 24;
 const PLOT_WIDTH = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
 const PLOT_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
-/** 防御率推移の折れ線グラフ（月別 ERA をエリア塗りつぶし付きで描画）。 */
-export function EraTrendChart({ data }: EraTrendChartProps) {
-  // 投球が無い月などで era が null/Infinity でも安全に描けるよう有限値だけ残し、
-  // 月昇順に並べる（API のソート順に依存しない）。
-  const points = data
-    .filter((point) => Number.isFinite(point.era))
-    .sort((a, b) => a.month - b.month);
-  if (points.length === 0) return null;
+const GRANULARITY_OPTIONS: readonly {
+  key: EraTrendGranularity;
+  label: string;
+}[] = [
+  { key: "month", label: "月" },
+  { key: "season", label: "シーズン" },
+];
+
+function GranularityToggle({
+  value,
+  onChange,
+}: {
+  value: EraTrendGranularity;
+  onChange: (value: EraTrendGranularity) => void;
+}) {
+  return (
+    <div className="flex rounded-md bg-[#27272A] p-0.5">
+      {GRANULARITY_OPTIONS.map((option) => {
+        const isActive = value === option.key;
+        return (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => onChange(option.key)}
+            className={`rounded px-2 py-1 text-[11px] font-semibold ${
+              isActive ? "bg-[#52525B] text-[#F4F4F4]" : "text-[#A1A1AA]"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** 防御率推移の折れ線グラフ（月別/シーズン別 ERA をエリア塗りつぶし付きで描画）。 */
+export function EraTrendChart({
+  points: rawPoints,
+  granularity,
+  onGranularityChange,
+}: EraTrendChartProps) {
+  // 投球が無い期間などで era が null/Infinity でも安全に描けるよう有限値だけ残す。
+  // 並び順は API 側（月昇順 / シーズン開始日昇順）に依存する。
+  const points = rawPoints.filter((point) => Number.isFinite(point.era));
+  const bestPoint =
+    granularity === "season" && points.length > 1
+      ? points.reduce((best, point) => (point.era < best.era ? point : best))
+      : null;
+
+  if (points.length === 0) {
+    return (
+      <section className="rounded-xl bg-[#3A3A3A] p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-base font-bold text-[#F4F4F4]">防御率推移</h3>
+          <GranularityToggle
+            value={granularity}
+            onChange={onGranularityChange}
+          />
+        </div>
+        <p className="text-sm text-[#A1A1AA]">対象データなし</p>
+      </section>
+    );
+  }
 
   // Math.max(..., 1) で maxEra は常に 1 以上になる。
   const maxEra = Math.max(...points.map((point) => point.era), 1);
@@ -46,7 +104,10 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
 
   return (
     <section className="rounded-xl bg-[#3A3A3A] p-4">
-      <h3 className="mb-3 text-base font-bold text-[#F4F4F4]">防御率推移</h3>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-base font-bold text-[#F4F4F4]">防御率推移</h3>
+        <GranularityToggle value={granularity} onChange={onGranularityChange} />
+      </div>
       <div className="flex justify-center">
         <svg
           width="100%"
@@ -94,7 +155,7 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
           />
 
           {points.map((point, index) => (
-            <Fragment key={`pt-${point.month}`}>
+            <Fragment key={`pt-${point.key}`}>
               <circle
                 cx={getX(index)}
                 cy={getY(point.era)}
@@ -112,20 +173,20 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
 
           {points.map((point, index) => (
             <text
-              key={`xl-${point.month}`}
+              key={`xl-${point.key}`}
               x={getX(index)}
               y={CHART_HEIGHT - 4}
               textAnchor="middle"
               fill="#A1A1AA"
               fontSize={10}
             >
-              {point.month}月
+              {point.label}
             </text>
           ))}
 
           {points.map((point, index) => (
             <text
-              key={`val-${point.month}`}
+              key={`val-${point.key}`}
               x={getX(index)}
               // 最大値の点では getY が上端付近になりラベルが見切れるため下限を設ける。
               y={Math.max(getY(point.era) - 10, PADDING_TOP + 9)}
@@ -139,6 +200,12 @@ export function EraTrendChart({ data }: EraTrendChartProps) {
           ))}
         </svg>
       </div>
+
+      {bestPoint ? (
+        <p className="mt-2.5 text-xs font-semibold text-[#FFD43B]">
+          ★ 自己ベスト防御率 {bestPoint.era.toFixed(2)}（{bestPoint.label}）
+        </p>
+      ) : null}
     </section>
   );
 }
