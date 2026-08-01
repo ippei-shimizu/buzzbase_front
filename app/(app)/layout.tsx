@@ -6,6 +6,7 @@ import { ProStatusProvider } from "@app/components/pro/ProStatusProvider";
 import { AuthProvider } from "@app/contexts/useAuthContext";
 import { UserProvider } from "@app/contexts/userContext";
 import { Providers } from "@app/providers";
+import GameRecordStorageCleanup from "./_components/GameRecordStorageCleanup";
 import SmartAppBanner from "./_components/SmartAppBanner";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Providers>
           <ProStatusProvider>
             <SmartAppBanner />
+            <GameRecordStorageCleanup />
             {children}
             <NavigationMenu />
             <Footer />

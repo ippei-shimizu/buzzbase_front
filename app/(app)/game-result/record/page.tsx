@@ -291,13 +291,6 @@ export default function GameRecord() {
       createNew();
       applyFormDefaults();
     }
-    if (
-      !(pathname === "/game-result/battings") &&
-      !(pathname === "/game-result/record") &&
-      savedGameResultId
-    ) {
-      localStorage.removeItem("gameResultId");
-    }
   }, [pathname]);
 
   useEffect(() => {
