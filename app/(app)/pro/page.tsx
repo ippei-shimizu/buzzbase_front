@@ -7,7 +7,7 @@ import HeroSection from "./_components/HeroSection";
 import PricingCards from "./_components/PricingCards";
 import Screenshots from "./_components/Screenshots";
 import Testimonials from "./_components/Testimonials";
-import { getProStatus } from "./actions";
+import { getCachedProStatus } from "./proStatus";
 
 export const metadata: Metadata = {
   title: "BUZZ BASE Pro — 記録を、成長へ。",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProLandingPage() {
-  const status = await getProStatus();
+  const status = await getCachedProStatus();
   if (status?.subscription.pro_active) {
     redirect("/account/subscription");
   }

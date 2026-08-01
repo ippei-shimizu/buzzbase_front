@@ -31,6 +31,13 @@ export default function SignIn() {
   const togglePasswordVisibility = () =>
     setIsPasswordVisible(!isPasswordVisible);
 
+  // 認証 cookie はクライアント側で書き換わるため、遷移だけでは Server Component の
+  // レンダー結果（Pro 状態など）が前のユーザーのまま残る。refresh で作り直す。
+  const navigateAfterAuth = (path: string) => {
+    router.push(path);
+    router.refresh();
+  };
+
   const setErrorsWithTimeout = (newErrors: React.SetStateAction<string[]>) => {
     setErrors(newErrors);
     setTimeout(() => {
@@ -49,10 +56,10 @@ export default function SignIn() {
       const userData = await getUserData();
       if (userData && userData.user_id) {
         setIsLoggedIn(true);
-        router.push(`/mypage/${userData.user_id}`);
+        navigateAfterAuth(`/mypage/${userData.user_id}`);
       } else {
         setIsLoggedIn(true);
-        router.push("/register-username");
+        navigateAfterAuth("/register-username");
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.errors) {

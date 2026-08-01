@@ -13,6 +13,9 @@ export default function Logout() {
       await signOut();
       setIsLoggedIn(false);
       router.push("/signin?logout=success");
+      // 認証 cookie 削除後も Server Component のレンダー結果（Pro 状態など）は
+      // ログイン中のまま残るため、明示的に作り直す。
+      router.refresh();
     } catch (error) {
       Sentry.captureException(error, {
         tags: { source: "logout" },
