@@ -1,9 +1,11 @@
+import MarkNoticesRead from "@app/(app)/_components/MarkNoticesRead";
 import Header from "@app/components/header/Header";
 import NotificationItem from "@app/components/notification/NotificationItem";
 
 export default function Notifications() {
   return (
     <>
+      <MarkNoticesRead />
       <div className="buzz-dark flex flex-col w-full min-h-screen">
         <Header />
         <div className="h-full bg-main">
