@@ -32,6 +32,7 @@ import {
   HIT_RESULT_COLOR,
   SACRIFICE_RESULT_COLOR,
 } from "@app/utils/battingResultColor";
+import { clearGameRecordStorage } from "@app/utils/gameRecordStorage";
 import { PlateAppearanceSummaryCard } from "./_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
@@ -213,7 +214,7 @@ export default function ResultsSummary() {
 
   const _handleShare = () => {};
   const handleResultComplete = () => {
-    localStorage.removeItem("gameResultId");
+    clearGameRecordStorage();
     router.push("/game-result/lists");
   };
 

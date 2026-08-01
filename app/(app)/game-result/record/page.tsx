@@ -115,6 +115,8 @@ export default function GameRecord() {
   const [stadiumData, setStadiumData] = useState<Stadium[]>([]);
   // 既存試合の編集中かどうか（編集時はパターン選択を出さず単一ボタンにする）。
   const [isEditMode, setIsEditMode] = useState(false);
+  // 対象試合の match_result が既に保存済みかどうか（中断ダイアログの文言に使う）。
+  const [isMatchResultSaved, setIsMatchResultSaved] = useState(false);
   const [matchBattingOrder, setMatchBattingOrder] = useState("");
   const [existingMatchBattingOrder, setExistingMatchBattingOrder] =
     useState("");
@@ -269,6 +271,7 @@ export default function GameRecord() {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
       // 既存試合がなければ（＝新規記録フロー）直近試合のデフォルトを適用する。
       fetchExistingMatchResult(JSON.parse(savedGameResultId)).then((found) => {
+        setIsMatchResultSaved(found);
         if (!found && !isEdit) applyFormDefaults();
       });
     } else if (pathname === "/game-result/record") {
@@ -290,13 +293,6 @@ export default function GameRecord() {
       };
       createNew();
       applyFormDefaults();
-    }
-    if (
-      !(pathname === "/game-result/battings") &&
-      !(pathname === "/game-result/record") &&
-      savedGameResultId
-    ) {
-      localStorage.removeItem("gameResultId");
     }
   }, [pathname]);
 
@@ -692,7 +688,7 @@ export default function GameRecord() {
 
   return (
     <>
-      <HeaderResult />
+      <HeaderResult isMatchResultSaved={isMatchResultSaved} />
       {isSubmitting && <LoadingSpinner />}
       <main className="h-full">
         <div className="pb-40 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">

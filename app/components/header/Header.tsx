@@ -15,7 +15,6 @@ export default function Header() {
     useState<NotificationCount | null>(null);
   const { isLoggedIn } = useAuthContext();
   useEffect(() => {
-    localStorage.removeItem("gameResultId");
     fetchDate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

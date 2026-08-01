@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@heroui/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { BackIcon } from "@app/components/icon/BackIcon";
 
 interface HeaderNoteSaveProps {
@@ -23,9 +23,6 @@ export default function HeaderNote({
     }
     window.history.back();
   };
-  useEffect(() => {
-    localStorage.removeItem("gameResultId");
-  }, []);
   return (
     <>
       <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--smart-banner-height,0px)] w-full bg-main z-50">

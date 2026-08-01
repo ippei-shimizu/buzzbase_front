@@ -1,15 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React from "react";
 import HeaderRight from "@app/components/header/HeaderRight";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function HeaderTop() {
   const { isLoggedIn } = useAuthContext();
-  useEffect(() => {
-    localStorage.removeItem("gameResultId");
-  }, []);
 
   return (
     <>
