@@ -17,11 +17,12 @@ const mockUseEntitlement = useEntitlement as jest.MockedFunction<
   typeof useEntitlement
 >;
 
-function mockEntitlement(granted: boolean) {
+function mockEntitlement(granted: boolean, isLoading = false) {
   mockUseEntitlement.mockReturnValue({
     isPro: granted,
     inTrial: false,
     inGracePeriod: false,
+    isLoading,
     hasEntitlement: jest.fn(() => granted),
   });
 }
@@ -68,6 +69,24 @@ describe("ProGate", () => {
     );
 
     expect(screen.getByText("Locked Notice")).toBeInTheDocument();
+    expect(screen.queryByText("Pro Content")).not.toBeInTheDocument();
+  });
+
+  it("Pro 判定が未確定の間は fallback もロックトリガーも出さない", () => {
+    mockEntitlement(false, true);
+
+    render(
+      <ProGate
+        feature="season_transition_graph"
+        fallback={<div>Locked Notice</div>}
+        renderLockedTrigger={() => <button type="button">ロック解除</button>}
+      >
+        <div>Pro Content</div>
+      </ProGate>,
+    );
+
+    expect(screen.queryByText("Locked Notice")).not.toBeInTheDocument();
+    expect(screen.queryByText("ロック解除")).not.toBeInTheDocument();
     expect(screen.queryByText("Pro Content")).not.toBeInTheDocument();
   });
 

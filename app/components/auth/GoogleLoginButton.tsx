@@ -3,7 +3,7 @@
 import type { CredentialResponse } from "@react-oauth/google";
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -23,6 +23,16 @@ export default function GoogleLoginButton({
   const { setIsLoggedIn } = useAuthContext();
   const router = useRouter();
 
+  // 認証 cookie はクライアント側で書き換わるため、遷移だけでは Server Component の
+  // レンダー結果が前のユーザーのまま残る。refresh で作り直す。
+  // 単一 transition にまとめて遷移先の RSC を2回取りに行かないようにする。
+  const navigateAfterAuth = (path: string) => {
+    startTransition(() => {
+      router.push(path);
+      router.refresh();
+    });
+  };
+
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
       setErrors(["Googleログインに失敗しました"]);
@@ -37,7 +47,7 @@ export default function GoogleLoginButton({
 
       if (response.data.requires_username) {
         trackEvent("sign_up", { method: "google" });
-        router.push("/register-username");
+        navigateAfterAuth("/register-username");
         setIsLoggedIn(true);
       } else {
         // requires_username=false はバックエンドが既存ユーザーと判断したことを意味する。
@@ -45,9 +55,9 @@ export default function GoogleLoginButton({
         trackEvent("login", { method: "google" });
         const userData = await getUserData();
         if (userData && userData.user_id) {
-          router.push(`/mypage/${userData.user_id}`);
+          navigateAfterAuth(`/mypage/${userData.user_id}`);
         } else {
-          router.push("/register-username");
+          navigateAfterAuth("/register-username");
         }
         setIsLoggedIn(true);
       }

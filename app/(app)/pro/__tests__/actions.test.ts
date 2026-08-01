@@ -13,7 +13,7 @@ jest.mock("../../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
-import { startProCheckout } from "../actions";
+import { getProStatus, startProCheckout } from "../actions";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -25,6 +25,56 @@ function setupAuthCookies() {
     return values[key];
   });
 }
+
+describe("getProStatus", () => {
+  const consoleErrorSpy = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("401 のときはログを出さずに null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+    });
+
+    await expect(getProStatus()).resolves.toBeNull();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("401 以外のエラーはログに残して null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+    });
+
+    await expect(getProStatus()).resolves.toBeNull();
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("タイムアウト用の AbortSignal を渡す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ subscription: {}, entitlements: [] }),
+    });
+
+    await getProStatus();
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});
 
 describe("startProCheckout", () => {
   const originalAppUrl = process.env.APP_URL;

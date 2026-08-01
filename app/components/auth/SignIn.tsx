@@ -1,7 +1,7 @@
 "use client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { startTransition, useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import GoogleLoginButton from "@app/components/auth/GoogleLoginButton";
@@ -31,6 +31,16 @@ export default function SignIn() {
   const togglePasswordVisibility = () =>
     setIsPasswordVisible(!isPasswordVisible);
 
+  // 認証 cookie はクライアント側で書き換わるため、遷移だけでは Server Component の
+  // レンダー結果が前のユーザーのまま残る。refresh で作り直す。
+  // 単一 transition にまとめて遷移先の RSC を2回取りに行かないようにする。
+  const navigateAfterAuth = (path: string) => {
+    startTransition(() => {
+      router.push(path);
+      router.refresh();
+    });
+  };
+
   const setErrorsWithTimeout = (newErrors: React.SetStateAction<string[]>) => {
     setErrors(newErrors);
     setTimeout(() => {
@@ -49,10 +59,10 @@ export default function SignIn() {
       const userData = await getUserData();
       if (userData && userData.user_id) {
         setIsLoggedIn(true);
-        router.push(`/mypage/${userData.user_id}`);
+        navigateAfterAuth(`/mypage/${userData.user_id}`);
       } else {
         setIsLoggedIn(true);
-        router.push("/register-username");
+        navigateAfterAuth("/register-username");
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.errors) {
