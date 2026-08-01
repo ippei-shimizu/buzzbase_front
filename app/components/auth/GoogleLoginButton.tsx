@@ -3,7 +3,7 @@
 import type { CredentialResponse } from "@react-oauth/google";
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -24,10 +24,13 @@ export default function GoogleLoginButton({
   const router = useRouter();
 
   // 認証 cookie はクライアント側で書き換わるため、遷移だけでは Server Component の
-  // レンダー結果（Pro 状態など）が前のユーザーのまま残る。refresh で作り直す。
+  // レンダー結果が前のユーザーのまま残る。refresh で作り直す。
+  // 単一 transition にまとめて遷移先の RSC を2回取りに行かないようにする。
   const navigateAfterAuth = (path: string) => {
-    router.push(path);
-    router.refresh();
+    startTransition(() => {
+      router.push(path);
+      router.refresh();
+    });
   };
 
   const handleSuccess = async (credentialResponse: CredentialResponse) => {

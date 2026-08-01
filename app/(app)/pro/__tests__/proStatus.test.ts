@@ -10,7 +10,7 @@ jest.mock("../actions", () => ({
 }));
 
 import { DEFAULT_PRO_STATUS, type ProStatus } from "@app/types/pro";
-import { getCachedProStatus, getProIdentityKey } from "../proStatus";
+import { getCachedProStatus } from "../proStatus";
 
 function setAuthCookies(uid = "user@example.com") {
   mockCookieGet.mockImplementation((key: string) => {
@@ -58,23 +58,5 @@ describe("getCachedProStatus", () => {
 
     await expect(getCachedProStatus()).resolves.toBeNull();
     expect(mockGetProStatus).not.toHaveBeenCalled();
-  });
-});
-
-describe("getProIdentityKey", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("ログイン中は uid を返す", async () => {
-    setAuthCookies("pro-user@example.com");
-
-    await expect(getProIdentityKey()).resolves.toBe("pro-user@example.com");
-  });
-
-  it("未認証なら anonymous を返す", async () => {
-    mockCookieGet.mockReturnValue(undefined);
-
-    await expect(getProIdentityKey()).resolves.toBe("anonymous");
   });
 });

@@ -8,6 +8,8 @@ interface UseEntitlementReturn {
   isPro: boolean;
   inTrial: boolean;
   inGracePeriod: boolean;
+  /** Pro 判定が未確定の間だけ true。ロック UI のちらつきを避ける判断に使う。 */
+  isLoading: boolean;
   hasEntitlement: (feature: Feature) => boolean;
 }
 
@@ -17,7 +19,7 @@ interface UseEntitlementReturn {
  * back の Entitlement#has_entitlement? と同じロジックを表現する。
  */
 export function useEntitlement(): UseEntitlementReturn {
-  const { proStatus, isPro } = useProStatus();
+  const { proStatus, isPro, isLoading } = useProStatus();
 
   const hasEntitlement = useCallback(
     (feature: Feature): boolean => {
@@ -31,6 +33,7 @@ export function useEntitlement(): UseEntitlementReturn {
     isPro,
     inTrial: proStatus.subscription.in_trial,
     inGracePeriod: proStatus.subscription.in_grace_period,
+    isLoading,
     hasEntitlement,
   };
 }

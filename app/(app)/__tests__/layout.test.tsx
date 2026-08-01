@@ -1,9 +1,4 @@
-const mockCookieGet = jest.fn();
 const mockGetProStatus = jest.fn();
-
-jest.mock("next/headers", () => ({
-  cookies: () => Promise.resolve({ get: mockCookieGet }),
-}));
 
 jest.mock("../pro/actions", () => ({
   getProStatus: () => mockGetProStatus(),
@@ -64,18 +59,18 @@ jest.mock("sonner", () => ({
   },
 }));
 
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, type RenderResult } from "@testing-library/react";
 import ProGate from "@app/components/pro/ProGate";
 import { useProStatus } from "@app/hooks/pro/useProStatus";
 import { DEFAULT_PRO_STATUS, type ProStatus } from "@app/types/pro";
 import AppLayout from "../layout";
 
 function ProStatusProbe() {
-  const { isPro } = useProStatus();
+  const { isPro, isLoading } = useProStatus();
 
   return (
     <div>
-      <p>{isPro ? "PRO" : "FREE"}</p>
+      <p>{isLoading ? "LOADING" : isPro ? "PRO" : "FREE"}</p>
       <ProGate
         feature="season_transition_graph"
         fallback={<p>シーズン推移グラフはロック中</p>}
@@ -86,23 +81,37 @@ function ProStatusProbe() {
   );
 }
 
-function renderLayout() {
+function layoutElement() {
   return AppLayout({ children: <ProStatusProbe /> });
 }
 
-function setAuthCookies(uid: string) {
-  mockCookieGet.mockImplementation((key: string) => {
-    const values: Record<string, { value: string }> = {
-      "access-token": { value: "test-access-token" },
-      client: { value: "test-client" },
-      uid: { value: uid },
-    };
-    return values[key];
+// Pro 状態はマウント後に Server Action で解決されるため、非同期 act で確定まで進める
+async function renderLayout() {
+  let rendered!: RenderResult;
+  await act(async () => {
+    rendered = render(layoutElement());
+  });
+
+  return rendered;
+}
+
+// ログイン/ログアウト後の router.refresh() 相当
+async function rerenderLayout(rendered: RenderResult) {
+  await act(async () => {
+    rendered.rerender(layoutElement());
   });
 }
 
+function setAuthCookies(uid: string) {
+  document.cookie = "access-token=test-access-token";
+  document.cookie = "client=test-client";
+  document.cookie = `uid=${encodeURIComponent(uid)}`;
+}
+
 function clearAuthCookies() {
-  mockCookieGet.mockReturnValue(undefined);
+  for (const name of ["access-token", "client", "uid"]) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
 }
 
 const proStatus: ProStatus = {
@@ -120,13 +129,14 @@ const proStatus: ProStatus = {
 describe("AppLayout の ProStatusProvider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearAuthCookies();
   });
 
   it("Pro ユーザーではレイアウト配下で Pro 判定が有効になる", async () => {
     setAuthCookies("pro-user@example.com");
     mockGetProStatus.mockResolvedValue(proStatus);
 
-    render(await renderLayout());
+    await renderLayout();
 
     expect(screen.getByText("PRO")).toBeInTheDocument();
     expect(screen.getByText("シーズン推移グラフ")).toBeInTheDocument();
@@ -136,7 +146,7 @@ describe("AppLayout の ProStatusProvider", () => {
     setAuthCookies("free-user@example.com");
     mockGetProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
 
-    render(await renderLayout());
+    await renderLayout();
 
     expect(screen.getByText("FREE")).toBeInTheDocument();
     expect(
@@ -145,22 +155,32 @@ describe("AppLayout の ProStatusProvider", () => {
   });
 
   it("未認証では Pro status API を叩かず無料状態にフォールバックする", async () => {
-    clearAuthCookies();
+    await renderLayout();
 
-    render(await renderLayout());
-
-    expect(mockGetProStatus).not.toHaveBeenCalled();
     expect(screen.getByText("FREE")).toBeInTheDocument();
+    expect(mockGetProStatus).not.toHaveBeenCalled();
     expect(
       screen.getByText("シーズン推移グラフはロック中"),
     ).toBeInTheDocument();
+  });
+
+  it("Pro 判定が確定するまではロック UI を描画しない", async () => {
+    setAuthCookies("pro-user@example.com");
+    mockGetProStatus.mockReturnValue(new Promise(() => {}));
+
+    await renderLayout();
+
+    expect(screen.getByText("LOADING")).toBeInTheDocument();
+    expect(
+      screen.queryByText("シーズン推移グラフはロック中"),
+    ).not.toBeInTheDocument();
   });
 
   it("API が失敗しても無料状態として描画する", async () => {
     setAuthCookies("pro-user@example.com");
     mockGetProStatus.mockResolvedValue(null);
 
-    render(await renderLayout());
+    await renderLayout();
 
     expect(screen.getByText("FREE")).toBeInTheDocument();
   });
@@ -169,11 +189,11 @@ describe("AppLayout の ProStatusProvider", () => {
     setAuthCookies("pro-user@example.com");
     mockGetProStatus.mockResolvedValue(proStatus);
 
-    const { rerender } = render(await renderLayout());
+    const rendered = await renderLayout();
     expect(screen.getByText("PRO")).toBeInTheDocument();
 
     clearAuthCookies();
-    rerender(await renderLayout());
+    await rerenderLayout(rendered);
 
     expect(screen.getByText("FREE")).toBeInTheDocument();
     expect(
@@ -185,14 +205,47 @@ describe("AppLayout の ProStatusProvider", () => {
     setAuthCookies("free-user@example.com");
     mockGetProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
 
-    const { rerender } = render(await renderLayout());
+    const rendered = await renderLayout();
     expect(screen.getByText("FREE")).toBeInTheDocument();
 
     setAuthCookies("pro-user@example.com");
     mockGetProStatus.mockResolvedValue(proStatus);
-    rerender(await renderLayout());
+    await rerenderLayout(rendered);
 
     expect(screen.getByText("PRO")).toBeInTheDocument();
     expect(screen.getByText("シーズン推移グラフ")).toBeInTheDocument();
+  });
+
+  it("同じユーザーのまま再レンダーされても Pro 状態を取り直さない", async () => {
+    setAuthCookies("pro-user@example.com");
+    mockGetProStatus.mockResolvedValue(proStatus);
+
+    const rendered = await renderLayout();
+    await rerenderLayout(rendered);
+
+    expect(mockGetProStatus).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("PRO")).toBeInTheDocument();
+  });
+
+  // SameSite=Strict の認証 cookie は検索結果や Stripe Checkout からの遷移では
+  // サーバーに届かない。Pro 判定をブラウザ側の cookie 起点にすることで無料表示に落ちない
+  it("サーバーに cookie が届かない流入経路でも Pro 判定が有効になる", async () => {
+    setAuthCookies("pro-user@example.com");
+    mockGetProStatus.mockResolvedValue(proStatus);
+
+    await renderLayout();
+
+    expect(mockGetProStatus).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("PRO")).toBeInTheDocument();
+  });
+
+  it("access-token が失効し uid だけ残っている場合は無料状態にする", async () => {
+    document.cookie = "uid=pro-user@example.com";
+    mockGetProStatus.mockResolvedValue(proStatus);
+
+    await renderLayout();
+
+    expect(mockGetProStatus).not.toHaveBeenCalled();
+    expect(screen.getByText("FREE")).toBeInTheDocument();
   });
 });

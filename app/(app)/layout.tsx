@@ -7,7 +7,6 @@ import { AuthProvider } from "@app/contexts/useAuthContext";
 import { UserProvider } from "@app/contexts/userContext";
 import { Providers } from "@app/providers";
 import SmartAppBanner from "./_components/SmartAppBanner";
-import { getCachedProStatus, getProIdentityKey } from "./pro/proStatus";
 
 export const metadata: Metadata = {
   title: {
@@ -17,22 +16,15 @@ export const metadata: Metadata = {
   description: "BUZZ BASE - 野球の個人成績をランキング形式で共有できるアプリ",
 };
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [proStatus, proIdentityKey] = await Promise.all([
-    getCachedProStatus(),
-    getProIdentityKey(),
-  ]);
-
+// Pro 状態の取得は ProStatusProvider 側（クライアント）に任せ、ここでは cookies() を読まない。
+// 読むと配下 105 ルートすべてが dynamic 扱いになり、コラム記事やツールなど
+// データ取得のない静的ページまでビルド時プリレンダリングを失う。
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <UserProvider>
         <Providers>
-          {/* key を identity に紐付け、ログイン/ログアウト後の再レンダーで Provider ごと作り直す */}
-          <ProStatusProvider key={proIdentityKey} initialValue={proStatus}>
+          <ProStatusProvider>
             <SmartAppBanner />
             {children}
             <NavigationMenu />

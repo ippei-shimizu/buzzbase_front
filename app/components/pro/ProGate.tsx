@@ -37,8 +37,12 @@ export default function ProGate({
   fallback,
   renderLockedTrigger,
 }: ProGateProps) {
-  const { hasEntitlement } = useEntitlement();
+  const { hasEntitlement, isLoading } = useEntitlement();
   const { open } = useProUpgradeModal();
+
+  // Pro 判定が確定するまで何も出さない。先に無料扱いで描画すると、
+  // 加入済みユーザーにロック UI が一瞬見えてしまう。
+  if (isLoading) return null;
 
   if (hasEntitlement(feature)) return <>{children}</>;
 

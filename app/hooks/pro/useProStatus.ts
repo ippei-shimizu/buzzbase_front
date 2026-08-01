@@ -7,6 +7,8 @@ import { DEFAULT_PRO_STATUS, type ProStatus } from "@app/types/pro";
 interface UseProStatusReturn {
   proStatus: ProStatus;
   isPro: boolean;
+  /** Pro 状態の取得が完了しておらず、無料/Pro を判定できない間だけ true。 */
+  isLoading: boolean;
   isRefreshing: boolean;
   refresh: () => void;
 }
@@ -22,15 +24,16 @@ export function useProStatus(): UseProStatusReturn {
     return {
       proStatus: DEFAULT_PRO_STATUS,
       isPro: false,
+      isLoading: false,
       isRefreshing: false,
       refresh: () => {},
     };
   }
 
-  const { proStatus, isRefreshing, refresh } = ctx;
+  const { proStatus, isLoading, isRefreshing, refresh } = ctx;
   // サーバー側で「期限内かつ Pro 扱いの status」を判定済みのフラグを単一の真実とする。
   // 期限切れの cancelled / billing_issue で誤って true にならないようにするため。
   const isPro = proStatus.subscription.pro_active;
 
-  return { proStatus, isPro, isRefreshing, refresh };
+  return { proStatus, isPro, isLoading, isRefreshing, refresh };
 }

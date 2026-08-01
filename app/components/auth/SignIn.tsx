@@ -1,7 +1,7 @@
 "use client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { startTransition, useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import GoogleLoginButton from "@app/components/auth/GoogleLoginButton";
@@ -32,10 +32,13 @@ export default function SignIn() {
     setIsPasswordVisible(!isPasswordVisible);
 
   // 認証 cookie はクライアント側で書き換わるため、遷移だけでは Server Component の
-  // レンダー結果（Pro 状態など）が前のユーザーのまま残る。refresh で作り直す。
+  // レンダー結果が前のユーザーのまま残る。refresh で作り直す。
+  // 単一 transition にまとめて遷移先の RSC を2回取りに行かないようにする。
   const navigateAfterAuth = (path: string) => {
-    router.push(path);
-    router.refresh();
+    startTransition(() => {
+      router.push(path);
+      router.refresh();
+    });
   };
 
   const setErrorsWithTimeout = (newErrors: React.SetStateAction<string[]>) => {

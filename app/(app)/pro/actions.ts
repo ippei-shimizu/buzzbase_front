@@ -9,6 +9,9 @@ import { cookies } from "next/headers";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
 
+// Rails 側が詰まったときにレンダーや Server Action を無期限に待たせないための上限。
+const PRO_API_TIMEOUT_MS = 5000;
+
 async function getAuthHeaders(): Promise<Record<string, string> | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access-token")?.value;
@@ -38,7 +41,12 @@ export async function getProStatus(): Promise<ProStatus | null> {
       method: "GET",
       headers,
       cache: "no-store",
+      signal: AbortSignal.timeout(PRO_API_TIMEOUT_MS),
     });
+
+    // 401 はトークン失効という想定内の状態。全ページのレンダーごとに記録すると
+    // 本当のエラーが埋もれるため、無料状態へのフォールバックだけ行う。
+    if (response.status === 401) return null;
 
     if (!response.ok) {
       console.error("Pro status API error:", response.status);
@@ -65,7 +73,10 @@ export async function getEntitlements(): Promise<EntitlementCheck[] | null> {
       method: "GET",
       headers,
       cache: "no-store",
+      signal: AbortSignal.timeout(PRO_API_TIMEOUT_MS),
     });
+
+    if (response.status === 401) return null;
 
     if (!response.ok) {
       console.error("Pro entitlements API error:", response.status);
