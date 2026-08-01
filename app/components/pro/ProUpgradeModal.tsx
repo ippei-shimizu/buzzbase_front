@@ -12,6 +12,7 @@ import {
   RadioGroup,
 } from "@heroui/react";
 import { useMediaQuery } from "@mantine/hooks";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { startProCheckout, type ProPlan } from "@app/(app)/pro/actions";
@@ -255,6 +256,21 @@ export default function ProUpgradeModal({
                 </li>
               ))}
             </ul>
+            <p className="mt-3 text-[11px] leading-relaxed text-gray-500">
+              ご購入にあたっては
+              <Link href="/termsofservice" className="text-blue-400 underline">
+                利用規約
+              </Link>
+              、
+              <Link href="/privacypolicy" className="text-blue-400 underline">
+                プライバシーポリシー
+              </Link>
+              、
+              <Link href="/tokushoho" className="text-blue-400 underline">
+                特定商取引法に基づく表記
+              </Link>
+              をご確認ください。
+            </p>
           </section>
         </ModalBody>
 
