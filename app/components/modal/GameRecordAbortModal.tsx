@@ -8,16 +8,27 @@ import {
   ModalHeader,
 } from "@heroui/react";
 
-export type GameRecordAbortMode = "new" | "edit";
+/**
+ * 中断ダイアログの文言バリエーション。
+ * - new: 試合情報がまだ保存されていない（試合情報入力画面）
+ * - recorded: 試合情報の保存後に打撃・投手・打席を入力している途中
+ * - edit: 既存試合の編集としてフローに入っている
+ */
+export type GameRecordAbortMode = "new" | "recorded" | "edit";
 
-// 編集中断は保存済みデータが残るため、新規記録とは異なる文言で誤解を防ぐ。
+// 保存済みのデータがあるかどうかで実際に失われるものが変わるため、文言を出し分ける。
 const ABORT_COPY: Record<
   GameRecordAbortMode,
   { title: string; description: string }
 > = {
   new: {
     title: "入力を中断しますか？",
-    description: "入力中のデータは破棄されます。",
+    description: "入力中の試合情報は保存されません。",
+  },
+  recorded: {
+    title: "入力を中断しますか？",
+    description:
+      "保存済みの試合結果は試合一覧に残ります。入力途中の内容は破棄されます。",
   },
   edit: {
     title: "編集を中断しますか？",

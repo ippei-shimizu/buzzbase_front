@@ -1,6 +1,6 @@
 "use client";
 import { Button, useDisclosure } from "@heroui/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BackIcon } from "@app/components/icon/BackIcon";
 import GameRecordAbortModal, {
@@ -13,9 +13,35 @@ import {
 } from "@app/utils/gameRecordStorage";
 
 const GAME_RESULT_LIST_PATH = "/game-result/lists";
+const GAME_INFO_PATH = "/game-result/record";
 
-export default function HeaderResult() {
+/**
+ * 中断時に実際に失われるものを判定する。
+ * 試合情報入力より先のページにいる時点で match_result はサーバに保存済みなので、
+ * 「入力中のデータは破棄される」とは言えない。
+ */
+function resolveAbortMode(
+  pathname: string | null,
+  isMatchResultSaved: boolean,
+): GameRecordAbortMode {
+  if (isGameRecordEditMode()) return "edit";
+  if (isMatchResultSaved || pathname !== GAME_INFO_PATH) return "recorded";
+  return "new";
+}
+
+interface HeaderResultProps {
+  /**
+   * 試合情報入力画面で既存の match_result を読み込んだ場合に true を渡す。
+   * 保存後に戻ってきたケースを「未保存」と誤って案内しないために使う。
+   */
+  isMatchResultSaved?: boolean;
+}
+
+export default function HeaderResult({
+  isMatchResultSaved = false,
+}: HeaderResultProps = {}) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [abortMode, setAbortMode] = useState<GameRecordAbortMode>("new");
 
@@ -35,7 +61,7 @@ export default function HeaderResult() {
   };
 
   const handleAbortPress = () => {
-    setAbortMode(isGameRecordEditMode() ? "edit" : "new");
+    setAbortMode(resolveAbortMode(pathname, isMatchResultSaved));
     onOpen();
   };
 

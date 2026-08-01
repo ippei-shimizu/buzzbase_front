@@ -1,11 +1,8 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect } from "react";
+import React from "react";
 
 export default function HeaderLogo() {
-  useEffect(() => {
-    localStorage.removeItem("gameResultId");
-  }, []);
   return (
     <>
       <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--smart-banner-height,0px)] w-full bg-main z-50">

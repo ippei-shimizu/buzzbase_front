@@ -48,6 +48,7 @@ import {
   HIT_RESULT_COLOR,
   SACRIFICE_RESULT_COLOR,
 } from "@app/utils/battingResultColor";
+import { saveGameResultId } from "@app/utils/gameRecordStorage";
 import { PlateAppearanceSummaryCard } from "../_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
@@ -91,9 +92,6 @@ export default function ResultsSummary() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [memo, setMemo] = useState<string | null>();
   const [currentUserPage, setCurrentUserPage] = useState(false);
-  const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
-    number | null
-  >(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -126,16 +124,11 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchCurrentResultData(JSON.parse(savedGameResultId));
-    }
-    if (!savedGameResultId) {
-      localStorage.setItem("gameResultId", JSON.stringify(id));
-    }
-  }, [pathname, id]);
+    // 表示対象は URL の id だけで決める。localStorage を優先すると、記録フローの
+    // 残骸がある状態で他人の試合を開いたときに別の試合を表示してしまう。
+    if (!Number.isInteger(id) || id <= 0) return;
+    fetchCurrentResultData(id);
+  }, [id]);
 
   useEffect(() => {
     if (matchResult.length > 0 && !isDetailDataFetched) {
@@ -146,7 +139,7 @@ export default function ResultsSummary() {
   }, [matchResult, isDetailDataFetched, currentUserId]);
 
   // 試合データ取得
-  const fetchCurrentResultData = async (localStorageGameResultId: number) => {
+  const fetchCurrentResultData = async (gameResultId: number) => {
     try {
       const [
         matchResultData,
@@ -156,11 +149,11 @@ export default function ResultsSummary() {
         plateAppearancesV2Data,
         currentUserIdData,
       ] = await Promise.all([
-        getUserMatchResult(localStorageGameResultId),
-        getUserBattingAverage(localStorageGameResultId),
-        getUserPitchingResult(localStorageGameResultId),
-        getUserPlateAppearance(localStorageGameResultId),
-        getPlateAppearancesByGame(localStorageGameResultId),
+        getUserMatchResult(gameResultId),
+        getUserBattingAverage(gameResultId),
+        getUserPitchingResult(gameResultId),
+        getUserPlateAppearance(gameResultId),
+        getPlateAppearancesByGame(gameResultId),
         getCurrentUserId(),
       ]);
       setPlateAppearancesV2(plateAppearancesV2Data);
@@ -248,7 +241,8 @@ export default function ResultsSummary() {
   };
 
   const handleResultComplete = () => {
-    // 既存試合の編集として試合情報入力画面へ入ることを記録する。
+    // 記録フロー側は localStorage の試合 ID を見るため、編集対象をここで確定させる。
+    saveGameResultId(id);
     localStorage.setItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY, "true");
     router.push("/game-result/record");
   };
@@ -619,9 +613,7 @@ export default function ResultsSummary() {
                         <Button
                           color="danger"
                           radius="sm"
-                          onPress={() =>
-                            handleDeleteGameResult(localStorageGameResultId)
-                          }
+                          onPress={() => handleDeleteGameResult(id)}
                         >
                           削除する
                         </Button>
