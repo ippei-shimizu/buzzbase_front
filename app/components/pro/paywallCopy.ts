@@ -2,8 +2,8 @@ import type { ProFeature } from "@app/types/pro";
 
 /**
  * Pro 機能ごとの訴求文言。ProUpgradeModal・ProUpsellCard・ProUpsellOverlay が同じ文言を参照する。
- * ProUpgradeModal（HeroUI / Stripe 依存の Client Component）から切り出すことで、
- * 文言だけを使いたい軽量コンポーネントがモーダル一式をバンドルに引き込まずに済む。
+ * 特定のコンポーネントに属さないドメインデータとして独立させることで、
+ * 文言の追加・修正が UI 実装から切り離され、参照側が増えても定義箇所が分散しない。
  */
 export interface PaywallCopy {
   title: string;
@@ -29,6 +29,11 @@ export const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
     title: "練習履歴を全期間で確認",
     description:
       "草機能のヒートマップを全期間で表示。継続の積み重ねを実感できます。",
+    benefits: [
+      "直近1年を超える練習履歴もヒートマップで振り返り",
+      "去年の同じ時期と練習量を並べて比較",
+      "最も続いた期間や積み上げた日数をいつでも確認",
+    ],
   },
   unlimited_practice_menus: {
     title: "練習メニューを無制限に登録",
@@ -82,6 +87,11 @@ export const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
     title: "練習と成績の関係を発見",
     description:
       "素振りや睡眠と打率の傾向を、あなたのデータから自動で読み解きます。",
+    benefits: [
+      "素振りの本数と打率の関係を自動で分析",
+      "睡眠やコンディションと成績のつながりを可視化",
+      "成果につながっている練習を数字で確認",
+    ],
   },
   unlimited_reflection_templates: {
     title: "振り返りテンプレを自由に作成",
@@ -97,6 +107,11 @@ export const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
     title: "野球ノートにタグを付けて整理",
     description:
       "Pro プランなら野球ノートにタグを付けて、後から振り返りやすく整理できます。",
+    benefits: [
+      "練習の気づきや試合の振り返りをタグで分類",
+      "過去のノートをタグから素早く検索",
+      "自分専用のタグも自由に作成可能",
+    ],
   },
   multi_game_result_notes: {
     title: "1つのノートに複数の試合を紐付け",
@@ -151,6 +166,11 @@ export const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
   hit_direction_average: {
     title: "方向別の打率",
     description: "打球を打った方向ごとの打率をヒートマップで可視化します。",
+    benefits: [
+      "引っ張り・センター返し・流し打ちの傾向が一目でわかる",
+      "方向ごとの打率をヒートマップで比較",
+      "打てていない方向を練習テーマに落とし込める",
+    ],
   },
   count_situation_average: {
     title: "カウント別の打率",
