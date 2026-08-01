@@ -86,6 +86,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/tokushoho" className="text-sm">
+                  特定商取引法に基づく表記
+                </Link>
+              </li>
+              <li>
                 <Link href="/account-deletion" className="text-sm">
                   アカウント削除について
                 </Link>

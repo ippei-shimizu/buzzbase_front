@@ -12,6 +12,7 @@ import {
   RadioGroup,
 } from "@heroui/react";
 import { useMediaQuery } from "@mantine/hooks";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { startProCheckout, type ProPlan } from "@app/(app)/pro/actions";
@@ -217,10 +218,10 @@ export default function ProUpgradeModal({
                         2 ヶ月分お得
                       </span>
                     </p>
-                    <p className="text-xs text-gray-400">月あたり ¥817</p>
+                    <p className="text-xs text-gray-400">月あたり ¥248</p>
                   </div>
                   <p className="text-base font-bold text-white">
-                    ¥9,800
+                    ¥2,980
                     <span className="text-xs font-normal text-gray-400">
                       {" "}
                       / 年
@@ -232,7 +233,7 @@ export default function ProUpgradeModal({
                 <div className="flex w-full items-center justify-between gap-3">
                   <p className="font-bold text-white">月額プラン</p>
                   <p className="text-base font-bold text-white">
-                    ¥980
+                    ¥300
                     <span className="text-xs font-normal text-gray-400">
                       {" "}
                       / 月
@@ -255,6 +256,21 @@ export default function ProUpgradeModal({
                 </li>
               ))}
             </ul>
+            <p className="mt-3 text-[11px] leading-relaxed text-gray-500">
+              ご購入にあたっては
+              <Link href="/termsofservice" className="text-blue-400 underline">
+                利用規約
+              </Link>
+              、
+              <Link href="/privacypolicy" className="text-blue-400 underline">
+                プライバシーポリシー
+              </Link>
+              、
+              <Link href="/tokushoho" className="text-blue-400 underline">
+                特定商取引法に基づく表記
+              </Link>
+              をご確認ください。
+            </p>
           </section>
         </ModalBody>
 
