@@ -1,5 +1,6 @@
 "use client";
 import { AxiosError } from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
@@ -174,6 +175,12 @@ export default function SignIn() {
           }
           type={isPasswordVisible ? "text" : "password"}
         />
+        <Link
+          href="/password-reset"
+          className="text-sm text-yellow-500 text-right"
+        >
+          パスワードをお忘れですか？
+        </Link>
         <SubmitButton
           className="bg-yellow-500 text-white h-auto text-base mt-6 mx-auto py-2.5 px-12 rounded-full block font-semibold"
           type="submit"
