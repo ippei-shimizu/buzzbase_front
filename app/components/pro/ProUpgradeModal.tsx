@@ -60,8 +60,9 @@ const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
       "よく組む練習をセットにして、予定登録や週プランでそのまま使い回せます。",
   },
   unlimited_monthly_goals: {
-    title: "月次目標を複数管理",
-    description: "打撃・投手・走塁など複数の目標を同時に追跡できます。",
+    title: "個人の期間目標を無制限に設定",
+    description:
+      "月次・週次・年間の目標を3つ以上、同時に管理できます（無料は合計2つまで）。",
   },
   season_goals: {
     title: "シーズン目標を設定",
@@ -187,7 +188,8 @@ const FEATURE_HIGHLIGHTS = [
   { icon: "🌱", label: "草機能の全期間ヒートマップ" },
   { icon: "🎥", label: "動画・画像アップロード無制限" },
   { icon: "📋", label: "練習メニュー / メニューセット無制限" },
-  { icon: "🎯", label: "月次・シーズン・大会目標を無制限に設定" },
+  { icon: "🎯", label: "個人の期間目標（月次/週次/年間）を無制限に設定" },
+  { icon: "🏆", label: "シーズン目標・大会目標の設定" },
   { icon: "📊", label: "方向別 / カウント別 / 球種別の打率分析" },
   { icon: "🔔", label: "カスタム通知メッセージ" },
 ] as const;

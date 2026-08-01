@@ -13,12 +13,6 @@ const ROWS: Row[] = [
     pro: "無制限",
   },
   {
-    category: "メディア",
-    feature: "メディア保管期間",
-    free: "30 日",
-    pro: "無制限（長期保管）",
-  },
-  {
     category: "成績",
     feature: "シーズン跨ぎ成績推移グラフ",
     free: "—",
@@ -38,14 +32,14 @@ const ROWS: Row[] = [
   },
   {
     category: "練習",
-    feature: "自主練スケジュール",
-    free: "1 件まで",
+    feature: "メニューセット",
+    free: "2 件まで",
     pro: "無制限",
   },
   {
     category: "目標",
-    feature: "月次目標",
-    free: "1 件まで",
+    feature: "個人の期間目標（月次/週次/年間）",
+    free: "2 件まで",
     pro: "無制限",
   },
   {
