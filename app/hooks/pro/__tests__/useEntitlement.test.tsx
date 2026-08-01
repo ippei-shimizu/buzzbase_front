@@ -108,6 +108,36 @@ describe("useEntitlement", () => {
     });
   });
 
+  describe("Pro 状態が解決したとき", () => {
+    it("isLoading が false に変わり、Pro 機能の判定が有効になる", async () => {
+      setAuthCookies();
+      let resolveProStatus!: (status: ProStatus) => void;
+      mockGetProStatus.mockReturnValue(
+        new Promise<ProStatus>((resolve) => {
+          resolveProStatus = resolve;
+        }),
+      );
+
+      let rendered!: RenderHookResult<
+        ReturnType<typeof useEntitlement>,
+        unknown
+      >;
+      await act(async () => {
+        rendered = renderHook(() => useEntitlement(), { wrapper: Wrapper });
+      });
+
+      expect(rendered.result.current.isLoading).toBe(true);
+      expect(rendered.result.current.hasEntitlement("no_ads")).toBe(false);
+
+      await act(async () => {
+        resolveProStatus(makeProActiveStatus());
+      });
+
+      expect(rendered.result.current.isLoading).toBe(false);
+      expect(rendered.result.current.hasEntitlement("no_ads")).toBe(true);
+    });
+  });
+
   describe("認証 cookie が揃っていない場合", () => {
     it("Server Action を呼ばずに無料状態で確定する", async () => {
       document.cookie = "uid=user@example.com";
