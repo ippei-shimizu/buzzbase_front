@@ -14,7 +14,7 @@ jest.mock("@app/components/header/Header", () => ({
 
 jest.mock("@app/components/notification/NotificationItem", () => ({
   __esModule: true,
-  default: () => <div>通知はありません</div>,
+  default: () => null,
 }));
 
 const markReadMock = markManagementNoticesRead as jest.Mock;
