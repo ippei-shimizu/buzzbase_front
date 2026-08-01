@@ -13,8 +13,8 @@ describe("PricingCards", () => {
 
     expect(screen.getByText("月額プラン")).toBeInTheDocument();
     expect(screen.getByText("年額プラン")).toBeInTheDocument();
-    expect(screen.getByText("¥980")).toBeInTheDocument();
-    expect(screen.getByText("¥9,800")).toBeInTheDocument();
+    expect(screen.getByText("¥300")).toBeInTheDocument();
+    expect(screen.getByText("¥2,980")).toBeInTheDocument();
   });
 
   it("両プランに CheckoutButton（モーダルトリガー）が配置されている", () => {

@@ -218,10 +218,10 @@ export default function ProUpgradeModal({
                         2 ヶ月分お得
                       </span>
                     </p>
-                    <p className="text-xs text-gray-400">月あたり ¥817</p>
+                    <p className="text-xs text-gray-400">月あたり ¥248</p>
                   </div>
                   <p className="text-base font-bold text-white">
-                    ¥9,800
+                    ¥2,980
                     <span className="text-xs font-normal text-gray-400">
                       {" "}
                       / 年
@@ -233,7 +233,7 @@ export default function ProUpgradeModal({
                 <div className="flex w-full items-center justify-between gap-3">
                   <p className="font-bold text-white">月額プラン</p>
                   <p className="text-base font-bold text-white">
-                    ¥980
+                    ¥300
                     <span className="text-xs font-normal text-gray-400">
                       {" "}
                       / 月

@@ -27,7 +27,7 @@ export default function PricingCards() {
             <header className="mb-4">
               <h3 className="text-lg font-bold text-white">月額プラン</h3>
               <p className="mt-2 text-3xl font-bold text-white">
-                ¥980
+                ¥300
                 <span className="text-base font-normal text-gray-400">
                   {" "}
                   / 月
@@ -56,13 +56,13 @@ export default function PricingCards() {
             <header className="mb-4">
               <h3 className="text-lg font-bold text-white">年額プラン</h3>
               <p className="mt-2 text-3xl font-bold text-white">
-                ¥9,800
+                ¥2,980
                 <span className="text-base font-normal text-gray-400">
                   {" "}
                   / 年
                 </span>
               </p>
-              <p className="mt-1 text-xs text-gray-400">月あたり ¥817</p>
+              <p className="mt-1 text-xs text-gray-400">月あたり ¥248</p>
             </header>
             <ul className="mb-6 space-y-2 text-sm text-gray-200">
               {PLAN_FEATURES.map((feature) => (
