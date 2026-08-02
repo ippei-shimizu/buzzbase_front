@@ -31,6 +31,9 @@ type Position = {
 export default function MyPage() {
   const { isLoggedIn, loading: authLoading } = useAuthContext();
   const [errors, setErrors] = useState<string[]>([]);
+  const [handledFollowRequestId, setHandledFollowRequestId] = useState<
+    number | null
+  >(null);
 
   const { userData, isLoadingUsers, isErrorUser, mutateUserData } =
     getUserIdData();
@@ -74,6 +77,10 @@ export default function MyPage() {
   }
 
   const isCurrentUserPage = currentUserId?.id === userData?.user.id;
+  // 承認・拒否の直後は再検証で incoming_follow_request_id が null になるため、
+  // 処理した ID を保持して完了表示が一瞬で消えないようにする
+  const followRequestId =
+    userData.incoming_follow_request_id ?? handledFollowRequestId;
   const isPrivateAndNotApproved =
     userData?.is_private &&
     !isCurrentUserPage &&
@@ -94,15 +101,20 @@ export default function MyPage() {
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-20 pb-20 bg-main lg:pt-14 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
             <div className="px-4 lg:p-6">
-              {isLoggedIn &&
-              !isCurrentUserPage &&
-              userData.incoming_follow_request_id ? (
+              {!isCurrentUserPage && followRequestId ? (
                 <FollowRequestBanner
-                  followRequestId={userData.incoming_follow_request_id}
-                  actorName={userData.user.name}
+                  // リクエストが送り直されて ID が変わったら完了表示を初期化する
+                  key={followRequestId}
+                  followRequestId={followRequestId}
+                  actorName={userData.user.name || "このユーザー"}
                   onHandled={() => {
+                    setHandledFollowRequestId(followRequestId);
                     mutateUserData();
                   }}
+                  onFailed={() => {
+                    mutateUserData();
+                  }}
+                  setErrorsWithTimeout={setErrorsWithTimeout}
                 />
               ) : null}
               <AvatarComponent userData={userData} />
@@ -240,10 +252,7 @@ export default function MyPage() {
                       </>
                     ) : (
                       <>
-                        {/* FollowButton は initialFollowStatus を内部 state の初期値としてしか読まないため、
-                            再検証でサーバー側の状態が変わったときは key を変えて初期化し直す */}
                         <FollowButton
-                          key={userData.follow_status || "none"}
                           userId={userData.user.id}
                           initialFollowStatus={userData.follow_status || "none"}
                           setErrorsWithTimeout={setErrorsWithTimeout}

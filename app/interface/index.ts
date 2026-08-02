@@ -425,6 +425,8 @@ export interface FollowRequestBannerProps {
   followRequestId: number;
   actorName: string;
   onHandled: () => void;
+  onFailed: () => void;
+  setErrorsWithTimeout: (errors: string[]) => void;
 }
 
 export interface HeaderNoteSaveProps {

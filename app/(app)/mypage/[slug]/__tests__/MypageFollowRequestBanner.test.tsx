@@ -99,6 +99,7 @@ type UserDataOverrides = {
   follow_status?: string;
   is_private?: boolean;
   userId?: number;
+  name?: string;
 };
 
 const setUserData = ({
@@ -106,13 +107,14 @@ const setUserData = ({
   follow_status = "none",
   is_private = false,
   userId = 2,
+  name = "リクエストユーザー",
 }: UserDataOverrides = {}) => {
   mockGetUserIdData.mockReturnValue({
     userData: {
       user: {
         id: userId,
         image: { url: "/test.jpg" },
-        name: "リクエストユーザー",
+        name,
         user_id: "request_user",
         url: "https://example.com",
         introduction: "",
@@ -168,13 +170,26 @@ describe("MyPage - フォローリクエストバナー", () => {
     expect(screen.queryByText(BANNER_TEXT)).not.toBeInTheDocument();
   });
 
-  it("未ログインのときバナーを表示しない", () => {
-    mockUseAuthContext.mockReturnValue({ isLoggedIn: false, loading: false });
+  it("認証状態の解決を待たずにバナーを表示する", () => {
+    mockUseAuthContext.mockReturnValue({
+      isLoggedIn: undefined,
+      loading: true,
+    });
     setUserData({ incoming_follow_request_id: 42 });
 
     render(<MyPage />);
 
-    expect(screen.queryByText(BANNER_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByText(BANNER_TEXT)).toBeInTheDocument();
+  });
+
+  it("名前が空のときは代替表記でバナーを表示する", () => {
+    setUserData({ incoming_follow_request_id: 42, name: "" });
+
+    render(<MyPage />);
+
+    expect(
+      screen.getByText("このユーザーさんからフォローリクエストが届いています"),
+    ).toBeInTheDocument();
   });
 
   it("非公開アカウントで成績が閲覧できない場合でもバナーは表示される", () => {
@@ -190,14 +205,11 @@ describe("MyPage - フォローリクエストバナー", () => {
     expect(screen.getByText("このアカウントは非公開です")).toBeInTheDocument();
   });
 
-  it("承認するとプロフィールが再検証され、フォローボタンの表示が最新の状態に追従する", async () => {
+  it("承認するとプロフィールが再検証され、再検証後も承認済み表示が残る", async () => {
     const user = userEvent.setup();
-    setUserData({ incoming_follow_request_id: 42, follow_status: "none" });
+    setUserData({ incoming_follow_request_id: 42 });
 
     const { rerender } = render(<MyPage />);
-    expect(
-      screen.getByRole("button", { name: "フォローする" }),
-    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "承認する" }));
 
@@ -206,30 +218,119 @@ describe("MyPage - フォローリクエストバナー", () => {
       expect(mockMutateUserData).toHaveBeenCalled();
     });
 
-    setUserData({
-      incoming_follow_request_id: null,
-      follow_status: "following",
-    });
+    setUserData({ incoming_follow_request_id: null });
     rerender(<MyPage />);
 
-    expect(
-      screen.getByRole("button", { name: "フォロー中" }),
-    ).toBeInTheDocument();
     expect(screen.queryByText(BANNER_TEXT)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "リクエストユーザーさんのフォローリクエストを承認しました",
+      ),
+    ).toBeInTheDocument();
   });
 
-  it("拒否するとバナーが消える", async () => {
+  it("拒否するとプロフィールが再検証され、再検証後も拒否済み表示が残る", async () => {
     const user = userEvent.setup();
     setUserData({ incoming_follow_request_id: 42 });
 
-    render(<MyPage />);
+    const { rerender } = render(<MyPage />);
 
     await user.click(screen.getByRole("button", { name: "拒否する" }));
 
     await waitFor(() => {
       expect(mockRejectFollowRequest).toHaveBeenCalledWith(42);
-      expect(screen.queryByText(BANNER_TEXT)).not.toBeInTheDocument();
+      expect(mockMutateUserData).toHaveBeenCalled();
+    });
+
+    setUserData({ incoming_follow_request_id: null });
+    rerender(<MyPage />);
+
+    expect(screen.queryByText(BANNER_TEXT)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "リクエストユーザーさんのフォローリクエストを拒否しました",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("承認後に別のリクエストが届いたら承認/拒否ボタンを出し直す", async () => {
+    const user = userEvent.setup();
+    setUserData({ incoming_follow_request_id: 42 });
+
+    const { rerender } = render(<MyPage />);
+
+    await user.click(screen.getByRole("button", { name: "承認する" }));
+
+    await waitFor(() => {
+      expect(mockMutateUserData).toHaveBeenCalled();
+    });
+
+    setUserData({ incoming_follow_request_id: 55 });
+    rerender(<MyPage />);
+
+    expect(screen.getByText(BANNER_TEXT)).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "リクエストユーザーさんのフォローリクエストを承認しました",
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("他画面で処理済みのリクエストを承認すると、エラーを表示したうえで再検証によりバナーが消える", async () => {
+    const user = userEvent.setup();
+    mockAcceptFollowRequest.mockRejectedValue({
+      response: { status: 404, data: { error: 'Couldn"t find Relationship' } },
+    });
+    setUserData({ incoming_follow_request_id: 42 });
+
+    const { rerender } = render(<MyPage />);
+
+    await user.click(screen.getByRole("button", { name: "承認する" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("フォローリクエストの承認に失敗しました"),
+      ).toBeInTheDocument();
     });
     expect(mockMutateUserData).toHaveBeenCalled();
+    expect(screen.getByText(BANNER_TEXT)).toBeInTheDocument();
+
+    setUserData({ incoming_follow_request_id: null });
+    rerender(<MyPage />);
+
+    expect(screen.queryByText(BANNER_TEXT)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "リクエストユーザーさんのフォローリクエストを承認しました",
+      ),
+    ).not.toBeInTheDocument();
+  });
+
+  it("承認に失敗しても再検証でリクエストが残っていればバナーは残り再操作できる", async () => {
+    const user = userEvent.setup();
+    mockAcceptFollowRequest.mockRejectedValueOnce({
+      response: { status: 500 },
+    });
+    setUserData({ incoming_follow_request_id: 42 });
+
+    render(<MyPage />);
+
+    await user.click(screen.getByRole("button", { name: "承認する" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "承認する" })).toBeEnabled();
+    });
+    expect(screen.getByText(BANNER_TEXT)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "承認する" }));
+
+    await waitFor(() => {
+      expect(mockAcceptFollowRequest).toHaveBeenCalledTimes(2);
+      expect(
+        screen.getByText(
+          "リクエストユーザーさんのフォローリクエストを承認しました",
+        ),
+      ).toBeInTheDocument();
+    });
   });
 });
