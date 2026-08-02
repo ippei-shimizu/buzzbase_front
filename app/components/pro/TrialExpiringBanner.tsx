@@ -20,17 +20,20 @@ export default function TrialExpiringBanner({
   const days = subscription.days_remaining;
   if (days === null || days > TRIAL_WARN_DAYS) return null;
 
+  const headline =
+    days === 0
+      ? "無料トライアルは本日で終了します"
+      : `無料トライアルはあと${days}日で終了します`;
+
   return (
     <div role="status" className="bg-[#78350f]">
       <Link
         href="/account/subscription"
+        // 見出しと本文を丸ごと読み上げる長い名前になるため、要点と遷移先だけを名前にする。
+        aria-label={`${headline}。サブスクリプション管理を開く`}
         className="block px-4 py-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#fed7aa]"
       >
-        <p className="text-[13px] font-bold text-white">
-          {days === 0
-            ? "無料トライアルは本日で終了します"
-            : `無料トライアルはあと${days}日で終了します`}
-        </p>
+        <p className="text-[13px] font-bold text-white">{headline}</p>
         <p className="mt-0.5 text-xs leading-4 text-[#fed7aa]">
           終了後は自動で有料プランに切り替わります。プランの確認と解約はサブスクリプション管理から行えます。
         </p>

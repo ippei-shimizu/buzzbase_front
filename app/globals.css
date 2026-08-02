@@ -2,6 +2,19 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+/* 上部固定要素の重なりを避けるための不変条件。
+   S = スマートアプリバナーの高さ、P = Pro バナーの高さ とすると、
+   全ページで次の関係が成り立っていなければならない。
+
+     SmartAppBanner   : top 0     / 高さ S
+     ProStatusBanners : top S     / 高さ P
+     固定ヘッダー     : top S + P
+     body             : padding-top S + P
+
+   各バナーは自身の実測高さを下の変数へ書き込み、非表示時は 0px に戻す。
+   固定ヘッダーと body が同じ合計値（--top-banner-offset）を参照することで、
+   片方だけがずれて本文やヘッダーがバナーの下に潜る状態を作らない。
+   この対応関係は CSS の合成結果でしか成立せず、Jest では検証できない。 */
 html {
   /* 画面上部に固定表示するバナーが、自身の実測高さを書き込む */
   --smart-app-banner-height: 0px;

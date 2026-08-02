@@ -92,6 +92,16 @@ describe("TrialExpiringBanner", () => {
     );
   });
 
+  it("リンクの読み上げ名は本文全体ではなく要点と遷移先にする", () => {
+    render(<TrialExpiringBanner subscription={trialSubscription()} />);
+
+    expect(
+      screen.getByRole("link", {
+        name: "無料トライアルはあと3日で終了します。サブスクリプション管理を開く",
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("緊急度の低い予告として role=status で通知する", () => {
     render(<TrialExpiringBanner subscription={trialSubscription()} />);
 

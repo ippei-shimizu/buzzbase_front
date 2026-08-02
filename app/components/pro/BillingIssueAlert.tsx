@@ -8,6 +8,10 @@ import Link from "next/link";
  * 媒体ごとの具体的な更新手順は遷移先の BillingIssueGuide が持つ。
  * Web には Stripe 加入者と iOS 加入者の両方が来るため、ここでは
  * mobile のような App Store 前提の文言にはしない。
+ *
+ * role は alert（assertive）にしない。常設かつ閉じる手段がないため、
+ * ページを開くたびに他の読み上げを中断してしまう。緊急度は配色で伝え、
+ * 支援技術には名前付きの region として一度だけ位置を知らせる。
  */
 export default function BillingIssueAlert({
   subscription,
@@ -17,9 +21,15 @@ export default function BillingIssueAlert({
   if (subscription.status !== "billing_issue") return null;
 
   return (
-    <div role="alert" className="bg-[#7f1d1d]">
+    <div
+      role="region"
+      aria-label="課金に関する重要なお知らせ"
+      className="bg-[#7f1d1d]"
+    >
       <Link
         href="/account/subscription"
+        // 見出しと本文を丸ごと読み上げる長い名前になるため、要点と遷移先だけを名前にする。
+        aria-label="決済情報の更新が必要です。サブスクリプション管理を開く"
         className="block px-4 py-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#fecaca]"
       >
         <p className="text-[13px] font-bold text-white">
