@@ -13,6 +13,9 @@ import { getFeatureFlags } from "../../featureFlags/actions";
 // Rails 側が詰まったときにレンダーや Server Action を無期限に待たせないための上限。
 const PRO_API_TIMEOUT_MS = 5000;
 
+// 同期 API は back が RevenueCat REST（サーバー側 5 秒上限）を挟むぶん往復が長い。
+const PRO_SYNC_API_TIMEOUT_MS = 10000;
+
 async function getAuthHeaders(): Promise<Record<string, string> | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access-token")?.value;
@@ -196,6 +199,11 @@ export async function startProCheckout(args: {
  * 決済側で契約内容が変わったのに webhook がローカルの expires_at / plan_type を
  * 更新しない操作（プラン変更など）のあとは、これを呼ばないと古い期限が残り
  * Pro が早期失効する。
+ *
+ * back は RevenueCat の subscriber を唯一の入力としてローカルの Subscription を
+ * 上書きする（entitlement が無ければ free / expired に確定させる）。Stripe Checkout
+ * 直後は RevenueCat がまだ加入を取り込んでいないため、反映待ちの手段としてこれを
+ * ポーリングしてはいけない。反映待ちは読み取り専用の getProStatusResult() で行うこと。
  */
 export async function syncProStatus(): Promise<ProStatus | null> {
   try {
@@ -203,9 +211,11 @@ export async function syncProStatus(): Promise<ProStatus | null> {
     if (!headers) return null;
 
     // POST はそもそも Next.js のフェッチキャッシュ対象外。cache: "no-store" は不要。
+    // back が RevenueCat REST を同期的に叩くぶん status API より遅く、上限も長めに取る。
     const response = await fetch(`${RAILS_API_URL}/api/v1/pro/sync`, {
       method: "POST",
       headers,
+      signal: AbortSignal.timeout(PRO_SYNC_API_TIMEOUT_MS),
     });
 
     if (!response.ok) {

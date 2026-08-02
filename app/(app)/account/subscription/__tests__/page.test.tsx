@@ -39,6 +39,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   DEFAULT_PRO_STATUS,
+  type Platform,
   type ProStatus,
   type ProSubscription,
   type SubscriptionStatus,
@@ -1167,5 +1168,161 @@ describe("取得失敗", () => {
     expect(
       screen.getByRole("link", { name: "ログインし直す" }),
     ).toHaveAttribute("href", "/signin");
+  });
+});
+
+describe("加入状態の再同期", () => {
+  const syncSection = () =>
+    screen.getByRole("region", { name: "加入状態の再同期" });
+
+  const clickSync = () =>
+    userEvent.click(screen.getByRole("button", { name: "状態を再同期" }));
+
+  // 「Webhook がまだ届かず無料プランと表示されている」状態からの復旧手段なので、
+  // 加入していない状態でも必ず出す。
+  it.each<SubscriptionStatus>([
+    "free",
+    "trial",
+    "active",
+    "cancelled",
+    "billing_issue",
+    "expired",
+    "pending",
+  ])("status=%s でも再同期ボタンを出す", async (status) => {
+    await renderPage({ status });
+
+    expect(
+      within(syncSection()).getByRole("button", { name: "状態を再同期" }),
+    ).toBeInTheDocument();
+  });
+
+  // back の同期はストア課金・Web 課金のどちらも RevenueCat の subscriber から
+  // 再構築するため、媒体で出し分けない。
+  it.each<Platform>(["web", "ios", "android"])(
+    "platform=%s でも再同期ボタンを出す",
+    async (platform) => {
+      await renderPage({ status: "active", pro_active: true, platform });
+
+      expect(
+        screen.getByRole("button", { name: "状態を再同期" }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("加入媒体が不明でも再同期ボタンを出す", async () => {
+    await renderPage({ status: "active", pro_active: true, platform: null });
+
+    expect(
+      screen.getByRole("button", { name: "状態を再同期" }),
+    ).toBeInTheDocument();
+  });
+
+  it("押すまでは同期 API を叩かない", async () => {
+    await renderPage({ status: "free" });
+
+    expect(mockSyncProStatus).not.toHaveBeenCalled();
+  });
+
+  it("押すと同期 API を呼び、成功を伝えて状態を再取得する", async () => {
+    await renderPage({ status: "free" });
+
+    await clickSync();
+
+    expect(mockSyncProStatus).toHaveBeenCalledTimes(1);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "最新の加入状態を取得しました。",
+    );
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("同期の結果は Server Component から取り直す（クライアント側で状態を組み立てない）", async () => {
+    await renderPage({ status: "free" });
+
+    await clickSync();
+
+    await screen.findByRole("status");
+    expect(mockSyncProStatus.mock.invocationCallOrder[0]).toBeLessThan(
+      mockRefresh.mock.invocationCallOrder[0],
+    );
+  });
+
+  // 同期の失敗は「契約が変わった」ではなく「今の契約を確認できなかった」。
+  // 課金中のユーザーを不安にさせないため、契約が無事であることを併せて伝える。
+  it("同期に失敗したときは再取得せず、契約が変わっていないことを伝える", async () => {
+    mockSyncProStatus.mockResolvedValue(null);
+    await renderPage({ status: "active", pro_active: true });
+
+    await clickSync();
+
+    const message = await screen.findByRole("status");
+    expect(message).toHaveTextContent("加入状態を取得できませんでした");
+    expect(message).toHaveTextContent("ご契約の内容は変わっていません");
+    expect(mockRefresh).not.toHaveBeenCalled();
+  });
+
+  it("失敗のあとに再度押すと前回の失敗表示を残さない", async () => {
+    mockSyncProStatus.mockResolvedValueOnce(null);
+    await renderPage({ status: "free" });
+
+    await clickSync();
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "加入状態を取得できませんでした",
+    );
+
+    await clickSync();
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "最新の加入状態を取得しました。",
+    );
+    expect(
+      screen.queryByText(/加入状態を取得できませんでした/),
+    ).not.toBeInTheDocument();
+  });
+
+  describe("同期中", () => {
+    async function startPendingSync() {
+      let settle: (result: ProStatus | null) => void = () => {};
+      mockSyncProStatus.mockReturnValue(
+        new Promise<ProStatus | null>((resolve) => {
+          settle = resolve;
+        }),
+      );
+      await clickSync();
+      await screen.findByRole("button", { name: "同期中…" });
+      return async () => {
+        await act(async () => {
+          settle(DEFAULT_PRO_STATUS);
+        });
+      };
+    }
+
+    it("同期中はボタンを無効化して二重送信させない", async () => {
+      await renderPage({ status: "free" });
+      const finish = await startPendingSync();
+
+      const button = screen.getByRole("button", { name: "同期中…" });
+      expect(button).toBeDisabled();
+      await userEvent.click(button);
+      expect(mockSyncProStatus).toHaveBeenCalledTimes(1);
+
+      await finish();
+    });
+
+    // 前回の失敗表示を残したまま再同期すると、成功したのに失敗したように見える。
+    it("同期中は前回の結果表示を消す", async () => {
+      mockSyncProStatus.mockResolvedValueOnce(null);
+      await renderPage({ status: "free" });
+
+      await clickSync();
+      expect(await screen.findByRole("status")).toHaveTextContent(
+        "加入状態を取得できませんでした",
+      );
+
+      const finish = await startPendingSync();
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+      await finish();
+    });
   });
 });
