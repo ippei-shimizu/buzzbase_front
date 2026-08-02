@@ -12,6 +12,7 @@ jest.mock("../../../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
+import { captureServerActionError } from "../../../../../lib/sentry-helpers";
 import { cancelWebSubscription, changeProPlan } from "../actions";
 
 function setupAuthCookies() {
@@ -272,6 +273,19 @@ describe("changeProPlan", () => {
     await expect(changeProPlan("yearly")).resolves.toEqual({
       ok: false,
       error: "unknown",
+    });
+  });
+
+  // 呼び出し元が分かる形で記録しないと、解約側の失敗と区別できず調査できない。
+  it("例外は changeProPlan として記録する", async () => {
+    setupAuthCookies();
+    const failure = new Error("network");
+    (global.fetch as jest.Mock).mockRejectedValueOnce(failure);
+
+    await changeProPlan("yearly");
+
+    expect(captureServerActionError).toHaveBeenCalledWith(failure, {
+      action: "changeProPlan",
     });
   });
 

@@ -6,6 +6,7 @@ const mockRefresh = jest.fn();
 const mockGetCachedProStatusResult = jest.fn();
 const mockCancelWebSubscription = jest.fn();
 const mockChangeProPlan = jest.fn();
+const mockSyncProStatus = jest.fn();
 
 jest.mock("next/headers", () => ({
   cookies: () => Promise.resolve({ get: mockCookieGet }),
@@ -20,6 +21,10 @@ jest.mock("@app/(app)/pro/proStatus", () => ({
   getCachedProStatusResult: () => mockGetCachedProStatusResult(),
 }));
 
+jest.mock("@app/(app)/pro/actions", () => ({
+  syncProStatus: () => mockSyncProStatus(),
+}));
+
 jest.mock("../actions", () => ({
   cancelWebSubscription: () => mockCancelWebSubscription(),
   changeProPlan: (plan: string) => mockChangeProPlan(plan),
@@ -30,7 +35,7 @@ jest.mock("@app/components/header/Header", () => ({
   default: () => <header />,
 }));
 
-import { render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   DEFAULT_PRO_STATUS,
@@ -84,6 +89,9 @@ const planChangeSection = () =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // 既定は同期成功。プラン変更の成功パスは必ずここを通るため、
+  // 明示しないテストが「同期できていない」表示に引きずられないようにする。
+  mockSyncProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
 });
 
 describe("メタデータ", () => {
@@ -619,14 +627,26 @@ describe("プラン変更の出し分け", () => {
     },
   );
 
-  it("切り替え前の案内でも日割りと返金なしを明示する", async () => {
+  // 部分一致だけだと文の途中を書き換えても素通りするため、案内文は一言一句そのまま照合する。
+  // 期待値はコンポーネント側の定数を import せずテストに直書きし、文言変更を必ず失敗させる。
+  it("切り替え前の案内は請求サイクルの変化・日割り・返金なしを一言一句そのまま伝える", async () => {
     await renderPage({ ...webActive, plan_type: "monthly" });
 
     expect(
       within(planChangeSection()!).getByText(
-        /未使用期間分は日割りで差額に反映されます（現金でのご返金は行いません）/,
+        "月額プランと年額プランはいつでも切り替えられます。切り替えた時点で請求サイクルが新しいプランの周期に変わり、お支払い済みの未使用期間分は日割りで差額に反映されます（現金でのご返金は行いません）。",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("切り替え前の案内で請求サイクルが変わらないとは言わない", async () => {
+    await renderPage({ ...webActive, plan_type: "monthly" });
+
+    expect(
+      within(planChangeSection()!).queryByText(
+        /請求サイクルは現在の更新日のまま変わらず/,
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it.each<"ios" | "android">(["ios", "android"])(
@@ -717,37 +737,53 @@ describe("プラン変更", () => {
     expect(mockChangeProPlan).not.toHaveBeenCalled();
   });
 
-  it("月額→年額は未使用分が年額請求から差し引かれると説明する", async () => {
+  // 支払いタイミングと差額の扱いは消費者保護上いちばん重い説明なので、
+  // 部分一致ではなく全文一致で固定する。期待文字列はコンポーネントから import せず直書きする。
+  it("月額→年額の説明を一言一句そのまま表示する", async () => {
     await openPlanChangeDialog("monthly");
 
-    const dialog = screen.getByRole("dialog");
     expect(
-      within(dialog).getByText(
-        /請求サイクルが変更時点から 1 年周期に切り替わり/,
-      ),
-    ).toBeInTheDocument();
-    expect(
-      within(dialog).getByText(
-        /月額プランの未使用期間分は日割りで計算され、その請求から差し引かれます/,
+      within(screen.getByRole("dialog")).getByText(
+        "年額プランに変更すると、請求サイクルが変更時点から 1 年周期に切り替わり、年額料金がすぐに請求されます。お支払い済みの月額プランの未使用期間分は日割りで計算され、その請求から差し引かれます。",
       ),
     ).toBeInTheDocument();
     expect(mockChangeProPlan).not.toHaveBeenCalled();
   });
 
-  it("年額→月額は返金ではなく次回以降への充当だと説明する", async () => {
+  it("月額→年額は年額料金が「すぐに」請求されると伝え、次回更新日まで待てるとは言わない", async () => {
+    await openPlanChangeDialog("monthly");
+
+    const dialog = screen.getByRole("dialog");
+    expect(
+      within(dialog).getByText(/年額料金がすぐに請求されます/),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).queryByText(/年額料金は次回更新日に請求されます/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("年額→月額の説明を一言一句そのまま表示する", async () => {
+    await openPlanChangeDialog("yearly");
+
+    expect(
+      within(screen.getByRole("dialog")).getByText(
+        "月額プランに変更すると、請求サイクルが変更時点から 1 か月周期に切り替わります。お支払い済みの年額プランの未使用期間分は日割りでクレジットとして計上され、次回以降のお支払いに充当されます（現金でのご返金は行いません）。クレジットを使い切るまでは請求額が 0 円になる場合があります。",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("年額→月額はクレジットを使い切るまで請求 0 円になりうると伝え、残額失効とは言わない", async () => {
     await openPlanChangeDialog("yearly");
 
     const dialog = screen.getByRole("dialog");
     expect(
       within(dialog).getByText(
-        /請求サイクルが変更時点から 1 か月周期に切り替わります/,
+        /クレジットを使い切るまでは請求額が 0 円になる場合があります/,
       ),
     ).toBeInTheDocument();
     expect(
-      within(dialog).getByText(
-        /日割りでクレジットとして計上され、次回以降のお支払いに充当されます（現金でのご返金は行いません）/,
-      ),
-    ).toBeInTheDocument();
+      within(dialog).queryByText(/翌月分のみに充当され、残額は失効します/),
+    ).not.toBeInTheDocument();
   });
 
   it("月額→年額の説明で「返金します」とは言わない", async () => {
@@ -796,9 +832,75 @@ describe("プラン変更", () => {
       await screen.findByText("プラン変更を受け付けました"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/反映されるまで少し時間がかかる場合があります/),
+      screen.getByText(
+        "日割りの差額は決済サービスから届く請求書メールでご確認ください。",
+      ),
     ).toBeInTheDocument();
     expect(mockRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  // back のプラン変更 API は expires_at を書き戻さないため、同期しないと旧プランの
+  // 期限のまま pro_active が落ちる。金銭的な損失に直結するので変更成功ごとに必ず叩く。
+  it("変更成功後は再取得の前に Pro 状態を同期する", async () => {
+    mockChangeProPlan.mockResolvedValue({ ok: true });
+    await openPlanChangeDialog("monthly");
+
+    await confirm();
+
+    expect(
+      await screen.findByText("プラン変更を受け付けました"),
+    ).toBeInTheDocument();
+    expect(mockSyncProStatus).toHaveBeenCalledTimes(1);
+    expect(mockSyncProStatus.mock.invocationCallOrder[0]).toBeLessThan(
+      mockRefresh.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("同期に成功したときは反映待ちの注意書きを出さない", async () => {
+    mockChangeProPlan.mockResolvedValue({ ok: true });
+    await openPlanChangeDialog("monthly");
+
+    await confirm();
+
+    expect(
+      await screen.findByText("プラン変更を受け付けました"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/反映されるまで少し時間がかかる場合があります/),
+    ).not.toBeInTheDocument();
+  });
+
+  // 変更自体は Stripe が受理済みなので、同期の失敗で変更を失敗扱いにしてはいけない。
+  it("同期に失敗しても変更は成功として扱い、反映の遅れだけを伝える", async () => {
+    mockChangeProPlan.mockResolvedValue({ ok: true });
+    mockSyncProStatus.mockResolvedValue(null);
+    await openPlanChangeDialog("monthly");
+
+    await confirm();
+
+    expect(
+      await screen.findByText("プラン変更を受け付けました"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "この画面の表示に反映されるまで少し時間がかかる場合があります。",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("変更が失敗したときは同期しない", async () => {
+    mockChangeProPlan.mockResolvedValue({
+      ok: false,
+      error: "stripe_api_error",
+    });
+    await openPlanChangeDialog("monthly");
+
+    await confirm();
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(mockSyncProStatus).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -829,19 +931,131 @@ describe("プラン変更", () => {
   );
 
   // 課金に関わる操作なので、失敗したときに現状維持であることを毎回明示する。
-  it.each(["invalid_plan", "stripe_api_error", "unknown"])(
-    "%s の失敗ではプランが変わっていないことを明示する",
-    async (error) => {
-      mockChangeProPlan.mockResolvedValue({ ok: false, error });
+  // cookie 欠落・401・契約なしも「変更は一切起きていない」ケースなので例外にしない。
+  it.each([
+    "unauthorized",
+    "no_active_subscription",
+    "invalid_plan",
+    "stripe_api_error",
+    "unknown",
+  ])("%s の失敗ではプランが変わっていないことを明示する", async (error) => {
+    mockChangeProPlan.mockResolvedValue({ ok: false, error });
+    await openPlanChangeDialog("monthly");
+
+    await confirm();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "プランは変更されていません",
+    );
+  });
+
+  // 到達するのは契約データが壊れているときだけで、再試行しても永久に直らない。
+  it("invalid_plan は再試行ではなく問い合わせへ誘導する", async () => {
+    mockChangeProPlan.mockResolvedValue({ ok: false, error: "invalid_plan" });
+    await openPlanChangeDialog("monthly");
+
+    await confirm();
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("お手数ですがお問い合わせください");
+    expect(alert).not.toHaveTextContent("時間をおいて再度お試しください");
+  });
+
+  it("エラーのあとに開き直したダイアログに前回のエラーを残さない", async () => {
+    mockChangeProPlan.mockResolvedValue({
+      ok: false,
+      error: "stripe_api_error",
+    });
+    await openPlanChangeDialog("monthly");
+    await confirm();
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+
+    await userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "閉じる",
+      }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "年額プランに変更する" }),
+    );
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("成功のあとに開き直したダイアログは完了表示ではなく確認内容から始まる", async () => {
+    mockChangeProPlan.mockResolvedValue({ ok: true });
+    await openPlanChangeDialog("monthly");
+    await confirm();
+    expect(
+      await screen.findByText("プラン変更を受け付けました"),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "閉じる",
+      }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "年額プランに変更する" }),
+    );
+
+    expect(
+      screen.queryByText("プラン変更を受け付けました"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "変更する",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  describe("変更処理中", () => {
+    async function startPendingChange() {
+      let settle: (result: { ok: true }) => void = () => {};
+      mockChangeProPlan.mockReturnValue(
+        new Promise<{ ok: true }>((resolve) => {
+          settle = resolve;
+        }),
+      );
+      await openPlanChangeDialog("monthly");
+      await confirm();
+      await screen.findByRole("button", { name: "変更手続き中…" });
+      return async () => {
+        await act(async () => {
+          settle({ ok: true });
+        });
+      };
+    }
+
+    it("処理中は確定ボタンを無効化して二重送信させない", async () => {
+      const finish = await startPendingChange();
+
+      const button = screen.getByRole("button", { name: "変更手続き中…" });
+      expect(button).toBeDisabled();
+      await userEvent.click(button);
+      expect(mockChangeProPlan).toHaveBeenCalledTimes(1);
+
+      await finish();
+    });
+
+    it("処理中は Escape でダイアログを閉じない", async () => {
+      const finish = await startPendingChange();
+
+      fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      await finish();
+    });
+
+    it("処理中でなければ Escape でダイアログを閉じる", async () => {
       await openPlanChangeDialog("monthly");
 
-      await confirm();
+      fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "プランは変更されていません",
-      );
-    },
-  );
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(mockChangeProPlan).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe("支払い情報の更新案内", () => {

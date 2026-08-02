@@ -3,15 +3,21 @@
 import type { PlanType } from "@app/types/pro";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { syncProStatus } from "@app/(app)/pro/actions";
 import { changeProPlan, type ChangeProPlanError } from "../actions";
 
+// 課金に関わる操作なので、どの失敗でも現状維持であることを毎回明示する。
+// いずれの分岐も back がプラン変更を実行する前か Stripe が拒否したあとで、
+// 契約は元のまま残っている。
 const ERROR_MESSAGES: Record<ChangeProPlanError, string> = {
   unauthorized:
-    "ログインの有効期限が切れています。再度ログインしてからお試しください。",
+    "ログインの有効期限が切れています。再度ログインしてからお試しください。プランは変更されていません。",
   no_active_subscription:
-    "変更できるご契約が見つかりませんでした。すでに解約手続きが完了しているか、別の媒体でご加入の可能性があります。",
+    "変更できるご契約が見つかりませんでした。すでに解約手続きが完了しているか、別の媒体でご加入の可能性があります。プランは変更されていません。",
+  // 送信できるのは現プランの反対側だけなので、この分岐は契約データの不整合でしか起きない。
+  // 再試行しても同じ結果になるため、再試行ではなく問い合わせへ倒す。
   invalid_plan:
-    "このプランへは変更できません。時間をおいて再度お試しください。プランは変更されていません。",
+    "このプランへは変更できません。お手数ですがお問い合わせください。プランは変更されていません。",
   stripe_api_error:
     "決済サービスとの通信に失敗しました。時間をおいて再度お試しください。プランは変更されていません。",
   unknown:
@@ -58,6 +64,7 @@ export default function ChangeWebPlan({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [isSyncPending, setIsSyncPending] = useState(false);
   const [error, setError] = useState<ChangeProPlanError | null>(null);
   const [isChanging, startTransition] = useTransition();
 
@@ -66,6 +73,7 @@ export default function ChangeWebPlan({
 
   const openDialog = () => {
     setIsDone(false);
+    setIsSyncPending(false);
     setError(null);
     setIsOpen(true);
   };
@@ -83,6 +91,11 @@ export default function ChangeWebPlan({
         setError(result.error);
         return;
       }
+      // back のプラン変更 API は Stripe に委譲するだけでローカルの expires_at を
+      // 書き戻さない。周期が変わると次回更新日も動くため、同期しないと旧プランの
+      // 期限のまま pro_active が落ち、支払い済みの Pro 機能を失う。
+      const synced = await syncProStatus();
+      setIsSyncPending(synced === null);
       setIsDone(true);
       // Stripe 側は受理済み。反映済みの加入状態を Server Component 側から取り直す。
       router.refresh();
@@ -120,8 +133,13 @@ export default function ChangeWebPlan({
                   プラン変更を受け付けました
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-zic-300">
-                  この画面の表示に反映されるまで少し時間がかかる場合があります。日割りの差額は決済サービスから届く請求書メールでご確認ください。
+                  日割りの差額は決済サービスから届く請求書メールでご確認ください。
                 </p>
+                {isSyncPending ? (
+                  <p className="mt-3 text-sm leading-6 text-zic-300">
+                    この画面の表示に反映されるまで少し時間がかかる場合があります。
+                  </p>
+                ) : null}
                 <div className="mt-5 flex justify-end">
                   <button
                     type="button"
