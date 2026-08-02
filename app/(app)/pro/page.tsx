@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getCachedFeatureFlag } from "@app/featureFlags/cachedFeatureFlags";
 import FAQ from "./_components/FAQ";
 import FeatureComparisonTable from "./_components/FeatureComparisonTable";
 import FinalCTA from "./_components/FinalCTA";
@@ -16,7 +17,19 @@ export const metadata: Metadata = {
 };
 
 export default async function ProLandingPage() {
-  const status = await getCachedProStatus();
+  // 互いに依存しないので並列で取る。どちらも cookies() 経由でこのルートは元から dynamic。
+  const [proFeaturesEnabled, status] = await Promise.all([
+    getCachedFeatureFlag("pro_features"),
+    getCachedProStatus(),
+  ]);
+
+  // kill switch が落ちている環境では LP ごと畳む。ここを通さないと Stripe Checkout の
+  // 導線（CheckoutButton → ProUpgradeModal）だけが生き残ってしまう。
+  // back の flag API は認証必須のため、未ログインからの閲覧もここで弾かれる。
+  if (!proFeaturesEnabled) {
+    redirect("/");
+  }
+
   if (status?.subscription.pro_active) {
     redirect("/account/subscription");
   }

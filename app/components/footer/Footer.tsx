@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logout from "@app/components/auth/Logout";
+import ProNavLink from "@app/components/footer/ProNavLink";
 import { XIcon } from "@app/components/icon/XIcon";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
@@ -37,6 +38,7 @@ export default function Footer() {
                   <></>
                 )}
               </li>
+              <ProNavLink />
               <li>
                 <Link href="/calculation-of-grades" className="text-sm">
                   成績の算出方法
