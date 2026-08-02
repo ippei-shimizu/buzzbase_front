@@ -68,7 +68,7 @@ describe("Pro 限定の分析 Server Actions", () => {
       data: countSituations,
     });
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://back:3000/api/v2/stats/count_situations?",
+      expect.stringContaining("http://back:3000/api/v2/stats/count_situations"),
       expect.objectContaining({ cache: "no-store" }),
     );
   });

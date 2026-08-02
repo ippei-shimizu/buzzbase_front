@@ -1,20 +1,20 @@
 interface ProSectionPlaceholderProps {
-  /** 判定確定後に描画されるブロックの高さに合わせる Tailwind クラス。 */
-  className?: string;
+  /** 読み込み中のブロック名。支援技術に何を待っているのか伝えるために使う。 */
+  label: string;
 }
 
 /**
- * Pro 判定の確定を待つ間に置く中立プレースホルダー。
- * 判定前は hasEntitlement が false 側に倒れるため、そのまま描画すると Pro ユーザーへ
- * ロック UI が一瞬映る。高さだけ確保して切り替え時のレイアウトシフトも抑える。
+ * Pro 限定ブロックをクライアントで取得している間に置くプレースホルダー。
+ * SSR 済みなら描画されない。加入直後の in-place 更新など、サーバーで
+ * entitlement を解決できなかったケースだけがここに落ちる。
  */
-export function ProSectionPlaceholder({
-  className = "h-[200px]",
-}: ProSectionPlaceholderProps) {
+export function ProSectionPlaceholder({ label }: ProSectionPlaceholderProps) {
   return (
     <div
-      aria-hidden="true"
-      className={`animate-pulse rounded-xl bg-[#3A3A3A] ${className}`}
-    />
+      role="status"
+      className="h-[200px] animate-pulse rounded-xl bg-[#3A3A3A]"
+    >
+      <span className="sr-only">{label}を読み込み中</span>
+    </div>
   );
 }

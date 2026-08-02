@@ -8,6 +8,32 @@ jest.mock("@app/lib/analytics", () => ({
   trackEvent: jest.fn(),
 }));
 
+// HeroUI の Dropdown は jsdom で開けないため、選択肢をそのままボタンとして描画する。
+jest.mock("@app/components/filter/FilterChip", () => ({
+  __esModule: true,
+  default: ({
+    label,
+    options,
+    onChange,
+  }: {
+    label: string;
+    options: { key: string; label: string }[];
+    onChange: (key: string) => void;
+  }) => (
+    <>
+      {options.map((option) => (
+        <button
+          key={option.key}
+          type="button"
+          onClick={() => onChange(option.key)}
+        >
+          {label}: {option.label}
+        </button>
+      ))}
+    </>
+  ),
+}));
+
 jest.mock("@app/(app)/pro/actions", () => ({
   getProStatus: jest.fn(),
 }));
@@ -29,21 +55,33 @@ jest.mock("../../../analysisActions", () => ({
 }));
 
 import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { getProStatus } from "@app/(app)/pro/actions";
 import { ProStatusProvider } from "@app/components/pro/ProStatusProvider";
 import {
   DEFAULT_PRO_STATUS,
   PRO_FEATURES,
   type Feature,
+  type ProFeature,
   type ProStatus,
 } from "@app/types/pro";
 import {
+  getAdditionalStats,
+  getBattingTrend,
+  getContactQualities,
   getCountSituations,
+  getHeadlineStats,
+  getHitDirections,
+  getHitLocations,
+  getPitcherAttributeSummary,
   getPitcherFaceoffs,
   getPitchTypes,
+  getPlateAppearanceBreakdown,
+  getRunnersSituation,
+  getTimingBreakdown,
   type AnalysisInitialData,
 } from "../../../analysisActions";
-import { AnalysisContainer } from "../AnalysisContainer";
+import { AnalysisContainer, type ProAnalysisData } from "../AnalysisContainer";
 
 const mockGetProStatus = getProStatus as jest.MockedFunction<
   typeof getProStatus
@@ -98,6 +136,11 @@ const REAL_COUNT_SITUATIONS = {
   favorable_count: { at_bats: 30, hits: 9, batting_average: 0.3 },
   pinch_count: { at_bats: 40, hits: 8, batting_average: 0.2 },
   total_target_pa: 77,
+};
+
+const REFETCHED_COUNT_SITUATIONS = {
+  ...REAL_COUNT_SITUATIONS,
+  first_pitch: { at_bats: 21, hits: 9, batting_average: 0.429 },
 };
 
 const REAL_PITCH_TYPES = {
@@ -184,6 +227,25 @@ const initialData: AnalysisInitialData = {
   battingTrend: { granularity: "game", points: [] },
 };
 
+const NO_PRO_DATA: ProAnalysisData = {
+  countSituations: null,
+  pitchTypes: null,
+  pitcherFaceoffs: null,
+};
+
+const SSR_PRO_DATA: ProAnalysisData = {
+  countSituations: REAL_COUNT_SITUATIONS,
+  pitchTypes: REAL_PITCH_TYPES,
+  pitcherFaceoffs: REAL_PITCHER_FACEOFFS,
+};
+
+const ALL_PRO_FEATURES: readonly ProFeature[] = [
+  "hit_direction_average",
+  "count_situation_average",
+  "pitch_type_average",
+  "pitcher_faceoff_average",
+];
+
 const CTA_NAMES = {
   hitDirection: "Pro プランを見る（方向別の打率）",
   countSituation: "Pro プランを見る（カウント別の打率）",
@@ -191,12 +253,20 @@ const CTA_NAMES = {
   pitcherFaceoff: "Pro プランを見る（対戦投手別）",
 };
 
-async function renderContainer() {
+async function renderContainer({
+  initialProData = NO_PRO_DATA,
+  initialProFeatures = [],
+}: {
+  initialProData?: ProAnalysisData;
+  initialProFeatures?: readonly ProFeature[];
+} = {}) {
   await act(async () => {
     render(
       <ProStatusProvider>
         <AnalysisContainer
           initialData={initialData}
+          initialProData={initialProData}
+          initialProFeatures={initialProFeatures}
           seasonOptions={[]}
           tournamentOptions={[]}
         />
@@ -205,10 +275,57 @@ async function renderContainer() {
   });
 }
 
+/** 年度フィルタを「通算」から当年へ切り替える。 */
+async function changeYearFilter() {
+  const user = userEvent.setup();
+  const year = String(new Date().getFullYear());
+  await act(async () => {
+    await user.click(screen.getByRole("button", { name: `年度: ${year}` }));
+  });
+}
+
+/** 見出しから該当セクション全体のテキストを取り出す（ブロック単位の表示確認用）。 */
+function sectionTextFor(heading: string): string {
+  return screen.getByText(heading).closest("section")?.textContent ?? "";
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolveFn) => {
+    resolve = resolveFn;
+  });
+  return { promise, resolve };
+}
+
+function mockNonProAnalysisActions() {
+  (getHeadlineStats as jest.Mock).mockResolvedValue(null);
+  (getRunnersSituation as jest.Mock).mockResolvedValue(null);
+  (getAdditionalStats as jest.Mock).mockResolvedValue(null);
+  (getHitLocations as jest.Mock).mockResolvedValue({ points: [] });
+  (getHitDirections as jest.Mock).mockResolvedValue(initialData.hitDirections);
+  (getPlateAppearanceBreakdown as jest.Mock).mockResolvedValue([]);
+  (getContactQualities as jest.Mock).mockResolvedValue({
+    breakdown: [],
+    total: 0,
+  });
+  (getTimingBreakdown as jest.Mock).mockResolvedValue({
+    breakdown: [],
+    total: 0,
+  });
+  (getPitcherAttributeSummary as jest.Mock).mockResolvedValue(
+    initialData.pitcherAttributes,
+  );
+  (getBattingTrend as jest.Mock).mockResolvedValue({
+    granularity: "game",
+    points: [],
+  });
+}
+
 describe("AnalysisContainer の Pro 出し分け", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     clearAuthCookies();
+    mockNonProAnalysisActions();
     mockGetCountSituations.mockResolvedValue({
       status: "ok",
       data: REAL_COUNT_SITUATIONS,
@@ -229,32 +346,53 @@ describe("AnalysisContainer の Pro 出し分け", () => {
       mockGetProStatus.mockResolvedValue(makeProStatus());
     });
 
-    it("4機能とも実データを表示し、Pro 限定 API を呼ぶ", async () => {
-      await renderContainer();
-
-      await waitFor(() => {
-        expect(mockGetCountSituations).toHaveBeenCalledTimes(1);
+    it("SSR 済みの実データをそのまま表示し、クライアントで取り直さない", async () => {
+      await renderContainer({
+        initialProData: SSR_PRO_DATA,
+        initialProFeatures: ALL_PRO_FEATURES,
       });
-      expect(mockGetPitchTypes).toHaveBeenCalledTimes(1);
-      expect(mockGetPitcherFaceoffs).toHaveBeenCalledTimes(1);
 
-      expect(await screen.findByText("20打数 8安打")).toBeInTheDocument();
+      expect(screen.getByText("20打数 8安打")).toBeInTheDocument();
       expect(
-        await screen.findByRole("button", { name: /ナックル/ }),
+        screen.getByRole("button", { name: /ナックル/ }),
       ).toBeInTheDocument();
       expect(
-        await screen.findByRole("button", { name: /実データ投手/ }),
+        screen.getByRole("button", { name: /実データ投手/ }),
       ).toBeInTheDocument();
       // 方向別は無料開放の hit_directions レスポンスをそのまま実データとして描画する。
       expect(screen.getByText("方向別の打率")).toBeInTheDocument();
       expect(screen.getByText(".333")).toBeInTheDocument();
+
+      expect(mockGetCountSituations).not.toHaveBeenCalled();
+      expect(mockGetPitchTypes).not.toHaveBeenCalled();
+      expect(mockGetPitcherFaceoffs).not.toHaveBeenCalled();
+    });
+
+    it("クライアントの Pro 判定を待つ間も「対象データなし」を挟まない", async () => {
+      // Pro 状態のクライアント取得を宙吊りにし、判定確定前の描画だけを観察する。
+      mockGetProStatus.mockReturnValue(new Promise(() => {}));
+
+      await renderContainer({
+        initialProData: SSR_PRO_DATA,
+        initialProFeatures: ALL_PRO_FEATURES,
+      });
+
+      expect(sectionTextFor("カウント別の打率")).not.toContain(
+        "対象データなし",
+      );
+      expect(sectionTextFor("球種別の打率")).not.toContain("対象データなし");
+      expect(sectionTextFor("対戦投手別")).not.toContain("対戦データなし");
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(screen.getByText("20打数 8安打")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /実データ投手/ }),
+      ).toBeInTheDocument();
     });
 
     it("アップセルもサンプルデータも表示しない", async () => {
-      await renderContainer();
-
-      await waitFor(() => {
-        expect(mockGetCountSituations).toHaveBeenCalled();
+      await renderContainer({
+        initialProData: SSR_PRO_DATA,
+        initialProFeatures: ALL_PRO_FEATURES,
       });
 
       expect(
@@ -264,6 +402,53 @@ describe("AnalysisContainer の Pro 出し分け", () => {
         screen.queryByText(/サンプルデータ（実際の記録ではありません）/),
       ).not.toBeInTheDocument();
       expect(screen.queryByText("投手 A")).not.toBeInTheDocument();
+    });
+
+    it("フィルタ変更時に Pro 限定3種をそれぞれ1回だけ再取得する", async () => {
+      mockGetCountSituations.mockResolvedValue({
+        status: "ok",
+        data: REFETCHED_COUNT_SITUATIONS,
+      });
+
+      await renderContainer({
+        initialProData: SSR_PRO_DATA,
+        initialProFeatures: ALL_PRO_FEATURES,
+      });
+      await changeYearFilter();
+
+      await waitFor(() => {
+        expect(screen.getByText("21打数 9安打")).toBeInTheDocument();
+      });
+      expect(mockGetCountSituations).toHaveBeenCalledTimes(1);
+      expect(mockGetPitchTypes).toHaveBeenCalledTimes(1);
+      expect(mockGetPitcherFaceoffs).toHaveBeenCalledTimes(1);
+    });
+
+    it("サーバーで Pro 判定できなかった場合は読み込み中を出してから実データに差し替える", async () => {
+      const pending = deferred<{
+        status: "ok";
+        data: typeof REAL_COUNT_SITUATIONS;
+      }>();
+      mockGetCountSituations.mockReturnValue(pending.promise);
+
+      await renderContainer();
+
+      expect(
+        screen.getByText("カウント別の打率を読み込み中"),
+      ).toBeInTheDocument();
+      // 空データのカードにも Paywall にも倒さず、読み込み中のまま待つ。
+      expect(screen.queryByText("カウント別の打率")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: CTA_NAMES.countSituation }),
+      ).not.toBeInTheDocument();
+
+      await act(async () => {
+        pending.resolve({ status: "ok", data: REAL_COUNT_SITUATIONS });
+      });
+
+      expect(screen.getByText("20打数 8安打")).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(mockGetCountSituations).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -289,17 +474,24 @@ describe("AnalysisContainer の Pro 出し分け", () => {
     it("サンプルデータを実コンポーネントに流し込んで表示する", async () => {
       await renderContainer();
 
-      expect(await screen.findByText("9打数 3安打")).toBeInTheDocument();
+      expect(await screen.findByText("18打数 6安打")).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /ストレート/ }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /投手 A/ }),
       ).toBeInTheDocument();
-      expect(
-        screen.getAllByText("サンプルデータ（実際の記録ではありません）"),
-      ).toHaveLength(3);
       expect(screen.queryByText("20打数 8安打")).not.toBeInTheDocument();
+    });
+
+    it("方向別を含む4ブロックすべてでサンプルであることを明示する", async () => {
+      await renderContainer();
+
+      expect(
+        await screen.findAllByText(
+          "サンプルデータ（実際の記録ではありません）",
+        ),
+      ).toHaveLength(4);
     });
 
     it("4つの CTA をスクリーンリーダーで読み分けられる", async () => {
@@ -313,31 +505,24 @@ describe("AnalysisContainer の Pro 出し分け", () => {
         screen.getAllByRole("button", { name: /Pro プランを見る/ }),
       ).toHaveLength(ctaNames.length);
     });
-  });
 
-  describe("Pro 判定が未確定の間", () => {
-    it("ロック UI もサンプルデータも表示しない", async () => {
-      setAuthCookies();
-      mockGetProStatus.mockReturnValue(new Promise(() => {}));
-
+    it("フィルタを変えても Pro 限定 API を呼ばない", async () => {
       await renderContainer();
+      await changeYearFilter();
 
-      expect(
-        screen.queryByRole("button", { name: /Pro プランを見る/ }),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByText("サンプルデータ（実際の記録ではありません）"),
-      ).not.toBeInTheDocument();
-      expect(screen.queryByText("投手 A")).not.toBeInTheDocument();
-      expect(screen.queryByText("方向別の打率")).not.toBeInTheDocument();
       expect(mockGetCountSituations).not.toHaveBeenCalled();
+      expect(mockGetPitchTypes).not.toHaveBeenCalled();
+      expect(mockGetPitcherFaceoffs).not.toHaveBeenCalled();
     });
   });
 
   describe("サーバーが 403 を返したとき", () => {
-    it("その機能だけ Paywall に切り替える", async () => {
+    beforeEach(() => {
       setAuthCookies();
       mockGetProStatus.mockResolvedValue(makeProStatus());
+    });
+
+    it("その機能だけ Paywall に切り替え、他機能を巻き込んで取り直さない", async () => {
       mockGetPitchTypes.mockResolvedValue({ status: "pro_required" });
 
       await renderContainer();
@@ -353,7 +538,47 @@ describe("AnalysisContainer の Pro 出し分け", () => {
       expect(
         screen.queryByRole("button", { name: CTA_NAMES.countSituation }),
       ).not.toBeInTheDocument();
-      // ロック側へ倒したあとに取得を繰り返さない。
+      expect(mockGetPitchTypes).toHaveBeenCalledTimes(1);
+      expect(mockGetCountSituations).toHaveBeenCalledTimes(1);
+      expect(mockGetPitcherFaceoffs).toHaveBeenCalledTimes(1);
+    });
+
+    it("SSR で 403 だった機能は判定確定まで Paywall のままにする", async () => {
+      // クライアントの Pro 判定を宙吊りにして、SSR の 403 判断が効く区間を観察する。
+      mockGetProStatus.mockReturnValue(new Promise(() => {}));
+
+      await renderContainer({
+        initialProData: { ...SSR_PRO_DATA, pitchTypes: null },
+        initialProFeatures: ALL_PRO_FEATURES.filter(
+          (feature) => feature !== "pitch_type_average",
+        ),
+      });
+
+      expect(
+        screen.getByRole("button", { name: CTA_NAMES.pitchType }),
+      ).toBeInTheDocument();
+      expect(mockGetPitchTypes).not.toHaveBeenCalled();
+      // 他2種は SSR 済みなので取得もプレースホルダーも発生しない。
+      expect(screen.getByText("20打数 8安打")).toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("フィルタを変えても 403 の機能はロックしたままにする", async () => {
+      mockGetPitchTypes.mockResolvedValue({ status: "pro_required" });
+
+      await renderContainer();
+      expect(
+        await screen.findByRole("button", { name: CTA_NAMES.pitchType }),
+      ).toBeInTheDocument();
+
+      await changeYearFilter();
+
+      await waitFor(() => {
+        expect(mockGetCountSituations).toHaveBeenCalledTimes(2);
+      });
+      expect(
+        screen.getByRole("button", { name: CTA_NAMES.pitchType }),
+      ).toBeInTheDocument();
       expect(mockGetPitchTypes).toHaveBeenCalledTimes(1);
     });
   });

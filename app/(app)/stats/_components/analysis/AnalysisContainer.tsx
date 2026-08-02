@@ -1,12 +1,18 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
+import type { ProFeature } from "@app/types/pro";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
+import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import { useProGatedFeatures } from "@app/hooks/pro/useProGatedFeatures";
+import { useProGatedResource } from "@app/hooks/pro/useProGatedResource";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
   type BattingTrendGranularity,
+  type CountSituations,
+  type PitcherFaceoffData,
+  type PitchTypeData,
   getAdditionalStats,
   getBattingTrend,
   getContactQualities,
@@ -21,11 +27,6 @@ import {
   getRunnersSituation,
   getTimingBreakdown,
 } from "../../analysisActions";
-import {
-  EMPTY_COUNT_SITUATIONS,
-  EMPTY_PITCH_TYPES,
-  EMPTY_PITCHER_FACEOFFS,
-} from "../../analysisFallbacks";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
 import { AnalysisFilters } from "./AnalysisFilters";
 import { BattingTrendChart } from "./BattingTrendChart";
@@ -49,9 +50,6 @@ import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
 import { TimingCard } from "./TimingCard";
 
-// 球場図は他ブロックより背が高いため、判定待ちのプレースホルダーも合わせて確保する。
-const HIT_DIRECTION_PLACEHOLDER_HEIGHT = "h-[420px]";
-
 function buildYearOptions(): FilterOption[] {
   const currentYear = new Date().getFullYear();
   const options: FilterOption[] = [{ key: "通算", label: "通算" }];
@@ -62,9 +60,19 @@ function buildYearOptions(): FilterOption[] {
   return options;
 }
 
+/** SSR で解決した Pro 限定ブロックのデータ。閲覧できない機能は null。 */
+export interface ProAnalysisData {
+  countSituations: CountSituations | null;
+  pitchTypes: PitchTypeData | null;
+  pitcherFaceoffs: PitcherFaceoffData | null;
+}
+
 interface AnalysisContainerProps {
   /** SSR で取得した初期表示データ。マウント時はこれを使い再取得しない。 */
   initialData: AnalysisInitialData;
+  initialProData: ProAnalysisData;
+  /** SSR で閲覧可と判定された Pro 機能。クライアント判定が確定するまでの初期値。 */
+  initialProFeatures: readonly ProFeature[];
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
@@ -73,6 +81,8 @@ interface AnalysisContainerProps {
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
 export function AnalysisContainer({
   initialData,
+  initialProData,
+  initialProFeatures,
   seasonOptions,
   tournamentOptions,
 }: AnalysisContainerProps) {
@@ -96,13 +106,6 @@ export function AnalysisContainer({
   const [timingBreakdown, setTimingBreakdown] = useState(
     initialData.timingBreakdown,
   );
-  const [countSituations, setCountSituations] = useState(
-    EMPTY_COUNT_SITUATIONS,
-  );
-  const [pitchTypes, setPitchTypes] = useState(EMPTY_PITCH_TYPES);
-  const [pitcherFaceoffs, setPitcherFaceoffs] = useState(
-    EMPTY_PITCHER_FACEOFFS,
-  );
   const [pitcherAttributes, setPitcherAttributes] = useState(
     initialData.pitcherAttributes,
   );
@@ -116,15 +119,36 @@ export function AnalysisContainer({
   const [isTrendPending, startTrendTransition] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
 
-  const {
-    isResolving: isProResolving,
-    canView,
-    unwrap,
-  } = useProGatedFeatures();
+  const { canView, unwrap } = useProGatedFeatures(initialProFeatures);
   const canViewHitDirectionDetail = canView("hit_direction_average");
   const canViewCountSituations = canView("count_situation_average");
   const canViewPitchTypes = canView("pitch_type_average");
   const canViewPitcherFaceoffs = canView("pitcher_faceoff_average");
+
+  const countSituations = useProGatedResource({
+    feature: "count_situation_average",
+    canView: canViewCountSituations,
+    initialData: initialProData.countSituations,
+    criteria: filters,
+    fetcher: getCountSituations,
+    unwrap,
+  });
+  const pitchTypes = useProGatedResource({
+    feature: "pitch_type_average",
+    canView: canViewPitchTypes,
+    initialData: initialProData.pitchTypes,
+    criteria: filters,
+    fetcher: getPitchTypes,
+    unwrap,
+  });
+  const pitcherFaceoffs = useProGatedResource({
+    feature: "pitcher_faceoff_average",
+    canView: canViewPitcherFaceoffs,
+    initialData: initialProData.pitcherFaceoffs,
+    criteria: filters,
+    fetcher: getPitcherFaceoffs,
+    unwrap,
+  });
 
   // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -175,49 +199,6 @@ export function AnalysisContainer({
       active = false;
     };
   }, [filters, startRefetch]);
-
-  // Pro 限定の3種は entitlement 判定がクライアントでしか出来ないため SSR せず、
-  // 閲覧できる機能ぶんだけクライアントで取得する（無料ユーザーに無駄な 403 を出さない）。
-  // 判定確定前は canView がすべて false になるので、確定後に再実行されて取得が走る。
-  useEffect(() => {
-    if (
-      !canViewCountSituations &&
-      !canViewPitchTypes &&
-      !canViewPitcherFaceoffs
-    ) {
-      return;
-    }
-    let active = true;
-    void Promise.all([
-      canViewCountSituations ? getCountSituations(filters) : null,
-      canViewPitchTypes ? getPitchTypes(filters) : null,
-      canViewPitcherFaceoffs ? getPitcherFaceoffs(filters) : null,
-    ]).then(([counts, pitches, faceoffs]) => {
-      if (!active) return;
-      if (counts) {
-        setCountSituations(
-          unwrap("count_situation_average", counts, EMPTY_COUNT_SITUATIONS),
-        );
-      }
-      if (pitches) {
-        setPitchTypes(unwrap("pitch_type_average", pitches, EMPTY_PITCH_TYPES));
-      }
-      if (faceoffs) {
-        setPitcherFaceoffs(
-          unwrap("pitcher_faceoff_average", faceoffs, EMPTY_PITCHER_FACEOFFS),
-        );
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [
-    filters,
-    canViewCountSituations,
-    canViewPitchTypes,
-    canViewPitcherFaceoffs,
-    unwrap,
-  ]);
 
   // 推移グラフは粒度/フィルタ切替で独立に再取得する（初回は initialData を使う）。
   // 専用 transition で更新が終わるまでグラフを dim し、古い値が一瞬出るのを防ぐ。
@@ -271,15 +252,16 @@ export function AnalysisContainer({
           mode={sprayChartMode}
           onModeChange={setSprayChartMode}
         />
-        {isProResolving ? (
-          <ProSectionPlaceholder className={HIT_DIRECTION_PLACEHOLDER_HEIGHT} />
-        ) : canViewHitDirectionDetail ? (
+        {canViewHitDirectionDetail ? (
           <HitDirectionTable directions={hitDirections.directions} />
         ) : (
-          // 打率の数値そのものが訴求対象なので、サンプルでも暗幕で覆って CTA を前に出す。
-          <ProUpsellOverlay feature="hit_direction_average">
-            <HitDirectionTable directions={SAMPLE_HIT_DIRECTIONS} />
-          </ProUpsellOverlay>
+          // 暗幕越しでも架空の打率は読めるため、他3ブロックと同じ注記を暗幕の外に出す。
+          <div className="flex flex-col gap-y-2">
+            <SampleDataLabel />
+            <ProUpsellOverlay feature="hit_direction_average">
+              <HitDirectionTable directions={SAMPLE_HIT_DIRECTIONS} />
+            </ProUpsellOverlay>
+          </div>
         )}
         <PlateAppearanceDonut
           breakdown={plateBreakdown}
@@ -296,22 +278,22 @@ export function AnalysisContainer({
           breakdown={timingBreakdown.breakdown}
           total={timingBreakdown.total}
         />
-        {isProResolving ? (
-          <ProSectionPlaceholder />
-        ) : canViewCountSituations ? (
+        {countSituations ? (
           <CountSituationCards data={countSituations} />
+        ) : canViewCountSituations ? (
+          <ProSectionPlaceholder label="カウント別の打率" />
         ) : (
           <ProSampleSection feature="count_situation_average">
             <CountSituationCards data={SAMPLE_COUNT_SITUATIONS} />
           </ProSampleSection>
         )}
-        {isProResolving ? (
-          <ProSectionPlaceholder />
-        ) : canViewPitchTypes ? (
+        {pitchTypes ? (
           <PitchTypeCard
             rows={pitchTypes.rows}
             totalTargetPa={pitchTypes.total_target_pa}
           />
+        ) : canViewPitchTypes ? (
+          <ProSectionPlaceholder label="球種別の打率" />
         ) : (
           <ProSampleSection feature="pitch_type_average">
             <PitchTypeCard
@@ -320,14 +302,14 @@ export function AnalysisContainer({
             />
           </ProSampleSection>
         )}
-        {isProResolving ? (
-          <ProSectionPlaceholder />
-        ) : canViewPitcherFaceoffs ? (
+        {pitcherFaceoffs ? (
           <PitcherFaceoffList
             rows={pitcherFaceoffs.rows}
             minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
             totalTargetPa={pitcherFaceoffs.total_target_pa}
           />
+        ) : canViewPitcherFaceoffs ? (
+          <ProSectionPlaceholder label="対戦投手別" />
         ) : (
           <ProSampleSection feature="pitcher_faceoff_average">
             <PitcherFaceoffList

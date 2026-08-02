@@ -486,7 +486,7 @@ export async function getHitDirections(
   );
 }
 
-/** SSR で初期描画する打撃分析ブロック群（Pro 限定の3種は含めない）。 */
+/** 全ユーザー共通で初期描画する打撃分析ブロック群（Pro 限定の3種は含めない）。 */
 export interface AnalysisInitialData {
   headline: HeadlineStats | null;
   runnersSituation: RunnersSituationSummary | null;
@@ -503,7 +503,8 @@ export interface AnalysisInitialData {
 /**
  * 打撃分析の初期表示ブロックをまとめて取得する（Server Component から SSR で呼ぶ）。
  * フィルタ既定は通算・全試合、推移は試合単位。
- * Pro 限定の3種は entitlement 判定がクライアントでしか出来ないためここでは取得しない。
+ * Pro 限定の3種は entitlement を持つユーザーにだけ投げたいので、ここには含めず
+ * 呼び出し側が Pro 判定と合わせて取得する。
  */
 export async function getInitialAnalysisData(
   filters: AnalysisFilters = { year: "通算", matchType: "" },
