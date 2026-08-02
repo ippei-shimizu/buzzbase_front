@@ -29,13 +29,24 @@ async function getAuthHeaders(): Promise<Record<string, string> | null> {
 }
 
 /**
- * 現在ユーザーの Pro 加入状態と保有 entitlement を取得する。
- * 未認証・API 失敗時は null を返す。UI 側で DEFAULT_PRO_STATUS にフォールバックする想定。
+ * Pro 加入状態の取得結果。
+ * トークン失効（unauthorized）と通信・サーバー障害（error）はユーザーが取るべき行動が
+ * 「再ログイン」と「再試行」で異なるため、null に畳まず呼び出し側で区別できるようにする。
  */
-export async function getProStatus(): Promise<ProStatus | null> {
+export type ProStatusResult =
+  | { status: "ok"; proStatus: ProStatus }
+  | { status: "unauthorized" }
+  | { status: "error" };
+
+/**
+ * 現在ユーザーの Pro 加入状態と保有 entitlement を、失敗理由付きで取得する。
+ * 加入状態そのものをユーザーに提示する画面（サブスクリプション管理など）は、
+ * 失敗を無料状態に倒さずこの戻り値で文言を出し分けること。
+ */
+export async function getProStatusResult(): Promise<ProStatusResult> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return null;
+    if (!headers) return { status: "unauthorized" };
 
     const response = await fetch(`${RAILS_API_URL}/api/v1/pro/status`, {
       method: "GET",
@@ -45,19 +56,32 @@ export async function getProStatus(): Promise<ProStatus | null> {
     });
 
     // 401 はトークン失効という想定内の状態。全ページのレンダーごとに記録すると
-    // 本当のエラーが埋もれるため、無料状態へのフォールバックだけ行う。
-    if (response.status === 401) return null;
+    // 本当のエラーが埋もれるため、ログには残さない。
+    if (response.status === 401) return { status: "unauthorized" };
 
     if (!response.ok) {
       console.error("Pro status API error:", response.status);
-      return null;
+      return { status: "error" };
     }
 
-    return (await response.json()) as ProStatus;
+    return { status: "ok", proStatus: (await response.json()) as ProStatus };
   } catch (error) {
     captureServerActionError(error, { action: "getProStatus" });
-    return null;
+    return { status: "error" };
   }
+}
+
+/**
+ * 現在ユーザーの Pro 加入状態と保有 entitlement を取得する。
+ * 未認証・API 失敗時は null を返す。
+ *
+ * null は「加入状態が不明」であって「無料」ではない。DEFAULT_PRO_STATUS へ倒してよいのは
+ * 訴求 LP のように加入状態を断定しない読み取り専用画面だけで、加入状態や課金内容を
+ * ユーザーに提示する画面は getProStatusResult() で失敗理由まで受け取ること。
+ */
+export async function getProStatus(): Promise<ProStatus | null> {
+  const result = await getProStatusResult();
+  return result.status === "ok" ? result.proStatus : null;
 }
 
 /**
