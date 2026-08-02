@@ -237,7 +237,7 @@ export interface PitcherAttributeSummaryData {
 
 /**
  * 打撃推移グラフの粒度。
- * - `game`: 開幕からの累積
+ * - `game`: 各試合時点までの累積（絞り込み後の全試合が対象で、通算なら複数年をまたぐ）
  * - `month` / `year`: その期間単独
  * - `season`: シーズン単独（シーズン跨ぎ比較。`season_transition_graph` が必要）
  * - `recent_games`: 直近10試合の累積

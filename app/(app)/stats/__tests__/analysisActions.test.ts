@@ -184,6 +184,33 @@ describe("推移グラフのシーズン粒度", () => {
     expect(calledUrl()).toContain("granularity=month");
   });
 
+  // back の era_trend は points 形式で返す。過去にここが trend 形式の想定とずれて
+  // グラフが常に空になったため、URL だけでなくパース結果まで固定する。
+  it("getEraTrend はシーズン粒度のレスポンスをそのまま points として返す", async () => {
+    mockResponse(200, eraTrend);
+
+    await expect(getEraTrend({ year: "2026" }, "season")).resolves.toEqual({
+      status: "ok",
+      data: eraTrend,
+    });
+  });
+
+  it("getEraTrend は月粒度のレスポンスをそのまま points として返す", async () => {
+    const monthEraTrend = {
+      granularity: "month",
+      points: [
+        { key: "2026-04", label: "4月", era: 3.12 },
+        { key: "2026-05", label: "5月", era: 1.98 },
+      ],
+    };
+    mockResponse(200, monthEraTrend);
+
+    await expect(getEraTrend({ year: "2026" })).resolves.toEqual({
+      status: "ok",
+      data: monthEraTrend,
+    });
+  });
+
   it.each([
     ["getBattingTrend", getBattingTrend, battingTrend],
     ["getEraTrend", getEraTrend, eraTrend],

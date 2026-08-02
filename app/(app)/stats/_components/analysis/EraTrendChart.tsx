@@ -139,6 +139,10 @@ export function EraTrendChart({
   const labelStride = isSeason
     ? Math.max(1, Math.ceil(drawablePoints.length / MAX_SEASON_X_LABELS))
     : 1;
+  // 値ラベル（era）も X 軸と同じ本数に間引く。シーズン数が増えると点の間隔が
+  // 4 桁の数値より狭くなり、間引かないと隣と重なって読めなくなる。
+  const isLabelVisible = (index: number) =>
+    index % labelStride === 0 || index === drawablePoints.length - 1;
 
   return (
     <ChartFrame
@@ -208,13 +212,8 @@ export function EraTrendChart({
             </Fragment>
           ))}
 
-          {drawablePoints.map((point, index) => {
-            if (
-              index % labelStride !== 0 &&
-              index !== drawablePoints.length - 1
-            )
-              return null;
-            return (
+          {drawablePoints.map((point, index) =>
+            isLabelVisible(index) ? (
               <text
                 key={`xl-${point.key}`}
                 x={getX(index)}
@@ -225,23 +224,25 @@ export function EraTrendChart({
               >
                 {isSeason ? toSeasonAxisLabel(point.label) : point.label}
               </text>
-            );
-          })}
+            ) : null,
+          )}
 
-          {drawablePoints.map((point, index) => (
-            <text
-              key={`val-${point.key}`}
-              x={getX(index)}
-              // 最大値の点では getY が上端付近になりラベルが見切れるため下限を設ける。
-              y={Math.max(getY(point.era) - 10, PADDING_TOP + 9)}
-              textAnchor="middle"
-              fill="#F4F4F4"
-              fontSize={9}
-              fontWeight={600}
-            >
-              {point.era.toFixed(2)}
-            </text>
-          ))}
+          {drawablePoints.map((point, index) =>
+            isLabelVisible(index) ? (
+              <text
+                key={`val-${point.key}`}
+                x={getX(index)}
+                // 最大値の点では getY が上端付近になりラベルが見切れるため下限を設ける。
+                y={Math.max(getY(point.era) - 10, PADDING_TOP + 9)}
+                textAnchor="middle"
+                fill="#F4F4F4"
+                fontSize={9}
+                fontWeight={600}
+              >
+                {point.era.toFixed(2)}
+              </text>
+            ) : null,
+          )}
         </svg>
       </div>
 

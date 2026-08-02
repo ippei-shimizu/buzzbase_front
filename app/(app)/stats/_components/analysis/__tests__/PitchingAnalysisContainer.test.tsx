@@ -125,6 +125,14 @@ async function clickGranularity(label: string) {
   });
 }
 
+/** モック化した FilterChip が並べる選択肢ボタンを押す（例: "年度: 2025"）。 */
+async function clickFilter(name: string) {
+  const user = userEvent.setup();
+  await act(async () => {
+    await user.click(screen.getByRole("button", { name }));
+  });
+}
+
 function activeGranularityLabel(): string | undefined {
   return screen
     .getAllByRole("button", { pressed: true })
@@ -212,6 +220,75 @@ describe("PitchingAnalysisContainer の防御率推移", () => {
       expect(await screen.findByText("2026春季…")).toBeInTheDocument();
       expect(screen.getByText("2025秋季…")).toBeInTheDocument();
       expect(screen.queryByText("2026春季リーグ戦")).not.toBeInTheDocument();
+    });
+
+    // シーズン数が多いユーザーほど点の間隔が狭くなる。X 軸ラベルだけ間引いても
+    // 値ラベルが全点に出ていると 4 桁の数値同士が重なって読めなくなる。
+    it("シーズン数が多いときは値ラベルも X 軸と同じ本数に間引く", async () => {
+      const manySeasons = Array.from({ length: 8 }, (_, index) => ({
+        key: `season-${index}`,
+        label: `S${index}`,
+        era: Number((index + 1).toFixed(2)),
+      }));
+      mockGetEraTrend.mockResolvedValue({
+        status: "ok",
+        data: { granularity: "season", points: manySeasons },
+      });
+
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+      await clickGranularity("シーズン");
+
+      // stride は ceil(8 / MAX_SEASON_X_LABELS) = 2。末尾は常に描く。
+      expect(await screen.findByText("1.00")).toBeInTheDocument();
+      expect(screen.getByText("3.00")).toBeInTheDocument();
+      expect(screen.getByText("8.00")).toBeInTheDocument();
+      expect(screen.queryByText("2.00")).not.toBeInTheDocument();
+      expect(screen.queryByText("4.00")).not.toBeInTheDocument();
+      expect(screen.queryByText("6.00")).not.toBeInTheDocument();
+    });
+
+    // back が将来 season 以外の粒度にも 403 を足したとき、無関係な粒度で
+    // 「月粒度へ戻す + シーズンの Paywall」が出ないことを担保する。
+    it("月粒度で 403 が返っても Paywall を出さない", async () => {
+      mockGetEraTrend.mockResolvedValue({ status: "pro_required" });
+
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+      await clickFilter("年度: 2025");
+
+      await waitFor(() => {
+        expect(mockGetEraTrend).toHaveBeenCalledWith(
+          expect.anything(),
+          "month",
+        );
+      });
+      expect(mockOpen).not.toHaveBeenCalled();
+      expect(activeGranularityLabel()).toBe("月");
+      expect(screen.getByText("4月")).toBeInTheDocument();
+    });
+
+    it("月粒度の 403 でシーズン粒度をロックしない", async () => {
+      mockGetEraTrend.mockResolvedValueOnce({ status: "pro_required" });
+      mockGetEraTrend.mockResolvedValue({
+        status: "ok",
+        data: { granularity: "season", points: SEASON_POINTS },
+      });
+
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+      await clickFilter("年度: 2025");
+      await clickGranularity("シーズン");
+
+      expect(mockGetEraTrend).toHaveBeenLastCalledWith(
+        expect.anything(),
+        "season",
+      );
+      expect(await screen.findByText("2026春季")).toBeInTheDocument();
+      expect(mockOpen).not.toHaveBeenCalled();
     });
 
     it("クライアントの Pro 判定を待つ間もシーズンを選べる", async () => {

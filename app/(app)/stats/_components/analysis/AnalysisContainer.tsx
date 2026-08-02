@@ -120,7 +120,6 @@ export function AnalysisContainer({
 
   const { granularity, requestGranularity, resolveTrend } =
     useSeasonTrendGranularity<BattingTrendGranularity>({
-      seasonKey: "season",
       freeKey: "game",
       initialGranted: initialProFeatures,
     });

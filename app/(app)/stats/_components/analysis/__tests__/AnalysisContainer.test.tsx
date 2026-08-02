@@ -609,7 +609,7 @@ const SEASON_TREND = {
 };
 
 const GRANULARITY_NOTES = {
-  game: "開幕からの累積",
+  game: "各試合時点までの累積",
   season: "シーズンごとの成績（シーズン跨ぎ比較）",
 };
 

@@ -49,7 +49,6 @@ export function PitchingAnalysisContainer({
 
   const { granularity, requestGranularity, resolveTrend } =
     useSeasonTrendGranularity<EraTrendGranularity>({
-      seasonKey: "season",
       freeKey: "month",
       initialGranted: initialProFeatures,
     });

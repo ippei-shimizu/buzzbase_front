@@ -58,7 +58,9 @@ const GRANULARITY_OPTIONS: readonly {
 
 // 累積と単独期間で同じ折れ線でも読み方が変わるため、粒度ごとに集計単位を明示する。
 const GRANULARITY_NOTES: Record<BattingTrendGranularity, string> = {
-  game: "開幕からの累積",
+  // back は絞り込み後の全試合を累積するため、既定の「通算」では複数年をまたぐ。
+  // 期間を含む表現にすると既定表示で誤った集計単位を伝えることになる。
+  game: "各試合時点までの累積",
   month: "月ごとの成績",
   year: "年ごとの成績",
   season: "シーズンごとの成績（シーズン跨ぎ比較）",

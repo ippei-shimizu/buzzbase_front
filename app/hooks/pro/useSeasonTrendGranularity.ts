@@ -5,11 +5,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useProGatedFeatures } from "@app/hooks/pro/useProGatedFeatures";
 
+/**
+ * シーズン跨ぎ比較を表す粒度キーと、それに必要な entitlement。
+ * 打撃 / 防御率どちらの推移も back の粒度名が `season` で揃っているため、
+ * キーだけ差し替えられて entitlement とずれることが無いよう組にして固定する。
+ */
+const SEASON_KEY = "season";
 const SEASON_TREND_FEATURE: ProFeature = "season_transition_graph";
 
 interface UseSeasonTrendGranularityOptions<G extends string> {
-  /** シーズン跨ぎ比較を表す粒度キー。この粒度だけ Pro 限定になる。 */
-  seasonKey: G;
   /** 無料で使える既定の粒度。初期値と、403 で拒否されたときの戻り先を兼ねる。 */
   freeKey: G;
   /**
@@ -24,8 +28,8 @@ interface UseSeasonTrendGranularityReturn<G extends string> {
   /** 粒度切替の要求。シーズン粒度を持たないユーザーには Paywall を出し、切替を行わない。 */
   requestGranularity: (next: G) => void;
   /**
-   * 推移データ取得結果をデータに落とす。403 なら無料粒度へ戻して Paywall を出し、
-   * 以降シーズン粒度をロックする。
+   * 推移データ取得結果をデータに落とす。シーズン粒度で 403 なら無料粒度へ戻して
+   * Paywall を出し、以降シーズン粒度をロックする。
    */
   resolveTrend: <T>(result: ProGatedResult<T>) => T | null;
 }
@@ -39,7 +43,6 @@ interface UseSeasonTrendGranularityReturn<G extends string> {
  * 戻したうえで Paywall を出す（グラフが空のまま無言で止まるのを避ける）。
  */
 export function useSeasonTrendGranularity<G extends string>({
-  seasonKey,
   freeKey,
   initialGranted,
 }: UseSeasonTrendGranularityOptions<G>): UseSeasonTrendGranularityReturn<G> {
@@ -56,30 +59,32 @@ export function useSeasonTrendGranularity<G extends string>({
 
   const requestGranularity = useCallback(
     (next: G) => {
-      if (next === seasonKey && !canViewSeason) {
+      if (next === SEASON_KEY && !canViewSeason) {
         openPaywall();
         return;
       }
       setGranularity(next);
     },
-    [seasonKey, canViewSeason, openPaywall],
+    [canViewSeason, openPaywall],
   );
 
   // resolveTrend は取得完了後に呼ばれる。identity が変わると呼び出し側の effect が
-  // 張り直されて進行中のレスポンスが捨てられるため、最新の関数は ref 経由で読む。
-  const latestRef = useRef({ unwrap, openPaywall });
+  // 張り直されて進行中のレスポンスが捨てられるため、最新の値は ref 経由で読む。
+  const latestRef = useRef({ unwrap, openPaywall, granularity });
   useEffect(() => {
-    latestRef.current = { unwrap, openPaywall };
+    latestRef.current = { unwrap, openPaywall, granularity };
   });
 
   const resolveTrend = useCallback(
     <T>(result: ProGatedResult<T>): T | null => {
-      const data = latestRef.current.unwrap(SEASON_TREND_FEATURE, result);
-      if (data === null) {
-        setGranularity(freeKey);
-        latestRef.current.openPaywall();
-      }
-      return data;
+      if (result.status === "ok") return result.data;
+      // シーズン粒度以外の 403 は season_transition_graph の拒否ではない。
+      // 無関係な粒度で無料粒度へ戻したり Paywall を出したりしないよう打ち切る。
+      if (latestRef.current.granularity !== SEASON_KEY) return null;
+      latestRef.current.unwrap(SEASON_TREND_FEATURE, result);
+      setGranularity(freeKey);
+      latestRef.current.openPaywall();
+      return null;
     },
     [freeKey],
   );
