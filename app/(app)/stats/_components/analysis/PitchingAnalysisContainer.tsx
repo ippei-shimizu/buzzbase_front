@@ -39,28 +39,16 @@ export function PitchingAnalysisContainer({
       return;
     }
     let active = true;
-    // 防御率推移は year/月範囲/season/tournament のみで絞る（種別は対象外）。
+    // 種別は getEraTrend 側で構造的に落とすため、ここでは filters をそのまま渡す
+    // （フィールドを手で並べると、絞り込み項目が増えたときに漏れる）。
     startRefetch(async () => {
-      const trend = await getEraTrend({
-        year: filters.year,
-        seasonId: filters.seasonId,
-        tournamentId: filters.tournamentId,
-        startMonth: filters.startMonth,
-        endMonth: filters.endMonth,
-      });
+      const trend = await getEraTrend(filters);
       if (active) setEraTrend(trend);
     });
     return () => {
       active = false;
     };
-  }, [
-    filters.year,
-    filters.seasonId,
-    filters.tournamentId,
-    filters.startMonth,
-    filters.endMonth,
-    startRefetch,
-  ]);
+  }, [filters, startRefetch]);
 
   return (
     <div className="flex flex-col gap-y-5">

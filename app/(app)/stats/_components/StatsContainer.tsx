@@ -26,6 +26,10 @@ const PERIOD_OPTIONS: { value: StatsPeriod; label: string }[] = [
 
 const CURRENT_YEAR = String(new Date().getFullYear());
 
+// 月/日表示の既定は「当年」。クリアで全期間（＝全期間の月別テーブル）に落とさないよう、
+// FilterBar のリセット先にもこれを渡す。
+const PERIODIC_DEFAULT_FILTERS: FilterValues = { year: CURRENT_YEAR };
+
 interface StatsContainerProps {
   /** SSR で取得した打撃・年別の初期行。マウント時はこれを使い再取得しない。 */
   initialRows: BattingStatsRow[];
@@ -91,7 +95,7 @@ export default function StatsContainer({
       !tableFilters.startMonth &&
       !tableFilters.endMonth
     ) {
-      setTableFilters((prev) => ({ ...prev, year: CURRENT_YEAR }));
+      setTableFilters((prev) => ({ ...prev, ...PERIODIC_DEFAULT_FILTERS }));
     }
   };
 
@@ -171,6 +175,7 @@ export default function StatsContainer({
           <FilterBar
             values={tableFilters}
             onChange={setTableFilters}
+            resetTo={PERIODIC_DEFAULT_FILTERS}
             options={{
               years: yearOptions,
               months: monthOptions,

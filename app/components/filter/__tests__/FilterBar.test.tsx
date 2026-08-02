@@ -46,10 +46,12 @@ const DEFAULT_OPTIONS: FilterBarOptions = {
 function Harness({
   initialValues = {},
   options = DEFAULT_OPTIONS,
+  resetTo,
   onValuesChange,
 }: {
   initialValues?: FilterValues;
   options?: FilterBarOptions;
+  resetTo?: FilterValues;
   onValuesChange?: (values: FilterValues) => void;
 }) {
   const [values, setValues] = useState<FilterValues>(initialValues);
@@ -62,6 +64,7 @@ function Harness({
           onValuesChange?.(next);
         }}
         options={options}
+        resetTo={resetTo}
       />
       <output data-testid="values">{JSON.stringify(values)}</output>
     </>
@@ -237,6 +240,52 @@ describe("FilterBar", () => {
     );
 
     expect(currentValues()).toEqual({});
+  });
+
+  describe("resetTo でリセット先を変えたとき", () => {
+    const RESET_TO: FilterValues = { year: "2026" };
+
+    it("リセット先と同じ値ならクリアボタンを出さない", () => {
+      render(<Harness initialValues={{ year: "2026" }} resetTo={RESET_TO} />);
+
+      expect(
+        screen.queryByRole("button", { name: "フィルターをクリア" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("リセット先から動いていればクリアボタンを出す", () => {
+      render(
+        <Harness
+          initialValues={{ year: "2026", tournamentId: "7" }}
+          resetTo={RESET_TO}
+        />,
+      );
+
+      expect(
+        screen.getByRole("button", { name: "フィルターをクリア" }),
+      ).toBeInTheDocument();
+    });
+
+    it("クリアで全解除ではなくリセット先に戻る", async () => {
+      const user = userEvent.setup();
+      render(
+        <Harness
+          initialValues={{
+            year: undefined,
+            startMonth: "2026-04",
+            endMonth: "2026-06",
+            tournamentId: "7",
+          }}
+          resetTo={RESET_TO}
+        />,
+      );
+
+      await user.click(
+        screen.getByRole("button", { name: "フィルターをクリア" }),
+      );
+
+      expect(currentValues()).toEqual({ year: "2026" });
+    });
   });
 
   it("選択肢が無いチップは描画しない", () => {

@@ -80,15 +80,16 @@ function setupServices() {
     { id: 7, name: "県大会" },
   ]);
   (getAvailableMonths as jest.Mock).mockResolvedValue(["2026-06", "2026-04"]);
-  mockGetFiltered.mockResolvedValue({
+  // 実 API と同じく、要求したページをそのまま返してページ送りが進むようにする。
+  mockGetFiltered.mockImplementation(async (_userId, params) => ({
     data: [],
     pagination: {
-      current_page: 1,
+      current_page: params?.page ?? 1,
       per_page: 10,
-      total_count: 0,
-      total_pages: 1,
+      total_count: 30,
+      total_pages: 3,
     },
-  });
+  }));
 }
 
 async function renderList() {
@@ -100,6 +101,8 @@ async function renderList() {
 describe("MatchResultList のフィルタ", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // jsdom は scrollIntoView を実装していないため、ページ送り時の呼び出しを潰す。
+    Element.prototype.scrollIntoView = jest.fn();
     setupServices();
   });
 
@@ -144,6 +147,51 @@ describe("MatchResultList のフィルタ", () => {
     expect(
       screen.queryByRole("button", { name: "開始: 2026年5月" }),
     ).not.toBeInTheDocument();
+  });
+
+  // シーズンは back で `to_i` されるため、name を送ると season_id=0 になって無言で0件になる。
+  it("シーズンは名前ではなく id を送る", async () => {
+    const user = userEvent.setup();
+    await renderList();
+
+    await user.click(screen.getByRole("button", { name: "シーズン: 春季" }));
+
+    await waitFor(() =>
+      expect(mockGetFiltered).toHaveBeenLastCalledWith(
+        USER_ID,
+        expect.objectContaining({ seasonId: "3" }),
+      ),
+    );
+  });
+
+  // 3ページ目のまま絞り込むと、該当件数が減って空リストになってしまう。
+  it("絞り込みを変えたらページを1に戻す", async () => {
+    const user = userEvent.setup();
+    await renderList();
+
+    await user.click(screen.getByRole("button", { name: "次へ" }));
+    await waitFor(() =>
+      expect(mockGetFiltered).toHaveBeenLastCalledWith(
+        USER_ID,
+        expect.objectContaining({ page: 2 }),
+      ),
+    );
+    await user.click(screen.getByRole("button", { name: "次へ" }));
+    await waitFor(() =>
+      expect(mockGetFiltered).toHaveBeenLastCalledWith(
+        USER_ID,
+        expect.objectContaining({ page: 3 }),
+      ),
+    );
+
+    await user.click(screen.getByRole("button", { name: "大会: 県大会" }));
+
+    await waitFor(() =>
+      expect(mockGetFiltered).toHaveBeenLastCalledWith(
+        USER_ID,
+        expect.objectContaining({ tournamentId: "7", page: 1 }),
+      ),
+    );
   });
 
   it("クリアで全ての絞り込みが外れる", async () => {

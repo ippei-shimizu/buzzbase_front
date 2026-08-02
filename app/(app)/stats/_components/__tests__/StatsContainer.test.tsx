@@ -109,19 +109,46 @@ describe("StatsContainer のテーブルフィルタ", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("クリアで年度・大会・月範囲がすべて初期化される", async () => {
+  // 全期間の月別テーブルは煩雑なので、月/日表示のクリアは「当年」に戻す（全解除にしない）。
+  it("クリアで大会・月範囲が外れ、当年の絞り込みに戻る", async () => {
     const user = userEvent.setup();
     renderContainer();
     await switchToMonthlyPeriod(user);
 
     await user.click(screen.getByRole("button", { name: "大会: 県大会" }));
+    await user.click(screen.getByRole("button", { name: "開始: 2026年4月" }));
     await user.click(
       screen.getByRole("button", { name: "フィルターをクリア" }),
     );
 
     await waitFor(() =>
-      expect(mockGetBattingStats).toHaveBeenLastCalledWith("monthly", {}),
+      expect(mockGetBattingStats).toHaveBeenLastCalledWith("monthly", {
+        year: CURRENT_YEAR,
+      }),
     );
+  });
+
+  // 当年で絞った状態は自動設定であってユーザー操作ではないため、クリアは出さない。
+  it("月表示にしただけではクリアボタンを出さない", async () => {
+    const user = userEvent.setup();
+    renderContainer();
+    await switchToMonthlyPeriod(user);
+
+    expect(
+      screen.queryByRole("button", { name: "フィルターをクリア" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("絞り込みを足すとクリアボタンが出る", async () => {
+    const user = userEvent.setup();
+    renderContainer();
+    await switchToMonthlyPeriod(user);
+
+    await user.click(screen.getByRole("button", { name: "大会: 県大会" }));
+
+    expect(
+      screen.getByRole("button", { name: "フィルターをクリア" }),
+    ).toBeInTheDocument();
   });
 
   it("月表示に切り替えたときは当年で絞る", async () => {

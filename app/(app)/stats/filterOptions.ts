@@ -21,12 +21,35 @@ const emptyOptions = (): StatsFilterOptions => ({
 });
 
 /**
+ * 選択肢1種類ぶんを取得する。1本の失敗で他のチップまで消えないよう、
+ * 失敗（例外 / 非 2xx）はこの関数内で空配列に畳んで呼び出し側には伝播させない。
+ */
+async function fetchOptionSource<T>(
+  path: string,
+  headers: Record<string, string>,
+  action: string,
+): Promise<T[]> {
+  try {
+    const response = await fetch(`${RAILS_API_URL}${path}`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!response.ok) return [];
+    return (await response.json()) as T[];
+  } catch (error) {
+    captureServerActionError(error, { action });
+    return [];
+  }
+}
+
+/**
  * 成績画面のフィルタ選択肢（シーズン / 大会 / 記録のある年月）をサーバーで取得する。
  * `cache()` でラップしているため、同一リクエスト内で page / 各 Section から
  * 複数回呼ばれても実取得は1回（seasons + tournaments + months の3コール）に集約される。
  * 認証ヘッダがあれば user_id は不要（バックエンドが current_user にフォールバック）。
  *
  * 大会は全大会ではなく自分の試合に紐づくものだけを返す（選んでも0件になる候補を出さないため）。
+ * 3本は互いに独立して縮退するため、1本落ちても残りのチップは出せる。
  */
 export const getStatsFilterOptions = cache(
   async (): Promise<StatsFilterOptions> => {
@@ -34,31 +57,23 @@ export const getStatsFilterOptions = cache(
       const headers = await getAuthHeaders();
       if (!headers) return emptyOptions();
 
-      const [seasonsResponse, tournamentsResponse, monthsResponse] =
-        await Promise.all([
-          fetch(`${RAILS_API_URL}/api/v1/seasons`, {
-            headers,
-            cache: "no-store",
-          }),
-          fetch(`${RAILS_API_URL}/api/v1/tournaments/user_tournaments`, {
-            headers,
-            cache: "no-store",
-          }),
-          fetch(`${RAILS_API_URL}/api/v1/match_results/available_months`, {
-            headers,
-            cache: "no-store",
-          }),
-        ]);
-
-      const seasons: SeasonData[] = seasonsResponse.ok
-        ? await seasonsResponse.json()
-        : [];
-      const tournaments: TournamentData[] = tournamentsResponse.ok
-        ? await tournamentsResponse.json()
-        : [];
-      const months: string[] = monthsResponse.ok
-        ? await monthsResponse.json()
-        : [];
+      const [seasons, tournaments, months] = await Promise.all([
+        fetchOptionSource<SeasonData>(
+          "/api/v1/seasons",
+          headers,
+          "getStatsFilterOptions:seasons",
+        ),
+        fetchOptionSource<TournamentData>(
+          "/api/v1/tournaments/user_tournaments",
+          headers,
+          "getStatsFilterOptions:tournaments",
+        ),
+        fetchOptionSource<string>(
+          "/api/v1/match_results/available_months",
+          headers,
+          "getStatsFilterOptions:months",
+        ),
+      ]);
 
       return {
         seasonOptions: seasons.map((season) => ({

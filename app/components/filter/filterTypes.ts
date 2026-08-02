@@ -29,7 +29,29 @@ export interface FilterValues {
  */
 export const ALL_FILTER_KEY = "__all__";
 
-/** 絞り込みが1つでも効いているか（リセットボタンの表示判定に使う）。 */
-export function hasActiveFilter(values: FilterValues): boolean {
-  return Object.values(values).some((value) => Boolean(value));
+const FILTER_KEYS = [
+  "year",
+  "matchType",
+  "seasonId",
+  "tournamentId",
+  "startMonth",
+  "endMonth",
+] as const satisfies readonly (keyof FilterValues)[];
+
+/**
+ * 絞り込みが基準値から動いているか（リセットボタンの表示判定に使う）。
+ *
+ * 画面によっては「絞り込み無し」が `{}` ではないため（例: 成績の月/日表示は
+ * 当年で絞った状態が既定）、基準値を渡せるようにしている。
+ *
+ * @param values 現在の絞り込み値
+ * @param baseline 絞り込み無しとみなす値。既定は全解除（`{}`）
+ */
+export function hasActiveFilter(
+  values: FilterValues,
+  baseline: FilterValues = {},
+): boolean {
+  return FILTER_KEYS.some(
+    (key) => (values[key] || undefined) !== (baseline[key] || undefined),
+  );
 }

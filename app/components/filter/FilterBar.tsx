@@ -5,6 +5,9 @@ import FilterChip from "./FilterChip";
 import FilterChipGroup from "./FilterChipGroup";
 import { ALL_FILTER_KEY, hasActiveFilter } from "./filterTypes";
 
+// デフォルト引数のたびに新しいオブジェクトを作らないための共有定数（読み取り専用で使う）。
+const EMPTY_FILTER_VALUES: FilterValues = {};
+
 /**
  * 表示する絞り込みチップの選択肢。空配列 / 未指定のチップは描画しない
  * （選べる候補が無いチップを出しても操作できないため）。
@@ -23,6 +26,12 @@ interface FilterBarProps {
   values: FilterValues;
   onChange: (values: FilterValues) => void;
   options: FilterBarOptions;
+  /**
+   * 「絞り込み無し」とみなす値。クリアの戻り先と、クリアボタンを出すかの
+   * 判定に使う。既定の `{}` にできない画面（成績の月/日表示は当年で絞った
+   * 状態が既定）でこの値を渡す。
+   */
+  resetTo?: FilterValues;
 }
 
 /**
@@ -36,6 +45,7 @@ export default function FilterBar({
   values,
   onChange,
   options,
+  resetTo = EMPTY_FILTER_VALUES,
 }: FilterBarProps) {
   const { years, months, matchTypes, seasons, tournaments } = options;
 
@@ -127,10 +137,10 @@ export default function FilterBar({
           })
         }
       />
-      {hasActiveFilter(values) ? (
+      {hasActiveFilter(values, resetTo) ? (
         <button
           type="button"
-          onClick={() => onChange({})}
+          onClick={() => onChange({ ...resetTo })}
           aria-label="フィルターをクリア"
           className="flex shrink-0 items-center gap-1 whitespace-nowrap px-2 py-1.5 text-xs font-medium text-[#A1A1AA]"
         >
