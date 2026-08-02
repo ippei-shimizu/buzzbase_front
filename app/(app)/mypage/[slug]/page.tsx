@@ -21,6 +21,7 @@ import getMyTeams from "@app/hooks/team/getTeams";
 import getUserAwards from "@app/hooks/user/getUserAwards";
 import getUserIdData from "@app/hooks/user/getUserIdData";
 import useCurrentUserId from "@app/hooks/user/useCurrentUserId";
+import FollowRequestBanner from "./_components/FollowRequestBanner";
 
 type Position = {
   id: string;
@@ -31,7 +32,8 @@ export default function MyPage() {
   const { isLoggedIn, loading: authLoading } = useAuthContext();
   const [errors, setErrors] = useState<string[]>([]);
 
-  const { userData, isLoadingUsers, isErrorUser } = getUserIdData();
+  const { userData, isLoadingUsers, isErrorUser, mutateUserData } =
+    getUserIdData();
   const { teamData, isLoadingTeams: _isLoadingTeams } = getMyTeams();
   const { userAwards, isLoadingAwards: _isLoadingAwards } = getUserAwards();
   const { currentUserId, isLoadingCurrentUserId: _isLoadingCurrentUserId } =
@@ -92,6 +94,17 @@ export default function MyPage() {
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-20 pb-20 bg-main lg:pt-14 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
             <div className="px-4 lg:p-6">
+              {isLoggedIn &&
+              !isCurrentUserPage &&
+              userData.incoming_follow_request_id ? (
+                <FollowRequestBanner
+                  followRequestId={userData.incoming_follow_request_id}
+                  actorName={userData.user.name}
+                  onHandled={() => {
+                    mutateUserData();
+                  }}
+                />
+              ) : null}
               <AvatarComponent userData={userData} />
               {!isPrivateAndNotApproved && (
                 <>
@@ -227,7 +240,10 @@ export default function MyPage() {
                       </>
                     ) : (
                       <>
+                        {/* FollowButton は initialFollowStatus を内部 state の初期値としてしか読まないため、
+                            再検証でサーバー側の状態が変わったときは key を変えて初期化し直す */}
                         <FollowButton
+                          key={userData.follow_status || "none"}
                           userId={userData.user.id}
                           initialFollowStatus={userData.follow_status || "none"}
                           setErrorsWithTimeout={setErrorsWithTimeout}

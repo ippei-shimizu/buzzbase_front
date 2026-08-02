@@ -418,6 +418,13 @@ export interface userData {
   is_private: boolean;
   followers_count: number | null;
   following_count: number | null;
+  incoming_follow_request_id: number | null;
+}
+
+export interface FollowRequestBannerProps {
+  followRequestId: number;
+  actorName: string;
+  onHandled: () => void;
 }
 
 export interface HeaderNoteSaveProps {
