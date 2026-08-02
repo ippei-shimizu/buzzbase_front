@@ -275,6 +275,14 @@ async function renderContainer({
   });
 }
 
+/** 推移グラフの粒度トグルを押す。 */
+async function clickGranularity(label: string) {
+  const user = userEvent.setup();
+  await act(async () => {
+    await user.click(screen.getByRole("button", { name: label }));
+  });
+}
+
 /** 年度フィルタを「通算」から当年へ切り替える。 */
 async function changeYearFilter() {
   const user = userEvent.setup();
@@ -316,8 +324,8 @@ function mockNonProAnalysisActions() {
     initialData.pitcherAttributes,
   );
   (getBattingTrend as jest.Mock).mockResolvedValue({
-    granularity: "game",
-    points: [],
+    status: "ok",
+    data: { granularity: "game", points: [] },
   });
 }
 
@@ -580,6 +588,180 @@ describe("AnalysisContainer の Pro 出し分け", () => {
         screen.getByRole("button", { name: CTA_NAMES.pitchType }),
       ).toBeInTheDocument();
       expect(mockGetPitchTypes).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+const SEASON_TREND = {
+  granularity: "season" as const,
+  points: [
+    {
+      key: "season-1",
+      label: "2026春季",
+      batting_average: 0.412,
+      on_base_percentage: 0.45,
+      slugging_percentage: 0.6,
+      ops: 1.05,
+      at_bats_in_period: 34,
+      cumulative_at_bats: 34,
+    },
+  ],
+};
+
+const GRANULARITY_NOTES = {
+  game: "開幕からの累積",
+  season: "シーズンごとの成績（シーズン跨ぎ比較）",
+};
+
+/** 粒度トグルの選択状態を読む（データが無くてもトグルは出るため常に使える）。 */
+function activeGranularityLabel(): string | undefined {
+  return screen
+    .getAllByRole("button", { pressed: true })
+    .map((button) => button.textContent ?? "")
+    .at(0);
+}
+
+describe("打撃推移のシーズン粒度", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearAuthCookies();
+    setAuthCookies();
+    mockNonProAnalysisActions();
+    mockGetCountSituations.mockResolvedValue({
+      status: "ok",
+      data: REAL_COUNT_SITUATIONS,
+    });
+    mockGetPitchTypes.mockResolvedValue({
+      status: "ok",
+      data: REAL_PITCH_TYPES,
+    });
+    mockGetPitcherFaceoffs.mockResolvedValue({
+      status: "ok",
+      data: REAL_PITCHER_FACEOFFS,
+    });
+  });
+
+  describe("season_transition_graph を持つとき", () => {
+    beforeEach(() => {
+      mockGetProStatus.mockResolvedValue(makeProStatus());
+      (getBattingTrend as jest.Mock).mockResolvedValue({
+        status: "ok",
+        data: SEASON_TREND,
+      });
+    });
+
+    it("シーズンを選ぶと season 粒度で取得して描画する", async () => {
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+
+      await clickGranularity("シーズン");
+
+      expect(getBattingTrend).toHaveBeenCalledWith(expect.anything(), "season");
+      expect(
+        await screen.findByText(GRANULARITY_NOTES.season),
+      ).toBeInTheDocument();
+      expect(screen.getByText("2026春季")).toBeInTheDocument();
+      expect(mockOpen).not.toHaveBeenCalled();
+    });
+
+    it("シーズン数が多いときは X 軸ラベルを間引く", async () => {
+      (getBattingTrend as jest.Mock).mockResolvedValue({
+        status: "ok",
+        data: {
+          granularity: "season",
+          points: Array.from({ length: 12 }, (_, index) => ({
+            ...SEASON_TREND.points[0],
+            key: `season-${index + 1}`,
+            label: `S${String(index + 1).padStart(2, "0")}`,
+          })),
+        },
+      });
+
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+      await clickGranularity("シーズン");
+
+      // 12 シーズンなら 3 つおき + 最終シーズンだけをラベルにする。
+      expect(await screen.findByText("S01")).toBeInTheDocument();
+      expect(screen.getByText("S04")).toBeInTheDocument();
+      expect(screen.getByText("S12")).toBeInTheDocument();
+      expect(screen.queryByText("S03")).not.toBeInTheDocument();
+    });
+
+    it("クライアントの Pro 判定を待つ間もシーズンを選べる", async () => {
+      // Pro 状態のクライアント取得を宙吊りにし、SSR 済みの判定だけで操作させる。
+      mockGetProStatus.mockReturnValue(new Promise(() => {}));
+
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+      await clickGranularity("シーズン");
+
+      expect(getBattingTrend).toHaveBeenCalledWith(expect.anything(), "season");
+      expect(mockOpen).not.toHaveBeenCalled();
+    });
+
+    it("サーバーに 403 で拒否されたら試合粒度へ戻し Paywall を出す", async () => {
+      (getBattingTrend as jest.Mock).mockResolvedValueOnce({
+        status: "pro_required",
+      });
+
+      await renderContainer({
+        initialProFeatures: ["season_transition_graph"],
+      });
+      await clickGranularity("シーズン");
+
+      await waitFor(() => {
+        expect(activeGranularityLabel()).toBe("試合");
+      });
+      expect(mockOpen).toHaveBeenCalledWith({
+        trigger: "season_transition_graph",
+      });
+      expect(getBattingTrend).toHaveBeenLastCalledWith(
+        expect.anything(),
+        "game",
+      );
+    });
+  });
+
+  describe("無料ユーザー", () => {
+    beforeEach(() => {
+      mockGetProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
+    });
+
+    it("シーズンを選んでも切り替えず、Paywall を出して API も叩かない", async () => {
+      await renderContainer();
+
+      await clickGranularity("シーズン");
+
+      expect(mockOpen).toHaveBeenCalledWith({
+        trigger: "season_transition_graph",
+      });
+      expect(getBattingTrend).not.toHaveBeenCalled();
+      expect(activeGranularityLabel()).toBe("試合");
+    });
+
+    it("Pro 判定が確定する前でもシーズン粒度の API を叩かない", async () => {
+      mockGetProStatus.mockReturnValue(new Promise(() => {}));
+
+      await renderContainer();
+      await clickGranularity("シーズン");
+
+      expect(getBattingTrend).not.toHaveBeenCalled();
+      expect(mockOpen).toHaveBeenCalledWith({
+        trigger: "season_transition_graph",
+      });
+    });
+
+    it("シーズン以外の粒度は従来どおり切り替えられる", async () => {
+      await renderContainer();
+
+      await clickGranularity("月");
+
+      expect(getBattingTrend).toHaveBeenCalledWith(expect.anything(), "month");
+      expect(mockOpen).not.toHaveBeenCalled();
     });
   });
 });

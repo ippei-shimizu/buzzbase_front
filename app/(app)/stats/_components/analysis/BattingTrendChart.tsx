@@ -4,6 +4,7 @@ import type {
   BattingTrendPoint,
 } from "../../analysisActions";
 import { Fragment, useEffect, useState } from "react";
+import { MAX_SEASON_X_LABELS, toSeasonAxisLabel } from "./trendAxis";
 
 interface BattingTrendChartProps {
   points: BattingTrendPoint[];
@@ -51,8 +52,18 @@ const GRANULARITY_OPTIONS: readonly {
   { key: "game", label: "試合" },
   { key: "month", label: "月" },
   { key: "year", label: "年" },
+  { key: "season", label: "シーズン" },
   { key: "recent_games", label: "直近10" },
 ];
+
+// 累積と単独期間で同じ折れ線でも読み方が変わるため、粒度ごとに集計単位を明示する。
+const GRANULARITY_NOTES: Record<BattingTrendGranularity, string> = {
+  game: "開幕からの累積",
+  month: "月ごとの成績",
+  year: "年ごとの成績",
+  season: "シーズンごとの成績（シーズン跨ぎ比較）",
+  recent_games: "直近10試合の累積",
+};
 
 const formatRate = (value: number): string =>
   value.toFixed(3).replace(/^0\./, ".");
@@ -72,6 +83,7 @@ function GranularityToggle({
           <button
             key={option.key}
             type="button"
+            aria-pressed={isActive}
             onClick={() => onChange(option.key)}
             className={`rounded px-2 py-1 text-[11px] font-semibold ${
               isActive ? "bg-[#52525B] text-[#F4F4F4]" : "text-[#A1A1AA]"
@@ -87,8 +99,9 @@ function GranularityToggle({
 
 /**
  * 打撃成績の推移グラフ（4 ライン: 打率 / 出塁率 / 長打率 / OPS）。
- * granularity 切替で 試合 / 月 / 年 / 直近10 を選べる。初期表示は打率のみで、
+ * granularity 切替で 試合 / 月 / 年 / シーズン / 直近10 を選べる。初期表示は打率のみで、
  * 絞り込みから他指標を重ねられる。
+ * シーズン粒度は Pro 限定のため、選択可否の判定は onGranularityChange 側が担う。
  */
 export function BattingTrendChart({
   points,
@@ -205,7 +218,11 @@ export function BattingTrendChart({
       .join(" "),
   }));
 
-  const labelStride = Math.max(1, Math.ceil(points.length / MAX_X_LABELS));
+  const isSeason = granularity === "season";
+  const labelStride = Math.max(
+    1,
+    Math.ceil(points.length / (isSeason ? MAX_SEASON_X_LABELS : MAX_X_LABELS)),
+  );
 
   return (
     <section className="rounded-xl bg-[#3A3A3A] p-4">
@@ -440,12 +457,16 @@ export function BattingTrendChart({
                 fill="#A1A1AA"
                 fontSize={9}
               >
-                {point.label}
+                {isSeason ? toSeasonAxisLabel(point.label) : point.label}
               </text>
             );
           })}
         </svg>
       </div>
+
+      <p className="mt-2 text-center text-[11px] text-[#71717A]">
+        {GRANULARITY_NOTES[granularity]}
+      </p>
 
       <div className="mt-2 flex flex-wrap justify-center gap-3">
         {LINES.map((line) => {

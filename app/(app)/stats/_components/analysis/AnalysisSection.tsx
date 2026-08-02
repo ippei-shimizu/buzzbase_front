@@ -8,6 +8,10 @@ import {
   getPitcherFaceoffs,
   getPitchTypes,
 } from "../../analysisActions";
+import {
+  SEASON_TREND_FEATURES,
+  grantedProFeatures,
+} from "../../analysisProFeatures";
 import { getStatsFilterOptions } from "../../filterOptions";
 import { AnalysisContainer, type ProAnalysisData } from "./AnalysisContainer";
 import { AnalysisLoading } from "./AnalysisLoading";
@@ -45,9 +49,12 @@ async function resolveProAnalysis(
     proStatus?.entitlements ?? DEFAULT_PRO_STATUS.entitlements;
   const isEntitled = (feature: ProFeature) => entitlements.includes(feature);
 
-  const grantedFeatures: ProFeature[] = isEntitled("hit_direction_average")
-    ? ["hit_direction_average"]
-    : [];
+  // 推移グラフのシーズン粒度は既定粒度ではないため SSR で取得しない。閲覧可否だけ
+  // 先に確定させ、Pro ユーザーの粒度切替が一瞬 Paywall に倒れるのを防ぐ。
+  const grantedFeatures: ProFeature[] = grantedProFeatures(proStatus, [
+    "hit_direction_average",
+    ...SEASON_TREND_FEATURES,
+  ]);
 
   const [counts, pitches, faceoffs] = await Promise.all([
     isEntitled("count_situation_average") ? getCountSituations() : null,

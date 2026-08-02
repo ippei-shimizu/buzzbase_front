@@ -10,7 +10,9 @@ jest.mock("../../../constants/api", () => ({
 }));
 
 import {
+  getBattingTrend,
   getCountSituations,
+  getEraTrend,
   getHitDirections,
   getPitcherFaceoffs,
   getPitchTypes,
@@ -123,5 +125,115 @@ describe("Pro 限定の分析 Server Actions", () => {
       directions: [],
       home_runs: [],
     });
+  });
+});
+
+describe("推移グラフのシーズン粒度", () => {
+  const battingTrend = {
+    granularity: "season",
+    points: [
+      {
+        key: "season-1",
+        label: "2026年 春季",
+        batting_average: 0.333,
+        on_base_percentage: 0.4,
+        slugging_percentage: 0.5,
+        ops: 0.9,
+        at_bats_in_period: 30,
+        cumulative_at_bats: 30,
+      },
+    ],
+  };
+  const eraTrend = {
+    granularity: "season",
+    points: [{ key: "season-1", label: "2026年 春季", era: 2.15 }],
+  };
+
+  function calledUrl(): string {
+    return (global.fetch as jest.Mock).mock.calls[0][0] as string;
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+    setupAuthCookies();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("getBattingTrend は granularity を送る", async () => {
+    mockResponse(200, battingTrend);
+
+    await expect(getBattingTrend({}, "season")).resolves.toEqual({
+      status: "ok",
+      data: battingTrend,
+    });
+    expect(calledUrl()).toContain("granularity=season");
+  });
+
+  it("getEraTrend は granularity を送り、既定は月粒度", async () => {
+    mockResponse(200, eraTrend);
+    await getEraTrend({ year: "2026" }, "season");
+    expect(calledUrl()).toContain("granularity=season");
+
+    (global.fetch as jest.Mock).mockClear();
+    mockResponse(200, { granularity: "month", points: [] });
+    await getEraTrend({ year: "2026" });
+    expect(calledUrl()).toContain("granularity=month");
+  });
+
+  it.each([
+    ["getBattingTrend", getBattingTrend, battingTrend],
+    ["getEraTrend", getEraTrend, eraTrend],
+  ] as const)(
+    "%s はシーズン粒度のとき season_id を送らない（1シーズンに縮退させない）",
+    async (_name, action, body) => {
+      mockResponse(200, body);
+
+      await action({ year: "通算", seasonId: "7" }, "season");
+
+      expect(calledUrl()).not.toContain("season_id");
+      expect(calledUrl()).toContain("granularity=season");
+    },
+  );
+
+  it("getBattingTrend はシーズン粒度以外では season_id を送る", async () => {
+    mockResponse(200, battingTrend);
+
+    await getBattingTrend({ year: "通算", seasonId: "7" }, "game");
+
+    expect(calledUrl()).toContain("season_id=7");
+  });
+
+  it("getEraTrend はシーズン粒度以外では season_id を送る", async () => {
+    mockResponse(200, eraTrend);
+
+    await getEraTrend({ year: "通算", seasonId: "7" }, "month");
+
+    expect(calledUrl()).toContain("season_id=7");
+  });
+
+  it.each([
+    ["getBattingTrend", getBattingTrend],
+    ["getEraTrend", getEraTrend],
+  ] as const)(
+    "%s はシーズン粒度が 403 なら status:pro_required を返す",
+    async (_name, action) => {
+      mockResponse(403, { error: "シーズン推移は Pro プラン限定です" });
+
+      await expect(action({}, "season")).resolves.toEqual({
+        status: "pro_required",
+      });
+    },
+  );
+
+  it("getEraTrend は match_type を送らない", async () => {
+    mockResponse(200, eraTrend);
+
+    await getEraTrend({ year: "2026", matchType: "regular" });
+
+    expect(calledUrl()).not.toContain("match_type");
   });
 });
