@@ -9,6 +9,7 @@ import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
 import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import { useProGatedFeatures } from "@app/hooks/pro/useProGatedFeatures";
 import { useProGatedResource } from "@app/hooks/pro/useProGatedResource";
+import { useSeasonTrendGranularity } from "@app/hooks/pro/useSeasonTrendGranularity";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
@@ -100,8 +101,6 @@ export function AnalysisContainer({
   const [pitcherAttributes, setPitcherAttributes] = useState(
     initialData.pitcherAttributes,
   );
-  const [granularity, setGranularity] =
-    useState<BattingTrendGranularity>("game");
   const [sprayChartMode, setSprayChartMode] =
     useState<SprayChartMode>("scatter");
   const [battingTrend, setBattingTrend] = useState(initialData.battingTrend);
@@ -109,6 +108,12 @@ export function AnalysisContainer({
   // 推移グラフは粒度切替で単独再取得もあるため、専用の pending でグラフだけ dim する。
   const [isTrendPending, startTrendTransition] = useTransition();
   const [yearOptions] = useState(buildRecentYearOptions);
+
+  const { granularity, requestGranularity, resolveTrend } =
+    useSeasonTrendGranularity<BattingTrendGranularity>({
+      freeKey: "game",
+      initialGranted: initialProFeatures,
+    });
 
   const { canView, unwrap } = useProGatedFeatures(initialProFeatures);
   const canViewHitDirectionDetail = canView("hit_direction_average");
@@ -200,13 +205,16 @@ export function AnalysisContainer({
     }
     let active = true;
     startTrendTransition(async () => {
-      const data = await getBattingTrend(filters, granularity);
-      if (active) setBattingTrend(data);
+      const result = await getBattingTrend(filters, granularity);
+      if (!active) return;
+      // シーズン粒度が 403 なら resolveTrend が粒度を戻し、この effect が再実行される。
+      const data = resolveTrend(result);
+      if (data) setBattingTrend(data);
     });
     return () => {
       active = false;
     };
-  }, [filters, granularity, startTrendTransition]);
+  }, [filters, granularity, resolveTrend, startTrendTransition]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -237,7 +245,7 @@ export function AnalysisContainer({
           <BattingTrendChart
             points={battingTrend.points}
             granularity={granularity}
-            onGranularityChange={setGranularity}
+            onGranularityChange={requestGranularity}
           />
         </div>
         <SprayChart

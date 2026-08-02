@@ -1,18 +1,23 @@
 "use client";
 import type { FilterOption } from "@app/components/filter/filterTypes";
+import type { ProFeature } from "@app/types/pro";
 import { useEffect, useRef, useState, useTransition } from "react";
 import FilterBar from "@app/components/filter/FilterBar";
 import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
+import { useSeasonTrendGranularity } from "@app/hooks/pro/useSeasonTrendGranularity";
 import {
   type AnalysisFilters as Filters,
+  type EraTrendGranularity,
   type EraTrendPoint,
   getEraTrend,
 } from "../../analysisActions";
 import { EraTrendChart } from "./EraTrendChart";
 
 interface PitchingAnalysisContainerProps {
-  /** SSR で取得した防御率推移の初期データ。マウント時はこれを使い再取得しない。 */
+  /** SSR で取得した防御率推移の初期データ（月粒度）。マウント時はこれを使い再取得しない。 */
   initialEraTrend: EraTrendPoint[];
+  /** SSR で閲覧可と判定された Pro 機能。クライアント判定が確定するまでの初期値。 */
+  initialProFeatures: readonly ProFeature[];
   /** サーバーで取得したシーズン/大会/年月のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
@@ -22,6 +27,7 @@ interface PitchingAnalysisContainerProps {
 /** 投手タブの分析（フィルタ + 防御率推移グラフ）コンテナ。 */
 export function PitchingAnalysisContainer({
   initialEraTrend,
+  initialProFeatures,
   seasonOptions,
   tournamentOptions,
   monthOptions,
@@ -31,7 +37,13 @@ export function PitchingAnalysisContainer({
   const [isRefetching, startRefetch] = useTransition();
   const [yearOptions] = useState(buildRecentYearOptions);
 
-  // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ変更時のみ取得）。
+  const { granularity, requestGranularity, resolveTrend } =
+    useSeasonTrendGranularity<EraTrendGranularity>({
+      freeKey: "month",
+      initialGranted: initialProFeatures,
+    });
+
+  // 初回は SSR の initialEraTrend を使うため再取得しない（フィルタ/粒度変更時のみ取得）。
   const didInitRef = useRef(false);
   useEffect(() => {
     if (!didInitRef.current) {
@@ -42,13 +54,16 @@ export function PitchingAnalysisContainer({
     // 種別は getEraTrend 側で構造的に落とすため、ここでは filters をそのまま渡す
     // （フィールドを手で並べると、絞り込み項目が増えたときに漏れる）。
     startRefetch(async () => {
-      const trend = await getEraTrend(filters);
-      if (active) setEraTrend(trend);
+      const result = await getEraTrend(filters, granularity);
+      if (!active) return;
+      // シーズン粒度が 403 なら resolveTrend が粒度を戻し、この effect が再実行される。
+      const data = resolveTrend(result);
+      if (data) setEraTrend(data.points);
     });
     return () => {
       active = false;
     };
-  }, [filters, startRefetch]);
+  }, [filters, granularity, resolveTrend, startRefetch]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -66,7 +81,11 @@ export function PitchingAnalysisContainer({
       <div
         className={isRefetching ? "opacity-50 transition-opacity" : undefined}
       >
-        <EraTrendChart data={eraTrend} />
+        <EraTrendChart
+          points={eraTrend}
+          granularity={granularity}
+          onGranularityChange={requestGranularity}
+        />
       </div>
     </div>
   );

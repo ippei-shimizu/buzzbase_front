@@ -95,9 +95,22 @@ export interface PlateAppearanceCategory {
   percentage: number;
 }
 
+/**
+ * 防御率推移グラフの粒度。
+ * - `month`: 月単独の ERA
+ * - `season`: シーズン単独の ERA（シーズン跨ぎ比較。`season_transition_graph` が必要）
+ */
+export type EraTrendGranularity = "month" | "season";
+
 export interface EraTrendPoint {
-  month: number;
+  key: string;
+  label: string;
   era: number;
+}
+
+export interface EraTrendData {
+  granularity: EraTrendGranularity;
+  points: EraTrendPoint[];
 }
 
 export interface ContactQualityCategory {
@@ -218,10 +231,18 @@ export interface PitcherAttributeSummaryData {
   by_pitcher_style: PitcherAttributeBucket[];
 }
 
+/**
+ * 打撃推移グラフの粒度。
+ * - `game`: 各試合時点までの累積（絞り込み後の全試合が対象で、通算なら複数年をまたぐ）
+ * - `month` / `year`: その期間単独
+ * - `season`: シーズン単独（シーズン跨ぎ比較。`season_transition_graph` が必要）
+ * - `recent_games`: 直近10試合の累積
+ */
 export type BattingTrendGranularity =
   | "game"
   | "month"
   | "year"
+  | "season"
   | "recent_games";
 
 export interface BattingTrendPoint {
@@ -264,6 +285,20 @@ function buildQuery(filters: AnalysisFilters): string {
   if (filters.startMonth) params.append("start_month", filters.startMonth);
   if (filters.endMonth) params.append("end_month", filters.endMonth);
   return params.toString();
+}
+
+/**
+ * シーズン粒度はシーズン跨ぎで全シーズンを比較するため、単一シーズンへの絞り込みと
+ * 併用すると 1 点に縮退する。back も season 粒度では season_id を無視するので、
+ * 送信側でも落として意図を揃える。
+ */
+function seasonAwareFilters(
+  filters: AnalysisFilters,
+  granularity: BattingTrendGranularity | EraTrendGranularity,
+): AnalysisFilters {
+  if (granularity !== "season") return filters;
+  const { seasonId: _seasonId, ...rest } = filters;
+  return rest;
 }
 
 async function fetchProGatedAnalysis<T>(
@@ -347,13 +382,17 @@ export async function getRunnersSituation(
   );
 }
 
+/**
+ * 打撃推移を取得する。`granularity: "season"` は `season_transition_graph` の
+ * entitlement が必要で、403 は pro_required として返す（他の粒度で 403 は起きない）。
+ */
 export async function getBattingTrend(
   filters: AnalysisFilters = {},
   granularity: BattingTrendGranularity = "game",
-): Promise<BattingTrendData> {
-  return fetchAnalysis<BattingTrendData>(
+): Promise<ProGatedResult<BattingTrendData>> {
+  return fetchProGatedAnalysis<BattingTrendData>(
     "batting_trend",
-    filters,
+    seasonAwareFilters(filters, granularity),
     "getBattingTrend",
     { granularity, points: [] },
     { granularity },
@@ -434,19 +473,24 @@ export async function getPitcherAttributeSummary(
   );
 }
 
+/**
+ * 防御率推移を取得する。`granularity: "season"` は `season_transition_graph` の
+ * entitlement が必要で、403 は pro_required として返す（月粒度で 403 は起きない）。
+ */
 export async function getEraTrend(
   filters: AnalysisFilters = {},
-): Promise<EraTrendPoint[]> {
+  granularity: EraTrendGranularity = "month",
+): Promise<ProGatedResult<EraTrendData>> {
   // era_trend は year/season/tournament のみで絞る。match_type は構造的に除外し、
   // 誤って matchType 付きで呼ばれても送信されないことを関数自身で保証する。
   const { matchType: _matchType, ...eraFilters } = filters;
-  const result = await fetchAnalysis<{ trend: EraTrendPoint[] }>(
+  return fetchProGatedAnalysis<EraTrendData>(
     "era_trend",
-    eraFilters,
+    seasonAwareFilters(eraFilters, granularity),
     "getEraTrend",
-    { trend: [] },
+    { granularity, points: [] },
+    { granularity },
   );
-  return result.trend ?? [];
 }
 
 export async function getPlateAppearanceBreakdown(
@@ -540,6 +584,10 @@ export async function getInitialAnalysisData(
     contactQualities,
     timingBreakdown,
     pitcherAttributes,
-    battingTrend,
+    // 既定粒度は Pro 限定ではないため、ここに pro_required は来ない。
+    battingTrend:
+      battingTrend.status === "ok"
+        ? battingTrend.data
+        : { granularity, points: [] },
   };
 }
