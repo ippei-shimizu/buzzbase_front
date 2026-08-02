@@ -2,12 +2,13 @@ import type { ProSubscription, SubscriptionStatus } from "@app/types/pro";
 import Link from "next/link";
 import BillingIssueGuide from "./BillingIssueGuide";
 import CancelGuide from "./CancelGuide";
+import PlanChangeGuide from "./PlanChangeGuide";
 import SubscriptionStatusCard from "./SubscriptionStatusCard";
 
 const JOINABLE_STATUSES: SubscriptionStatus[] = ["free", "expired"];
 
 /**
- * 加入状態カード・加入 CTA・支払い更新案内・解約案内をまとめた本体表示。
+ * 加入状態カード・加入 CTA・支払い更新案内・プラン変更・解約案内をまとめた本体表示。
  */
 export default function SubscriptionOverview({
   subscription,
@@ -18,6 +19,7 @@ export default function SubscriptionOverview({
     <div className="flex flex-col gap-4">
       <SubscriptionStatusCard subscription={subscription} />
       <BillingIssueGuide subscription={subscription} />
+      <PlanChangeGuide subscription={subscription} />
       {JOINABLE_STATUSES.includes(subscription.status) ? (
         <Link
           href="/pro"

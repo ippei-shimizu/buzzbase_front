@@ -190,8 +190,12 @@ export async function startProCheckout(args: {
 }
 
 /**
- * RevenueCat と Rails の Pro 状態を再同期する。
- * 本Issueはスタブで last_synced_at の更新のみ。実同期ロジックは #318 で実装する。
+ * RevenueCat と Rails の Pro 状態を再同期し、同期後の加入状態を返す。
+ * 失敗時は null（呼び出し側は加入状態不明として扱う）。
+ *
+ * 決済側で契約内容が変わったのに webhook がローカルの expires_at / plan_type を
+ * 更新しない操作（プラン変更など）のあとは、これを呼ばないと古い期限が残り
+ * Pro が早期失効する。
  */
 export async function syncProStatus(): Promise<ProStatus | null> {
   try {
