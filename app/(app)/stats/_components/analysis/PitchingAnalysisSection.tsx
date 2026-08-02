@@ -25,9 +25,9 @@ export function PitchingAnalysisSection() {
 async function PitchingAnalysisDataProvider() {
   // /stats は認証チェックで既に dynamic なので、Pro 判定もサーバーで解決できる。
   const proStatusPromise = getCachedProStatus();
-  // 防御率推移は year/season/tournament のみで絞る（既定は通算・月粒度）。
+  // 防御率推移は year/月範囲/season/tournament のみで絞る（既定は絞り込みなし＝通算・月粒度）。
   const [initialEraTrend, filterOptions, proFeatures] = await Promise.all([
-    getEraTrend({ year: "通算" }),
+    getEraTrend(),
     getStatsFilterOptions(),
     // シーズン粒度を選ばせてよいかをサーバーで確定させ、クライアント判定の
     // 待ち時間に Pro ユーザーが Paywall へ倒れるのを防ぐ。
@@ -45,6 +45,7 @@ async function PitchingAnalysisDataProvider() {
       initialProFeatures={proFeatures}
       seasonOptions={filterOptions.seasonOptions}
       tournamentOptions={filterOptions.tournamentOptions}
+      monthOptions={filterOptions.monthOptions}
     />
   );
 }

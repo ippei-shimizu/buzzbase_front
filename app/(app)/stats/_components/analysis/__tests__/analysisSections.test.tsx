@@ -97,6 +97,7 @@ beforeEach(() => {
   mockGetStatsFilterOptions.mockResolvedValue({
     seasonOptions: [],
     tournamentOptions: [],
+    monthOptions: [],
   });
   mockGetEraTrend.mockResolvedValue({
     status: "ok",

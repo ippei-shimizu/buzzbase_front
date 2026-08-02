@@ -38,9 +38,11 @@ jest.mock("../../../analysisActions", () => ({
   getEraTrend: jest.fn(),
 }));
 
+import type { FilterOption } from "@app/components/filter/filterTypes";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getProStatus } from "@app/(app)/pro/actions";
+import { monthOptionsFromRecorded } from "@app/components/filter/monthOptions";
 import { ProStatusProvider } from "@app/components/pro/ProStatusProvider";
 import {
   DEFAULT_PRO_STATUS,
@@ -49,13 +51,15 @@ import {
   type ProFeature,
   type ProStatus,
 } from "@app/types/pro";
-import { getEraTrend } from "../../../analysisActions";
+import { getEraTrend, type EraTrendPoint } from "../../../analysisActions";
 import { PitchingAnalysisContainer } from "../PitchingAnalysisContainer";
 
 const mockGetProStatus = getProStatus as jest.MockedFunction<
   typeof getProStatus
 >;
 const mockGetEraTrend = getEraTrend as jest.MockedFunction<typeof getEraTrend>;
+
+const CURRENT_YEAR = String(new Date().getFullYear());
 
 function setAuthCookies() {
   document.cookie = "access-token=test-access-token";
@@ -91,27 +95,40 @@ function makeProStatus(): ProStatus {
   };
 }
 
-const MONTH_POINTS = [
+const MONTH_POINTS: EraTrendPoint[] = [
   { key: "month-04", label: "4月", era: 2.5 },
   { key: "month-05", label: "5月", era: 3.75 },
 ];
 
-const SEASON_POINTS = [
+const SEASON_POINTS: EraTrendPoint[] = [
   { key: "season-1", label: "2025秋季", era: 4.2 },
   { key: "season-2", label: "2026春季", era: 1.85 },
 ];
 
+interface RenderOptions {
+  initialEraTrend?: EraTrendPoint[];
+  initialProFeatures?: readonly ProFeature[];
+  seasonOptions?: FilterOption[];
+  tournamentOptions?: FilterOption[];
+  monthOptions?: FilterOption[];
+}
+
 async function renderContainer({
+  initialEraTrend = MONTH_POINTS,
   initialProFeatures = [],
-}: { initialProFeatures?: readonly ProFeature[] } = {}) {
+  seasonOptions = [],
+  tournamentOptions = [],
+  monthOptions = [],
+}: RenderOptions = {}) {
   await act(async () => {
     render(
       <ProStatusProvider>
         <PitchingAnalysisContainer
-          initialEraTrend={MONTH_POINTS}
+          initialEraTrend={initialEraTrend}
           initialProFeatures={initialProFeatures}
-          seasonOptions={[]}
-          tournamentOptions={[]}
+          seasonOptions={seasonOptions}
+          tournamentOptions={tournamentOptions}
+          monthOptions={monthOptions}
         />
       </ProStatusProvider>,
     );
@@ -257,7 +274,7 @@ describe("PitchingAnalysisContainer の防御率推移", () => {
       await renderContainer({
         initialProFeatures: ["season_transition_graph"],
       });
-      await clickFilter("年度: 2025");
+      await clickFilter(`年度: ${CURRENT_YEAR}`);
 
       await waitFor(() => {
         expect(mockGetEraTrend).toHaveBeenCalledWith(
@@ -280,7 +297,7 @@ describe("PitchingAnalysisContainer の防御率推移", () => {
       await renderContainer({
         initialProFeatures: ["season_transition_graph"],
       });
-      await clickFilter("年度: 2025");
+      await clickFilter(`年度: ${CURRENT_YEAR}`);
       await clickGranularity("シーズン");
 
       expect(mockGetEraTrend).toHaveBeenLastCalledWith(
@@ -372,5 +389,87 @@ describe("PitchingAnalysisContainer の防御率推移", () => {
 
     expect(await screen.findByText("対象データなし")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "月" })).toBeInTheDocument();
+  });
+});
+
+describe("PitchingAnalysisContainer の絞り込み", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearAuthCookies();
+    mockGetProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
+    mockGetEraTrend.mockResolvedValue({
+      status: "ok",
+      data: { granularity: "month", points: [] },
+    });
+  });
+
+  async function renderWithFilterOptions() {
+    await renderContainer({
+      initialEraTrend: [],
+      seasonOptions: [{ key: "3", label: "春季" }],
+      tournamentOptions: [{ key: "7", label: "県大会" }],
+      monthOptions: monthOptionsFromRecorded(["2026-06", "2026-04"]),
+    });
+  }
+
+  it("初回は SSR の初期データを使い再取得しない", async () => {
+    await renderWithFilterOptions();
+
+    expect(mockGetEraTrend).not.toHaveBeenCalled();
+  });
+
+  it("月範囲を選ぶと startMonth / endMonth 付きで再取得する", async () => {
+    await renderWithFilterOptions();
+
+    await clickFilter("開始: 2026年4月");
+    await clickFilter("終了: 2026年6月");
+
+    await waitFor(() =>
+      expect(mockGetEraTrend).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          startMonth: "2026-04",
+          endMonth: "2026-06",
+        }),
+        "month",
+      ),
+    );
+  });
+
+  it("大会・シーズン・年度もそのまま渡す", async () => {
+    await renderWithFilterOptions();
+
+    await clickFilter("大会: 県大会");
+    await clickFilter("シーズン: 春季");
+    await clickFilter(`年度: ${CURRENT_YEAR}`);
+
+    await waitFor(() =>
+      expect(mockGetEraTrend).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          tournamentId: "7",
+          seasonId: "3",
+          year: CURRENT_YEAR,
+        }),
+        "month",
+      ),
+    );
+  });
+
+  it("記録のない月は選択肢に出ない", async () => {
+    await renderWithFilterOptions();
+
+    expect(
+      screen.queryByRole("button", { name: "開始: 2026年5月" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("クリアで全ての絞り込みが外れる", async () => {
+    await renderWithFilterOptions();
+
+    await clickFilter("大会: 県大会");
+    await clickFilter("フィルターをクリア");
+
+    await waitFor(() =>
+      expect(mockGetEraTrend).toHaveBeenLastCalledWith({}, "month"),
+    );
   });
 });

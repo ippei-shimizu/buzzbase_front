@@ -18,7 +18,7 @@ jest.mock("../../../featureFlags/actions", () => ({
   getFeatureFlags: (keys: string[]) => mockGetFeatureFlags(keys),
 }));
 
-import { getProStatus, startProCheckout } from "../actions";
+import { getProStatus, getProStatusResult, startProCheckout } from "../actions";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -78,6 +78,76 @@ describe("getProStatus", () => {
 
     const [, init] = (global.fetch as jest.Mock).mock.calls[0];
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+describe("getProStatusResult", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("未認証 cookie のときは fetch せずに unauthorized を返す", async () => {
+    mockGet.mockReturnValue(undefined);
+
+    await expect(getProStatusResult()).resolves.toEqual({
+      status: "unauthorized",
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("401 は通信障害と区別して unauthorized を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+    });
+
+    await expect(getProStatusResult()).resolves.toEqual({
+      status: "unauthorized",
+    });
+  });
+
+  it("5xx は error を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+    });
+
+    await expect(getProStatusResult()).resolves.toEqual({ status: "error" });
+  });
+
+  it("fetch が throw したら error を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
+
+    await expect(getProStatusResult()).resolves.toEqual({ status: "error" });
+  });
+
+  it("成功時は取得した Pro 状態を ok として返す", async () => {
+    setupAuthCookies();
+    const proStatus = { subscription: { status: "active" }, entitlements: [] };
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => proStatus,
+    });
+
+    await expect(getProStatusResult()).resolves.toEqual({
+      status: "ok",
+      proStatus,
+    });
   });
 });
 
