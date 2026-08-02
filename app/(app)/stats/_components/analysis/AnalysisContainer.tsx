@@ -1,7 +1,10 @@
 "use client";
-import type { FilterOption } from "../../statsFilterOption";
+import type { FilterOption } from "@app/components/filter/filterTypes";
 import type { ProFeature } from "@app/types/pro";
 import { useEffect, useRef, useState, useTransition } from "react";
+import FilterBar from "@app/components/filter/FilterBar";
+import { MATCH_TYPE_OPTIONS } from "@app/components/filter/matchTypeOptions";
+import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
 import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
 import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import { useProGatedFeatures } from "@app/hooks/pro/useProGatedFeatures";
@@ -28,7 +31,6 @@ import {
   getTimingBreakdown,
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
-import { AnalysisFilters } from "./AnalysisFilters";
 import { BattingTrendChart } from "./BattingTrendChart";
 import { ContactQualityCard } from "./ContactQualityCard";
 import { CountSituationCards } from "./CountSituationCards";
@@ -50,16 +52,6 @@ import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
 import { TimingCard } from "./TimingCard";
 
-function buildYearOptions(): FilterOption[] {
-  const currentYear = new Date().getFullYear();
-  const options: FilterOption[] = [{ key: "通算", label: "通算" }];
-  for (let offset = 0; offset < 6; offset += 1) {
-    const year = String(currentYear - offset);
-    options.push({ key: year, label: year });
-  }
-  return options;
-}
-
 /** SSR で解決した Pro 限定ブロックのデータ。閲覧できない機能は null。 */
 export interface ProAnalysisData {
   countSituations: CountSituations | null;
@@ -73,9 +65,10 @@ interface AnalysisContainerProps {
   initialProData: ProAnalysisData;
   /** SSR で閲覧可と判定された Pro 機能。クライアント判定が確定するまでの初期値。 */
   initialProFeatures: readonly ProFeature[];
-  /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
+  /** サーバーで取得したシーズン/大会/年月のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  monthOptions: FilterOption[];
 }
 
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
@@ -85,11 +78,9 @@ export function AnalysisContainer({
   initialProFeatures,
   seasonOptions,
   tournamentOptions,
+  monthOptions,
 }: AnalysisContainerProps) {
-  const [filters, setFilters] = useState<Filters>({
-    year: "通算",
-    matchType: "",
-  });
+  const [filters, setFilters] = useState<Filters>({});
   const [headline, setHeadline] = useState(initialData.headline);
   const [runnersSituation, setRunnersSituation] = useState(
     initialData.runnersSituation,
@@ -117,7 +108,7 @@ export function AnalysisContainer({
   const [isRefetching, startRefetch] = useTransition();
   // 推移グラフは粒度切替で単独再取得もあるため、専用の pending でグラフだけ dim する。
   const [isTrendPending, startTrendTransition] = useTransition();
-  const [yearOptions] = useState(buildYearOptions);
+  const [yearOptions] = useState(buildRecentYearOptions);
 
   const { canView, unwrap } = useProGatedFeatures(initialProFeatures);
   const canViewHitDirectionDetail = canView("hit_direction_average");
@@ -219,12 +210,16 @@ export function AnalysisContainer({
 
   return (
     <div className="flex flex-col gap-y-5">
-      <AnalysisFilters
-        filters={filters}
+      <FilterBar
+        values={filters}
         onChange={setFilters}
-        yearOptions={yearOptions}
-        seasonOptions={seasonOptions}
-        tournamentOptions={tournamentOptions}
+        options={{
+          years: yearOptions,
+          months: monthOptions,
+          matchTypes: MATCH_TYPE_OPTIONS,
+          seasons: seasonOptions,
+          tournaments: tournamentOptions,
+        }}
       />
       <div
         className={`flex flex-col gap-y-5${

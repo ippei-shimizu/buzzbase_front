@@ -94,6 +94,7 @@ async function AnalysisDataProvider() {
       initialProFeatures={pro.grantedFeatures}
       seasonOptions={filterOptions.seasonOptions}
       tournamentOptions={filterOptions.tournamentOptions}
+      monthOptions={filterOptions.monthOptions}
     />
   );
 }

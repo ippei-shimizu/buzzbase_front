@@ -54,9 +54,11 @@ jest.mock("../../../analysisActions", () => ({
   getPitcherFaceoffs: jest.fn(),
 }));
 
+import type { FilterOption } from "@app/components/filter/filterTypes";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getProStatus } from "@app/(app)/pro/actions";
+import { monthOptionsFromRecorded } from "@app/components/filter/monthOptions";
 import { ProStatusProvider } from "@app/components/pro/ProStatusProvider";
 import {
   DEFAULT_PRO_STATUS,
@@ -256,9 +258,13 @@ const CTA_NAMES = {
 async function renderContainer({
   initialProData = NO_PRO_DATA,
   initialProFeatures = [],
+  tournamentOptions = [],
+  monthOptions = [],
 }: {
   initialProData?: ProAnalysisData;
   initialProFeatures?: readonly ProFeature[];
+  tournamentOptions?: FilterOption[];
+  monthOptions?: FilterOption[];
 } = {}) {
   await act(async () => {
     render(
@@ -268,7 +274,8 @@ async function renderContainer({
           initialProData={initialProData}
           initialProFeatures={initialProFeatures}
           seasonOptions={[]}
-          tournamentOptions={[]}
+          tournamentOptions={tournamentOptions}
+          monthOptions={monthOptions}
         />
       </ProStatusProvider>,
     );
@@ -581,5 +588,72 @@ describe("AnalysisContainer の Pro 出し分け", () => {
       ).toBeInTheDocument();
       expect(mockGetPitchTypes).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe("AnalysisContainer の絞り込み", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    clearAuthCookies();
+    mockNonProAnalysisActions();
+    mockGetProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
+  });
+
+  async function renderWithFilterOptions() {
+    await renderContainer({
+      tournamentOptions: [{ key: "7", label: "県大会" }],
+      monthOptions: monthOptionsFromRecorded(["2026-06", "2026-04"]),
+    });
+  }
+
+  async function clickChip(name: string) {
+    const user = userEvent.setup();
+    await act(async () => {
+      await user.click(screen.getByRole("button", { name }));
+    });
+  }
+
+  it("大会を選ぶと tournamentId 付きで再取得する", async () => {
+    await renderWithFilterOptions();
+
+    await clickChip("大会: 県大会");
+
+    await waitFor(() =>
+      expect(getHeadlineStats).toHaveBeenCalledWith(
+        expect.objectContaining({ tournamentId: "7" }),
+      ),
+    );
+  });
+
+  it("月範囲を選ぶと startMonth / endMonth 付きで再取得する", async () => {
+    await renderWithFilterOptions();
+
+    await clickChip("開始: 2026年4月");
+    await clickChip("終了: 2026年6月");
+
+    await waitFor(() =>
+      expect(getHeadlineStats).toHaveBeenLastCalledWith({
+        startMonth: "2026-04",
+        endMonth: "2026-06",
+        year: undefined,
+      }),
+    );
+  });
+
+  it("記録のない月は選択肢に出ない", async () => {
+    await renderWithFilterOptions();
+
+    expect(
+      screen.queryByRole("button", { name: "開始: 2026年5月" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("クリアで全ての絞り込みが外れる", async () => {
+    await renderWithFilterOptions();
+
+    await clickChip("大会: 県大会");
+    await clickChip("フィルターをクリア");
+
+    await waitFor(() => expect(getHeadlineStats).toHaveBeenLastCalledWith({}));
   });
 });

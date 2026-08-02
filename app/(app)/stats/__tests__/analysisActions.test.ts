@@ -11,6 +11,7 @@ jest.mock("../../../constants/api", () => ({
 
 import {
   getCountSituations,
+  getEraTrend,
   getHitDirections,
   getPitcherFaceoffs,
   getPitchTypes,
@@ -114,6 +115,46 @@ describe("Pro 限定の分析 Server Actions", () => {
     const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
     expect(calledUrl).toContain("year=2026");
     expect(calledUrl).toContain("match_type=regular");
+  });
+
+  it("大会と月範囲をクエリパラメータに反映する", async () => {
+    mockResponse(200, countSituations);
+
+    await getCountSituations({
+      tournamentId: "7",
+      startMonth: "2026-04",
+      endMonth: "2026-06",
+    });
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(calledUrl).toContain("tournament_id=7");
+    expect(calledUrl).toContain("start_month=2026-04");
+    expect(calledUrl).toContain("end_month=2026-06");
+  });
+
+  it("月範囲が未指定なら start_month / end_month を送らない", async () => {
+    mockResponse(200, countSituations);
+
+    await getCountSituations({ year: "2026" });
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(calledUrl).not.toContain("start_month");
+    expect(calledUrl).not.toContain("end_month");
+  });
+
+  it("防御率推移も月範囲で絞り込める（種別は送らない）", async () => {
+    mockResponse(200, { trend: [] });
+
+    await getEraTrend({
+      matchType: "regular",
+      startMonth: "2026-04",
+      endMonth: "2026-06",
+    });
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(calledUrl).toContain("start_month=2026-04");
+    expect(calledUrl).toContain("end_month=2026-06");
+    expect(calledUrl).not.toContain("match_type");
   });
 
   it("Pro ゲートの無いエンドポイントは 403 でも空データを返す（判別ユニオンにしない）", async () => {

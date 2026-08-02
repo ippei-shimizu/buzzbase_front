@@ -1,49 +1,41 @@
 "use client";
 
-import type { FilterOption } from "../../../stats/statsFilterOption";
 import type {
   GameSummaryFilters,
   GameSummaryResult,
 } from "../gameSummaryTypes";
+import type { FilterOption } from "@app/components/filter/filterTypes";
 import { Spinner } from "@heroui/react";
 import { useEffect, useState, useTransition } from "react";
-import { AnalysisFilters } from "../../../stats/_components/analysis/AnalysisFilters";
+import FilterBar from "@app/components/filter/FilterBar";
+import { MATCH_TYPE_OPTIONS } from "@app/components/filter/matchTypeOptions";
+import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
 import {
   getGameSummary,
   getGameSummaryFilterOptions,
 } from "../gameSummaryActions";
 import { GameResultSummary } from "./summary/GameResultSummary";
 
-const DEFAULT_FILTERS: GameSummaryFilters = { year: "通算", matchType: "" };
-
-function buildYearOptions(): FilterOption[] {
-  const currentYear = new Date().getFullYear();
-  const options: FilterOption[] = [{ key: "通算", label: "通算" }];
-  for (let offset = 0; offset < 6; offset += 1) {
-    const year = String(currentYear - offset);
-    options.push({ key: year, label: year });
-  }
-  return options;
-}
-
-/** サマリータブ本体。フィルタ（年度/種別/シーズン/大会）変更で再取得し、結果を表示する。 */
+/** サマリータブ本体。フィルタ（年度/月範囲/種別/シーズン/大会）変更で再取得し、結果を表示する。 */
 export function GameSummaryContainer() {
-  const [filters, setFilters] = useState<GameSummaryFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<GameSummaryFilters>({});
   const [result, setResult] = useState<GameSummaryResult | null>(null);
   const [seasonOptions, setSeasonOptions] = useState<FilterOption[]>([]);
   const [tournamentOptions, setTournamentOptions] = useState<FilterOption[]>(
     [],
   );
+  const [monthOptions, setMonthOptions] = useState<FilterOption[]>([]);
   const [isRefetching, startRefetch] = useTransition();
-  const [yearOptions] = useState(buildYearOptions);
+  const [yearOptions] = useState(buildRecentYearOptions);
 
-  // シーズン / 大会の選択肢はマウント時に1度だけ取得する。
+  // シーズン / 大会 / 年月の選択肢はマウント時に1度だけ取得する。
   useEffect(() => {
     let active = true;
     getGameSummaryFilterOptions().then((options) => {
       if (!active) return;
       setSeasonOptions(options.seasonOptions);
       setTournamentOptions(options.tournamentOptions);
+      setMonthOptions(options.monthOptions);
     });
     return () => {
       active = false;
@@ -88,12 +80,16 @@ export function GameSummaryContainer() {
 
   return (
     <div className="flex flex-col gap-y-4">
-      <AnalysisFilters
-        filters={filters}
+      <FilterBar
+        values={filters}
         onChange={setFilters}
-        yearOptions={yearOptions}
-        seasonOptions={seasonOptions}
-        tournamentOptions={tournamentOptions}
+        options={{
+          years: yearOptions,
+          months: monthOptions,
+          matchTypes: MATCH_TYPE_OPTIONS,
+          seasons: seasonOptions,
+          tournaments: tournamentOptions,
+        }}
       />
       {result.status === "error" ? (
         <p className="py-10 text-center text-sm text-[#A1A1AA]">
