@@ -7,6 +7,8 @@ const mockGetCachedProStatusResult = jest.fn();
 const mockCancelWebSubscription = jest.fn();
 const mockChangeProPlan = jest.fn();
 const mockSyncProStatus = jest.fn();
+const mockSubmitCancellationFeedback = jest.fn();
+const mockGetCachedFeatureFlagDecision = jest.fn();
 
 jest.mock("next/headers", () => ({
   cookies: () => Promise.resolve({ get: mockCookieGet }),
@@ -25,9 +27,16 @@ jest.mock("@app/(app)/pro/actions", () => ({
   syncProStatus: () => mockSyncProStatus(),
 }));
 
+jest.mock("@app/featureFlags/cachedFeatureFlags", () => ({
+  getCachedFeatureFlagDecision: (key: string) =>
+    mockGetCachedFeatureFlagDecision(key),
+}));
+
 jest.mock("../actions", () => ({
   cancelWebSubscription: () => mockCancelWebSubscription(),
   changeProPlan: (plan: string) => mockChangeProPlan(plan),
+  submitCancellationFeedback: (input: unknown) =>
+    mockSubmitCancellationFeedback(input),
 }));
 
 jest.mock("@app/components/header/Header", () => ({
@@ -92,6 +101,8 @@ beforeEach(() => {
   // 既定は同期成功。プラン変更の成功パスは必ずここを通るため、
   // 明示しないテストが「同期できていない」表示に引きずられないようにする。
   mockSyncProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
+  // アンケートは opt-in の flag。既定を無効にして、明示したテストだけがモーダルを見る。
+  mockGetCachedFeatureFlagDecision.mockResolvedValue("disabled");
 });
 
 describe("メタデータ", () => {
@@ -1167,5 +1178,387 @@ describe("取得失敗", () => {
     expect(
       screen.getByRole("link", { name: "ログインし直す" }),
     ).toHaveAttribute("href", "/signin");
+  });
+});
+
+describe("解約アンケート", () => {
+  const REASON_CASES = [
+    { label: "料金が高い", reason: "expensive" },
+    { label: "あまり使わなくなった", reason: "less_usage" },
+    { label: "必要な機能がなかった", reason: "feature_missing" },
+    { label: "他のサービスを使うことにした", reason: "competitor" },
+    { label: "その他", reason: "other" },
+  ];
+
+  const surveyReasons = () => screen.queryAllByRole("radio");
+
+  async function cancel(decision = "enabled") {
+    mockGetCachedFeatureFlagDecision.mockResolvedValue(decision);
+    mockCancelWebSubscription.mockResolvedValue({ ok: true });
+    await renderPage({ status: "active", pro_active: true, platform: "web" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "この画面で解約する" }),
+    );
+    await userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "解約する",
+      }),
+    );
+    await screen.findByText("解約申請を受け付けました");
+  }
+
+  const submit = () =>
+    userEvent.click(screen.getByRole("button", { name: "送信する" }));
+
+  const chooseReason = (label: string) =>
+    userEvent.click(screen.getByRole("radio", { name: label }));
+
+  it("cancellation_survey を参照して出し分ける", async () => {
+    await cancel();
+
+    expect(mockGetCachedFeatureFlagDecision).toHaveBeenCalledWith(
+      "cancellation_survey",
+    );
+  });
+
+  it("フラグ有効なら解約完了後にアンケートを出す", async () => {
+    await cancel("enabled");
+
+    expect(
+      screen.getByRole("dialog", { name: "解約申請を受け付けました" }),
+    ).toBeInTheDocument();
+    expect(surveyReasons()).toHaveLength(REASON_CASES.length);
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  // back は flag 無効のユーザーにエンドポイント自体を隠す（404）。回答先が無い導線は出さない。
+  it.each(["disabled", "indeterminate"])(
+    "フラグが %s ならアンケートを出さず、解約だけを完了させる",
+    async (decision) => {
+      await cancel(decision);
+
+      expect(surveyReasons()).toHaveLength(0);
+      expect(mockCancelWebSubscription).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByText(
+          "次回更新日まで引き続き Pro 機能をご利用いただけます。",
+        ),
+      ).toBeInTheDocument();
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+      expect(mockSubmitCancellationFeedback).not.toHaveBeenCalled();
+    },
+  );
+
+  it("解約を確定するまではアンケートを出さない", async () => {
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("enabled");
+    await renderPage({ status: "active", pro_active: true, platform: "web" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "この画面で解約する" }),
+    );
+
+    expect(surveyReasons()).toHaveLength(0);
+  });
+
+  it("解約が失敗したときはアンケートを出さない", async () => {
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("enabled");
+    mockCancelWebSubscription.mockResolvedValue({
+      ok: false,
+      error: "stripe_api_error",
+    });
+    await renderPage({ status: "active", pro_active: true, platform: "web" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "この画面で解約する" }),
+    );
+    await userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "解約する",
+      }),
+    );
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(surveyReasons()).toHaveLength(0);
+  });
+
+  // back の enum と 1 対 1 で送る。ラベルだけ変えて値がずれると集計が壊れる。
+  it.each(REASON_CASES)(
+    "「$label」を選ぶと reason=$reason を送る",
+    async ({ label, reason }) => {
+      mockSubmitCancellationFeedback.mockResolvedValue({ ok: true });
+      await cancel();
+
+      await chooseReason(label);
+      await submit();
+
+      expect(mockSubmitCancellationFeedback).toHaveBeenCalledTimes(1);
+      expect(mockSubmitCancellationFeedback).toHaveBeenCalledWith({
+        reason,
+        note: "",
+      });
+    },
+  );
+
+  it("自由記述を入力すると note も送る", async () => {
+    mockSubmitCancellationFeedback.mockResolvedValue({ ok: true });
+    await cancel();
+
+    await chooseReason("その他");
+    await userEvent.type(
+      screen.getByLabelText("ご意見・ご要望（任意）"),
+      "使い方が難しかった",
+    );
+    await submit();
+
+    expect(mockSubmitCancellationFeedback).toHaveBeenCalledWith({
+      reason: "other",
+      note: "使い方が難しかった",
+    });
+  });
+
+  it("送信に成功したらお礼を表示する", async () => {
+    mockSubmitCancellationFeedback.mockResolvedValue({ ok: true });
+    await cancel();
+
+    await chooseReason("料金が高い");
+    await submit();
+
+    expect(
+      await screen.findByText(/ご回答ありがとうございました/),
+    ).toBeInTheDocument();
+    expect(surveyReasons()).toHaveLength(0);
+  });
+
+  it("お礼の表示から閉じられる", async () => {
+    mockSubmitCancellationFeedback.mockResolvedValue({ ok: true });
+    await cancel();
+    await chooseReason("料金が高い");
+    await submit();
+    await screen.findByText(/ご回答ありがとうございました/);
+
+    await userEvent.click(screen.getByRole("button", { name: "閉じる" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("スキップすると API を呼ばずに閉じる", async () => {
+    await cancel();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "回答せずに閉じる" }),
+    );
+
+    expect(mockSubmitCancellationFeedback).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("Escape でもスキップできる", async () => {
+    await cancel();
+
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+
+    expect(mockSubmitCancellationFeedback).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("理由を選ばずに送信しても API を呼ばず、選択を促す", async () => {
+    await cancel();
+
+    await submit();
+
+    expect(mockSubmitCancellationFeedback).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "解約の理由を選択してください。",
+    );
+  });
+
+  it.each([
+    { error: "reason_required", message: "解約の理由を選択してください。" },
+    {
+      error: "invalid_reason",
+      message:
+        "選択された解約の理由が正しくありません。もう一度お選びください。",
+    },
+    {
+      error: "note_too_long",
+      message: "ご意見は1000文字以内で入力してください。",
+    },
+    {
+      error: "unauthorized",
+      message:
+        "ログインの有効期限が切れているため、アンケートを送信できませんでした。解約手続きは完了しています。",
+    },
+    {
+      error: "unknown",
+      message:
+        "アンケートを送信できませんでした。解約手続きは完了していますので、そのまま閉じていただけます。",
+    },
+  ])("$error は「$message」として伝える", async ({ error, message }) => {
+    mockSubmitCancellationFeedback.mockResolvedValue({ ok: false, error });
+    await cancel();
+
+    await chooseReason("その他");
+    await submit();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(message);
+  });
+
+  // アンケートの失敗で解約の完了を疑わせない。
+  it.each(["unauthorized", "unknown", "note_too_long"])(
+    "%s で失敗しても閉じて先に進める",
+    async (error) => {
+      mockSubmitCancellationFeedback.mockResolvedValue({ ok: false, error });
+      await cancel();
+      await chooseReason("その他");
+      await submit();
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "回答せずに閉じる" }),
+      );
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    },
+  );
+
+  // 受付が止まっているだけで利用者に非がないため、エラーを見せずに畳む。
+  it("survey_disabled のときはエラーを出さずに閉じる", async () => {
+    mockSubmitCancellationFeedback.mockResolvedValue({
+      ok: false,
+      error: "survey_disabled",
+    });
+    await cancel();
+
+    await chooseReason("その他");
+    await submit();
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  describe("自由記述の文字数", () => {
+    const noteField = () => screen.getByLabelText("ご意見・ご要望（任意）");
+
+    it("初期状態で残り 1000 文字と表示する", async () => {
+      await cancel();
+
+      expect(screen.getByText("残り1000文字")).toBeInTheDocument();
+    });
+
+    it("入力に応じて残り文字数を減らす", async () => {
+      await cancel();
+
+      fireEvent.change(noteField(), { target: { value: "あ".repeat(40) } });
+
+      expect(screen.getByText("残り960文字")).toBeInTheDocument();
+    });
+
+    // サーバーの 422 に頼らず、そもそも上限を超えて送れないようにする。
+    it("1000 文字を超える入力はクライアント側で切り詰める", async () => {
+      mockSubmitCancellationFeedback.mockResolvedValue({ ok: true });
+      await cancel();
+
+      fireEvent.change(noteField(), { target: { value: "a".repeat(1005) } });
+
+      expect((noteField() as HTMLTextAreaElement).value).toHaveLength(1000);
+      expect(screen.getByText("残り0文字")).toBeInTheDocument();
+
+      await chooseReason("その他");
+      await submit();
+
+      expect(mockSubmitCancellationFeedback).toHaveBeenCalledWith({
+        reason: "other",
+        note: "a".repeat(1000),
+      });
+    });
+
+    it("入力欄自体にも上限を設定する", async () => {
+      await cancel();
+
+      expect(noteField()).toHaveAttribute("maxlength", "1000");
+    });
+  });
+
+  describe("アクセシビリティ", () => {
+    it("モーダルとして見出しで名前を付ける", async () => {
+      await cancel();
+
+      const dialog = screen.getByRole("dialog", {
+        name: "解約申請を受け付けました",
+      });
+      expect(dialog).toHaveAttribute("aria-modal", "true");
+    });
+
+    it("理由の選択肢にグループ名を付ける", async () => {
+      await cancel();
+
+      expect(
+        screen.getByRole("group", { name: "解約の理由" }),
+      ).toBeInTheDocument();
+    });
+
+    it("開いた時点で最初の選択肢にフォーカスする", async () => {
+      await cancel();
+
+      expect(screen.getByRole("radio", { name: "料金が高い" })).toHaveFocus();
+    });
+
+    it("末尾から Tab で先頭に戻す", async () => {
+      await cancel();
+
+      const submitButton = screen.getByRole("button", { name: "送信する" });
+      submitButton.focus();
+      fireEvent.keyDown(submitButton, { key: "Tab" });
+
+      expect(screen.getByRole("radio", { name: "料金が高い" })).toHaveFocus();
+    });
+
+    it("先頭から Shift+Tab で末尾に戻す", async () => {
+      await cancel();
+
+      const firstReason = screen.getByRole("radio", { name: "料金が高い" });
+      firstReason.focus();
+      fireEvent.keyDown(firstReason, { key: "Tab", shiftKey: true });
+
+      expect(screen.getByRole("button", { name: "送信する" })).toHaveFocus();
+    });
+  });
+
+  describe("送信中", () => {
+    async function startPendingSubmit() {
+      let settle: (result: { ok: true }) => void = () => {};
+      mockSubmitCancellationFeedback.mockReturnValue(
+        new Promise<{ ok: true }>((resolve) => {
+          settle = resolve;
+        }),
+      );
+      await cancel();
+      await chooseReason("その他");
+      await submit();
+      await screen.findByRole("button", { name: "送信中…" });
+      return async () => {
+        await act(async () => {
+          settle({ ok: true });
+        });
+      };
+    }
+
+    it("二重送信させない", async () => {
+      const finish = await startPendingSubmit();
+
+      const button = screen.getByRole("button", { name: "送信中…" });
+      expect(button).toBeDisabled();
+      await userEvent.click(button);
+      expect(mockSubmitCancellationFeedback).toHaveBeenCalledTimes(1);
+
+      await finish();
+    });
+
+    it("送信中は Escape で閉じない", async () => {
+      const finish = await startPendingSubmit();
+
+      fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      await finish();
+    });
   });
 });
