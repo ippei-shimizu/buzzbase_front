@@ -4,6 +4,9 @@ process.env.NEXT_PUBLIC_IMAGE_HOSTNAME = "localhost";
 process.env.NEXT_PUBLIC_IMAGE_PORT = "3000";
 process.env.NEXT_PUBLIC_IMAGE_PATHNAME = "/**";
 process.env.NEXT_PUBLIC_BACKEND_URL = "http://localhost:3000";
+// Server Action を経由するコンポーネント（ProStatusProvider 等）を描画するテストは
+// app/constants/api.ts を読み込む。未設定だとモジュール評価時に throw する
+process.env.RAILS_API_URL = "http://localhost:3000";
 
 const nextJest = require("next/jest");
 
