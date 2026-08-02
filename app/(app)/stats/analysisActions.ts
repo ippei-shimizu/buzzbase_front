@@ -1,5 +1,6 @@
 "use server";
 
+import type { FilterValues } from "@app/components/filter/filterTypes";
 import type { ProGatedResult } from "@app/types/pro";
 import { cookies } from "next/headers";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
@@ -10,13 +11,8 @@ import {
   EMPTY_PITCHER_FACEOFFS,
 } from "./analysisFallbacks";
 
-// 分析系エンドポイント共通のフィルタ。
-export interface AnalysisFilters {
-  year?: string;
-  matchType?: string;
-  seasonId?: string;
-  tournamentId?: string;
-}
+// 分析系エンドポイント共通のフィルタ。絞り込み UI と同じ形を使う。
+export type AnalysisFilters = FilterValues;
 
 export interface HeadlineStats {
   batting_average: number;
@@ -281,12 +277,13 @@ async function getAuthHeaders(): Promise<Record<string, string> | null> {
 
 function buildQuery(filters: AnalysisFilters): string {
   const params = new URLSearchParams();
-  if (filters.year && filters.year !== "通算")
-    params.append("year", filters.year);
+  if (filters.year) params.append("year", filters.year);
   if (filters.matchType) params.append("match_type", filters.matchType);
   if (filters.seasonId) params.append("season_id", filters.seasonId);
   if (filters.tournamentId)
     params.append("tournament_id", filters.tournamentId);
+  if (filters.startMonth) params.append("start_month", filters.startMonth);
+  if (filters.endMonth) params.append("end_month", filters.endMonth);
   return params.toString();
 }
 
@@ -546,12 +543,12 @@ export interface AnalysisInitialData {
 
 /**
  * 打撃分析の初期表示ブロックをまとめて取得する（Server Component から SSR で呼ぶ）。
- * フィルタ既定は通算・全試合、推移は試合単位。
+ * フィルタ既定は絞り込みなし（通算・全試合）、推移は試合単位。
  * Pro 限定の3種は entitlement を持つユーザーにだけ投げたいので、ここには含めず
  * 呼び出し側が Pro 判定と合わせて取得する。
  */
 export async function getInitialAnalysisData(
-  filters: AnalysisFilters = { year: "通算", matchType: "" },
+  filters: AnalysisFilters = {},
   granularity: BattingTrendGranularity = "game",
 ): Promise<AnalysisInitialData> {
   const [

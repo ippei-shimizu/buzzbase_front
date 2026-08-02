@@ -5,11 +5,14 @@ import type {
   PitchingStatsRow,
   StatsPeriod,
 } from "../actions";
+import type {
+  FilterOption,
+  FilterValues,
+} from "@app/components/filter/filterTypes";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import FilterChip from "@app/components/filter/FilterChip";
-import FilterChipGroup from "@app/components/filter/FilterChipGroup";
+import FilterBar from "@app/components/filter/FilterBar";
+import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
 import { getBattingStats, getPitchingStats } from "../actions";
-import { DEFAULT_OPTION, type FilterOption } from "../statsFilterOption";
 import BattingStatsTable from "./BattingStatsTable";
 import PitchingStatsTable from "./PitchingStatsTable";
 
@@ -21,17 +24,11 @@ const PERIOD_OPTIONS: { value: StatsPeriod; label: string }[] = [
   { value: "daily", label: "日" },
 ];
 
-function buildYearOptions(): FilterOption[] {
-  const currentYear = new Date().getFullYear();
-  const options: FilterOption[] = [DEFAULT_OPTION];
-  for (let offset = 0; offset < 6; offset += 1) {
-    const year = String(currentYear - offset);
-    options.push({ key: year, label: year });
-  }
-  return options;
-}
-
 const CURRENT_YEAR = String(new Date().getFullYear());
+
+// 月/日表示の既定は「当年」。クリアで全期間（＝全期間の月別テーブル）に落とさないよう、
+// FilterBar のリセット先にもこれを渡す。
+const PERIODIC_DEFAULT_FILTERS: FilterValues = { year: CURRENT_YEAR };
 
 interface StatsContainerProps {
   /** SSR で取得した打撃・年別の初期行。マウント時はこれを使い再取得しない。 */
@@ -40,9 +37,10 @@ interface StatsContainerProps {
   analysisSlot: ReactNode;
   /** 投手タブの分析セクション（同上）。 */
   pitchingAnalysisSlot: ReactNode;
-  /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
+  /** サーバーで取得したシーズン/大会/年月のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
+  monthOptions: FilterOption[];
 }
 
 export default function StatsContainer({
@@ -51,21 +49,19 @@ export default function StatsContainer({
   pitchingAnalysisSlot,
   seasonOptions,
   tournamentOptions,
+  monthOptions,
 }: StatsContainerProps) {
   const [tab, setTab] = useState<ActiveTab>("batting");
   const [period, setPeriod] = useState<StatsPeriod>("yearly");
-  const [tableYear, setTableYear] = useState<string | undefined>(undefined);
-  const [tableSeasonId, setTableSeasonId] = useState<string | undefined>(
-    undefined,
-  );
-  const [tableTournamentId, setTableTournamentId] = useState<
-    string | undefined
-  >(undefined);
+  // テーブル系エンドポイントは種別を受け取らないため、種別チップは出さない。
+  const [tableFilters, setTableFilters] = useState<
+    Omit<FilterValues, "matchType">
+  >({});
   const [battingRows, setBattingRows] =
     useState<BattingStatsRow[]>(initialRows);
   const [pitchingRows, setPitchingRows] = useState<PitchingStatsRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [yearOptions] = useState(buildYearOptions);
+  const [yearOptions] = useState(buildRecentYearOptions);
 
   // 初回マウントは SSR の initialRows（打撃/年別）を使うため取得しない。
   const didInitRef = useRef(false);
@@ -78,24 +74,28 @@ export default function StatsContainer({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     const fetcher = tab === "batting" ? getBattingStats : getPitchingStats;
-    void fetcher(period, tableYear, tableSeasonId, tableTournamentId).then(
-      (rows) => {
-        if (!active) return;
-        if (tab === "batting") setBattingRows(rows as BattingStatsRow[]);
-        else setPitchingRows(rows as PitchingStatsRow[]);
-        setIsLoading(false);
-      },
-    );
+    void fetcher(period, tableFilters).then((rows) => {
+      if (!active) return;
+      if (tab === "batting") setBattingRows(rows as BattingStatsRow[]);
+      else setPitchingRows(rows as PitchingStatsRow[]);
+      setIsLoading(false);
+    });
     return () => {
       active = false;
     };
-  }, [tab, period, tableYear, tableSeasonId, tableTournamentId]);
+  }, [tab, period, tableFilters]);
 
   const handlePeriodChange = (next: StatsPeriod) => {
     setPeriod(next);
-    // 月/日表示にしたとき年度/シーズン未指定なら今年で絞る（全期間の月別は煩雑なため）。
-    if (next !== "yearly" && !tableYear && !tableSeasonId) {
-      setTableYear(CURRENT_YEAR);
+    // 月/日表示にしたとき期間の絞り込みが無ければ今年で絞る（全期間の月別は煩雑なため）。
+    if (
+      next !== "yearly" &&
+      !tableFilters.year &&
+      !tableFilters.seasonId &&
+      !tableFilters.startMonth &&
+      !tableFilters.endMonth
+    ) {
+      setTableFilters((prev) => ({ ...prev, ...PERIODIC_DEFAULT_FILTERS }));
     }
   };
 
@@ -169,40 +169,20 @@ export default function StatsContainer({
         </div>
       </div>
 
-      {/* テーブル専用フィルタ（年/月以外＝年度/シーズン/大会で絞る） */}
+      {/* テーブル専用フィルタ（年/月以外＝年度/月範囲/シーズン/大会で絞る） */}
       {showTableFilters ? (
-        <div className="mb-3 flex justify-end">
-          <FilterChipGroup>
-            <FilterChip
-              label="年度"
-              value={tableYear ?? "全て"}
-              defaultValue="全て"
-              options={yearOptions}
-              onChange={(key) => setTableYear(key === "全て" ? undefined : key)}
-            />
-            {seasonOptions.length > 1 ? (
-              <FilterChip
-                label="シーズン"
-                value={tableSeasonId ?? "全て"}
-                defaultValue="全て"
-                options={seasonOptions}
-                onChange={(key) =>
-                  setTableSeasonId(key === "全て" ? undefined : key)
-                }
-              />
-            ) : null}
-            {tournamentOptions.length > 1 ? (
-              <FilterChip
-                label="大会"
-                value={tableTournamentId ?? "全て"}
-                defaultValue="全て"
-                options={tournamentOptions}
-                onChange={(key) =>
-                  setTableTournamentId(key === "全て" ? undefined : key)
-                }
-              />
-            ) : null}
-          </FilterChipGroup>
+        <div className="mb-3">
+          <FilterBar
+            values={tableFilters}
+            onChange={setTableFilters}
+            resetTo={PERIODIC_DEFAULT_FILTERS}
+            options={{
+              years: yearOptions,
+              months: monthOptions,
+              seasons: seasonOptions,
+              tournaments: tournamentOptions,
+            }}
+          />
         </div>
       ) : null}
 
