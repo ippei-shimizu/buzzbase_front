@@ -6,9 +6,10 @@ jest.mock("next/navigation", () => ({
   redirect: (path: string) => mockRedirect(path),
 }));
 
-const mockGetCachedFeatureFlag = jest.fn();
+const mockGetCachedFeatureFlagDecision = jest.fn();
 jest.mock("@app/featureFlags/cachedFeatureFlags", () => ({
-  getCachedFeatureFlag: (key: string) => mockGetCachedFeatureFlag(key),
+  getCachedFeatureFlagDecision: (key: string) =>
+    mockGetCachedFeatureFlagDecision(key),
 }));
 
 const mockGetCachedProStatus = jest.fn();
@@ -33,6 +34,13 @@ const proActiveStatus: ProStatus = {
   entitlements: [...DEFAULT_PRO_STATUS.entitlements],
 };
 
+function expectLandingPageRendered() {
+  expect(
+    screen.getByRole("heading", { name: /記録を、成長へ。/ }),
+  ).toBeInTheDocument();
+  expect(mockRedirect).not.toHaveBeenCalled();
+}
+
 describe("ProLandingPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,27 +48,34 @@ describe("ProLandingPage", () => {
   });
 
   it("pro_features が有効なら LP を表示する", async () => {
-    mockGetCachedFeatureFlag.mockResolvedValue(true);
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("enabled");
 
     render(await ProLandingPage());
 
-    expect(
-      screen.getByRole("heading", { name: /記録を、成長へ。/ }),
-    ).toBeInTheDocument();
-    expect(mockRedirect).not.toHaveBeenCalled();
+    expectLandingPageRendered();
+    expect(mockGetCachedFeatureFlagDecision).toHaveBeenCalledWith(
+      "pro_features",
+    );
   });
 
-  it("pro_features が無効ならトップへリダイレクトする", async () => {
-    mockGetCachedFeatureFlag.mockResolvedValue(false);
+  it("判定不能（未認証・cookie 未達）でも公開 LP は表示する", async () => {
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("indeterminate");
+
+    render(await ProLandingPage());
+
+    expectLandingPageRendered();
+  });
+
+  it("pro_features が無効と確定したときだけトップへリダイレクトする", async () => {
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("disabled");
 
     await expect(ProLandingPage()).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockGetCachedFeatureFlag).toHaveBeenCalledWith("pro_features");
     expect(mockRedirect).toHaveBeenCalledWith("/");
   });
 
   it("flag が無効なら Pro 加入済みでもトップへリダイレクトする", async () => {
-    // 取得失敗も含めて「true 以外は無効」。kill switch を Pro 加入者向け分岐より先に効かせる。
-    mockGetCachedFeatureFlag.mockResolvedValue(false);
+    // kill switch を Pro 加入者向け分岐より先に効かせる。
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("disabled");
     mockGetCachedProStatus.mockResolvedValue(proActiveStatus);
 
     await expect(ProLandingPage()).rejects.toThrow("NEXT_REDIRECT");
@@ -69,7 +84,7 @@ describe("ProLandingPage", () => {
   });
 
   it("Pro 加入済みならサブスクリプション画面へリダイレクトする", async () => {
-    mockGetCachedFeatureFlag.mockResolvedValue(true);
+    mockGetCachedFeatureFlagDecision.mockResolvedValue("enabled");
     mockGetCachedProStatus.mockResolvedValue(proActiveStatus);
 
     await expect(ProLandingPage()).rejects.toThrow("NEXT_REDIRECT");

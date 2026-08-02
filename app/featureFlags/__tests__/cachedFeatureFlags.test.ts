@@ -1,28 +1,43 @@
-const mockGetFeatureFlags = jest.fn();
+const mockGetFeatureFlagDecisions = jest.fn();
 
 jest.mock("../actions", () => ({
-  getFeatureFlags: (keys: string[]) => mockGetFeatureFlags(keys),
+  getFeatureFlagDecisions: (keys: string[]) =>
+    mockGetFeatureFlagDecisions(keys),
 }));
 
-import { getCachedFeatureFlag } from "../cachedFeatureFlags";
+import { getCachedFeatureFlagDecision } from "../cachedFeatureFlags";
 
-describe("getCachedFeatureFlag", () => {
+describe("getCachedFeatureFlagDecision", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("有効な flag は true を返す", async () => {
-    mockGetFeatureFlags.mockResolvedValue({ pro_features: true });
+  it("有効な flag は enabled を返す", async () => {
+    mockGetFeatureFlagDecisions.mockResolvedValue({ pro_features: "enabled" });
 
-    await expect(getCachedFeatureFlag("pro_features")).resolves.toBe(true);
-    expect(mockGetFeatureFlags).toHaveBeenCalledWith(["pro_features"]);
+    await expect(getCachedFeatureFlagDecision("pro_features")).resolves.toBe(
+      "enabled",
+    );
+    expect(mockGetFeatureFlagDecisions).toHaveBeenCalledWith(["pro_features"]);
   });
 
-  it("無効な flag は false を返す", async () => {
-    mockGetFeatureFlags.mockResolvedValue({ cancellation_survey: false });
+  it("無効な flag は disabled を返す", async () => {
+    mockGetFeatureFlagDecisions.mockResolvedValue({
+      cancellation_survey: "disabled",
+    });
 
-    await expect(getCachedFeatureFlag("cancellation_survey")).resolves.toBe(
-      false,
+    await expect(
+      getCachedFeatureFlagDecision("cancellation_survey"),
+    ).resolves.toBe("disabled");
+  });
+
+  it("判定不能は disabled に丸めずそのまま返す", async () => {
+    mockGetFeatureFlagDecisions.mockResolvedValue({
+      pro_features: "indeterminate",
+    });
+
+    await expect(getCachedFeatureFlagDecision("pro_features")).resolves.toBe(
+      "indeterminate",
     );
   });
 });

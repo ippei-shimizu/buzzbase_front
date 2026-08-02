@@ -10,12 +10,23 @@ jest.mock("sonner", () => ({
   toast: { error: jest.fn(), info: jest.fn(), success: jest.fn() },
 }));
 
+// flag の解決そのものは useFeatureFlag のテストで担保する。ここでは判定ごとの描画だけを見る。
+const mockUseFeatureFlag = jest.fn();
+jest.mock("@app/hooks/featureFlags/useFeatureFlag", () => ({
+  useFeatureFlag: (key: string, options?: { skip?: boolean }) =>
+    mockUseFeatureFlag(key, options),
+}));
+
 import { fireEvent, render, screen } from "@testing-library/react";
 import ProUpgradeModal from "../ProUpgradeModal";
+
+const SUSPENDED_MESSAGE =
+  "現在、新規のお申し込みを停止しています。再開までしばらくお待ちください。";
 
 describe("ProUpgradeModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFeatureFlag.mockReturnValue("enabled");
   });
 
   it("isOpen が false のときは何も描画しない", () => {
@@ -63,5 +74,39 @@ describe("ProUpgradeModal", () => {
     render(<ProUpgradeModal isOpen onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: "閉じる" }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("pro_features が無効なら CTA を出さず販売停止を伝える", () => {
+    mockUseFeatureFlag.mockReturnValue("disabled");
+
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+
+    expect(screen.queryByTestId("pro-upgrade-cta")).not.toBeInTheDocument();
+    expect(screen.getByText(SUSPENDED_MESSAGE)).toBeInTheDocument();
+  });
+
+  it("判定不能のときは販売停止を告知せず CTA を残す", () => {
+    mockUseFeatureFlag.mockReturnValue("indeterminate");
+
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByTestId("pro-upgrade-cta")).toBeInTheDocument();
+    expect(screen.queryByText(SUSPENDED_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  it("閉じている間は flag を評価しない", () => {
+    render(<ProUpgradeModal isOpen={false} onClose={jest.fn()} />);
+
+    expect(mockUseFeatureFlag).toHaveBeenCalledWith("pro_features", {
+      skip: true,
+    });
+  });
+
+  it("開いている間は flag を評価する", () => {
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+
+    expect(mockUseFeatureFlag).toHaveBeenCalledWith("pro_features", {
+      skip: false,
+    });
   });
 });

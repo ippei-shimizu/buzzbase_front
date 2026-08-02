@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCachedFeatureFlag } from "@app/featureFlags/cachedFeatureFlags";
+import { getCachedFeatureFlagDecision } from "@app/featureFlags/cachedFeatureFlags";
 import FAQ from "./_components/FAQ";
 import FeatureComparisonTable from "./_components/FeatureComparisonTable";
 import FinalCTA from "./_components/FinalCTA";
@@ -18,15 +18,15 @@ export const metadata: Metadata = {
 
 export default async function ProLandingPage() {
   // 互いに依存しないので並列で取る。どちらも cookies() 経由でこのルートは元から dynamic。
-  const [proFeaturesEnabled, status] = await Promise.all([
-    getCachedFeatureFlag("pro_features"),
+  const [proFeatures, status] = await Promise.all([
+    getCachedFeatureFlagDecision("pro_features"),
     getCachedProStatus(),
   ]);
 
-  // kill switch が落ちている環境では LP ごと畳む。ここを通さないと Stripe Checkout の
-  // 導線（CheckoutButton → ProUpgradeModal）だけが生き残ってしまう。
-  // back の flag API は認証必須のため、未ログインからの閲覧もここで弾かれる。
-  if (!proFeaturesEnabled) {
+  // このページは公開マーケティング LP なので、判定不能（未認証 / cookie が届かない）では畳まない。
+  // kill switch の目的は Pro を売るのを止めることであり、実際の課金経路は startProCheckout 側で
+  // 改めて flag を検証している。ここで畳むのは「無効」と確定したビューアだけに限る。
+  if (proFeatures === "disabled") {
     redirect("/");
   }
 

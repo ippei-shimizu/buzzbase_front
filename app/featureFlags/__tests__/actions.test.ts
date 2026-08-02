@@ -12,7 +12,7 @@ jest.mock("../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
-import { getFeatureFlags } from "../actions";
+import { getFeatureFlagDecisions, getFeatureFlags } from "../actions";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -33,20 +33,20 @@ function mockJsonResponse(body: unknown, status = 200) {
   });
 }
 
+const consoleErrorSpy = jest
+  .spyOn(console, "error")
+  .mockImplementation(() => {});
+
+afterAll(() => {
+  consoleErrorSpy.mockRestore();
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  global.fetch = jest.fn();
+});
+
 describe("getFeatureFlags", () => {
-  const consoleErrorSpy = jest
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    global.fetch = jest.fn();
-  });
-
-  afterAll(() => {
-    consoleErrorSpy.mockRestore();
-  });
-
   it("有効な flag は true を返す", async () => {
     setupAuthCookies();
     mockJsonResponse({ pro_features: true });
@@ -147,5 +147,78 @@ describe("getFeatureFlags", () => {
     });
     expect(init.cache).toBe("no-store");
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+describe("getFeatureFlagDecisions", () => {
+  it("back が返した boolean をそのまま判定にする", async () => {
+    setupAuthCookies();
+    mockJsonResponse({ pro_features: true, cancellation_survey: false });
+
+    await expect(
+      getFeatureFlagDecisions(["pro_features", "cancellation_survey"]),
+    ).resolves.toEqual({
+      pro_features: "enabled",
+      cancellation_survey: "disabled",
+    });
+  });
+
+  it("レスポンスに含まれないキーは indeterminate を返す", async () => {
+    setupAuthCookies();
+    mockJsonResponse({});
+
+    await expect(getFeatureFlagDecisions(["pro_features"])).resolves.toEqual({
+      pro_features: "indeterminate",
+    });
+  });
+
+  it("boolean 以外の値（文字列 'false' など）は indeterminate を返す", async () => {
+    setupAuthCookies();
+    mockJsonResponse({ pro_features: "false" });
+
+    await expect(getFeatureFlagDecisions(["pro_features"])).resolves.toEqual({
+      pro_features: "indeterminate",
+    });
+  });
+
+  it("認証 cookie が無いときは disabled と断定せず indeterminate を返す", async () => {
+    mockGet.mockReturnValue(undefined);
+
+    await expect(getFeatureFlagDecisions(["pro_features"])).resolves.toEqual({
+      pro_features: "indeterminate",
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("API がエラーを返したときも disabled と断定しない", async () => {
+    setupAuthCookies();
+    mockJsonResponse({}, 500);
+
+    await expect(getFeatureFlagDecisions(["pro_features"])).resolves.toEqual({
+      pro_features: "indeterminate",
+    });
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("401 のときはログを出さずに indeterminate を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+    });
+
+    await expect(getFeatureFlagDecisions(["pro_features"])).resolves.toEqual({
+      pro_features: "indeterminate",
+    });
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("fetch が throw しても indeterminate を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
+
+    await expect(getFeatureFlagDecisions(["pro_features"])).resolves.toEqual({
+      pro_features: "indeterminate",
+    });
   });
 });
