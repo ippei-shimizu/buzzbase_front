@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getCachedFeatureFlagDecision } from "@app/featureFlags/cachedFeatureFlags";
 import FAQ from "./_components/FAQ";
 import FeatureComparisonTable from "./_components/FeatureComparisonTable";
 import FinalCTA from "./_components/FinalCTA";
@@ -16,7 +17,19 @@ export const metadata: Metadata = {
 };
 
 export default async function ProLandingPage() {
-  const status = await getCachedProStatus();
+  // 互いに依存しないので並列で取る。どちらも cookies() 経由でこのルートは元から dynamic。
+  const [proFeatures, status] = await Promise.all([
+    getCachedFeatureFlagDecision("pro_features"),
+    getCachedProStatus(),
+  ]);
+
+  // このページは公開マーケティング LP なので、判定不能（未認証 / cookie が届かない）では畳まない。
+  // kill switch の目的は Pro を売るのを止めることであり、実際の課金経路は startProCheckout 側で
+  // 改めて flag を検証している。ここで畳むのは「無効」と確定したビューアだけに限る。
+  if (proFeatures === "disabled") {
+    redirect("/");
+  }
+
   if (status?.subscription.pro_active) {
     redirect("/account/subscription");
   }

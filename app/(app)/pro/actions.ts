@@ -8,6 +8,7 @@ import type {
 import { cookies } from "next/headers";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
+import { getFeatureFlags } from "../../featureFlags/actions";
 
 // Rails 側が詰まったときにレンダーや Server Action を無期限に待たせないための上限。
 const PRO_API_TIMEOUT_MS = 5000;
@@ -123,6 +124,7 @@ export type StartProCheckoutResult =
       ok: false;
       error:
         | "unauthorized"
+        | "feature_disabled"
         | "already_subscribed"
         | "invalid_plan"
         | "stripe_api_error"
@@ -134,6 +136,9 @@ export type StartProCheckoutResult =
  * success_url / cancel_url の元になるホストは Server 側で `APP_URL` 環境変数から決定する。
  * クライアント発の値（window.location.origin など）は受け取らない: Server Action は POST で
  * 直接叩けるため任意ドメインを差し込まれると Stripe 経由のフィッシングに繋がる。
+ *
+ * pro_features が無効なら Stripe を呼ばずに `feature_disabled` を返す。back の checkout API は
+ * flag を見ていないため、Web の課金経路を止める実質的なゲートはここだけになる。
  */
 export async function startProCheckout(args: {
   plan: ProPlan;
@@ -143,6 +148,11 @@ export async function startProCheckout(args: {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return { ok: false, error: "unauthorized" };
+
+    // flag は actor ごとの評価なので、認証を確かめてから引く。
+    // 未認証を先に弾かないと「ログインが必要」を「販売停止中」と誤って伝えることになる。
+    const flags = await getFeatureFlags(["pro_features"]);
+    if (!flags.pro_features) return { ok: false, error: "feature_disabled" };
 
     const response = await fetch(`${RAILS_API_URL}/api/v1/pro/checkout`, {
       method: "POST",
