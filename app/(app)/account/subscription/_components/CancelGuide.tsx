@@ -3,22 +3,17 @@ import type {
   ProSubscription,
   SubscriptionStatus,
 } from "@app/types/pro";
-import Link from "next/link";
+import CancelWebSubscription from "./CancelWebSubscription";
+import GuideSection, { type GuideContent } from "./GuideSection";
 
-interface CancelGuideContent {
-  description: string;
-  steps: string[];
-  link: { href: string; label: string };
-}
-
-// 解約手続きは加入した媒体でしか行えない。ストア課金の解約 UI は Web から呼び出せないため、
-// それぞれの管理画面へ誘導する。
-const CANCEL_GUIDE: Record<Platform, CancelGuideContent> = {
+// ストア課金の解約 UI は Web から呼び出せないため、それぞれの管理画面へ誘導する。
+// Web（Stripe）だけは back の DELETE /api/v1/pro/subscription でこの画面から完結できる。
+const CANCEL_GUIDE: Record<Platform, GuideContent> = {
   web: {
     description:
-      "Web（クレジットカード）でご加入中です。この画面からの解約手続きは現在準備中のため、解約をご希望の場合はお問い合わせください。",
+      "Web（クレジットカード）でご加入中です。この画面からいつでも解約できます。解約後も次回更新日までは Pro 機能をご利用いただけます。",
     steps: [],
-    link: { href: "/contact", label: "お問い合わせ" },
+    link: null,
   },
   ios: {
     description:
@@ -50,12 +45,22 @@ const CANCEL_GUIDE: Record<Platform, CancelGuideContent> = {
   },
 };
 
+// back は Stripe Checkout 完了時点では platform を保存せず、決済プロバイダの webhook 到達で
+// 初めて確定する。未登録 product の場合は恒久的に null のままにもなりうるため、
+// 「媒体不明」を無表示にせず問い合わせ導線へ倒す。
+const UNKNOWN_PLATFORM_GUIDE: GuideContent = {
+  description:
+    "ご加入の媒体を判別できませんでした。ご加入直後は反映までお時間がかかる場合があります。時間をおいても変わらない場合や解約をご希望の場合はお問い合わせください。",
+  steps: [],
+  link: { href: "/contact", label: "お問い合わせ" },
+};
+
 // 解約できるのは期間内の加入状態のときだけ。解約済み・期限切れには案内を出さない。
 const CANCELLABLE_STATUSES: SubscriptionStatus[] = ["trial", "active"];
 
 /**
- * 加入媒体ごとの解約手順を案内するセクション。
- * 解約可能な状態かつ加入媒体が判明しているときだけ描画する。
+ * 加入媒体ごとの解約手段を案内するセクション。
+ * 解約可能な状態のときだけ描画し、Web 加入者にはこの画面で完結する解約ボタンを出す。
  */
 export default function CancelGuide({
   subscription,
@@ -63,33 +68,13 @@ export default function CancelGuide({
   subscription: ProSubscription;
 }) {
   const { platform, status } = subscription;
-  if (platform === null || !CANCELLABLE_STATUSES.includes(status)) return null;
+  if (!CANCELLABLE_STATUSES.includes(status)) return null;
 
-  const content = CANCEL_GUIDE[platform];
-  const isExternal = content.link.href.startsWith("http");
+  const content = platform ? CANCEL_GUIDE[platform] : UNKNOWN_PLATFORM_GUIDE;
 
   return (
-    <section aria-label="解約について" className="rounded-xl bg-sub p-4">
-      <h2 className="text-sm font-bold text-white">解約について</h2>
-      <p className="mt-2 text-sm leading-5 text-zic-300">
-        {content.description}
-      </p>
-      {content.steps.length > 0 ? (
-        <ol className="mt-3 list-decimal space-y-1 rounded-lg bg-main p-3 pl-7 text-sm text-zic-200">
-          {content.steps.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
-      ) : null}
-      <Link
-        href={content.link.href}
-        className="mt-3 inline-block text-sm font-semibold text-[#d08000] underline"
-        {...(isExternal
-          ? { target: "_blank", rel: "noopener noreferrer" }
-          : {})}
-      >
-        {content.link.label}
-      </Link>
-    </section>
+    <GuideSection title="解約について" content={content}>
+      {platform === "web" ? <CancelWebSubscription /> : null}
+    </GuideSection>
   );
 }

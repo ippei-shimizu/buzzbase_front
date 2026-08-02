@@ -1,16 +1,16 @@
 const mockCookieGet = jest.fn();
-const mockGetProStatus = jest.fn();
+const mockGetProStatusResult = jest.fn();
 
 jest.mock("next/headers", () => ({
   cookies: () => Promise.resolve({ get: mockCookieGet }),
 }));
 
 jest.mock("../actions", () => ({
-  getProStatus: () => mockGetProStatus(),
+  getProStatusResult: () => mockGetProStatusResult(),
 }));
 
 import { DEFAULT_PRO_STATUS, type ProStatus } from "@app/types/pro";
-import { getCachedProStatus } from "../proStatus";
+import { getCachedProStatus, getCachedProStatusResult } from "../proStatus";
 
 function setAuthCookies(uid = "user@example.com") {
   mockCookieGet.mockImplementation((key: string) => {
@@ -39,7 +39,7 @@ describe("getCachedProStatus", () => {
 
   it("認証済みなら Pro 状態を返す", async () => {
     setAuthCookies();
-    mockGetProStatus.mockResolvedValueOnce(proStatus);
+    mockGetProStatusResult.mockResolvedValueOnce({ status: "ok", proStatus });
 
     await expect(getCachedProStatus()).resolves.toEqual(proStatus);
   });
@@ -48,7 +48,7 @@ describe("getCachedProStatus", () => {
     mockCookieGet.mockReturnValue(undefined);
 
     await expect(getCachedProStatus()).resolves.toBeNull();
-    expect(mockGetProStatus).not.toHaveBeenCalled();
+    expect(mockGetProStatusResult).not.toHaveBeenCalled();
   });
 
   it("認証 cookie が一部だけのときも API を呼ばずに null を返す", async () => {
@@ -57,6 +57,37 @@ describe("getCachedProStatus", () => {
     );
 
     await expect(getCachedProStatus()).resolves.toBeNull();
-    expect(mockGetProStatus).not.toHaveBeenCalled();
+    expect(mockGetProStatusResult).not.toHaveBeenCalled();
+  });
+
+  it("取得に失敗したときは null を返す", async () => {
+    setAuthCookies();
+    mockGetProStatusResult.mockResolvedValueOnce({ status: "error" });
+
+    await expect(getCachedProStatus()).resolves.toBeNull();
+  });
+});
+
+describe("getCachedProStatusResult", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("認証 cookie が無いときは API を呼ばずに unauthorized を返す", async () => {
+    mockCookieGet.mockReturnValue(undefined);
+
+    await expect(getCachedProStatusResult()).resolves.toEqual({
+      status: "unauthorized",
+    });
+    expect(mockGetProStatusResult).not.toHaveBeenCalled();
+  });
+
+  it("失敗理由を畳まずにそのまま返す", async () => {
+    setAuthCookies();
+    mockGetProStatusResult.mockResolvedValueOnce({ status: "error" });
+
+    await expect(getCachedProStatusResult()).resolves.toEqual({
+      status: "error",
+    });
   });
 });

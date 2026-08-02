@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getCachedProStatus } from "@app/(app)/pro/proStatus";
+import { getCachedProStatusResult } from "@app/(app)/pro/proStatus";
 import Header from "@app/components/header/Header";
 import SubscriptionLoadError from "./_components/SubscriptionLoadError";
 import SubscriptionOverview from "./_components/SubscriptionOverview";
@@ -21,9 +21,9 @@ export default async function AccountSubscriptionPage() {
     redirect("/signup?auth_required=true");
   }
 
-  // 認証済みで null が返るのは API 障害かトークン失効。無料状態にフォールバックすると
-  // 課金中のユーザーに未加入と誤表示するため、取得失敗として扱う。
-  const proStatus = await getCachedProStatus();
+  // 認証済みで取得できないのは API 障害かトークン失効。無料状態にフォールバックすると
+  // 課金中のユーザーに未加入と誤表示するため、失敗理由ごとの導線を出す。
+  const result = await getCachedProStatusResult();
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
@@ -35,10 +35,12 @@ export default async function AccountSubscriptionPage() {
               サブスクリプション管理
             </h1>
             <div className="my-6">
-              {proStatus ? (
-                <SubscriptionOverview subscription={proStatus.subscription} />
+              {result.status === "ok" ? (
+                <SubscriptionOverview
+                  subscription={result.proStatus.subscription}
+                />
               ) : (
-                <SubscriptionLoadError />
+                <SubscriptionLoadError reason={result.status} />
               )}
             </div>
           </div>

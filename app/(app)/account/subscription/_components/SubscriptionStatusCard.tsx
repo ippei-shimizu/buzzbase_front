@@ -7,6 +7,12 @@ import type {
 interface StatusContent {
   label: string;
   description: string;
+  /**
+   * pro_active === false のときに description を差し替える文言。
+   * status を expired へ倒すのは webhook 頼みで定期ジョブが無いため、
+   * 「期限は過ぎたが status は加入中のまま」という状態を必ず通る。
+   */
+  inactiveDescription?: string;
   badgeClass: string;
 }
 
@@ -19,22 +25,30 @@ const STATUS_CONTENT: Record<SubscriptionStatus, StatusContent> = {
   trial: {
     label: "無料トライアル中",
     description: "期間中はいつでも解約できます。",
+    inactiveDescription:
+      "無料トライアル期間は終了しています。引き続き利用するには Pro に加入してください。",
     badgeClass: "bg-[#3b82f6]",
   },
   active: {
     label: "Pro 加入中",
     description: "Pro 機能をすべてご利用いただけます。",
+    inactiveDescription:
+      "ご利用期間は終了しています。お支払い後の反映には時間がかかる場合があります。",
     badgeClass: "bg-[#10b981]",
   },
   cancelled: {
     label: "解約済み（期間内）",
     description: "次回更新日まで Pro 機能を利用できます。",
+    inactiveDescription:
+      "ご利用期間は終了しています。再加入すると引き続き Pro 機能を利用できます。",
     badgeClass: "bg-[#f59e0b]",
   },
   billing_issue: {
     // モバイルは App Store 固定の文言だが、Web には Stripe 加入者も来るため媒体を限定しない。
     label: "決済に問題があります",
     description: "お支払い情報を更新してください。",
+    inactiveDescription:
+      "お支払いを確認できず、Pro 機能のご利用は停止しています。お支払い情報を更新してください。",
     badgeClass: "bg-[#ef4444]",
   },
   expired: {
@@ -78,7 +92,8 @@ function formatDate(iso: string | null): string {
 
 /**
  * Pro 加入状態を表示するカード。
- * status ごとにバッジ色・見出し・説明文を出し分け、期限日と残り日数を添える。
+ * status ごとにバッジ色・見出しを出し分けつつ、説明文と残り日数は
+ * Server が判定した pro_active を単一の真実として扱う。
  */
 export default function SubscriptionStatusCard({
   subscription,
@@ -86,12 +101,19 @@ export default function SubscriptionStatusCard({
   subscription: ProSubscription;
 }) {
   const content = STATUS_CONTENT[subscription.status];
+  const description =
+    !subscription.pro_active && content.inactiveDescription
+      ? content.inactiveDescription
+      : content.description;
   const planLabel = subscription.plan_type
     ? PLAN_LABEL[subscription.plan_type]
     : null;
   const metaLabel = EXPIRY_META_STATUSES.includes(subscription.status)
     ? "利用期限"
     : "次回更新日";
+  // 利用できない状態で「残りN日」を出すと、使えるはずの期間が残っていると誤解させる。
+  const showDaysRemaining =
+    subscription.pro_active && subscription.days_remaining !== null;
 
   return (
     <section
@@ -111,9 +133,7 @@ export default function SubscriptionStatusCard({
         ) : null}
       </div>
 
-      <p className="mt-2 text-sm leading-5 text-zic-300">
-        {content.description}
-      </p>
+      <p className="mt-2 text-sm leading-5 text-zic-300">{description}</p>
 
       <dl className="mt-3 border-t border-zinc-600 pt-2 text-sm">
         <div className="flex items-center justify-between py-1">
@@ -122,11 +142,11 @@ export default function SubscriptionStatusCard({
             {formatDate(subscription.expires_at)}
           </dd>
         </div>
-        {subscription.days_remaining !== null ? (
+        {showDaysRemaining ? (
           <div className="flex items-center justify-between py-1">
             <dt className="text-xs text-zic-400">残り日数</dt>
             <dd className="font-semibold text-white">
-              残り{subscription.days_remaining}日
+              {subscription.days_remaining}日
             </dd>
           </div>
         ) : null}
