@@ -1,8 +1,14 @@
 "use server";
 
+import type { ProGatedResult } from "@app/types/pro";
 import { cookies } from "next/headers";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
+import {
+  EMPTY_COUNT_SITUATIONS,
+  EMPTY_PITCH_TYPES,
+  EMPTY_PITCHER_FACEOFFS,
+} from "./analysisFallbacks";
 
 // 分析系エンドポイント共通のフィルタ。
 export interface AnalysisFilters {
@@ -263,16 +269,16 @@ function buildQuery(filters: AnalysisFilters): string {
   return params.toString();
 }
 
-async function fetchAnalysis<T>(
+async function fetchProGatedAnalysis<T>(
   path: string,
   filters: AnalysisFilters,
   action: string,
   fallback: T,
   extra?: Record<string, string>,
-): Promise<T> {
+): Promise<ProGatedResult<T>> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return fallback;
+    if (!headers) return { status: "ok", data: fallback };
     const params = new URLSearchParams(buildQuery(filters));
     if (extra) {
       for (const [key, value] of Object.entries(extra)) {
@@ -284,12 +290,31 @@ async function fetchAnalysis<T>(
       `${RAILS_API_URL}/api/v2/stats/${path}?${query}`,
       { headers, cache: "no-store" },
     );
-    if (!response.ok) return fallback;
-    return (await response.json()) as T;
+    if (response.status === 403) return { status: "pro_required" };
+    if (!response.ok) return { status: "ok", data: fallback };
+    return { status: "ok", data: (await response.json()) as T };
   } catch (error) {
     captureServerActionError(error, { action });
-    return fallback;
+    return { status: "ok", data: fallback };
   }
+}
+
+// Pro ゲートの無いエンドポイント用。403 も他の失敗と同じくフォールバックに畳む。
+async function fetchAnalysis<T>(
+  path: string,
+  filters: AnalysisFilters,
+  action: string,
+  fallback: T,
+  extra?: Record<string, string>,
+): Promise<T> {
+  const result = await fetchProGatedAnalysis(
+    path,
+    filters,
+    action,
+    fallback,
+    extra,
+  );
+  return result.status === "ok" ? result.data : fallback;
 }
 
 export async function getHeadlineStats(
@@ -360,39 +385,39 @@ export async function getTimingBreakdown(
   );
 }
 
+/** count_situation_average の entitlement が必要。403 は pro_required として返す。 */
 export async function getCountSituations(
   filters: AnalysisFilters = {},
-): Promise<CountSituations> {
-  return fetchAnalysis<CountSituations>(
+): Promise<ProGatedResult<CountSituations>> {
+  return fetchProGatedAnalysis<CountSituations>(
     "count_situations",
     filters,
     "getCountSituations",
-    {
-      first_pitch: { at_bats: 0, hits: 0, batting_average: 0 },
-      favorable_count: { at_bats: 0, hits: 0, batting_average: 0 },
-      pinch_count: { at_bats: 0, hits: 0, batting_average: 0 },
-      total_target_pa: 0,
-    },
+    EMPTY_COUNT_SITUATIONS,
   );
 }
 
+/** pitch_type_average の entitlement が必要。403 は pro_required として返す。 */
 export async function getPitchTypes(
   filters: AnalysisFilters = {},
-): Promise<PitchTypeData> {
-  return fetchAnalysis<PitchTypeData>("pitch_types", filters, "getPitchTypes", {
-    rows: [],
-    total_target_pa: 0,
-  });
+): Promise<ProGatedResult<PitchTypeData>> {
+  return fetchProGatedAnalysis<PitchTypeData>(
+    "pitch_types",
+    filters,
+    "getPitchTypes",
+    EMPTY_PITCH_TYPES,
+  );
 }
 
+/** pitcher_faceoff_average の entitlement が必要。403 は pro_required として返す。 */
 export async function getPitcherFaceoffs(
   filters: AnalysisFilters = {},
-): Promise<PitcherFaceoffData> {
-  return fetchAnalysis<PitcherFaceoffData>(
+): Promise<ProGatedResult<PitcherFaceoffData>> {
+  return fetchProGatedAnalysis<PitcherFaceoffData>(
     "pitcher_faceoffs",
     filters,
     "getPitcherFaceoffs",
-    { rows: [], min_plate_appearances: 0, total_target_pa: 0 },
+    EMPTY_PITCHER_FACEOFFS,
   );
 }
 
@@ -461,7 +486,7 @@ export async function getHitDirections(
   );
 }
 
-/** SSR で初期描画する打撃分析ブロック群（coming soon ゲートの3種は含めない）。 */
+/** 全ユーザー共通で初期描画する打撃分析ブロック群（Pro 限定の3種は含めない）。 */
 export interface AnalysisInitialData {
   headline: HeadlineStats | null;
   runnersSituation: RunnersSituationSummary | null;
@@ -477,7 +502,9 @@ export interface AnalysisInitialData {
 
 /**
  * 打撃分析の初期表示ブロックをまとめて取得する（Server Component から SSR で呼ぶ）。
- * フィルタ既定は通算・全試合、推移は試合単位。coming soon の3種は取得しない。
+ * フィルタ既定は通算・全試合、推移は試合単位。
+ * Pro 限定の3種は entitlement を持つユーザーにだけ投げたいので、ここには含めず
+ * 呼び出し側が Pro 判定と合わせて取得する。
  */
 export async function getInitialAnalysisData(
   filters: AnalysisFilters = { year: "通算", matchType: "" },

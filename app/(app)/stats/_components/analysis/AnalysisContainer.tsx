@@ -1,11 +1,18 @@
 "use client";
 import type { FilterOption } from "../../statsFilterOption";
+import type { ProFeature } from "@app/types/pro";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
+import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
+import { useProGatedFeatures } from "@app/hooks/pro/useProGatedFeatures";
+import { useProGatedResource } from "@app/hooks/pro/useProGatedResource";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
   type BattingTrendGranularity,
   type CountSituations,
+  type PitcherFaceoffData,
+  type PitchTypeData,
   getAdditionalStats,
   getBattingTrend,
   getContactQualities,
@@ -19,8 +26,6 @@ import {
   getPlateAppearanceBreakdown,
   getRunnersSituation,
   getTimingBreakdown,
-  type PitchTypeData,
-  type PitcherFaceoffData,
 } from "../../analysisActions";
 import { AdditionalStatsCard } from "./AdditionalStatsCard";
 import { AnalysisFilters } from "./AnalysisFilters";
@@ -33,19 +38,17 @@ import { PitcherAttributeSummary } from "./PitcherAttributeSummary";
 import { PitcherFaceoffList } from "./PitcherFaceoffList";
 import { PitchTypeCard } from "./PitchTypeCard";
 import { PlateAppearanceDonut } from "./PlateAppearanceDonut";
-import { ProComingSoonCard } from "./ProComingSoonCard";
+import { ProSampleSection } from "./ProSampleSection";
+import { ProSectionPlaceholder } from "./ProSectionPlaceholder";
 import {
-  CountSituationDummy,
-  PitcherFaceoffDummy,
-  PitchTypeDummy,
-} from "./ProComingSoonDummies";
-import { ProComingSoonHitDirectionField } from "./ProComingSoonHitDirectionField";
+  SAMPLE_COUNT_SITUATIONS,
+  SAMPLE_HIT_DIRECTIONS,
+  SAMPLE_PITCH_TYPES,
+  SAMPLE_PITCHER_FACEOFFS,
+} from "./proStatsSampleData";
 import { RunnersSituationCard } from "./RunnersSituationCard";
 import { SprayChart, type SprayChartMode } from "./SprayChart";
 import { TimingCard } from "./TimingCard";
-
-// Pro プラン機能のリリース前は coming soon 表示にする（mobile と同じ運用）。
-const PRO_FEATURES_COMING_SOON: boolean = true;
 
 function buildYearOptions(): FilterOption[] {
   const currentYear = new Date().getFullYear();
@@ -57,9 +60,19 @@ function buildYearOptions(): FilterOption[] {
   return options;
 }
 
+/** SSR で解決した Pro 限定ブロックのデータ。閲覧できない機能は null。 */
+export interface ProAnalysisData {
+  countSituations: CountSituations | null;
+  pitchTypes: PitchTypeData | null;
+  pitcherFaceoffs: PitcherFaceoffData | null;
+}
+
 interface AnalysisContainerProps {
   /** SSR で取得した初期表示データ。マウント時はこれを使い再取得しない。 */
   initialData: AnalysisInitialData;
+  initialProData: ProAnalysisData;
+  /** SSR で閲覧可と判定された Pro 機能。クライアント判定が確定するまでの初期値。 */
+  initialProFeatures: readonly ProFeature[];
   /** サーバーで取得したシーズン/大会のフィルタ選択肢。 */
   seasonOptions: FilterOption[];
   tournamentOptions: FilterOption[];
@@ -68,6 +81,8 @@ interface AnalysisContainerProps {
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
 export function AnalysisContainer({
   initialData,
+  initialProData,
+  initialProFeatures,
   seasonOptions,
   tournamentOptions,
 }: AnalysisContainerProps) {
@@ -91,21 +106,6 @@ export function AnalysisContainer({
   const [timingBreakdown, setTimingBreakdown] = useState(
     initialData.timingBreakdown,
   );
-  const [countSituations, setCountSituations] = useState<CountSituations>({
-    first_pitch: { at_bats: 0, hits: 0, batting_average: 0 },
-    favorable_count: { at_bats: 0, hits: 0, batting_average: 0 },
-    pinch_count: { at_bats: 0, hits: 0, batting_average: 0 },
-    total_target_pa: 0,
-  });
-  const [pitchTypes, setPitchTypes] = useState<PitchTypeData>({
-    rows: [],
-    total_target_pa: 0,
-  });
-  const [pitcherFaceoffs, setPitcherFaceoffs] = useState<PitcherFaceoffData>({
-    rows: [],
-    min_plate_appearances: 0,
-    total_target_pa: 0,
-  });
   const [pitcherAttributes, setPitcherAttributes] = useState(
     initialData.pitcherAttributes,
   );
@@ -119,11 +119,42 @@ export function AnalysisContainer({
   const [isTrendPending, startTrendTransition] = useTransition();
   const [yearOptions] = useState(buildYearOptions);
 
+  const { canView, unwrap } = useProGatedFeatures(initialProFeatures);
+  const canViewHitDirectionDetail = canView("hit_direction_average");
+  const canViewCountSituations = canView("count_situation_average");
+  const canViewPitchTypes = canView("pitch_type_average");
+  const canViewPitcherFaceoffs = canView("pitcher_faceoff_average");
+
+  const countSituations = useProGatedResource({
+    feature: "count_situation_average",
+    canView: canViewCountSituations,
+    initialData: initialProData.countSituations,
+    criteria: filters,
+    fetcher: getCountSituations,
+    unwrap,
+  });
+  const pitchTypes = useProGatedResource({
+    feature: "pitch_type_average",
+    canView: canViewPitchTypes,
+    initialData: initialProData.pitchTypes,
+    criteria: filters,
+    fetcher: getPitchTypes,
+    unwrap,
+  });
+  const pitcherFaceoffs = useProGatedResource({
+    feature: "pitcher_faceoff_average",
+    canView: canViewPitcherFaceoffs,
+    initialData: initialProData.pitcherFaceoffs,
+    criteria: filters,
+    fetcher: getPitcherFaceoffs,
+    unwrap,
+  });
+
   // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
   const didInitTrendRef = useRef(false);
 
-  // フィルタ変更時のみ、メイン指標と打球詳細系（coming soon ゲートの3種を除く）を
+  // フィルタ変更時のみ、メイン指標と打球詳細系（Pro 限定の3種を除く）を
   // まとめて再取得する。useTransition の isPending でカードを薄く表示する。
   useEffect(() => {
     if (!didInitRef.current) {
@@ -168,25 +199,6 @@ export function AnalysisContainer({
       active = false;
     };
   }, [filters, startRefetch]);
-
-  // coming soon でゲートする3種は SSR せず、解禁時のみクライアントで取得する。
-  useEffect(() => {
-    if (PRO_FEATURES_COMING_SOON) return;
-    let active = true;
-    Promise.all([
-      getCountSituations(filters),
-      getPitchTypes(filters),
-      getPitcherFaceoffs(filters),
-    ]).then(([counts, pitches, faceoffs]) => {
-      if (!active) return;
-      setCountSituations(counts);
-      setPitchTypes(pitches);
-      setPitcherFaceoffs(faceoffs);
-    });
-    return () => {
-      active = false;
-    };
-  }, [filters]);
 
   // 推移グラフは粒度/フィルタ切替で独立に再取得する（初回は initialData を使う）。
   // 専用 transition で更新が終わるまでグラフを dim し、古い値が一瞬出るのを防ぐ。
@@ -240,15 +252,16 @@ export function AnalysisContainer({
           mode={sprayChartMode}
           onModeChange={setSprayChartMode}
         />
-        {PRO_FEATURES_COMING_SOON ? (
-          <ProComingSoonCard
-            title="方向別の打率"
-            description="打球を打った方向ごとの打率をヒートマップで可視化します"
-          >
-            <ProComingSoonHitDirectionField />
-          </ProComingSoonCard>
-        ) : (
+        {canViewHitDirectionDetail ? (
           <HitDirectionTable directions={hitDirections.directions} />
+        ) : (
+          // 暗幕越しでも架空の打率は読めるため、他3ブロックと同じ注記を暗幕の外に出す。
+          <div className="flex flex-col gap-y-2">
+            <SampleDataLabel />
+            <ProUpsellOverlay feature="hit_direction_average">
+              <HitDirectionTable directions={SAMPLE_HIT_DIRECTIONS} />
+            </ProUpsellOverlay>
+          </div>
         )}
         <PlateAppearanceDonut
           breakdown={plateBreakdown}
@@ -265,42 +278,48 @@ export function AnalysisContainer({
           breakdown={timingBreakdown.breakdown}
           total={timingBreakdown.total}
         />
-        {PRO_FEATURES_COMING_SOON ? (
-          <ProComingSoonCard
-            title="カウント別の打率"
-            description="初球・有利カウント・追い込みなど、カウント状況別の打率がわかります"
-          >
-            <CountSituationDummy />
-          </ProComingSoonCard>
-        ) : (
+        {countSituations ? (
           <CountSituationCards data={countSituations} />
-        )}
-        {PRO_FEATURES_COMING_SOON ? (
-          <ProComingSoonCard
-            title="球種別の打率"
-            description="ストレートや変化球など、球種ごとの得意・苦手が分析できます"
-          >
-            <PitchTypeDummy />
-          </ProComingSoonCard>
+        ) : canViewCountSituations ? (
+          <ProSectionPlaceholder label="カウント別の打率" />
         ) : (
+          <ProSampleSection feature="count_situation_average">
+            <CountSituationCards data={SAMPLE_COUNT_SITUATIONS} />
+          </ProSampleSection>
+        )}
+        {pitchTypes ? (
           <PitchTypeCard
             rows={pitchTypes.rows}
             totalTargetPa={pitchTypes.total_target_pa}
           />
-        )}
-        {PRO_FEATURES_COMING_SOON ? (
-          <ProComingSoonCard
-            title="対戦投手別"
-            description="対戦した投手ごとの打撃成績を一覧で確認できます"
-          >
-            <PitcherFaceoffDummy />
-          </ProComingSoonCard>
+        ) : canViewPitchTypes ? (
+          <ProSectionPlaceholder label="球種別の打率" />
         ) : (
+          <ProSampleSection feature="pitch_type_average">
+            <PitchTypeCard
+              rows={SAMPLE_PITCH_TYPES.rows}
+              totalTargetPa={SAMPLE_PITCH_TYPES.total_target_pa}
+            />
+          </ProSampleSection>
+        )}
+        {pitcherFaceoffs ? (
           <PitcherFaceoffList
             rows={pitcherFaceoffs.rows}
             minPlateAppearances={pitcherFaceoffs.min_plate_appearances}
             totalTargetPa={pitcherFaceoffs.total_target_pa}
           />
+        ) : canViewPitcherFaceoffs ? (
+          <ProSectionPlaceholder label="対戦投手別" />
+        ) : (
+          <ProSampleSection feature="pitcher_faceoff_average">
+            <PitcherFaceoffList
+              rows={SAMPLE_PITCHER_FACEOFFS.rows}
+              minPlateAppearances={
+                SAMPLE_PITCHER_FACEOFFS.min_plate_appearances
+              }
+              totalTargetPa={SAMPLE_PITCHER_FACEOFFS.total_target_pa}
+            />
+          </ProSampleSection>
         )}
         <PitcherAttributeSummary data={pitcherAttributes} />
       </div>

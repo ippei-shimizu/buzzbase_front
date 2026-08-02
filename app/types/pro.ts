@@ -95,6 +95,17 @@ export interface EntitlementCheck {
   granted: boolean;
 }
 
+/**
+ * Pro 限定エンドポイントを叩く Server Action の戻り値。
+ * back は entitlement が無いと 403 + `{ error: "..." }` を返すため、
+ * クライアント側の entitlement 判定がサーバーと食い違ったケースを検知して
+ * Paywall へ倒せるよう、403 だけをデータ取得失敗と区別する。
+ * 403 以外の失敗は status:"ok" + フォールバック値に畳み、空状態として描画させる。
+ */
+export type ProGatedResult<T> =
+  | { status: "ok"; data: T }
+  | { status: "pro_required" };
+
 export interface EntitlementsResponse {
   entitlements: EntitlementCheck[];
 }
