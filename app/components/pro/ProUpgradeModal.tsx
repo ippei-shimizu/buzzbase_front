@@ -20,6 +20,10 @@ import {
   DEFAULT_PAYWALL_COPY,
   PRO_PAYWALL_COPY,
 } from "@app/components/pro/paywallCopy";
+import { useFeatureFlag } from "@app/hooks/featureFlags/useFeatureFlag";
+
+const CHECKOUT_SUSPENDED_MESSAGE =
+  "現在、新規のお申し込みを停止しています。再開までしばらくお待ちください。";
 
 const FEATURE_HIGHLIGHTS = [
   { icon: "🚫", label: "広告非表示" },
@@ -70,6 +74,8 @@ export default function ProUpgradeModal({
   const [plan, setPlan] = useState<ProPlan>(defaultPlan ?? "yearly");
   const [isPending, startTransition] = useTransition();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  // このモーダルは全ページに常設されているため、開くまでは flag を引かない。
+  const proFeatures = useFeatureFlag("pro_features", { skip: !isOpen });
 
   const copy = (trigger && PRO_PAYWALL_COPY[trigger]) ?? DEFAULT_PAYWALL_COPY;
 
@@ -85,6 +91,7 @@ export default function ProUpgradeModal({
 
       const messages: Record<typeof result.error, string> = {
         unauthorized: "ログインしてからお試しください",
+        feature_disabled: CHECKOUT_SUSPENDED_MESSAGE,
         already_subscribed: "すでに Pro に加入済みです",
         invalid_plan: "プランの指定が不正です",
         stripe_api_error:
@@ -96,6 +103,9 @@ export default function ProUpgradeModal({
   };
 
   const ctaBusy = isPending || isRedirecting;
+  // 「判定不能」で CTA を隠すと、cookie が届かないだけのユーザーに販売停止を誤って告知する。
+  // 実際の決済は startProCheckout 側で改めて flag を検証しているので、ここは確定時のみ畳む。
+  const isCheckoutSuspended = proFeatures === "disabled";
 
   return (
     <Modal
@@ -210,17 +220,26 @@ export default function ProUpgradeModal({
         </ModalBody>
 
         <ModalFooter className="flex-col gap-2">
-          <Button
-            color="primary"
-            onPress={handleCheckout}
-            isDisabled={ctaBusy}
-            isLoading={ctaBusy}
-            fullWidth
-            className="font-bold"
-            data-testid="pro-upgrade-cta"
-          >
-            7 日間の無料トライアルを始める
-          </Button>
+          {isCheckoutSuspended ? (
+            <p
+              role="status"
+              className="w-full rounded-medium bg-sub px-3 py-3 text-center text-sm text-gray-200"
+            >
+              {CHECKOUT_SUSPENDED_MESSAGE}
+            </p>
+          ) : (
+            <Button
+              color="primary"
+              onPress={handleCheckout}
+              isDisabled={ctaBusy}
+              isLoading={ctaBusy}
+              fullWidth
+              className="font-bold"
+              data-testid="pro-upgrade-cta"
+            >
+              7 日間の無料トライアルを始める
+            </Button>
+          )}
           <Button
             variant="light"
             onPress={onClose}
