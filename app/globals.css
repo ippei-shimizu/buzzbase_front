@@ -3,14 +3,20 @@
 @config "../tailwind.config.ts";
 
 html {
-  --smart-banner-height: 0px;
+  /* 画面上部に固定表示するバナーが、自身の実測高さを書き込む */
+  --smart-app-banner-height: 0px;
+  --pro-banner-height: 0px;
+  /* 固定ヘッダーの top と本文の padding-top が参照する、上部固定バナーの合計高さ */
+  --top-banner-offset: calc(
+    var(--smart-app-banner-height) + var(--pro-banner-height)
+  );
   background-color: #2e2e2e !important;
 }
 
 body {
   font-weight: 400;
   color: #f4f4f4;
-  padding-top: var(--smart-banner-height, 0px);
+  padding-top: var(--top-banner-offset, 0px);
   --mantine-color-text: #f4f4f4;
   --mantine-color-body: #f4f4f4;
 }

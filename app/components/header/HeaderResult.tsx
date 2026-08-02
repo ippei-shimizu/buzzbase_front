@@ -80,7 +80,7 @@ export default function HeaderResult({
   return (
     <>
       {/* 背景透過のまま全幅に広げるため、ヘッダー自体はクリックを透過させる。 */}
-      <header className="py-2 px-3 fixed top-[var(--smart-banner-height,0px)] w-full bg-transparent z-50 pointer-events-none">
+      <header className="py-2 px-3 fixed top-[var(--top-banner-offset,0px)] w-full bg-transparent z-50 pointer-events-none">
         <div className="flex items-center justify-between max-w-[692px] mx-auto lg:m-[0_auto_0_28%]">
           <button
             type="button"
