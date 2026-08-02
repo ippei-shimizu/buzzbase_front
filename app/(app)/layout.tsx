@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import Footer from "@app/components/footer/Footer";
 import NavigationMenu from "@app/components/header/NavigationMenu";
+import ProStatusBanners from "@app/components/pro/ProStatusBanners";
 import { ProStatusProvider } from "@app/components/pro/ProStatusProvider";
 import { AuthProvider } from "@app/contexts/useAuthContext";
 import { UserProvider } from "@app/contexts/userContext";
@@ -27,6 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Providers>
           <ProStatusProvider>
             <SmartAppBanner />
+            <ProStatusBanners />
             <GameRecordStorageCleanup />
             {children}
             <NavigationMenu />
