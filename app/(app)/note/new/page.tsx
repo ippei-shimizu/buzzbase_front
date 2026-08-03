@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getReflectionTemplates } from "@app/services/v2/reflectionTemplateService";
 import NoteCreateForm from "./_components/NoteCreateForm";
 
 export default async function NoteNew() {
@@ -7,5 +8,6 @@ export default async function NoteNew() {
   if (!cookieStore.get("access-token")) {
     redirect("/signup?auth_required=true");
   }
-  return <NoteCreateForm />;
+  const templatesResult = await getReflectionTemplates();
+  return <NoteCreateForm templatesResult={templatesResult} />;
 }

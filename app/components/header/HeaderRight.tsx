@@ -56,6 +56,16 @@ export default function HeaderRight() {
                   野球ノート
                 </DropdownItem>
                 <DropdownItem
+                  key="reflection-templates"
+                  as={Link}
+                  href="/note/templates"
+                  startContent={
+                    <NoteIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  振り返りテンプレ
+                </DropdownItem>
+                <DropdownItem
                   key="practice-menus"
                   as={Link}
                   href="/practice/menus"

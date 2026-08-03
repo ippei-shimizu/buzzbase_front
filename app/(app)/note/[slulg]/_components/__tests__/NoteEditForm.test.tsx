@@ -30,6 +30,8 @@ jest.mock("next/dynamic", () => () => {
 });
 
 import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
+import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
+import type { FetchResult } from "@app/services/v2/requests";
 import type ReactModule from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { updateBaseballNote } from "@app/services/v2/baseballNoteService";
@@ -59,6 +61,29 @@ function sentPayload() {
   return mockUpdateBaseballNote.mock.calls[0][1];
 }
 
+const templatesResult: FetchResult<ReflectionTemplate[]> = {
+  status: "ok",
+  data: [
+    {
+      id: 3,
+      title: "試合の振り返り",
+      questions: ["課題"],
+      is_preset: true,
+      is_default: false,
+      sort_order: 1,
+    },
+  ],
+};
+
+function renderForm(overrides: Partial<BaseballNoteV2> = {}) {
+  return render(
+    <NoteEditForm
+      note={{ ...note, ...overrides }}
+      templatesResult={templatesResult}
+    />,
+  );
+}
+
 describe("NoteEditForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,7 +91,7 @@ describe("NoteEditForm", () => {
   });
 
   it("ノートの日付・タイトル・メモを初期表示する", () => {
-    render(<NoteEditForm note={note} />);
+    renderForm();
 
     expect(screen.getByLabelText("タイトル")).toHaveValue("気づき");
     expect(screen.getByLabelText("日付")).toHaveValue("2026-08-01");
@@ -74,7 +99,7 @@ describe("NoteEditForm", () => {
   });
 
   it("タイトルだけ変更した場合、title キーだけを送る（紐付けキーは送らない）", async () => {
-    render(<NoteEditForm note={note} />);
+    renderForm();
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
       target: { value: "更新後タイトル" },
@@ -93,7 +118,7 @@ describe("NoteEditForm", () => {
   });
 
   it("メモだけ変更した場合、memo キーだけを送る", async () => {
-    render(<NoteEditForm note={note} />);
+    renderForm();
 
     fireEvent.change(screen.getByLabelText("メモ"), {
       target: { value: "書き換えたメモ" },
@@ -107,7 +132,7 @@ describe("NoteEditForm", () => {
   });
 
   it("タイトルを空にした場合は null を送る", async () => {
-    render(<NoteEditForm note={note} />);
+    renderForm();
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
       target: { value: "" },
@@ -121,7 +146,7 @@ describe("NoteEditForm", () => {
   });
 
   it("変更が無ければ更新リクエストを送らずに一覧へ戻る", async () => {
-    render(<NoteEditForm note={note} />);
+    renderForm();
 
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
@@ -134,7 +159,7 @@ describe("NoteEditForm", () => {
       ok: false,
       errors: ["タグ機能は Pro プラン限定です"],
     });
-    render(<NoteEditForm note={note} />);
+    renderForm();
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
       target: { value: "更新後" },
@@ -148,11 +173,136 @@ describe("NoteEditForm", () => {
   });
 
   it("v1 のプレーンテキスト memo でも、編集しなければ更新を送らない", async () => {
-    render(<NoteEditForm note={{ ...note, memo: "素振り30分" }} />);
+    renderForm({ memo: "素振り30分" });
 
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
     expect(mockUpdateBaseballNote).not.toHaveBeenCalled();
+  });
+
+  describe("振り返りテンプレ", () => {
+    const synthesizedNote: Partial<BaseballNoteV2> = {
+      memo: JSON.stringify([
+        {
+          type: "paragraph",
+          children: [{ text: "【課題】\n引きつけ\n\n【次やること】\n素振り" }],
+        },
+      ]),
+      reflection_answers: [
+        { question: "課題", answer: "引きつけ" },
+        { question: "次やること", answer: "素振り" },
+      ],
+    };
+
+    it("保存済みの回答を問いごとに表示する", () => {
+      renderForm();
+
+      expect(screen.getByLabelText("課題")).toHaveValue("引きつけ");
+    });
+
+    it("テンプレ名を見出しに出し、テンプレ選択チップは出さない（固定する）", () => {
+      renderForm();
+
+      expect(screen.getByText("振り返り（試合の振り返り）")).toBeVisible();
+      expect(
+        screen.queryByRole("group", { name: "振り返りテンプレ" }),
+      ).toBeNull();
+      expect(screen.queryByRole("button", { name: "なし" })).toBeNull();
+    });
+
+    it("合成されたメモは自由メモ欄へ流し込まない（回答欄との二重表示を防ぐ）", () => {
+      renderForm(synthesizedNote);
+
+      expect(screen.getByLabelText("メモ")).toHaveValue(
+        '[{"type":"paragraph","children":[{"text":""}]}]',
+      );
+      expect(screen.getByLabelText("課題")).toHaveValue("引きつけ");
+      expect(screen.getByLabelText("次やること")).toHaveValue("素振り");
+    });
+
+    it("合成メモのノートを開いただけでは更新を送らない", async () => {
+      renderForm(synthesizedNote);
+
+      fireEvent.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+      expect(mockUpdateBaseballNote).not.toHaveBeenCalled();
+    });
+
+    it("回答を編集すると reflection_answers を送り、テンプレ ID は送らない", async () => {
+      renderForm();
+
+      fireEvent.change(screen.getByLabelText("課題"), {
+        target: { value: "体の開き" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() =>
+        expect(mockUpdateBaseballNote).toHaveBeenCalledTimes(1),
+      );
+      expect(sentPayload().reflection_answers).toEqual([
+        { question: "課題", answer: "体の開き" },
+      ]);
+      expect(sentPayload()).not.toHaveProperty("reflection_template_id");
+    });
+
+    it("合成メモのノートは回答を編集するとメモ本文も作り直す（回答との乖離を防ぐ）", async () => {
+      renderForm(synthesizedNote);
+
+      fireEvent.change(screen.getByLabelText("次やること"), {
+        target: { value: "ティー" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() =>
+        expect(mockUpdateBaseballNote).toHaveBeenCalledTimes(1),
+      );
+      expect(sentPayload().memo).toBe(
+        JSON.stringify([
+          {
+            type: "paragraph",
+            children: [
+              { text: "【課題】\n引きつけ\n\n【次やること】\nティー" },
+            ],
+          },
+        ]),
+      );
+    });
+
+    it("自由メモを書いたノートは回答を編集してもメモ本文を上書きしない", async () => {
+      renderForm();
+
+      fireEvent.change(screen.getByLabelText("課題"), {
+        target: { value: "体の開き" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() =>
+        expect(mockUpdateBaseballNote).toHaveBeenCalledTimes(1),
+      );
+      expect(sentPayload()).not.toHaveProperty("memo");
+    });
+
+    it("回答を全て消した場合は空配列を明示して送る", async () => {
+      renderForm();
+
+      fireEvent.change(screen.getByLabelText("課題"), {
+        target: { value: "" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() =>
+        expect(mockUpdateBaseballNote).toHaveBeenCalledTimes(1),
+      );
+      expect(sentPayload().reflection_answers).toEqual([]);
+    });
+
+    it("回答が無いノートでは振り返りの欄自体を出さない", () => {
+      renderForm({ reflection_answers: [], reflection_template_id: null });
+
+      expect(screen.queryByLabelText("課題")).toBeNull();
+      expect(screen.queryByText(/振り返り/)).toBeNull();
+    });
   });
 });

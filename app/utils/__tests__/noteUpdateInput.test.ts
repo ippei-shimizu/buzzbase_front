@@ -38,6 +38,41 @@ describe("buildNoteUpdateInput", () => {
     expect(input).toEqual({ title: null });
   });
 
+  it("テンプレ回答を変えたときだけ reflection_answers を送る", () => {
+    const withAnswers: NoteEditableFields = {
+      ...initial,
+      reflectionAnswers: [{ question: "課題", answer: "引きつけ" }],
+    };
+    expect(buildNoteUpdateInput(withAnswers, { ...withAnswers })).toEqual({});
+    expect(
+      buildNoteUpdateInput(withAnswers, {
+        ...withAnswers,
+        reflectionAnswers: [{ question: "課題", answer: "体の開き" }],
+      }),
+    ).toEqual({
+      reflection_answers: [{ question: "課題", answer: "体の開き" }],
+    });
+  });
+
+  it("回答を全て消したときは空配列を明示して送る（未送信では消えないため）", () => {
+    const withAnswers: NoteEditableFields = {
+      ...initial,
+      reflectionAnswers: [{ question: "課題", answer: "引きつけ" }],
+    };
+    expect(
+      buildNoteUpdateInput(withAnswers, {
+        ...withAnswers,
+        reflectionAnswers: [],
+      }),
+    ).toEqual({ reflection_answers: [] });
+  });
+
+  it("回答を扱わない呼び出し元には reflection_answers キーを生やさない", () => {
+    expect(
+      buildNoteUpdateInput(initial, { ...initial, title: "更新後" }),
+    ).not.toHaveProperty("reflection_answers");
+  });
+
   it("紐付け・タグのキーは決して生やさない（既存の紐付けを消さない）", () => {
     const input = buildNoteUpdateInput(initial, {
       date: "2026-08-02",
@@ -47,6 +82,7 @@ describe("buildNoteUpdateInput", () => {
     expect(input).not.toHaveProperty("game_result_ids");
     expect(input).not.toHaveProperty("improvement_theme_ids");
     expect(input).not.toHaveProperty("tag_ids");
+    expect(input).not.toHaveProperty("reflection_template_id");
     expect(Object.keys(input).sort()).toEqual(["date", "memo", "title"]);
   });
 });

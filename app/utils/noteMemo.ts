@@ -56,6 +56,35 @@ export const isReflectionMemo = (
   return memoText === buildReflectionMemoText(answers) || memoText === legacy;
 };
 
+/**
+ * 問いの並び順どおりに回答を組み立てる。未入力（空白のみ）の問いは落とす。
+ * 回答は問い文をキーにしたマップで持つため、問いを出し入れしても他の回答が消えない。
+ */
+export const buildAnswerList = (
+  questions: string[],
+  answers: Record<string, string>,
+): ReflectionAnswer[] =>
+  questions
+    .map((question) => ({ question, answer: (answers[question] ?? "").trim() }))
+    .filter((item) => item.answer.length > 0);
+
+/**
+ * 保存する memo を決める。自由メモが空のときだけテンプレ回答から本文を合成する。
+ *
+ * 一覧のプレビューは memo から作られるため、テンプレだけで書いたノートが
+ * 「本文なし」に見えないよう合成する。自由メモが入力されていればそちらを正とし、
+ * 合成で上書きしない（ユーザーが書いた本文を失わせない）。
+ */
+export const resolveNoteMemo = (
+  memo: string,
+  answers: ReflectionAnswer[],
+): string => {
+  if (extractMemoText(memo).trim() !== "") return memo;
+  return buildMemoJson(
+    answers.length > 0 ? buildReflectionMemoText(answers) : "",
+  );
+};
+
 const isMemoParagraph = (value: unknown): value is MemoParagraph => {
   if (typeof value !== "object" || value === null) return false;
   const children = (value as { children?: unknown }).children;

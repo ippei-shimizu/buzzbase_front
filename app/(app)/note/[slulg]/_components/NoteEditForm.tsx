@@ -1,6 +1,8 @@
 "use client";
 
 import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
+import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
+import type { FetchResult } from "@app/services/v2/requests";
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -8,9 +10,16 @@ import { useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import NoteMenu from "@app/components/note/NoteMenu";
+import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { updateBaseballNote } from "@app/services/v2/baseballNoteService";
-import { parseMemoToSlateValue } from "@app/utils/noteMemo";
+import {
+  buildAnswerList,
+  extractMemoText,
+  isReflectionMemo,
+  parseMemoToSlateValue,
+  resolveNoteMemo,
+} from "@app/utils/noteMemo";
 import {
   buildNoteUpdateInput,
   hasNoteChanges,
@@ -23,31 +32,72 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
   ),
 });
 
-export default function NoteEditForm({ note }: { note: BaseballNoteV2 }) {
+interface NoteEditFormProps {
+  note: BaseballNoteV2;
+  templatesResult: FetchResult<ReflectionTemplate[]>;
+}
+
+export default function NoteEditForm({
+  note,
+  templatesResult,
+}: NoteEditFormProps) {
   const router = useRouter();
+  // 回答から自動合成された memo は回答欄と同じ内容が並ぶため、自由メモ欄へは流し込まない。
+  const isSynthesizedMemo = isReflectionMemo(
+    extractMemoText(note.memo),
+    note.reflection_answers,
+  );
   // エディタが最初の onChange で書き戻す形と揃えておくことで、カーソル移動だけで
   // 「変更あり」と判定されるのを防ぐ（v1 のプレーンテキスト memo でも同様）。
-  const initialMemo = useMemo(
-    () => JSON.stringify(parseMemoToSlateValue(note.memo)),
-    [note.memo],
-  );
-  const initialValues = useMemo(
-    () => ({ date: note.date, title: note.title ?? "", memo: initialMemo }),
-    [note.date, note.title, initialMemo],
+  const editorMemo = useMemo(
+    () =>
+      JSON.stringify(
+        parseMemoToSlateValue(isSynthesizedMemo ? null : note.memo),
+      ),
+    [note.memo, isSynthesizedMemo],
   );
 
-  const [date, setDate] = useState(initialValues.date);
-  const [title, setTitle] = useState(initialValues.title);
-  const [memo, setMemo] = useState(initialValues.memo);
+  // テンプレは更新のたびに id が変わり削除もされうるため、問いはノートに保存済みの回答を
+  // 正とする（テンプレから引き直すと過去ノートの問いが後から書き換わってしまう）。
+  const questions = useMemo(
+    () => note.reflection_answers.map((item) => item.question),
+    [note.reflection_answers],
+  );
+  const initialAnswerMap = useMemo(
+    () =>
+      Object.fromEntries(
+        note.reflection_answers.map((item) => [item.question, item.answer]),
+      ),
+    [note.reflection_answers],
+  );
+
+  const [date, setDate] = useState(note.date);
+  const [title, setTitle] = useState(note.title ?? "");
+  const [memo, setMemo] = useState(editorMemo);
+  const [answers, setAnswers] =
+    useState<Record<string, string>>(initialAnswerMap);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
-  // 送るのは変更したキーだけ。試合 / 課題 / タグの紐付けはこの画面で編集しないため
-  // キー自体を送らず、back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
+  const initialAnswers = buildAnswerList(questions, initialAnswerMap);
+  const currentAnswers = buildAnswerList(questions, answers);
+  const initialValues = {
+    date: note.date,
+    title: note.title ?? "",
+    // 初期値も現在値と同じ手順で導出する。そうしないと合成メモのノートは開いただけで
+    // 「変更あり」と判定されてしまう。
+    memo: resolveNoteMemo(editorMemo, initialAnswers),
+    reflectionAnswers: initialAnswers,
+  };
+
+  // 送るのは変更したキーだけ。試合 / 課題 / タグの紐付けとテンプレ ID はこの画面で
+  // 編集しないためキー自体を送らず、back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
   const updateInput = buildNoteUpdateInput(initialValues, {
     date,
     title,
-    memo,
+    // 回答を編集したら合成メモも作り直す。メモだけ古い回答のまま残すと本文と回答が食い違う。
+    memo: resolveNoteMemo(memo, currentAnswers),
+    reflectionAnswers: currentAnswers,
   });
   const hasChanges = hasNoteChanges(updateInput);
 
@@ -55,6 +105,9 @@ export default function NoteEditForm({ note }: { note: BaseballNoteV2 }) {
     setErrors(newErrors);
     setTimeout(() => setErrors([]), 2000);
   };
+
+  const handleChangeAnswer = (question: string, answer: string) =>
+    setAnswers((prev) => ({ ...prev, [question]: answer }));
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -112,8 +165,16 @@ export default function NoteEditForm({ note }: { note: BaseballNoteV2 }) {
                   />
                 </div>
                 <div className="mt-10 w-full h-full">
-                  <NoteEditor memo={initialValues.memo} setMemo={setMemo} />
+                  <NoteEditor memo={editorMemo} setMemo={setMemo} />
                 </div>
+                <ReflectionTemplateSection
+                  templatesResult={templatesResult}
+                  selectedTemplateId={note.reflection_template_id}
+                  questions={questions}
+                  answers={answers}
+                  onChangeAnswer={handleChangeAnswer}
+                  locked
+                />
               </div>
             </form>
           </div>
