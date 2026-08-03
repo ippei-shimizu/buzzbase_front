@@ -5,13 +5,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import { useGroupNavBadge } from "@app/hooks/onboarding/useGroupNavBadge";
 import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 import NavigationItems from "./NavigationItems";
+
+const GROUPS_HREF = "/groups";
 
 export default function NavigationMenu() {
   const pathName = usePathname();
   const { isLoggedIn } = useAuthContext();
   const navigationItems = NavigationItems();
+  const { showBadge: showGroupBadge, markSeen: markGroupBadgeSeen } =
+    useGroupNavBadge();
 
   const handleAuthRequiredClick = () => {
     if (!isLoggedIn) {
@@ -57,32 +62,51 @@ export default function NavigationMenu() {
             />
           </Link>
           <ul className="flex items-center justify-around max-w-[720px] mx-auto lg:grid-cols-1 lg:ml-0 lg:h-full lg:items-start lg:gap-y-5 lg:flex-col lg:justify-start">
-            {navigationItems.map((item, index) => (
-              <li key={index}>
-                <Link
-                  href={item.href}
-                  onClick={
-                    item.authRequired ? handleAuthRequiredClick : undefined
-                  }
-                  className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
-                    isActive(pathName, item.href)
-                      ? `text-yellow-500`
-                      : `text-white`
-                  } lg:flex-row lg:text-base lg:w-fit lg:font-bold lg:gap-x-5 [&>svg]:lg:w-6 [&>svg]:lg:h-6 [&>svg]:lg:mr-4`}
-                >
-                  <item.icon
-                    fill={isActive(pathName, item.href) ? `#e08e0a` : `#F4F4F4`}
-                    filled={
-                      isActive(pathName, item.href) ? `#e08e0a` : `#F4F4F4`
+            {navigationItems.map((item, index) => {
+              const isGroupsItem = item.href === GROUPS_HREF;
+
+              return (
+                <li key={index}>
+                  <Link
+                    href={item.href}
+                    onClick={
+                      isGroupsItem
+                        ? markGroupBadgeSeen
+                        : item.authRequired
+                          ? handleAuthRequiredClick
+                          : undefined
                     }
-                    height="22"
-                    width="22"
-                    label=""
-                  />
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+                    className={`flex items-center min-w-[50px] flex-col gap-y-1 px-0 bg-transparent overflow-visible text-[10px] font-medium ${
+                      isActive(pathName, item.href)
+                        ? `text-yellow-500`
+                        : `text-white`
+                    } lg:flex-row lg:text-base lg:w-fit lg:font-bold lg:gap-x-5 [&_svg]:lg:w-6 [&_svg]:lg:h-6 [&_svg]:lg:mr-4`}
+                  >
+                    <span className="relative inline-flex">
+                      <item.icon
+                        fill={
+                          isActive(pathName, item.href) ? `#e08e0a` : `#F4F4F4`
+                        }
+                        filled={
+                          isActive(pathName, item.href) ? `#e08e0a` : `#F4F4F4`
+                        }
+                        height="22"
+                        width="22"
+                        label=""
+                      />
+                      {isGroupsItem && showGroupBadge ? (
+                        <span
+                          role="status"
+                          aria-label="グループ未参加"
+                          className="absolute top-0 right-0 block w-2 h-2 rounded-full bg-red-500 lg:right-3"
+                        />
+                      ) : null}
+                    </span>
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
             <li>
               <HeaderUserMenu />
             </li>
