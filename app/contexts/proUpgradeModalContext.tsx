@@ -5,6 +5,7 @@ import type { ProFeature } from "@app/types/pro";
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 import ProUpgradeModal from "@app/components/pro/ProUpgradeModal";
+import { trackProFeatureTapped } from "@app/utils/analytics";
 
 export interface OpenProUpgradeModalOptions {
   /** 表示時に「○○を使うには Pro 加入が必要」のコンテキスト訴求を出すための機能キー。 */
@@ -38,6 +39,9 @@ export function ProUpgradeModalProvider({ children }: { children: ReactNode }) {
   const [openCount, setOpenCount] = useState(0);
 
   const open = useCallback((options?: OpenProUpgradeModalOptions) => {
+    // Pro 訴求はここに集約されているため、どの機能が課金意向のきっかけかを一箇所で計測する。
+    // 機能非依存の CTA（LP など）は trigger を持たないため "general" として区別する。
+    trackProFeatureTapped(options?.trigger ?? "general");
     setTrigger(options?.trigger);
     setDefaultPlan(options?.defaultPlan);
     setOpenCount((prev) => prev + 1);

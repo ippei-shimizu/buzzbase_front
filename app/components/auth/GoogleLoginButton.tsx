@@ -10,6 +10,8 @@ import { useAuthContext } from "@app/contexts/useAuthContext";
 import { trackEvent } from "@app/lib/analytics";
 import { googleSignIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
+import { trackSignUpCompleted, trackUserLoggedIn } from "@app/utils/analytics";
+import { identifyUser } from "@app/utils/posthog";
 
 interface GoogleLoginButtonProps {
   mode?: "signin" | "signup";
@@ -47,14 +49,17 @@ export default function GoogleLoginButton({
 
       if (response.data.requires_username) {
         trackEvent("sign_up", { method: "google" });
+        trackSignUpCompleted("google");
         navigateAfterAuth("/register-username");
         setIsLoggedIn(true);
       } else {
         // requires_username=false はバックエンドが既存ユーザーと判断したことを意味する。
         // getUserData() が user_id を返さない一時的失敗があっても sign_up ではなく login として記録する。
         trackEvent("login", { method: "google" });
+        trackUserLoggedIn("google");
         const userData = await getUserData();
         if (userData && userData.user_id) {
+          identifyUser(userData.id);
           navigateAfterAuth(`/mypage/${userData.user_id}`);
         } else {
           navigateAfterAuth("/register-username");

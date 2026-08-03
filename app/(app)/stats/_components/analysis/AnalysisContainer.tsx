@@ -4,12 +4,14 @@ import type { ProFeature } from "@app/types/pro";
 import { useEffect, useRef, useState, useTransition } from "react";
 import FilterBar from "@app/components/filter/FilterBar";
 import { MATCH_TYPE_OPTIONS } from "@app/components/filter/matchTypeOptions";
+import { trackFilterChanges } from "@app/components/filter/trackFilterChange";
 import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
 import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
 import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import { useProGatedFeatures } from "@app/hooks/pro/useProGatedFeatures";
 import { useProGatedResource } from "@app/hooks/pro/useProGatedResource";
 import { useSeasonTrendGranularity } from "@app/hooks/pro/useSeasonTrendGranularity";
+import { trackBattingTrendGranularityChanged } from "@app/utils/analytics";
 import {
   type AnalysisFilters as Filters,
   type AnalysisInitialData,
@@ -216,11 +218,21 @@ export function AnalysisContainer({
     };
   }, [filters, granularity, resolveTrend, startTrendTransition]);
 
+  const handleFiltersChange = (next: Filters) => {
+    trackFilterChanges(filters, next);
+    setFilters(next);
+  };
+
+  const handleGranularityChange = (next: BattingTrendGranularity) => {
+    trackBattingTrendGranularityChanged(next);
+    requestGranularity(next);
+  };
+
   return (
     <div className="flex flex-col gap-y-5">
       <FilterBar
         values={filters}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         options={{
           years: yearOptions,
           months: monthOptions,
@@ -245,7 +257,7 @@ export function AnalysisContainer({
           <BattingTrendChart
             points={battingTrend.points}
             granularity={granularity}
-            onGranularityChange={requestGranularity}
+            onGranularityChange={handleGranularityChange}
           />
         </div>
         <SprayChart

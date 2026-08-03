@@ -24,11 +24,26 @@ jest.mock("@app/services/pitchingResultsService", () => ({
   getCurrentPitchingResult: () => Promise.resolve([]),
 }));
 
+const mockCapture = jest.fn();
+jest.mock("@app/utils/posthog", () => ({
+  capture: (...args: unknown[]) => mockCapture(...args),
+}));
+
 describe("打席一覧ページ", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
     mockGetPlateAppearancesByGame.mockResolvedValue([]);
+  });
+
+  it("打席入力ステップの表示を game record step viewed で送る", () => {
+    localStorage.setItem(GAME_RESULT_ID_STORAGE_KEY, "42");
+
+    render(<PlateAppearanceListPage />);
+
+    expect(mockCapture).toHaveBeenCalledWith("game record step viewed", {
+      step: 2,
+    });
   });
 
   it("記録中の試合を見失ったときは試合一覧へ逃がす", async () => {

@@ -19,6 +19,7 @@ import {
   declinedGroupInvitation,
 } from "@app/services/groupInvitationsService";
 import { deleteNotification } from "@app/services/notificationsService";
+import { trackGroupJoined } from "@app/utils/analytics";
 
 interface NotificationGroupProps {
   notice: Notifications;
@@ -44,6 +45,7 @@ export default function NotificationGroup({
   const handleAcceptGroupInvitation = async (groupId: number, id: number) => {
     try {
       await acceptGroupInvitation(groupId);
+      trackGroupJoined(groupId);
       await deleteNotification(id);
       router.push(`/groups/${groupId}`);
     } catch (error) {

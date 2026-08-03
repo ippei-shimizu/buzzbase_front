@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { startTransition } from "react";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { signOut } from "@app/services/authService";
+import { resetUser } from "@app/utils/posthog";
 
 export default function Logout() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function Logout() {
   const handleLogout = async () => {
     try {
       await signOut();
+      resetUser();
       setIsLoggedIn(false);
       // 認証 cookie 削除後も Server Component のレンダー結果はログイン中のまま
       // 残るため、明示的に作り直す。

@@ -14,6 +14,8 @@ import { useAuthContext } from "@app/contexts/useAuthContext";
 import { trackEvent } from "@app/lib/analytics";
 import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
+import { trackUserLoggedIn } from "@app/utils/analytics";
+import { identifyUser } from "@app/utils/posthog";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -56,8 +58,10 @@ export default function SignIn() {
       await signIn({ email, password });
       setIsLoggedIn(true);
       trackEvent("login", { method: "email" });
+      trackUserLoggedIn("email");
       const userData = await getUserData();
       if (userData && userData.user_id) {
+        identifyUser(userData.id);
         setIsLoggedIn(true);
         navigateAfterAuth(`/mypage/${userData.user_id}`);
       } else {

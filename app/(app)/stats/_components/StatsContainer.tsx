@@ -11,6 +11,7 @@ import type {
 } from "@app/components/filter/filterTypes";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import FilterBar from "@app/components/filter/FilterBar";
+import { trackFilterChanges } from "@app/components/filter/trackFilterChange";
 import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
 import { getBattingStats, getPitchingStats } from "../actions";
 import BattingStatsTable from "./BattingStatsTable";
@@ -84,6 +85,11 @@ export default function StatsContainer({
       active = false;
     };
   }, [tab, period, tableFilters]);
+
+  const handleTableFiltersChange = (next: FilterValues) => {
+    trackFilterChanges(tableFilters, next);
+    setTableFilters(next);
+  };
 
   const handlePeriodChange = (next: StatsPeriod) => {
     setPeriod(next);
@@ -174,7 +180,7 @@ export default function StatsContainer({
         <div className="mb-3">
           <FilterBar
             values={tableFilters}
-            onChange={setTableFilters}
+            onChange={handleTableFiltersChange}
             resetTo={PERIODIC_DEFAULT_FILTERS}
             options={{
               years: yearOptions,

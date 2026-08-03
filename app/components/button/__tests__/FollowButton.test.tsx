@@ -14,6 +14,11 @@ jest.mock("@app/services/userService", () => ({
   userUnFollow: jest.fn(),
 }));
 
+const mockCapture = jest.fn();
+jest.mock("@app/utils/posthog", () => ({
+  capture: (...args: unknown[]) => mockCapture(...args),
+}));
+
 describe("FollowButton", () => {
   const mockSetErrorsWithTimeout = jest.fn();
   const mockUseAuthContext = useAuthContext as jest.Mock;
@@ -66,6 +71,33 @@ describe("FollowButton", () => {
       expect(mockUserFollow).toHaveBeenCalledWith(1);
       expect(screen.getByText("フォロー中")).toBeInTheDocument();
     });
+  });
+
+  it("フォローすると user followed を送る", async () => {
+    const user = userEvent.setup();
+    mockUserFollow.mockResolvedValue({ follow_status: "following" });
+
+    render(<FollowButton {...defaultProps} userId={42} />);
+
+    await user.click(screen.getByText("フォローする"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith("user followed", {
+        followed_user_id: 42,
+      }),
+    );
+  });
+
+  it("フォロー解除では user followed を送らない", async () => {
+    const user = userEvent.setup();
+    mockUserUnFollow.mockResolvedValue({});
+
+    render(<FollowButton {...defaultProps} initialFollowStatus="following" />);
+
+    await user.click(screen.getByText("フォロー中"));
+
+    await waitFor(() => expect(mockUserUnFollow).toHaveBeenCalled());
+    expect(mockCapture).not.toHaveBeenCalled();
   });
 
   it("非公開アカウントへのフォローでリクエスト済みになる", async () => {
