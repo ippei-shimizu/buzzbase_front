@@ -14,6 +14,7 @@ import { CalendarIcon } from "@app/components/icon/CalendarIcon";
 import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
+import { RankingIcon } from "@app/components/icon/RankingIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -64,6 +65,16 @@ export default function HeaderRight() {
                   }
                 >
                   振り返りテンプレ
+                </DropdownItem>
+                <DropdownItem
+                  key="goals"
+                  as={Link}
+                  href="/goals"
+                  startContent={
+                    <RankingIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  目標
                 </DropdownItem>
                 <DropdownItem
                   key="practice-menus"
