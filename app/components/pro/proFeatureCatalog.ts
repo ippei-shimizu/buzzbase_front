@@ -41,7 +41,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
   unlimited_media_uploads: {
     free: "月3件",
     pro: "無制限",
-    availability: "app_only",
+    availability: "web_and_app",
   },
   schedule_copy_next_week: {
     free: "手動",

@@ -47,6 +47,7 @@ const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "count_situation_average",
   "pitch_type_average",
   "pitcher_faceoff_average",
+  "unlimited_media_uploads",
 ];
 
 describe("FEATURE_COMPARISONS", () => {

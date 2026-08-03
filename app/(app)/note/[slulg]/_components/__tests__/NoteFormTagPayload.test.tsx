@@ -10,6 +10,13 @@ jest.mock("@app/services/v2/baseballNoteService", () => ({
   deleteBaseballNote: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/mediaAttachmentService", () => ({
+  presignMediaUpload: jest.fn(),
+  completeMediaUpload: jest.fn(),
+  updateMediaAttachmentMemo: jest.fn(),
+  deleteMediaAttachment: jest.fn(),
+}));
+
 // タグ選択 UI 側のガードを外し、フォームの送信ペイロード組み立てだけを検証する。
 // UI を隠すだけでは不十分で、ペイロード組み立ての時点で entitlement を見て
 // tag_ids キーごと落としていることを担保する。
