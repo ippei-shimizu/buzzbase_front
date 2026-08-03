@@ -70,13 +70,26 @@ const SEGMENT_BASE =
 const CHIP_BASE =
   "rounded-full px-3.5 py-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d08000]";
 
-/** 目標量の初期値。back の decimal は文字列で返るため数値化してから入力欄へ流す。 */
-function initialMenuAmounts(schedule: Schedule | null): Record<number, string> {
+/** 目標量の表示用文字列。back の decimal は文字列で返るため数値化してから入力欄へ流す。 */
+function toAmountText(value: number | null): string {
+  const parsed = parseDecimal(value);
+  return parsed === null ? "" : String(parsed);
+}
+
+/**
+ * 編集可能なメニューの目標量の初期値。
+ * 記録済み（ロック）メニューは入力状態として持たず、送信時にサーバー由来の値をそのまま
+ * 足し戻す。ユーザー操作の状態に混ぜると、UI の無効化を外しただけで紐付けを失いうる。
+ */
+function initialMenuAmounts(
+  schedule: Schedule | null,
+  lockedIds: Set<number>,
+): Record<number, string> {
   if (!schedule || schedule.menu_set_id !== null) return {};
   const amounts: Record<number, string> = {};
   schedule.menus.forEach((menu) => {
-    const parsed = parseDecimal(menu.target_value);
-    amounts[menu.practice_menu_id] = parsed === null ? "" : String(parsed);
+    if (lockedIds.has(menu.practice_menu_id)) return;
+    amounts[menu.practice_menu_id] = toAmountText(menu.target_value);
   });
   return amounts;
 }
@@ -107,6 +120,9 @@ export default function ScheduleForm({
     lockedIds.has(menu.practice_menu_id),
   );
   const hasLockedMenu = lockedMenus.length > 0;
+  const lockedAmounts = new Map(
+    lockedMenus.map((menu) => [menu.practice_menu_id, menu.target_value]),
+  );
 
   const [recurrence, setRecurrence] = useState<ScheduleRecurrence>(
     schedule?.days_of_week ? "weekly" : "single",
@@ -129,7 +145,7 @@ export default function ScheduleForm({
     schedule?.menu_set_id ?? null,
   );
   const [menuAmounts, setMenuAmounts] = useState<Record<number, string>>(() =>
-    initialMenuAmounts(schedule),
+    initialMenuAmounts(schedule, lockedIds),
   );
   const [notificationEnabled, setNotificationEnabled] = useState(
     schedule?.notification_enabled ?? true,
@@ -406,8 +422,8 @@ export default function ScheduleForm({
             ) : (
               <ul className="flex flex-col gap-2">
                 {menus.map((menu) => {
-                  const isSelected = menu.id in menuAmounts;
                   const isLocked = lockedIds.has(menu.id);
+                  const isSelected = isLocked || menu.id in menuAmounts;
                   const defaultValue = parseDecimal(menu.default_value);
                   return (
                     <li
@@ -442,7 +458,13 @@ export default function ScheduleForm({
                           <input
                             type="number"
                             aria-label={`${menu.name}の目標量`}
-                            value={menuAmounts[menu.id] ?? ""}
+                            value={
+                              isLocked
+                                ? toAmountText(
+                                    lockedAmounts.get(menu.id) ?? null,
+                                  )
+                                : (menuAmounts[menu.id] ?? "")
+                            }
                             disabled={isLocked}
                             onChange={(event) =>
                               changeMenuAmount(menu.id, event.target.value)
