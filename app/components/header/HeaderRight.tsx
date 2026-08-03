@@ -9,6 +9,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import HeaderLoginAndSignUp from "@app/components/auth/HeaderLoginAndSignUp";
+import { BallIcon } from "@app/components/icon/BallIcon";
 import { CalendarIcon } from "@app/components/icon/CalendarIcon";
 import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
@@ -53,6 +54,16 @@ export default function HeaderRight() {
                   }
                 >
                   野球ノート
+                </DropdownItem>
+                <DropdownItem
+                  key="practice-menus"
+                  as={Link}
+                  href="/practice/menus"
+                  startContent={
+                    <BallIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  練習メニュー
                 </DropdownItem>
                 <DropdownItem
                   key="seasons"
