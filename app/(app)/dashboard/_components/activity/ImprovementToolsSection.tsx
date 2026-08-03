@@ -1,7 +1,7 @@
 import type { ComponentType, SVGProps } from "react";
+import ChartBarIcon from "@heroicons/react/24/outline/ChartBarIcon";
 import ChevronRightIcon from "@heroicons/react/24/outline/ChevronRightIcon";
 import FlagIcon from "@heroicons/react/24/outline/FlagIcon";
-import ChartBarIcon from "@heroicons/react/24/outline/ChartBarIcon";
 import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 import TrophyIcon from "@heroicons/react/24/outline/TrophyIcon";
 import Link from "next/link";

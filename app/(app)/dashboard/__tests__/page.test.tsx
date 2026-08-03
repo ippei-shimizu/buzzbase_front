@@ -390,7 +390,7 @@ describe("セクションの並び", () => {
 });
 
 describe("後からマージされた機能の差し込み", () => {
-  it("今日のやること・継続（草グラフ）・練習ツールを活動面に出す", async () => {
+  it("今日のやること・継続（草グラフ）・練習ツール・相関インサイトを活動面に出す", async () => {
     await renderPage();
 
     expect(screen.getByText("今日のやること")).toBeInTheDocument();
@@ -398,6 +398,9 @@ describe("後からマージされた機能の差し込み", () => {
     expect(
       screen.getByRole("link", { name: /素振りカウントタイマー/ }),
     ).toHaveAttribute("href", "/practice/shadow-swing");
+    expect(
+      screen.getByRole("link", { name: /練習と成績のつながり/ }),
+    ).toHaveAttribute("href", "/insights");
   });
 
   it("差し込んだセクションの取得が失敗しても他のセクションは表示する", async () => {
@@ -868,6 +871,6 @@ describe("記録導線と上達サイクル", () => {
       within(section)
         .getAllByRole("link")
         .map((link) => link.getAttribute("href")),
-    ).toEqual(["/themes", "/goals", "/review"]);
+    ).toEqual(["/themes", "/goals", "/insights", "/review"]);
   });
 });
