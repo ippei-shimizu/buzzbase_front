@@ -34,6 +34,7 @@ import {
   SAVE_FAILED_TITLE,
   SAVED_MESSAGE,
   STATS_ERROR_MESSAGE,
+  VIBRATION_UNSUPPORTED_HINT,
 } from "../_components/shadowSwingCopy";
 
 const mockUseEntitlement = useEntitlement as jest.MockedFunction<
@@ -369,6 +370,15 @@ describe("合図", () => {
     installBrowserApis({ vibration: false });
     const user = setupUser();
     render(<ShadowSwingContent initialStatsResult={okStats()} />);
+
+    // 設定画面では非対応の理由を出し、「あり」を押しても有効にならない。
+    expect(screen.getByText(VIBRATION_UNSUPPORTED_HINT)).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("group", { name: "バイブレーション" })).getByRole(
+        "button",
+        { name: "なし" },
+      ),
+    ).toHaveAttribute("aria-pressed", "true");
 
     await startCounting(user, { target: 10, vibration: true });
     await advance(15_100);
