@@ -22,7 +22,7 @@ export interface FeatureComparison {
  * 機能名は PRO_PAYWALL_COPY の title を使うため、ここでは持たない。
  */
 export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
-  no_ads: { free: "表示あり", pro: "非表示", availability: "app_only" },
+  no_ads: { free: "表示あり", pro: "非表示", availability: "web_and_app" },
   season_transition_graph: {
     free: "単年のみ",
     pro: "複数年比較",

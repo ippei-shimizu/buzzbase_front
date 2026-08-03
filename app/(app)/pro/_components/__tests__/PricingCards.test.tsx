@@ -78,11 +78,11 @@ describe("PricingCards", () => {
   it("アプリ版でのみ使える機能に「アプリ版」を明記する", () => {
     render(<PricingCards />);
 
-    const adsItem = screen
-      .getAllByText("広告を非表示にして集中する")[0]
+    const insightItem = screen
+      .getAllByText("練習と成績の関係を発見")[0]
       .closest("li");
     expect(
-      within(adsItem as HTMLElement).getByText("アプリ版"),
+      within(insightItem as HTMLElement).getByText("アプリ版"),
     ).toBeInTheDocument();
 
     const directionItem = screen.getAllByText("方向別の打率")[0].closest("li");
