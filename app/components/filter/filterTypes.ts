@@ -29,7 +29,7 @@ export interface FilterValues {
  */
 export const ALL_FILTER_KEY = "__all__";
 
-const FILTER_KEYS = [
+export const FILTER_KEYS = [
   "year",
   "matchType",
   "seasonId",

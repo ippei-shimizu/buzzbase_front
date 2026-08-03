@@ -51,6 +51,7 @@ import {
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
 import { createStadium, searchStadiums } from "@app/services/v2/stadiumService";
+import { trackGameRecordStepViewed } from "@app/utils/analytics";
 import PatternSelector from "./_components/PatternSelector";
 import ScoreStepper from "./_components/ScoreStepper";
 
@@ -149,6 +150,9 @@ export default function GameRecord() {
   const pathname = usePathname();
   const router = useRouter();
   useRequireAuth();
+  useEffect(() => {
+    trackGameRecordStepViewed(1);
+  }, []);
   // 球場サジェスト検索のデバウンスタイマーと、最新リクエスト判定用のシーケンス番号。
   const stadiumSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stadiumRequestId = useRef(0);

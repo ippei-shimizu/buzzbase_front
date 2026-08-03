@@ -13,6 +13,7 @@ import {
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getCurrentPitchingResult } from "@app/services/pitchingResultsService";
 import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
+import { trackGameRecordStepViewed } from "@app/utils/analytics";
 import { AddPlateAppearanceCard } from "./_components/AddPlateAppearanceCard";
 import { PlateAppearanceCard } from "./_components/PlateAppearanceCard";
 
@@ -39,6 +40,10 @@ export default function PlateAppearanceListPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [hasPitching, setHasPitching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    trackGameRecordStepViewed(2);
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("gameResultId");

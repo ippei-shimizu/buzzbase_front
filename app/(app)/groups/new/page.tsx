@@ -9,6 +9,7 @@ import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
+import { trackGroupCreated } from "@app/utils/analytics";
 
 export default function GroupNew() {
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -129,6 +130,7 @@ export default function GroupNew() {
     });
     try {
       const response = await createGroup(formData);
+      trackGroupCreated(response.id);
       router.push(`/groups/${response.id}/share-invite`);
     } catch {}
   };

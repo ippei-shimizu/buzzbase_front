@@ -11,16 +11,24 @@ import type {
   SwingType,
 } from "@app/interface/plateAppearanceV2";
 import { Button } from "@heroui/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import {
   createPlateAppearanceV2,
   updatePlateAppearanceV2,
 } from "@app/services/v2/plateAppearanceService";
+import {
+  trackPlateAppearanceCanceled,
+  trackPlateAppearanceCompleted,
+} from "@app/utils/analytics";
 import { roundHitLocation, type Point } from "@app/utils/groundZoneDetector";
 import { DetailDataForm } from "./detail/DetailDataForm";
-import { EMPTY_DETAIL, type DetailState } from "./detail/detailState";
+import {
+  EMPTY_DETAIL,
+  hasDetailInput,
+  type DetailState,
+} from "./detail/detailState";
 import { GroundTapField } from "./GroundTapField";
 import { HitTypeModal } from "./HitTypeModal";
 import { OutTypeModal } from "./OutTypeModal";
@@ -113,6 +121,19 @@ export function PlateAppearanceWizard({
 
   const setDetail = (patch: Partial<DetailState>) =>
     setDetailState((prev) => ({ ...prev, ...patch }));
+
+  // 保存せずに画面を離れた場合だけ途中離脱として計測するためのフラグ。
+  // クリーンアップで最新値を読む必要があるため ref で持つ。
+  const isCompletedRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      // 中断ボタン・ブラウザバック・親画面の遷移を区別せず「完了しなかった」で計測する。
+      if (!isCompletedRef.current) {
+        trackPlateAppearanceCanceled({ is_edit: isEdit });
+      }
+    };
+  }, [isEdit]);
 
   // 編集モードはタブで自由に切り替えるため、結果選択での自動遷移はしない。
   const goToScore = () => {
@@ -214,6 +235,12 @@ export function PlateAppearanceWizard({
         ? await updatePlateAppearanceV2(editingPlateAppearance.id, input)
         : await createPlateAppearanceV2(input);
     if (result.ok) {
+      isCompletedRef.current = true;
+      trackPlateAppearanceCompleted({
+        is_edit: isEdit,
+        has_pitcher: detail.pitcherId !== null,
+        has_detail: hasDetailInput(detail),
+      });
       // onCompleted が遷移しなかった場合でもボタンが永続 disabled にならないよう先に解除する。
       setIsSubmitting(false);
       onCompleted();

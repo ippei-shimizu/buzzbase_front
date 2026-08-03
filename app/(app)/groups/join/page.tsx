@@ -11,6 +11,7 @@ import {
   acceptInviteLink,
   getInviteLinkInfo,
 } from "@app/services/groupInviteLinksService";
+import { trackGroupJoined } from "@app/utils/analytics";
 
 export default function GroupJoinPage() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function GroupJoinPage() {
     setIsAccepting(true);
     try {
       const result = await acceptInviteLink(trimmedCode);
+      trackGroupJoined(result.group_id);
       router.push(`/groups/${result.group_id}`);
     } catch (error) {
       console.error("グループへの参加に失敗しました", error);
