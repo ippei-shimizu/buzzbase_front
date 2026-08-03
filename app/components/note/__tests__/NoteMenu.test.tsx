@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-import { deleteBaseballNote } from "@app/services/baseballNoteService";
+import { deleteBaseballNote } from "@app/services/v2/baseballNoteService";
 import NoteMenu from "../NoteMenu";
 
 // Mock dependencies
-jest.mock("@app/services/baseballNoteService", () => ({
+jest.mock("@app/services/v2/baseballNoteService", () => ({
   deleteBaseballNote: jest.fn(),
 }));
 

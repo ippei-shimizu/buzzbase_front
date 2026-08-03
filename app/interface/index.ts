@@ -436,22 +436,9 @@ export interface HeaderNoteSaveProps {
   hasChanges: boolean;
 }
 
-export interface createNoteProps {
-  date: string;
-  title: string;
-  memo: string;
-}
-
 export interface NoteEditorProps {
   memo: string;
   setMemo: (memo: string) => void;
-}
-
-export interface getNoteProps {
-  id: number;
-  title: string;
-  date: string;
-  memo: string[];
 }
 
 export interface ResendConfirmationModalProps {

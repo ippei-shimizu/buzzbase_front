@@ -1,19 +1,25 @@
 "use client";
-import type { getNoteProps } from "@app/interface";
-import { Card, Spinner } from "@heroui/react";
-import NoteListItem from "@app/components/note/NoteListItem";
-import getBaseballNotes from "@app/hooks/note/getBaseballNotes";
 
-export default function NoteListComponent() {
-  const { notes, isLoading, isError } = getBaseballNotes();
-  if (isLoading) {
+import type {
+  BaseballNoteV2,
+  NoteFetchResult,
+} from "@app/interface/baseballNoteV2";
+import { Card } from "@heroui/react";
+import NoteListItem from "@app/components/note/NoteListItem";
+
+interface NoteListComponentProps {
+  result: NoteFetchResult<BaseballNoteV2[]>;
+}
+
+export default function NoteListComponent({ result }: NoteListComponentProps) {
+  if (result.status === "forbidden") {
     return (
-      <div className="flex justify-center pb-6 pt-14">
-        <Spinner color="primary" />
-      </div>
+      <p className="text-sm text-zinc-400 text-center">
+        野球ノートを表示する権限がありません。
+      </p>
     );
   }
-  if (isError) {
+  if (result.status === "error") {
     return (
       <p className="text-sm text-zinc-400 text-center">
         野球ノートの読み込みに失敗しました。
@@ -22,22 +28,16 @@ export default function NoteListComponent() {
   }
 
   return (
-    <>
-      <div>
-        <Card className="pt-2 pb-8 px-6">
-          {notes.length > 0 ? (
-            notes.map((note: getNoteProps) => (
-              <div key={note.id}>
-                {note.date && <NoteListItem note={note} />}
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-zinc-400 text-center">
-              まだ野球ノートが作成されていません。
-            </p>
-          )}
-        </Card>
-      </div>
-    </>
+    <div>
+      <Card className="pt-2 pb-8 px-6">
+        {result.data.length > 0 ? (
+          result.data.map((note) => <NoteListItem key={note.id} note={note} />)
+        ) : (
+          <p className="text-sm text-zinc-400 text-center">
+            まだ野球ノートが作成されていません。
+          </p>
+        )}
+      </Card>
+    </div>
   );
 }
