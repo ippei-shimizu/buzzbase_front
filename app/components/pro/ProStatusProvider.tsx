@@ -76,9 +76,16 @@ export function ProStatusProvider({ children }: { children: ReactNode }) {
     const pending =
       identity === ANONYMOUS_IDENTITY ? Promise.resolve(null) : getProStatus();
 
-    void pending.then((next) => {
-      if (active) setResolved({ identity, proStatus: next });
-    });
+    void pending
+      .then((next) => {
+        if (active) setResolved({ identity, proStatus: next });
+      })
+      .catch(() => {
+        // Server Action の通信自体が失敗した場合は無料状態で確定させる。
+        // 未確定のままだと isLoading が永久に true になり、Pro 判定に依存する UI（広告枠など）が
+        // 二度と描画されない
+        if (active) setResolved({ identity, proStatus: null });
+      });
 
     return () => {
       active = false;

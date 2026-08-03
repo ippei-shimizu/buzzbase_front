@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import AdsenseScript from "@app/components/ad/AdsenseScript";
 import Footer from "@app/components/footer/Footer";
 import NavigationMenu from "@app/components/header/NavigationMenu";
 import ProStatusBanners from "@app/components/pro/ProStatusBanners";
@@ -27,6 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <UserProvider>
         <Providers>
           <ProStatusProvider>
+            <AdsenseScript />
             <SmartAppBanner />
             <ProStatusBanners />
             <GameRecordStorageCleanup />
