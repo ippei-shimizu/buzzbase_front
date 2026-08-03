@@ -7,6 +7,7 @@ export const PAGE_DESCRIPTION =
   "この日だけの予定と、毎週くり返す予定を登録できます。メニューを紐付けておくと、その日の練習記録にそのまま引き継げます。";
 
 export const CREATE_LABEL = "予定を作る";
+export const CALENDAR_LABEL = "カレンダー";
 export const EMPTY_MESSAGE = "まだ予定がありません";
 export const RECURRING_SECTION_TITLE = "毎週の予定";
 export const SINGLE_SECTION_TITLE = "この日だけの予定";
