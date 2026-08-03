@@ -141,6 +141,7 @@ describe("表示単位", () => {
     expect(screen.getByText("累計")).toBeInTheDocument();
     expect(screen.getByText("12,400本")).toBeInTheDocument();
     expect(screen.getByText("800本")).toBeInTheDocument();
+    expect(screen.getByText("記録 40日 ・ 最終 8/3")).toBeInTheDocument();
     expect(screen.queryByText("総挙上重量")).not.toBeInTheDocument();
   });
 
@@ -165,7 +166,9 @@ describe("表示単位", () => {
     expect(screen.getByText("総挙上重量")).toBeInTheDocument();
     expect(screen.getByText("8.2t")).toBeInTheDocument();
     expect(screen.getByText("640kg")).toBeInTheDocument();
-    expect(screen.getByText(/累計 620回/)).toBeInTheDocument();
+    expect(
+      screen.getByText("累計 620回 ・ 記録 12日 ・ 最終 8/3"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("8,200本")).not.toBeInTheDocument();
   });
 });

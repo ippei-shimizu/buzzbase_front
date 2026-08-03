@@ -125,6 +125,8 @@ describe("カードの並び", () => {
       "記録あり",
       "未記録",
     ]);
+    // 記録日が古くても、未記録より前に並ぶ（未記録は必ず末尾）。
+    expect(cards[0].summary.last_logged_on).toBe("2026-01-05");
     expect(cards[1].summary.days_count).toBe(0);
     expect(cards[1].summary.last_logged_on).toBeNull();
   });
