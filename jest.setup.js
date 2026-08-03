@@ -12,6 +12,9 @@ global.ResizeObserver = class ResizeObserver {
 jest.mock("framer-motion", () => ({
   ...jest.requireActual("framer-motion"),
   AnimatePresence: ({ children }) => children,
+  // HeroUI Modal は LazyMotion の features を動的 import で読み込むが、
+  // jest の CJS 環境では動的 import が失敗するため features ごとバイパスする
+  LazyMotion: ({ children }) => children,
   motion: {
     div: ({ children, ...props }) => <div {...props}>{children}</div>,
     button: ({ children, ...props }) => <button {...props}>{children}</button>,
