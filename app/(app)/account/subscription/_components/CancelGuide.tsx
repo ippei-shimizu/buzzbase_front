@@ -61,11 +61,15 @@ const CANCELLABLE_STATUSES: SubscriptionStatus[] = ["trial", "active"];
 /**
  * 加入媒体ごとの解約手段を案内するセクション。
  * 解約可能な状態のときだけ描画し、Web 加入者にはこの画面で完結する解約ボタンを出す。
+ *
+ * @param surveyEnabled 解約後に理由アンケートを出すか（Flipper :cancellation_survey の判定）。
  */
 export default function CancelGuide({
   subscription,
+  surveyEnabled,
 }: {
   subscription: ProSubscription;
+  surveyEnabled: boolean;
 }) {
   const { platform, status } = subscription;
   if (!CANCELLABLE_STATUSES.includes(status)) return null;
@@ -74,7 +78,9 @@ export default function CancelGuide({
 
   return (
     <GuideSection title="解約について" content={content}>
-      {platform === "web" ? <CancelWebSubscription /> : null}
+      {platform === "web" ? (
+        <CancelWebSubscription surveyEnabled={surveyEnabled} />
+      ) : null}
     </GuideSection>
   );
 }
