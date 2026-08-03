@@ -53,6 +53,7 @@ import { getCurrentUserId, getUserData } from "@app/services/userService";
 import { createStadium, searchStadiums } from "@app/services/v2/stadiumService";
 import PatternSelector from "./_components/PatternSelector";
 import ScoreStepper from "./_components/ScoreStepper";
+import SeasonField from "./_components/SeasonField";
 
 // 打順の選択肢。代打・代走・途中出場・未出場のケースで「なし」を選べるよう先頭に追加。
 // 「なし」は id=""（空文字）として、state（matchBattingOrder）と Select の selectedKeys を一致させる。
@@ -835,26 +836,12 @@ export default function GameRecord() {
                   ))}
                 </Autocomplete>
                 <Divider className="my-4" />
-                <Autocomplete
-                  allowsCustomValue
-                  label="シーズン"
-                  variant="bordered"
-                  placeholder="シーズン名を入力"
-                  labelPlacement="outside-left"
-                  className="[&>div]:justify-between [&>div&>label]:whitespace-nowrap"
-                  size="md"
+                <SeasonField
+                  seasons={seasonsData}
+                  selectedSeason={selectedSeason}
                   onInputChange={handleSeasonInputChange}
                   onSelectionChange={handleSeasonSelectionChange}
-                  selectedKey={
-                    selectedSeason !== null ? selectedSeason.toString() : null
-                  }
-                >
-                  {seasonsData.map((data) => (
-                    <AutocompleteItem key={data.id}>
-                      {data.name}
-                    </AutocompleteItem>
-                  ))}
-                </Autocomplete>
+                />
                 <Divider className="my-4" />
                 <Input
                   isRequired
