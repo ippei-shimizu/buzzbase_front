@@ -66,6 +66,16 @@ export default function HeaderRight() {
                   振り返りテンプレ
                 </DropdownItem>
                 <DropdownItem
+                  key="practice-records"
+                  as={Link}
+                  href="/practice/records"
+                  startContent={
+                    <BallIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  練習記録
+                </DropdownItem>
+                <DropdownItem
                   key="practice-menus"
                   as={Link}
                   href="/practice/menus"
