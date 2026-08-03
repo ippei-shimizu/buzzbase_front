@@ -181,10 +181,34 @@ describe("analytics", () => {
   });
 
   describe("環境変数が未設定のとき", () => {
+    it("計測が無効になる", async () => {
+      const { posthog } = await loadModules();
+
+      expect(posthog.isPostHogEnabled()).toBe(false);
+    });
+
+    it("キーがあれば計測が有効になる", async () => {
+      const { posthog } = await loadModules("phc_test");
+
+      expect(posthog.isPostHogEnabled()).toBe(true);
+    });
+
     it("PostHog を初期化せず、外部通信も発生させない", async () => {
       await loadModules();
 
       expect(mockInit).not.toHaveBeenCalled();
+    });
+
+    it("無効な間に呼ばれた計測は、後から有効化されても送らない", async () => {
+      const { analytics, posthog } = await loadModules();
+
+      analytics.trackGroupJoined(1);
+
+      process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test";
+      posthog.initPostHog();
+      await flushMicrotasks();
+
+      expect(mockCapture).not.toHaveBeenCalled();
     });
 
     it("計測を呼んでもエラーにならず、イベントも送らない", async () => {

@@ -102,6 +102,30 @@ describe("打席記録ウィザードの計測", () => {
     );
   });
 
+  it("対戦投手だけ入力されていても has_detail は true で送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          pitcher: { id: 9, name: "投手" } as PlateAppearanceV2["pitcher"],
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
+        is_edit: true,
+        has_pitcher: true,
+        has_detail: true,
+      }),
+    );
+  });
+
   it("保存せず画面を離れると plate appearance canceled を送る", () => {
     const { unmount } = render(
       <PlateAppearanceWizard
