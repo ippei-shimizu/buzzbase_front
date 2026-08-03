@@ -198,17 +198,19 @@ describe("NoteListComponent の検索・絞り込み・月次ページング", (
     expect(screen.queryByText("守備の気づき")).not.toBeInTheDocument();
   });
 
-  it("絞り込みを変えると月のページが最新へ戻る", () => {
+  it("絞り込みを変えると、絞り込み後にも複数の月が残る場合でもページが最新へ戻る", () => {
     renderList(notes, tagsResult);
     fireEvent.click(screen.getByRole("button", { name: "前の月" }));
     expect(screen.getByText("2026年7月（1件）")).toBeInTheDocument();
 
+    // 絞り込み後も 8月・7月の2ヶ月が残る語を選び、古いページに留まらないことを見る。
     fireEvent.change(screen.getByLabelText("ノートを検索"), {
-      target: { value: "気づき" },
+      target: { value: "打撃" },
     });
 
-    expect(screen.getByText("2026年8月（2件）")).toBeInTheDocument();
+    expect(screen.getByText("2026年8月（1件）")).toBeInTheDocument();
     expect(screen.getByText("打撃の気づき")).toBeInTheDocument();
+    expect(screen.queryByText("7月のノート")).not.toBeInTheDocument();
   });
 
   it("条件に一致しない場合は未作成と区別したメッセージを出す", () => {
