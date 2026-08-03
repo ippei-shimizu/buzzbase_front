@@ -1,6 +1,11 @@
 "use server";
 
-import type { Goal, GoalInput, GoalUpdateInput } from "@app/types/goal";
+import type {
+  Goal,
+  GoalBadge,
+  GoalInput,
+  GoalUpdateInput,
+} from "@app/types/goal";
 import {
   type DeletedResponse,
   type FetchResult,
@@ -10,6 +15,15 @@ import {
 } from "./requests";
 
 const BASE_PATH = "/api/v2/goals";
+const BADGES_PATH = "/api/v2/goal_badges";
+
+/**
+ * 達成バッジの一覧を取得する（GET /api/v2/goal_badges）。
+ * back は自分のバッジだけを awarded_at の降順で返す。
+ */
+export async function getGoalBadges(): Promise<FetchResult<GoalBadge[]>> {
+  return fetchV2<GoalBadge[]>(BADGES_PATH, "getGoalBadges");
+}
 
 /**
  * 進行中（未確定）の目標一覧を取得する（GET /api/v2/goals）。

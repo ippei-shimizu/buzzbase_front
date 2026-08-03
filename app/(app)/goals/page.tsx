@@ -1,10 +1,16 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Header from "@app/components/header/Header";
-import { getGoalHistory, getGoals } from "@app/services/v2/goalService";
+import {
+  getGoalBadges,
+  getGoalHistory,
+  getGoals,
+} from "@app/services/v2/goalService";
 import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
+import AchievementSummaryModal from "./_components/AchievementSummaryModal";
 import { LOAD_ERROR_MESSAGE } from "./_components/goalCopy";
 import GoalsContent from "./_components/GoalsContent";
+import { previousMonthKey } from "./_utils/achievementSummary";
 import { todayString } from "./_utils/goalForm";
 import { getGoalSeasonOptions, getGoalTournamentOptions } from "./actions";
 
@@ -18,14 +24,26 @@ export default async function GoalsPage() {
     redirect("/signup?auth_required=true");
   }
 
-  const [goalsResult, historyResult, seasonsResult, tournamentsResult, menus] =
-    await Promise.all([
-      getGoals(),
-      getGoalHistory(),
-      getGoalSeasonOptions(),
-      getGoalTournamentOptions(),
-      getPracticeMenus(),
-    ]);
+  const [
+    goalsResult,
+    historyResult,
+    badgesResult,
+    seasonsResult,
+    tournamentsResult,
+    menus,
+  ] = await Promise.all([
+    getGoals(),
+    getGoalHistory(),
+    getGoalBadges(),
+    getGoalSeasonOptions(),
+    getGoalTournamentOptions(),
+    getPracticeMenus(),
+  ]);
+
+  const history = historyResult.status === "ok" ? historyResult.data : [];
+  // 履歴が取れていないと「N件中M件」が実際より少なく出るため、その月は振り返りを出さない。
+  const summaryMonthKey =
+    historyResult.status === "ok" ? previousMonthKey() : null;
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
@@ -36,9 +54,7 @@ export default async function GoalsPage() {
             {goalsResult.status === "ok" ? (
               <GoalsContent
                 initialGoals={goalsResult.data}
-                initialHistory={
-                  historyResult.status === "ok" ? historyResult.data : []
-                }
+                initialHistory={history}
                 historyLoadFailed={historyResult.status !== "ok"}
                 seasons={
                   seasonsResult.status === "ok" ? seasonsResult.data : []
@@ -60,6 +76,14 @@ export default async function GoalsPage() {
           </div>
         </div>
       </main>
+
+      {summaryMonthKey !== null ? (
+        <AchievementSummaryModal
+          monthKey={summaryMonthKey}
+          history={history}
+          badges={badgesResult.status === "ok" ? badgesResult.data : []}
+        />
+      ) : null}
     </div>
   );
 }
