@@ -98,6 +98,16 @@ export default function HeaderRight() {
                   振り返りレポート
                 </DropdownItem>
                 <DropdownItem
+                  key="insights"
+                  as={Link}
+                  href="/insights"
+                  startContent={
+                    <StatsIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  練習と成績のつながり
+                </DropdownItem>
+                <DropdownItem
                   key="goals"
                   as={Link}
                   href="/goals"

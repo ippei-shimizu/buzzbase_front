@@ -18,6 +18,7 @@ jest.mock("@app/hooks/featureFlags/useFeatureFlag", () => ({
 }));
 
 import { fireEvent, render, screen } from "@testing-library/react";
+import { APP_ONLY_LABEL } from "@app/components/pro/proFeatureCatalog";
 import ProUpgradeModal from "../ProUpgradeModal";
 
 const SUSPENDED_MESSAGE =
@@ -72,8 +73,8 @@ describe("ProUpgradeModal", () => {
 
     expect(screen.getByText("方向別の打率")).toBeInTheDocument();
     expect(screen.getByText("練習と成績の関係を発見")).toBeInTheDocument();
-    // Web 未提供の機能には「アプリ版」を添える。
-    expect(screen.getAllByText("アプリ版").length).toBeGreaterThan(0);
+    // 代表機能はすべて Web 提供済みなので「アプリ版」は出ない。
+    expect(screen.queryByText(APP_ONLY_LABEL)).not.toBeInTheDocument();
   });
 
   it("プラン Radio に年額・月額の両方が表示される", () => {
