@@ -76,6 +76,16 @@ export default function HeaderRight() {
                   練習メニュー
                 </DropdownItem>
                 <DropdownItem
+                  key="practice-schedules"
+                  as={Link}
+                  href="/practice/schedules"
+                  startContent={
+                    <CalendarIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  練習スケジュール
+                </DropdownItem>
+                <DropdownItem
                   key="seasons"
                   as={Link}
                   href="/seasons"
