@@ -3,15 +3,21 @@
 import type {
   BaseballNoteV2,
   NoteFetchResult,
+  NoteTag,
 } from "@app/interface/baseballNoteV2";
-import { Card } from "@heroui/react";
-import NoteListItem from "@app/components/note/NoteListItem";
+import type { FetchResult } from "@app/services/v2/requests";
+import NoteListBoard from "@app/components/note/NoteListBoard";
 
 interface NoteListComponentProps {
   result: NoteFetchResult<BaseballNoteV2[]>;
+  /** タグチップの候補。取得に失敗しても一覧自体は出したいのでチップだけ落とす。 */
+  tagsResult: FetchResult<NoteTag[]>;
 }
 
-export default function NoteListComponent({ result }: NoteListComponentProps) {
+export default function NoteListComponent({
+  result,
+  tagsResult,
+}: NoteListComponentProps) {
   if (result.status === "forbidden") {
     return (
       <p className="text-sm text-zinc-400 text-center">
@@ -28,16 +34,9 @@ export default function NoteListComponent({ result }: NoteListComponentProps) {
   }
 
   return (
-    <div>
-      <Card className="pt-2 pb-8 px-6">
-        {result.data.length > 0 ? (
-          result.data.map((note) => <NoteListItem key={note.id} note={note} />)
-        ) : (
-          <p className="text-sm text-zinc-400 text-center">
-            まだ野球ノートが作成されていません。
-          </p>
-        )}
-      </Card>
-    </div>
+    <NoteListBoard
+      notes={result.data}
+      tags={tagsResult.status === "ok" ? tagsResult.data : []}
+    />
   );
 }

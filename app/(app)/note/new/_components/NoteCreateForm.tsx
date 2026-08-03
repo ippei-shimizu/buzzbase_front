@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReflectionAnswer } from "@app/interface/baseballNoteV2";
+import type { NoteTag, ReflectionAnswer } from "@app/interface/baseballNoteV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
 import { Input } from "@heroui/react";
@@ -9,10 +9,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
+import NoteTagSection from "@app/components/note/NoteTagSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { useNoteTagEditing } from "@app/hooks/note/useNoteTagEditing";
 import { createBaseballNote } from "@app/services/v2/baseballNoteService";
 import { buildAnswerList, resolveNoteMemo } from "@app/utils/noteMemo";
+import { buildTagIdsPayload } from "@app/utils/noteTags";
 
 const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
   ssr: false,
@@ -23,6 +26,7 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
 
 interface NoteCreateFormProps {
   templatesResult: FetchResult<ReflectionTemplate[]>;
+  tagsResult: FetchResult<NoteTag[]>;
 }
 
 /** 日付入力（`type="date"`）が要求する `YYYY-MM-DD` をローカル時刻で組み立てる。 */
@@ -35,8 +39,10 @@ function todayString(): string {
 
 export default function NoteCreateForm({
   templatesResult,
+  tagsResult,
 }: NoteCreateFormProps) {
   const router = useRouter();
+  const { canEditTags } = useNoteTagEditing();
   const [initialDate] = useState(todayString);
   const [date, setDate] = useState(initialDate);
   const [title, setTitle] = useState("");
@@ -45,6 +51,7 @@ export default function NoteCreateForm({
   const [questions, setQuestions] = useState<string[]>([]);
   // 回答は問い文をキーに保持する。テンプレを切り替えて戻ってきても入力済みの回答が残る。
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [tagIds, setTagIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -57,7 +64,8 @@ export default function NoteCreateForm({
     title !== "" ||
     memo !== "" ||
     templateId !== null ||
-    reflectionAnswers.length > 0;
+    reflectionAnswers.length > 0 ||
+    tagIds.length > 0;
 
   const setErrorsWithTimeout = (newErrors: string[]) => {
     setErrors(newErrors);
@@ -85,13 +93,15 @@ export default function NoteCreateForm({
       return;
     }
     setIsSubmitting(true);
-    // 紐付け・タグは新規作成画面では扱わないためキーごと送らない。
+    // 試合 / 課題の紐付けは新規作成画面では扱わないためキーごと送らない。
+    // タグも Pro 判定が確定して entitlement を持つときだけキーを生やす。
     const result = await createBaseballNote({
       date,
       title: title === "" ? null : title,
       memo: resolveNoteMemo(memo, reflectionAnswers),
       reflection_template_id: templateId,
       reflection_answers: reflectionAnswers,
+      ...buildTagIdsPayload({ canEditTags, tagIds }),
     });
     if (!result.ok) {
       setErrorsWithTimeout(result.errors);
@@ -149,6 +159,12 @@ export default function NoteCreateForm({
                   answers={answers}
                   onSelectTemplate={handleSelectTemplate}
                   onChangeAnswer={handleChangeAnswer}
+                />
+                <NoteTagSection
+                  tagsResult={tagsResult}
+                  selectedIds={tagIds}
+                  onChange={setTagIds}
+                  canEdit={canEditTags}
                 />
               </div>
             </form>

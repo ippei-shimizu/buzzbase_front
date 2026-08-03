@@ -8,6 +8,23 @@ jest.mock("@app/services/v2/baseballNoteService", () => ({
   createBaseballNote: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/noteTagService", () => ({
+  createNoteTag: jest.fn(),
+}));
+
+const mockHasEntitlement = jest.fn(() => false);
+const mockIsEntitlementLoading = jest.fn(() => false);
+
+jest.mock("@app/hooks/pro/useEntitlement", () => ({
+  useEntitlement: () => ({
+    isPro: false,
+    inTrial: false,
+    inGracePeriod: false,
+    isLoading: mockIsEntitlementLoading(),
+    hasEntitlement: mockHasEntitlement,
+  }),
+}));
+
 // 実エディタは Slate に依存するため、メモ入力だけを模した textarea に差し替える。
 jest.mock("next/dynamic", () => () => {
   // ファクトリ内は外部スコープを参照できないため、React はここで解決する。
@@ -28,7 +45,7 @@ jest.mock("next/dynamic", () => () => {
   };
 });
 
-import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
+import type { BaseballNoteV2, NoteTag } from "@app/interface/baseballNoteV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
 import type ReactModule from "react";
@@ -61,13 +78,36 @@ const templates: ReflectionTemplate[] = [
 
 const createdNote = { id: 1 } as BaseballNoteV2;
 
+const tags: NoteTag[] = [
+  { id: 11, name: "打撃", is_preset: true },
+  { id: 12, name: "メンタル", is_preset: false },
+];
+
+const tagsResult: FetchResult<NoteTag[]> = { status: "ok", data: tags };
+
 function renderForm(
   templatesResult: FetchResult<ReflectionTemplate[]> = {
     status: "ok",
     data: templates,
   },
 ) {
-  return render(<NoteCreateForm templatesResult={templatesResult} />);
+  return render(
+    <NoteCreateForm
+      templatesResult={templatesResult}
+      tagsResult={tagsResult}
+    />,
+  );
+}
+
+/** `note_tags` entitlement を持つ Pro ユーザーとして描画する。 */
+function asProUser() {
+  mockHasEntitlement.mockReturnValue(true);
+}
+
+/** Pro 判定がまだ確定していない状態にする。 */
+function asResolvingUser() {
+  mockHasEntitlement.mockReturnValue(true);
+  mockIsEntitlementLoading.mockReturnValue(true);
 }
 
 function sentPayload() {
@@ -82,6 +122,8 @@ async function save() {
 describe("NoteCreateForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHasEntitlement.mockReturnValue(false);
+    mockIsEntitlementLoading.mockReturnValue(false);
     mockCreateBaseballNote.mockResolvedValue({ ok: true, data: createdNote });
   });
 
@@ -232,5 +274,61 @@ describe("NoteCreateForm", () => {
       ),
     ).toBeVisible();
     expect(screen.queryByRole("button", { name: "試合の振り返り" })).toBeNull();
+  });
+});
+
+describe("NoteCreateForm のタグ送信", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHasEntitlement.mockReturnValue(false);
+    mockIsEntitlementLoading.mockReturnValue(false);
+    mockCreateBaseballNote.mockResolvedValue({ ok: true, data: createdNote });
+  });
+
+  async function fillTitleAndSave() {
+    fireEvent.change(screen.getByLabelText("タイトル"), {
+      target: { value: "気づき" },
+    });
+    await save();
+  }
+
+  it("無料ユーザーはタグを選ぼうとしても tag_ids キー自体を送らない", async () => {
+    renderForm();
+    // 暗幕の裏でも要素自体は描画されるため、押せてしまった場合も送らないことを確かめる。
+    fireEvent.click(screen.getByText("#打撃"));
+
+    await fillTitleAndSave();
+
+    expect("tag_ids" in sentPayload()).toBe(false);
+  });
+
+  it("Pro 判定が未確定の間は tag_ids キー自体を送らない", async () => {
+    asResolvingUser();
+    renderForm();
+    fireEvent.click(screen.getByText("#打撃"));
+
+    await fillTitleAndSave();
+
+    expect("tag_ids" in sentPayload()).toBe(false);
+  });
+
+  it("Pro ユーザーは選択したタグを tag_ids で送る", async () => {
+    asProUser();
+    renderForm();
+    fireEvent.click(screen.getByRole("button", { name: "#打撃" }));
+    fireEvent.click(screen.getByRole("button", { name: "#メンタル" }));
+
+    await fillTitleAndSave();
+
+    expect(sentPayload().tag_ids).toEqual([11, 12]);
+  });
+
+  it("Pro ユーザーが何も選ばなければ空配列を送る", async () => {
+    asProUser();
+    renderForm();
+
+    await fillTitleAndSave();
+
+    expect(sentPayload().tag_ids).toEqual([]);
   });
 });
