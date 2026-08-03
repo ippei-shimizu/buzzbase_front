@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
+import { getPeriodicReviews } from "@app/services/v2/periodicReviewService";
 import DashboardContent from "./_components/DashboardContent";
+import PeriodicReviewBanner from "./_components/PeriodicReviewBanner";
 import { getAvailableSeasons, getDashboardData } from "./actions";
 
 export const metadata = {
@@ -16,9 +18,10 @@ export default async function DashboardPage() {
     redirect("/signup?auth_required=true");
   }
 
-  const [data, seasons] = await Promise.all([
+  const [data, seasons, reviews] = await Promise.all([
     getDashboardData(),
     getAvailableSeasons(),
+    getPeriodicReviews(),
   ]);
 
   return (
@@ -29,7 +32,8 @@ export default async function DashboardPage() {
           <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
             <div className="pt-20 px-4 lg:px-6">
               <h2 className="text-2xl font-bold">ダッシュボード</h2>
-              <div className="my-6">
+              <div className="my-6 flex flex-col gap-6">
+                <PeriodicReviewBanner result={reviews} />
                 <DashboardContent data={data} seasons={seasons} />
                 <AdInFeed
                   slot={adSlots.dashboardInFeed}

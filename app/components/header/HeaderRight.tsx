@@ -15,6 +15,7 @@ import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
 import { RankingIcon } from "@app/components/icon/RankingIcon";
+import { StatsIcon } from "@app/components/icon/StatsIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -65,6 +66,16 @@ export default function HeaderRight() {
                   }
                 >
                   振り返りテンプレ
+                </DropdownItem>
+                <DropdownItem
+                  key="review"
+                  as={Link}
+                  href="/review"
+                  startContent={
+                    <StatsIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  振り返りレポート
                 </DropdownItem>
                 <DropdownItem
                   key="goals"
