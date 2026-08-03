@@ -5,6 +5,7 @@ import {
   GROUP_JOIN_TOOLTIP_SHOWN_STORAGE_KEY,
   GROUP_TAB_BADGE_SEEN_STORAGE_KEY,
   INVITE_CARD_DISMISSED_STORAGE_KEY,
+  WALKTHROUGH_COMPLETED_STORAGE_KEY,
 } from "@app/constants/onboarding";
 import { useOnboardingFlag } from "../useOnboardingFlag";
 
@@ -109,12 +110,16 @@ describe("オンボーディングの永続化キー", () => {
     expect(INVITE_CARD_DISMISSED_STORAGE_KEY).toBe(
       "buzzbase.onboarding.inviteCardDismissed",
     );
+    expect(WALKTHROUGH_COMPLETED_STORAGE_KEY).toBe(
+      "buzzbase.onboarding.walkthroughCompleted",
+    );
     expect(
       new Set([
         GROUP_JOIN_TOOLTIP_SHOWN_STORAGE_KEY,
         GROUP_TAB_BADGE_SEEN_STORAGE_KEY,
         INVITE_CARD_DISMISSED_STORAGE_KEY,
+        WALKTHROUGH_COMPLETED_STORAGE_KEY,
       ]).size,
-    ).toBe(3);
+    ).toBe(4);
   });
 });

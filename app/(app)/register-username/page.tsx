@@ -82,7 +82,11 @@ export default function RegisterUserName() {
       const userData = await getUserData();
       if (userData && userData.user_id) {
         setIsLoggedIn(true);
-        router.push(`/mypage/${userData.user_id}`);
+        // 必須項目の登録を終えてからウォークスルーを挟む。
+        // 途中で挟むとフォーム離脱を招くため、順序は入れ替えない。
+        router.push(
+          `/onboarding?next=${encodeURIComponent(`/mypage/${userData.user_id}`)}`,
+        );
       }
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.data?.errors) {
