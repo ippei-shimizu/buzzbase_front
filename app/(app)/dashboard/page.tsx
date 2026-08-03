@@ -1,11 +1,18 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { todayInTokyo } from "@app/(app)/practice/schedules/calendar/_utils/calendarDate";
+import {
+  addDays,
+  todayInTokyo,
+} from "@app/(app)/practice/schedules/calendar/_utils/calendarDate";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
+import { GRASS_HISTORY_DAYS } from "@app/constants/activity";
+import { getActivityHeatmap } from "@app/services/v2/activityService";
 import { getPeriodicReviews } from "@app/services/v2/periodicReviewService";
 import { getDayPlan } from "@app/services/v2/planService";
+import { getShadowSwingStats } from "@app/services/v2/shadowSwingService";
+import ActivityGrassSection from "./_components/ActivityGrassSection";
 import DashboardContent from "./_components/DashboardContent";
 import PeriodicReviewBanner from "./_components/PeriodicReviewBanner";
 import TodayTasksSection from "./_components/TodayTasksSection";
@@ -24,12 +31,19 @@ export default async function DashboardPage() {
   // 「今日」は back の集計と同じ Asia/Tokyo 基準で決める。実行環境のタイムゾーンに任せると
   // 日付が 1 日ずれ、当日の予定と「済」の判定日が食い違う。
   const today = todayInTokyo();
-  const [data, seasons, reviews, todayPlans] = await Promise.all([
-    getDashboardData(),
-    getAvailableSeasons(),
-    getPeriodicReviews(),
-    getDayPlan(today),
-  ]);
+  // 草グラフは今日を含む 1 年ぶんを要求する。無料プランでは back が直近30日へ
+  // クランプして返すため、要求した開始日を Container へ渡してクランプを検出させる。
+  const grassFrom = addDays(today, -(GRASS_HISTORY_DAYS - 1));
+
+  const [data, seasons, reviews, todayPlans, heatmap, swingStats] =
+    await Promise.all([
+      getDashboardData(),
+      getAvailableSeasons(),
+      getPeriodicReviews(),
+      getDayPlan(today),
+      getActivityHeatmap(grassFrom, today),
+      getShadowSwingStats(),
+    ]);
 
   return (
     <>
@@ -41,6 +55,12 @@ export default async function DashboardPage() {
               <h2 className="text-2xl font-bold">ダッシュボード</h2>
               <div className="my-6 flex flex-col gap-6">
                 <PeriodicReviewBanner result={reviews} />
+                <ActivityGrassSection
+                  today={today}
+                  requestedFrom={grassFrom}
+                  heatmap={heatmap}
+                  swingStats={swingStats}
+                />
                 <TodayTasksSection today={today} result={todayPlans} />
                 <DashboardContent data={data} seasons={seasons} />
                 <AdInFeed

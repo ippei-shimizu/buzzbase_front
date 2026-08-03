@@ -31,7 +31,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
   grass_full_history: {
     free: "直近30日",
     pro: "全期間",
-    availability: "app_only",
+    availability: "web_and_app",
   },
   unlimited_practice_menus: {
     free: "3件",
