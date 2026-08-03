@@ -8,12 +8,16 @@ import type { ComponentType, SVGProps } from "react";
 import ArrowTrendingUpIcon from "@heroicons/react/24/outline/ArrowTrendingUpIcon";
 import BoltIcon from "@heroicons/react/24/outline/BoltIcon";
 import EllipsisHorizontalCircleIcon from "@heroicons/react/24/outline/EllipsisHorizontalCircleIcon";
+import FaceFrownIcon from "@heroicons/react/24/outline/FaceFrownIcon";
+import FaceSmileIcon from "@heroicons/react/24/outline/FaceSmileIcon";
 import FireIcon from "@heroicons/react/24/outline/FireIcon";
 import HandRaisedIcon from "@heroicons/react/24/outline/HandRaisedIcon";
 import HeartIcon from "@heroicons/react/24/outline/HeartIcon";
 import ScaleIcon from "@heroicons/react/24/outline/ScaleIcon";
 import ShieldCheckIcon from "@heroicons/react/24/outline/ShieldCheckIcon";
 import SolidBoltIcon from "@heroicons/react/24/solid/BoltIcon";
+import SolidFaceFrownIcon from "@heroicons/react/24/solid/FaceFrownIcon";
+import SolidFaceSmileIcon from "@heroicons/react/24/solid/FaceSmileIcon";
 
 // back/app/models/concerns/plan_limits.rb の PRACTICE_MENU_FREE_LIMIT と一致させる。
 export const PRACTICE_MENU_FREE_LIMIT = 3;
@@ -78,6 +82,67 @@ export const PRACTICE_CATEGORY_ICONS: Readonly<
 
 /** 気分の選択肢。back は自由文字列カラムのため、選択肢は front / mobile 側で揃える。 */
 export const CONDITION_MOODS: ReadonlyArray<string> = ["好調", "普通", "不調"];
+
+/** コンディションの4段階を疲労度・体調のどちらとして読むか。 */
+export type ConditionLevelKind = "fatigue" | "physical";
+
+/**
+ * 疲労度・体調の4段階。value は back の ConditionLog::LEVEL_RANGE（1..4）と一致させる。
+ * 悪い→良いで赤→緑に変わるが、色覚特性があっても段階を読み取れるよう
+ * 表情（しかめ面 / 笑顔）と塗り（塗りつぶし / 輪郭）でも差を付け、必ずラベルを併記して使う。
+ */
+export const CONDITION_LEVELS: ReadonlyArray<{
+  value: number;
+  fatigueLabel: string;
+  physicalLabel: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  colorClass: string;
+}> = [
+  {
+    value: 1,
+    fatigueLabel: "かなり疲れ",
+    physicalLabel: "不調",
+    icon: SolidFaceFrownIcon,
+    colorClass: "text-[#ef4444]",
+  },
+  {
+    value: 2,
+    fatigueLabel: "やや疲れ",
+    physicalLabel: "やや不調",
+    icon: FaceFrownIcon,
+    colorClass: "text-[#f59e0b]",
+  },
+  {
+    value: 3,
+    fatigueLabel: "ふつう",
+    physicalLabel: "ふつう",
+    icon: FaceSmileIcon,
+    colorClass: "text-[#84cc16]",
+  },
+  {
+    value: 4,
+    fatigueLabel: "元気",
+    physicalLabel: "好調",
+    icon: SolidFaceSmileIcon,
+    colorClass: "text-[#22c55e]",
+  },
+];
+
+/** 段階の表示情報を返す。範囲外（back の値域変更やデータ不整合）は null。 */
+export const conditionLevelMeta = (
+  level: number | null | undefined,
+): (typeof CONDITION_LEVELS)[number] | null =>
+  CONDITION_LEVELS.find((item) => item.value === level) ?? null;
+
+/** 段階のラベルを返す。疲労度と体調で語彙が違うため kind で呼び分ける。 */
+export const conditionLevelLabel = (
+  kind: ConditionLevelKind,
+  level: number | null | undefined,
+): string | null => {
+  const meta = conditionLevelMeta(level);
+  if (!meta) return null;
+  return kind === "fatigue" ? meta.fatigueLabel : meta.physicalLabel;
+};
 
 /** 故障箇所のプリセット。back は jsonb の自由文字列のため、入力補助としてのみ使う。 */
 export const INJURY_PARTS: ReadonlyArray<string> = [

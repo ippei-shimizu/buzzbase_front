@@ -41,6 +41,7 @@ const FREE_LIMITS_FROM_BACK: Partial<Record<ProFeature, string>> = {
 /** Web（front）で実際に entitlement ゲートを実装済みの機能。 */
 const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "no_ads",
+  "detailed_condition_log",
   "season_transition_graph",
   "hit_direction_average",
   "count_situation_average",

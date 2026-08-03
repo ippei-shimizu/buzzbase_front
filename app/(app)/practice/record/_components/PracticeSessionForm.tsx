@@ -12,18 +12,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import ConditionCard from "@app/components/practice/ConditionCard";
+import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
+import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
+import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import { upsertPracticeSession } from "@app/services/v2/practiceSessionService";
+import {
+  buildConditionPayload,
+  buildInitialCondition,
+} from "../_utils/conditionDraft";
 import {
   buildInitialAmounts,
   buildInitialWeights,
   buildItems,
   toInputValue,
 } from "../_utils/practiceRecordDraft";
+import ConditionForm from "./ConditionForm";
+import { SAMPLE_CONDITION } from "./conditionSample";
 import ImprovementThemeField from "./ImprovementThemeField";
 import PracticeMenuChecklist from "./PracticeMenuChecklist";
 import {
   ADD_MENU_LABEL,
+  CONDITION_PRO_BADGE,
+  CONDITION_SECTION_TITLE,
   MENU_SECTION_TITLE,
   NO_ITEMS_ERROR,
   SAVE_ONLY_LABEL,
@@ -76,6 +88,7 @@ export default function PracticeSessionForm({
 }: PracticeSessionFormProps) {
   const router = useRouter();
   const { open: openProUpgradeModal } = useProUpgradeModal();
+  const { hasEntitlement, isLoading: isEntitlementLoading } = useEntitlement();
   const [amounts, setAmounts] = useState<Record<number, string>>(() =>
     buildInitialAmounts(session, presetMenus),
   );
@@ -88,8 +101,15 @@ export default function PracticeSessionForm({
   const [linkedThemeCountAtLoad] = useState(
     () => session?.improvement_theme_ids.length ?? 0,
   );
+  const [condition, setCondition] = useState(() =>
+    buildInitialCondition(session),
+  );
   const [errors, setErrors] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  const hasConditionEntitlement = hasEntitlement("detailed_condition_log");
+  // 判定確定前は入力させない。未確定のまま送るとコンディションの 403 で保存全体が失敗しうる。
+  const canRecordCondition = !isEntitlementLoading && hasConditionEntitlement;
 
   const handleToggleMenu = (menu: PracticeMenu) => {
     const isSelected = menu.id in amounts;
@@ -119,7 +139,12 @@ export default function PracticeSessionForm({
     // 触っていない項目も含めて選択中の全メニューを送る。
     // back は送らなかったメニューのログを削除するため、間引くと既存の記録が消える。
     const items = buildItems(amounts, weights);
-    if (items.length === 0) {
+    // entitlement を持たない間は、入力状態に値が残っていてもコンディションを送らない。
+    const conditionPayload = buildConditionPayload(condition, {
+      hasConditionEntitlement,
+      isEntitlementLoading,
+    });
+    if (items.length === 0 && conditionPayload === null) {
       setErrors([NO_ITEMS_ERROR]);
       return;
     }
@@ -130,14 +155,21 @@ export default function PracticeSessionForm({
       logged_on: date,
       items,
       improvement_theme_ids: themeIds,
+      // 送らない場合はキーごと落とす。back は condition が有ると Pro 判定に入る。
+      ...(conditionPayload === null ? {} : { condition: conditionPayload }),
     });
 
     if (!result.ok) {
       setIsSaving(false);
       // 403 は保存全体がロールバックされるため、成功表示も画面遷移もしない。
-      // 課題を複数送ったときだけ紐付け上限として Pro 訴求へ倒し、それ以外は back の文言をそのまま出す。
-      if (result.reason === "forbidden" && themeIds.length > 1) {
-        openProUpgradeModal({ trigger: "multi_improvement_theme_links" });
+      // back は課題の紐付けをコンディションより先に判定するため、訴求もその順で出し分ける。
+      // どちらでもなければ back の文言をそのまま出す。
+      if (result.reason === "forbidden") {
+        if (themeIds.length > 1) {
+          openProUpgradeModal({ trigger: "multi_improvement_theme_links" });
+        } else if (conditionPayload !== null) {
+          openProUpgradeModal({ trigger: "detailed_condition_log" });
+        }
       }
       setErrors(result.errors);
       return;
@@ -176,6 +208,37 @@ export default function PracticeSessionForm({
           onAmountChange={handleAmountChange}
           onWeightChange={handleWeightChange}
         />
+      </div>
+
+      <div className="mt-8 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-white">
+          {CONDITION_SECTION_TITLE}
+        </h2>
+        {/* 判定確定前はロック表示を出さず、Pro ユーザーにバッジが一瞬見えるのを防ぐ。 */}
+        {isEntitlementLoading || canRecordCondition ? null : (
+          <span className="rounded-full bg-[#3A3A3A] px-2 py-0.5 text-[11px] font-bold text-[#d08000]">
+            {CONDITION_PRO_BADGE}
+          </span>
+        )}
+      </div>
+      <div className="mt-3">
+        {canRecordCondition ? (
+          <ConditionForm value={condition} onChange={setCondition} />
+        ) : (
+          <div className="flex flex-col gap-y-2">
+            {/* 過去に記録したコンディションがあるときは、それを暗幕越しのプレビューにする。 */}
+            {isEntitlementLoading || session?.condition ? null : (
+              <SampleDataLabel />
+            )}
+            <ProUpsellOverlay feature="detailed_condition_log">
+              <ConditionCard
+                condition={session?.condition ?? SAMPLE_CONDITION}
+                showTitle={false}
+                className="p-1"
+              />
+            </ProUpsellOverlay>
+          </div>
+        )}
       </div>
 
       <h2 className="mt-8 text-sm font-bold text-white">
