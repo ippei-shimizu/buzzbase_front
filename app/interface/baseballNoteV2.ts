@@ -7,7 +7,13 @@ export type MediaAttachmentStatus = "pending" | "ready" | "failed";
 export interface NoteTag {
   id: number;
   name: string;
+  /** 運営提供のプリセットタグ（全ユーザー共通）。false はそのユーザーの自作タグ。 */
   is_preset: boolean;
+}
+
+/** タグの作成パラメータ。`name` は `#` を含まない保存名で渡す（normalizeTagName を通すこと）。 */
+export interface NoteTagInput {
+  name: string;
 }
 
 /** 振り返りテンプレの問い→回答の1組。 */

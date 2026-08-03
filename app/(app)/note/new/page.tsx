@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getNoteTags } from "@app/services/v2/noteTagService";
 import { getReflectionTemplates } from "@app/services/v2/reflectionTemplateService";
 import NoteCreateForm from "./_components/NoteCreateForm";
 
@@ -8,6 +9,12 @@ export default async function NoteNew() {
   if (!cookieStore.get("access-token")) {
     redirect("/signup?auth_required=true");
   }
-  const templatesResult = await getReflectionTemplates();
-  return <NoteCreateForm templatesResult={templatesResult} />;
+  // 互いに依存しない取得なので並列で待つ。
+  const [templatesResult, tagsResult] = await Promise.all([
+    getReflectionTemplates(),
+    getNoteTags(),
+  ]);
+  return (
+    <NoteCreateForm templatesResult={templatesResult} tagsResult={tagsResult} />
+  );
 }

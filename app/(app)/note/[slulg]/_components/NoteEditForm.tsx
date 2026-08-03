@@ -1,6 +1,6 @@
 "use client";
 
-import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
+import type { BaseballNoteV2, NoteTag } from "@app/interface/baseballNoteV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
 import { Input } from "@heroui/react";
@@ -10,8 +10,10 @@ import { useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import NoteMenu from "@app/components/note/NoteMenu";
+import NoteTagSection from "@app/components/note/NoteTagSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { useNoteTagEditing } from "@app/hooks/note/useNoteTagEditing";
 import { updateBaseballNote } from "@app/services/v2/baseballNoteService";
 import {
   buildAnswerList,
@@ -20,6 +22,7 @@ import {
   parseMemoToSlateValue,
   resolveNoteMemo,
 } from "@app/utils/noteMemo";
+import { buildTagIdsUpdate } from "@app/utils/noteTags";
 import {
   buildNoteUpdateInput,
   hasNoteChanges,
@@ -35,13 +38,16 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
 interface NoteEditFormProps {
   note: BaseballNoteV2;
   templatesResult: FetchResult<ReflectionTemplate[]>;
+  tagsResult: FetchResult<NoteTag[]>;
 }
 
 export default function NoteEditForm({
   note,
   templatesResult,
+  tagsResult,
 }: NoteEditFormProps) {
   const router = useRouter();
+  const { canEditTags } = useNoteTagEditing();
   // 回答から自動合成された memo は回答欄と同じ内容が並ぶため、自由メモ欄へは流し込まない。
   const isSynthesizedMemo = isReflectionMemo(
     extractMemoText(note.memo),
@@ -76,6 +82,11 @@ export default function NoteEditForm({
   const [memo, setMemo] = useState(editorMemo);
   const [answers, setAnswers] =
     useState<Record<string, string>>(initialAnswerMap);
+  const initialTagIds = useMemo(
+    () => note.tags.map((tag) => tag.id),
+    [note.tags],
+  );
+  const [tagIds, setTagIds] = useState<number[]>(initialTagIds);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -90,15 +101,19 @@ export default function NoteEditForm({
     reflectionAnswers: initialAnswers,
   };
 
-  // 送るのは変更したキーだけ。試合 / 課題 / タグの紐付けとテンプレ ID はこの画面で
-  // 編集しないためキー自体を送らず、back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
-  const updateInput = buildNoteUpdateInput(initialValues, {
-    date,
-    title,
-    // 回答を編集したら合成メモも作り直す。メモだけ古い回答のまま残すと本文と回答が食い違う。
-    memo: resolveNoteMemo(memo, currentAnswers),
-    reflectionAnswers: currentAnswers,
-  });
+  // 送るのは変更したキーだけ。試合 / 課題の紐付けとテンプレ ID はこの画面で編集しないため
+  // キー自体を送らず、back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
+  // タグも Pro 判定が確定して entitlement を持ち、かつ実際に選択が変わったときだけキーを生やす。
+  const updateInput = {
+    ...buildNoteUpdateInput(initialValues, {
+      date,
+      title,
+      // 回答を編集したら合成メモも作り直す。メモだけ古い回答のまま残すと本文と回答が食い違う。
+      memo: resolveNoteMemo(memo, currentAnswers),
+      reflectionAnswers: currentAnswers,
+    }),
+    ...buildTagIdsUpdate({ canEditTags, initialTagIds, tagIds }),
+  };
   const hasChanges = hasNoteChanges(updateInput);
 
   const setErrorsWithTimeout = (newErrors: string[]) => {
@@ -174,6 +189,12 @@ export default function NoteEditForm({
                   answers={answers}
                   onChangeAnswer={handleChangeAnswer}
                   locked
+                />
+                <NoteTagSection
+                  tagsResult={tagsResult}
+                  selectedIds={tagIds}
+                  onChange={setTagIds}
+                  canEdit={canEditTags}
                 />
               </div>
             </form>

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getBaseballNote } from "@app/services/v2/baseballNoteService";
+import { getNoteTags } from "@app/services/v2/noteTagService";
 import { getReflectionTemplates } from "@app/services/v2/reflectionTemplateService";
 import NoteEditForm from "./_components/NoteEditForm";
 
@@ -27,9 +28,10 @@ export default async function NoteDetail(props: {
   }
 
   // 互いに依存しない取得なので並列で待つ。
-  const [result, templatesResult] = await Promise.all([
+  const [result, templatesResult, tagsResult] = await Promise.all([
     getBaseballNote(noteId),
     getReflectionTemplates(),
+    getNoteTags(),
   ]);
   if (result.status === "forbidden") {
     return <NoteLoadError message="このノートを表示する権限がありません。" />;
@@ -38,5 +40,11 @@ export default async function NoteDetail(props: {
     return <NoteLoadError message="野球ノートの読み込みに失敗しました。" />;
   }
 
-  return <NoteEditForm note={result.data} templatesResult={templatesResult} />;
+  return (
+    <NoteEditForm
+      note={result.data}
+      templatesResult={templatesResult}
+      tagsResult={tagsResult}
+    />
+  );
 }

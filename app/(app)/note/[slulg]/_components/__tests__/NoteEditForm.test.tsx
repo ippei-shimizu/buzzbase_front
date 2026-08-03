@@ -9,6 +9,23 @@ jest.mock("@app/services/v2/baseballNoteService", () => ({
   deleteBaseballNote: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/noteTagService", () => ({
+  createNoteTag: jest.fn(),
+}));
+
+const mockHasEntitlement = jest.fn(() => false);
+const mockIsEntitlementLoading = jest.fn(() => false);
+
+jest.mock("@app/hooks/pro/useEntitlement", () => ({
+  useEntitlement: () => ({
+    isPro: false,
+    inTrial: false,
+    inGracePeriod: false,
+    isLoading: mockIsEntitlementLoading(),
+    hasEntitlement: mockHasEntitlement,
+  }),
+}));
+
 // 実エディタは Slate に依存するため、メモ入力だけを模した textarea に差し替える。
 jest.mock("next/dynamic", () => () => {
   // ファクトリ内は外部スコープを参照できないため、React はここで解決する。
@@ -29,7 +46,7 @@ jest.mock("next/dynamic", () => () => {
   };
 });
 
-import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
+import type { BaseballNoteV2, NoteTag } from "@app/interface/baseballNoteV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
 import type ReactModule from "react";
@@ -75,11 +92,19 @@ const templatesResult: FetchResult<ReflectionTemplate[]> = {
   ],
 };
 
+const tags: NoteTag[] = [
+  { id: 301, name: "打撃", is_preset: true },
+  { id: 302, name: "メンタル", is_preset: false },
+];
+
+const tagsResult: FetchResult<NoteTag[]> = { status: "ok", data: tags };
+
 function renderForm(overrides: Partial<BaseballNoteV2> = {}) {
   return render(
     <NoteEditForm
       note={{ ...note, ...overrides }}
       templatesResult={templatesResult}
+      tagsResult={tagsResult}
     />,
   );
 }
@@ -87,6 +112,8 @@ function renderForm(overrides: Partial<BaseballNoteV2> = {}) {
 describe("NoteEditForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHasEntitlement.mockReturnValue(false);
+    mockIsEntitlementLoading.mockReturnValue(false);
     mockUpdateBaseballNote.mockResolvedValue({ ok: true, data: note });
   });
 
@@ -303,6 +330,106 @@ describe("NoteEditForm", () => {
 
       expect(screen.queryByLabelText("課題")).toBeNull();
       expect(screen.queryByText(/振り返り/)).toBeNull();
+    });
+  });
+
+  describe("タグ", () => {
+    async function saveAfter(action: () => void) {
+      action();
+      fireEvent.click(screen.getByRole("button", { name: "保存" }));
+      await waitFor(() =>
+        expect(mockUpdateBaseballNote).toHaveBeenCalledTimes(1),
+      );
+    }
+
+    it("ノートに付いているタグは選択済みで表示する（# 付き）", () => {
+      mockHasEntitlement.mockReturnValue(true);
+      renderForm();
+
+      expect(screen.getByRole("button", { name: "#打撃" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: "#メンタル" })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+    });
+
+    it("無料ユーザーがタイトルだけ更新しても tag_ids を送らない（既存タグを消さない）", async () => {
+      renderForm();
+
+      await saveAfter(() =>
+        fireEvent.change(screen.getByLabelText("タイトル"), {
+          target: { value: "更新後" },
+        }),
+      );
+
+      expect(sentPayload()).not.toHaveProperty("tag_ids");
+    });
+
+    it("無料ユーザーはタグを外そうとしても tag_ids を送らない", async () => {
+      renderForm();
+
+      await saveAfter(() => {
+        // 暗幕の裏でも要素自体は描画されるため、押せてしまった場合も送らないことを確かめる。
+        fireEvent.click(screen.getByText("#打撃"));
+        fireEvent.change(screen.getByLabelText("タイトル"), {
+          target: { value: "更新後" },
+        });
+      });
+
+      expect(sentPayload()).not.toHaveProperty("tag_ids");
+    });
+
+    it("Pro 判定が未確定の間は tag_ids を送らない", async () => {
+      mockHasEntitlement.mockReturnValue(true);
+      mockIsEntitlementLoading.mockReturnValue(true);
+      renderForm();
+
+      await saveAfter(() => {
+        fireEvent.click(screen.getByText("#メンタル"));
+        fireEvent.change(screen.getByLabelText("タイトル"), {
+          target: { value: "更新後" },
+        });
+      });
+
+      expect(sentPayload()).not.toHaveProperty("tag_ids");
+    });
+
+    it("Pro ユーザーがタグを追加すると tag_ids を送る", async () => {
+      mockHasEntitlement.mockReturnValue(true);
+      renderForm();
+
+      await saveAfter(() =>
+        fireEvent.click(screen.getByRole("button", { name: "#メンタル" })),
+      );
+
+      expect(sentPayload().tag_ids).toEqual([301, 302]);
+    });
+
+    it("Pro ユーザーがタグを全て外すと空配列を明示して送る", async () => {
+      mockHasEntitlement.mockReturnValue(true);
+      renderForm();
+
+      await saveAfter(() =>
+        fireEvent.click(screen.getByRole("button", { name: "#打撃" })),
+      );
+
+      expect(sentPayload().tag_ids).toEqual([]);
+    });
+
+    it("Pro ユーザーでもタグを変えていなければ tag_ids を送らない", async () => {
+      mockHasEntitlement.mockReturnValue(true);
+      renderForm();
+
+      await saveAfter(() =>
+        fireEvent.change(screen.getByLabelText("タイトル"), {
+          target: { value: "更新後" },
+        }),
+      );
+
+      expect(sentPayload()).not.toHaveProperty("tag_ids");
     });
   });
 });
