@@ -1,13 +1,16 @@
 import type { BaseballNoteV2, NoteTag } from "@app/interface/baseballNoteV2";
 import {
   EMPTY_NOTE_FILTERS,
-  collectNoteMonths,
   filterNotes,
-  formatMonthLabel,
   hasActiveNoteFilter,
-  notesInMonth,
+  noteDate,
 } from "@app/utils/noteListFilter";
 import { buildMemoJson } from "@app/utils/noteMemo";
+import {
+  collectMonths,
+  formatMonthLabel,
+  itemsInMonth,
+} from "@app/utils/recordListFilter";
 
 const battingTag: NoteTag = { id: 1, name: "打撃", is_preset: true };
 const mentalTag: NoteTag = { id: 2, name: "メンタル", is_preset: false };
@@ -190,13 +193,13 @@ describe("月次ページングの補助", () => {
   ];
 
   it("ノートのある年月を新しい順に重複なく並べる", () => {
-    expect(collectNoteMonths(notes)).toEqual(["2026-08", "2026-06"]);
+    expect(collectMonths(notes, noteDate)).toEqual(["2026-08", "2026-06"]);
   });
 
   it("指定した年月のノートだけを取り出す", () => {
-    expect(notesInMonth(notes, "2026-08").map((note) => note.id)).toEqual([
-      1, 3,
-    ]);
+    expect(
+      itemsInMonth(notes, noteDate, "2026-08").map((note) => note.id),
+    ).toEqual([1, 3]);
   });
 
   it("年月を日本語表記にする", () => {

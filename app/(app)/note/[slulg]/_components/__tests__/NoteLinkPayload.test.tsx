@@ -14,6 +14,13 @@ jest.mock("@app/services/v2/noteTagService", () => ({
   createNoteTag: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/mediaAttachmentService", () => ({
+  presignMediaUpload: jest.fn(),
+  completeMediaUpload: jest.fn(),
+  updateMediaAttachmentMemo: jest.fn(),
+  deleteMediaAttachment: jest.fn(),
+}));
+
 // 紐付け UI のガード（Pro 判定・ピッカー操作）を外し、フォームの送信ペイロード組み立てだけを検証する。
 // 「変えていないならキーごと送らない」「全解除は [] を送る」はペイロード組み立ての責務。
 jest.mock("@app/components/note/NoteThemeSection", () => {

@@ -16,6 +16,13 @@ jest.mock("@app/services/v2/gameResultLinkService", () => ({
   ),
 }));
 
+jest.mock("@app/services/v2/mediaAttachmentService", () => ({
+  presignMediaUpload: jest.fn(),
+  completeMediaUpload: jest.fn(),
+  updateMediaAttachmentMemo: jest.fn(),
+  deleteMediaAttachment: jest.fn(),
+}));
+
 jest.mock("@app/contexts/proUpgradeModalContext", () => ({
   useProUpgradeModal: () => ({ open: jest.fn(), close: jest.fn() }),
 }));

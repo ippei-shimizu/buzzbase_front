@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
+import NoteMediaSection from "@app/components/note/media/NoteMediaSection";
 import NoteGameResultSection from "@app/components/note/NoteGameResultSection";
 import NoteMenu from "@app/components/note/NoteMenu";
 import NoteTagSection from "@app/components/note/NoteTagSection";
@@ -124,6 +125,7 @@ export default function NoteEditForm({
   // back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
   // 紐付け（試合 / 課題 / タグ）も、選択が実際に変わったときだけキーを生やす。
   // 変わったときは空配列でも必ず送る（`[]` が「全解除」の意思表示になる）。
+  // メディア添付はノート更新とは別 API で即時反映するため、この入力には含めない。
   const updateInput = {
     ...buildNoteUpdateInput(initialValues, {
       date,
@@ -235,6 +237,10 @@ export default function NoteEditForm({
                   onChange={setGameResultIds}
                   initialCount={note.game_result_ids.length}
                   linkedOptions={linkedGameResults}
+                />
+                <NoteMediaSection
+                  noteId={note.id}
+                  attachments={note.media_attachments}
                 />
               </div>
             </form>

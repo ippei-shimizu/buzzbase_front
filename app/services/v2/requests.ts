@@ -71,6 +71,48 @@ export async function fetchV2<T>(
   }
 }
 
+/**
+ * 単一リソース取得系 Server Action の戻り値。
+ * 他ユーザーのリソースを 404 で隠す（存在自体を漏らさない）エンドポイント向けに、
+ * FetchResult へ `not_found` を足したもの。
+ * 「見つからない」を error に丸めると、リンク切れなのに「通信に失敗しました」と誤案内してしまう。
+ */
+export type DetailFetchResult<T> =
+  | { status: "ok"; data: T }
+  | { status: "forbidden" }
+  | { status: "not_found" }
+  | { status: "error" };
+
+/**
+ * v2 API の GET を叩き、404 を「見つからない」として区別して返す。
+ *
+ * @param path `/api/v2/...` から始まるパス（クエリを含めてよい）
+ * @param action Sentry に送るアクション名
+ */
+export async function fetchDetailV2<T>(
+  path: string,
+  action: string,
+): Promise<DetailFetchResult<T>> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return { status: "error" };
+
+    const response = await fetch(`${RAILS_API_URL}${path}`, {
+      headers,
+      cache: "no-store",
+    });
+
+    if (response.status === 403) return { status: "forbidden" };
+    if (response.status === 404) return { status: "not_found" };
+    if (!response.ok) return { status: "error" };
+
+    return { status: "ok", data: (await response.json()) as T };
+  } catch (error) {
+    captureServerActionError(error, { action });
+    return { status: "error" };
+  }
+}
+
 interface MutateOptions {
   method: "POST" | "PATCH" | "DELETE";
   /** JSON 化して送るリクエストボディ。DELETE のように本文が無い場合は省略する。 */

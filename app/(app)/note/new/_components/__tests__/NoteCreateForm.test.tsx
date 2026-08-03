@@ -8,6 +8,13 @@ jest.mock("@app/services/v2/baseballNoteService", () => ({
   createBaseballNote: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/mediaAttachmentService", () => ({
+  presignMediaUpload: jest.fn(),
+  completeMediaUpload: jest.fn(),
+  updateMediaAttachmentMemo: jest.fn(),
+  deleteMediaAttachment: jest.fn(),
+}));
+
 jest.mock("@app/services/v2/noteTagService", () => ({
   createNoteTag: jest.fn(),
 }));
