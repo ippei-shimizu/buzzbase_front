@@ -23,14 +23,12 @@ export const metadata: Metadata = {
 // 読むと配下 105 ルートすべてが dynamic 扱いになり、コラム記事やツールなど
 // データ取得のない静的ページまでビルド時プリレンダリングを失う。
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const isProduction = process.env.NODE_ENV === "production";
-
   return (
     <AuthProvider>
       <UserProvider>
         <Providers>
           <ProStatusProvider>
-            {isProduction ? <AdsenseScript /> : null}
+            <AdsenseScript />
             <SmartAppBanner />
             <ProStatusBanners />
             <GameRecordStorageCleanup />

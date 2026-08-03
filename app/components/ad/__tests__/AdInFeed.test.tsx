@@ -66,6 +66,8 @@ describe("AdInFeed", () => {
     const { container } = renderInFeed();
 
     expect(container.querySelector("ins.adsbygoogle")).toBeNull();
+    // 枠だけ残ると余白が空きセルとして残る
+    expect(container.querySelector(".ad-container")).toBeNull();
     expect(adRequestCount()).toBe(0);
   });
 

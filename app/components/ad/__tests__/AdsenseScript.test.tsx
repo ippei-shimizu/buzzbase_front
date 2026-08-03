@@ -1,6 +1,7 @@
 jest.mock("../adConfig", () => ({
   ADSENSE_CLIENT_ID: "ca-pub-test",
   isAdsenseEnabled: true,
+  isAdsenseScriptEnabled: true,
 }));
 
 jest.mock("@app/hooks/pro/useEntitlement", () => ({
