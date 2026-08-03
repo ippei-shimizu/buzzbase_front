@@ -142,6 +142,17 @@ describe("GoalsContent", () => {
     mockEntitlement();
   });
 
+  describe("達成バッジへの導線", () => {
+    it("バッジ一覧へのリンクを出す", () => {
+      renderContent();
+
+      expect(screen.getByRole("link", { name: "達成バッジ" })).toHaveAttribute(
+        "href",
+        "/goals/badges",
+      );
+    });
+  });
+
   describe("3タブの分類", () => {
     const activeGoals = [
       buildGoal({ id: 1, title: "進行中の目標" }),

@@ -22,6 +22,20 @@ export const EMPTY_MESSAGE: Record<GoalTab, string> = {
 export const LOAD_ERROR_MESSAGE =
   "目標を取得できませんでした。時間を置いて再度お試しください。";
 
+export const BADGES_TITLE = "達成バッジ";
+
+export const BADGES_DESCRIPTION =
+  "期限を迎えた目標を達成すると、自動でバッジが増えます。";
+
+/** 空状態の文言はモバイルアプリのバッジ一覧と揃える。 */
+export const BADGES_EMPTY_TITLE = "まだ達成バッジはありません";
+
+export const BADGES_EMPTY_DESCRIPTION =
+  "目標を達成すると、ここにバッジが並びます";
+
+export const BADGES_LOAD_ERROR_MESSAGE =
+  "達成バッジを取得できませんでした。時間を置いて再度お試しください。";
+
 export const HISTORY_LOAD_ERROR_MESSAGE =
   "達成・未達の履歴を取得できませんでした。進行中の目標のみ表示しています。";
 
