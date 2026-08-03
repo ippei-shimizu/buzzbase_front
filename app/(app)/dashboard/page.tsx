@@ -33,10 +33,13 @@ export default async function DashboardPage({
 
   const { tab } = await searchParams;
   const isActivity = parseHomeTab(tab) === "activity";
+  // 「今日」は back の集計と同じ Asia/Tokyo 基準で決める。実行環境のタイムゾーンに任せると
+  // 日付が 1 日ずれ、当日の予定と「済」の判定日が食い違う。
+  const today = todayInTokyo();
 
   // 表示しない面のデータは取りに行かない。面の中の取得は互いに独立なので並列で待つ。
   const [activity, dashboard, seasons] = await Promise.all([
-    isActivity ? loadActivityData() : null,
+    isActivity ? loadActivityData(today) : null,
     isActivity ? null : getDashboardData(),
     isActivity ? null : getAvailableSeasons(),
   ]);
@@ -53,7 +56,7 @@ export default async function DashboardPage({
             </div>
             <div className="my-6">
               {activity ? (
-                <ActivityView data={activity} today={todayInTokyo()} />
+                <ActivityView data={activity} today={today} />
               ) : (
                 <div className="flex flex-col gap-6">
                   <DashboardContent data={dashboard} seasons={seasons ?? []} />

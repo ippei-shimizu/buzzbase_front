@@ -1,6 +1,7 @@
 import type { ComponentType, SVGProps } from "react";
 import ChevronRightIcon from "@heroicons/react/24/outline/ChevronRightIcon";
 import FlagIcon from "@heroicons/react/24/outline/FlagIcon";
+import ChartBarIcon from "@heroicons/react/24/outline/ChartBarIcon";
 import SparklesIcon from "@heroicons/react/24/outline/SparklesIcon";
 import TrophyIcon from "@heroicons/react/24/outline/TrophyIcon";
 import Link from "next/link";
@@ -16,8 +17,7 @@ interface Tool {
 
 /**
  * 上達サイクルを回すための機能への導線。
- * mobile と同じ並び（課題 → 目標 → 振り返り）にする。
- * 「練習と成績のつながり（相関インサイト）」は front 未実装のため、実装 PR でこの配列に足す。
+ * mobile と同じ並び（課題 → 目標 → 練習と成績のつながり → 振り返り）にする。
  */
 const TOOLS: ReadonlyArray<Tool> = [
   {
@@ -31,6 +31,12 @@ const TOOLS: ReadonlyArray<Tool> = [
     label: "目標を立てる",
     description: "目標を決めて達成状況を追う",
     icon: TrophyIcon,
+  },
+  {
+    href: "/insights",
+    label: "練習と成績のつながり",
+    description: "やったことと成績の傾向を見る",
+    icon: ChartBarIcon,
   },
   {
     href: "/review",

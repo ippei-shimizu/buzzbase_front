@@ -54,3 +54,10 @@ export const RECENT_PRACTICE_NO_MENU = "メニューの記録なし";
 /** 1日分の行を開くリンクのラベル。日付表記をそのまま読み上げに使う。 */
 export const recentPracticeDetailLabel = (dateText: string): string =>
   `${dateText}の練習の詳細を開く`;
+
+export const PRACTICE_TOOLS_TITLE = "練習ツール";
+
+export const PRACTICE_TOOLS_DESCRIPTION =
+  "一定のテンポで素振りの回数を数えて、回数を音で伝えてくれる機能です";
+
+export const SHADOW_SWING_LABEL = "素振りカウントタイマー";

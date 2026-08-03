@@ -12,7 +12,8 @@ jest.mock("../../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
-import { getPlanCalendar } from "../planService";
+import type { Plan } from "@app/types/plan";
+import { getDayPlan, getPlanCalendar } from "../planService";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -40,6 +41,71 @@ beforeEach(() => {
   jest.clearAllMocks();
   global.fetch = jest.fn();
   setupAuthCookies();
+});
+
+describe("getDayPlan", () => {
+  const plan: Plan = {
+    id: 3,
+    title: "朝練",
+    event_type: "self_practice",
+    scheduled_time: "06:00",
+    recurring: true,
+    menu_set_id: null,
+    game_result_id: null,
+    note: null,
+    menus: [
+      {
+        practice_menu_id: 1,
+        name: "素振り",
+        unit_label: "本",
+        target_value: 200,
+        sort_order: 0,
+        done: false,
+      },
+    ],
+    done: false,
+  };
+
+  it("date をクエリに付けて by_date を叩く", async () => {
+    mockResponse(200, []);
+
+    await getDayPlan("2026-08-03");
+
+    expect(requestedUrl()).toBe(
+      "http://back:3000/api/v2/plans/by_date?date=2026-08-03",
+    );
+  });
+
+  it("繰り返しと単発が同じ日付に集約されて返る", async () => {
+    const single: Plan = {
+      ...plan,
+      id: 4,
+      title: "練習試合",
+      event_type: "game",
+      recurring: false,
+      menus: [],
+    };
+    mockResponse(200, [plan, single]);
+
+    const result = await getDayPlan("2026-08-03");
+
+    expect(result).toEqual({ status: "ok", data: [plan, single] });
+  });
+
+  it("予定 0 件は空配列の ok として返す（取得失敗と区別する）", async () => {
+    mockResponse(200, []);
+
+    await expect(getDayPlan("2026-08-03")).resolves.toEqual({
+      status: "ok",
+      data: [],
+    });
+  });
+
+  it("date が不正で back が 422 を返したら error にする", async () => {
+    mockResponse(422, { error: "date が不正です" });
+
+    await expect(getDayPlan("invalid")).resolves.toEqual({ status: "error" });
+  });
 });
 
 describe("getPlanCalendar", () => {

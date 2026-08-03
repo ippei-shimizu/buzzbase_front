@@ -1,11 +1,14 @@
 import type { ActivityData } from "../../_utils/homeData";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
+import ActivityGrassSection from "../ActivityGrassSection";
 import PeriodicReviewBanner from "../PeriodicReviewBanner";
+import TodayTasksSection from "../TodayTasksSection";
 import CurrentThemeSection from "./CurrentThemeSection";
 import GoalSection from "./GoalSection";
 import ImprovementToolsSection from "./ImprovementToolsSection";
 import MonthlySummarySection from "./MonthlySummarySection";
+import PracticeToolsSection from "./PracticeToolsSection";
 import RecentPracticeSection from "./RecentPracticeSection";
 import RecordButtonsSection from "./RecordButtonsSection";
 
@@ -20,16 +23,23 @@ interface ActivityViewProps {
  * 「記録する → 何に取り組むか → 進捗 → 振り返り → 積み上げ → 直近の実績」の順に積む
  * （mobile のホーム活動面と同じ並び）。
  *
- * 未実装の機能（草グラフ・Streak / 素振りカウンター / 練習と成績のつながり / 今日のやること）は
- * 枠だけ置かず、実装 PR がこの並びの該当位置に SectionCard を差し込む。
+ * 未実装の機能は枠だけ置かず、実装 PR がこの並びの該当位置に SectionCard を差し込む。
  */
 export default function ActivityView({ data, today }: ActivityViewProps) {
   return (
     <div className="flex flex-col gap-4">
       <RecordButtonsSection />
+      <TodayTasksSection today={today} result={data.todayPlans} />
       <CurrentThemeSection themesResult={data.themes} />
       <GoalSection goalsResult={data.goals} />
+      <ActivityGrassSection
+        today={today}
+        requestedFrom={data.grassFrom}
+        heatmap={data.heatmap}
+        swingStats={data.swingStats}
+      />
       <PeriodicReviewBanner result={data.reviews} />
+      <PracticeToolsSection />
       <ImprovementToolsSection />
       <MonthlySummarySection summariesResult={data.summaries} />
       <RecentPracticeSection

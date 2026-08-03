@@ -70,3 +70,25 @@ label {
 .flex.flex-col.min-h-screen > .bg-main {
   flex-grow: 1;
 }
+
+/* 素振りカウンター完了画面の達成演出。
+   Tailwind v4 の @theme で --animate-* を定義すると animate-swing-pop が使える。
+   prefers-reduced-motion 環境では motion-safe: 修飾子側で外れる。 */
+@theme {
+  --animate-swing-pop: swing-pop 520ms cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+@keyframes swing-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

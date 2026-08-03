@@ -9,6 +9,9 @@ const mockGetMenuSummaries = jest.fn();
 const mockGetImprovementThemes = jest.fn();
 const mockGetGoals = jest.fn();
 const mockGetPeriodicReviews = jest.fn();
+const mockGetDayPlan = jest.fn();
+const mockGetActivityHeatmap = jest.fn();
+const mockGetShadowSwingStats = jest.fn();
 const mockGetDashboardData = jest.fn();
 const mockGetAvailableSeasons = jest.fn();
 
@@ -42,6 +45,18 @@ jest.mock("@app/services/v2/improvementThemeService", () => ({
 
 jest.mock("@app/services/v2/goalService", () => ({
   getGoals: () => mockGetGoals(),
+}));
+
+jest.mock("@app/services/v2/planService", () => ({
+  getDayPlan: (...args: unknown[]) => mockGetDayPlan(...args),
+}));
+
+jest.mock("@app/services/v2/activityService", () => ({
+  getActivityHeatmap: (...args: unknown[]) => mockGetActivityHeatmap(...args),
+}));
+
+jest.mock("@app/services/v2/shadowSwingService", () => ({
+  getShadowSwingStats: (...args: unknown[]) => mockGetShadowSwingStats(...args),
 }));
 
 jest.mock("@app/services/v2/periodicReviewService", () => ({
@@ -123,6 +138,15 @@ const buildCondition = (
   memo: null,
   injuries: [],
   ...overrides,
+});
+
+const buildHeatmap = () => ({
+  from: "2025-08-04",
+  to: "2026-08-03",
+  current_streak_days: 0,
+  longest_streak_days: 0,
+  total_active_days: 0,
+  data: [],
 });
 
 const buildNote = (
@@ -220,6 +244,9 @@ interface RenderOptions {
   themes?: unknown;
   goals?: unknown;
   reviews?: unknown;
+  todayPlans?: unknown;
+  heatmap?: unknown;
+  swingStats?: unknown;
 }
 
 /** 解決値そのものか、Promise を返す関数（reject を作りたい場合）を受ける。 */
@@ -240,6 +267,9 @@ async function renderPage({
   themes = ok([]),
   goals = ok([]),
   reviews = ok([]),
+  todayPlans = ok([]),
+  heatmap = ok(buildHeatmap()),
+  swingStats = ok({ today_count: 0, month_count: 0, total_count: 0 }),
 }: RenderOptions = {}) {
   setAuthCookies();
   resolveWith(mockGetPracticeSessions, sessions);
@@ -249,6 +279,9 @@ async function renderPage({
   resolveWith(mockGetImprovementThemes, themes);
   resolveWith(mockGetGoals, goals);
   resolveWith(mockGetPeriodicReviews, reviews);
+  resolveWith(mockGetDayPlan, todayPlans);
+  resolveWith(mockGetActivityHeatmap, heatmap);
+  resolveWith(mockGetShadowSwingStats, swingStats);
   mockGetDashboardData.mockResolvedValue(null);
   mockGetAvailableSeasons.mockResolvedValue([]);
 
@@ -337,7 +370,7 @@ describe("2面の切り替え", () => {
 });
 
 describe("セクションの並び", () => {
-  it("記録導線を先頭に、課題 → 目標 → 上達サイクル → 最近の練習 の順で並べる", async () => {
+  it("記録導線を先頭に、課題 → 目標 → 練習ツール → 上達サイクル → 最近の練習 の順で並べる", async () => {
     await renderPage({
       summaries: ok([buildSummary()]),
     });
@@ -348,10 +381,37 @@ describe("セクションの並び", () => {
     expect(titles).toEqual([
       "取り組んでいる課題",
       "目標管理",
+      "練習ツール",
       "上達サイクルをまわす",
       "今月の積み上げ",
       "最近の練習",
     ]);
+  });
+});
+
+describe("後からマージされた機能の差し込み", () => {
+  it("今日のやること・継続（草グラフ）・練習ツールを活動面に出す", async () => {
+    await renderPage();
+
+    expect(screen.getByText("今日のやること")).toBeInTheDocument();
+    expect(screen.getByText("継続")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /素振りカウントタイマー/ }),
+    ).toHaveAttribute("href", "/practice/shadow-swing");
+  });
+
+  it("差し込んだセクションの取得が失敗しても他のセクションは表示する", async () => {
+    await renderPage({
+      todayPlans: () => Promise.reject(new Error("boom")),
+      heatmap: () => Promise.reject(new Error("boom")),
+      swingStats: () => Promise.reject(new Error("boom")),
+      summaries: ok([buildSummary()]),
+    });
+
+    expect(recentPractice()).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "今月の積み上げ" }),
+    ).toBeInTheDocument();
   });
 });
 

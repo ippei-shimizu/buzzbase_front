@@ -8,6 +8,7 @@ export const PAGE_DESCRIPTION =
 
 export const CREATE_LABEL = "予定を作る";
 export const CALENDAR_LABEL = "カレンダー";
+export const WEEKLY_PLAN_LABEL = "週プラン";
 export const EMPTY_MESSAGE = "まだ予定がありません";
 export const RECURRING_SECTION_TITLE = "毎週の予定";
 export const SINGLE_SECTION_TITLE = "この日だけの予定";
