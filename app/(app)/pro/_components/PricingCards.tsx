@@ -1,15 +1,68 @@
+import type { PlanType } from "@app/types/pro";
+import Link from "next/link";
+import AvailabilityBadge from "@app/components/pro/AvailabilityBadge";
+import { PRO_PAYWALL_COPY } from "@app/components/pro/paywallCopy";
+import {
+  FEATURE_COMPARISONS,
+  PLAN_HIGHLIGHT_FEATURES,
+} from "@app/components/pro/proFeatureCatalog";
+import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
 import CheckoutButton from "./CheckoutButton";
 
-const PLAN_FEATURES = [
-  "広告なしで集中",
-  "メディアアップロード無制限",
-  "シーズン跨ぎの成績推移グラフ",
-  "草機能の全期間ヒートマップ",
-  "練習メニュー・メニューセット無制限",
-  "個人の期間目標（月次/週次/年間）を無制限に設定",
-  "シーズン目標・大会目標の設定",
-  "カスタム通知メッセージ",
-] as const;
+const HIGHLIGHTS = PLAN_HIGHLIGHT_FEATURES.map((feature) => ({
+  feature,
+  title: PRO_PAYWALL_COPY[feature].title,
+  availability: FEATURE_COMPARISONS[feature].availability,
+}));
+
+function PlanCard({ plan }: { plan: PlanType }) {
+  const price = PRO_PLAN_PRICES[plan];
+  // バッジの有無をそのまま「推したいプラン」の印として使い、強調用のフラグを別に持たない。
+  const isFeatured = price.badge !== null;
+
+  return (
+    <article
+      className={
+        isFeatured
+          ? "relative rounded-2xl border-2 border-[#d08000] bg-[#424242] p-6 shadow-xl"
+          : "relative rounded-2xl border border-gray-700 bg-[#424242] p-6 shadow-lg"
+      }
+    >
+      {price.badge ? (
+        <span className="absolute -top-3 right-4 rounded-full bg-[#d08000] px-3 py-0.5 text-xs font-bold text-white">
+          {price.badge}
+        </span>
+      ) : null}
+      <header className="mb-4">
+        <h3 className="text-lg font-bold text-white">{price.name}</h3>
+        <p className="mt-2 text-3xl font-bold text-white">
+          {price.amount}
+          <span className="text-base font-normal text-gray-400">
+            {" "}
+            {price.period}
+          </span>
+        </p>
+        {price.note ? (
+          <p className="mt-1 text-xs text-gray-400">{price.note}</p>
+        ) : null}
+      </header>
+      <ul className="mb-6 space-y-2 text-sm text-gray-200">
+        {HIGHLIGHTS.map((highlight) => (
+          <li key={highlight.feature} className="flex items-start gap-2">
+            <span className="text-[#d08000]">✓</span>
+            <span>{highlight.title}</span>
+            <AvailabilityBadge availability={highlight.availability} />
+          </li>
+        ))}
+      </ul>
+      <CheckoutButton
+        label="7 日間の無料トライアルを始める"
+        defaultPlan={plan}
+        fullWidth
+      />
+    </article>
+  );
+}
 
 export default function PricingCards() {
   return (
@@ -19,66 +72,25 @@ export default function PricingCards() {
           プランを選ぶ
         </h2>
         <p className="mb-10 text-center text-sm text-gray-400">
-          7 日間の無料トライアル付き。期間中はいつでも解約できます。
+          月額・年額のどちらも使える機能は同じです。7
+          日間の無料トライアル付きで、期間中はいつでも解約できます。
         </p>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <article className="rounded-2xl border border-gray-700 bg-[#424242] p-6 shadow-lg">
-            <header className="mb-4">
-              <h3 className="text-lg font-bold text-white">月額プラン</h3>
-              <p className="mt-2 text-3xl font-bold text-white">
-                ¥300
-                <span className="text-base font-normal text-gray-400">
-                  {" "}
-                  / 月
-                </span>
-              </p>
-            </header>
-            <ul className="mb-6 space-y-2 text-sm text-gray-200">
-              {PLAN_FEATURES.map((feature) => (
-                <li key={feature} className="flex items-start gap-2">
-                  <span className="text-[#d08000]">✓</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <CheckoutButton
-              label="7 日間の無料トライアルを始める"
-              defaultPlan="monthly"
-              fullWidth
-            />
-          </article>
-
-          <article className="relative rounded-2xl border-2 border-[#d08000] bg-[#424242] p-6 shadow-xl">
-            <span className="absolute -top-3 right-4 rounded-full bg-[#d08000] px-3 py-0.5 text-xs font-bold text-white">
-              2 ヶ月分お得
-            </span>
-            <header className="mb-4">
-              <h3 className="text-lg font-bold text-white">年額プラン</h3>
-              <p className="mt-2 text-3xl font-bold text-white">
-                ¥2,980
-                <span className="text-base font-normal text-gray-400">
-                  {" "}
-                  / 年
-                </span>
-              </p>
-              <p className="mt-1 text-xs text-gray-400">月あたり ¥248</p>
-            </header>
-            <ul className="mb-6 space-y-2 text-sm text-gray-200">
-              {PLAN_FEATURES.map((feature) => (
-                <li key={feature} className="flex items-start gap-2">
-                  <span className="text-[#d08000]">✓</span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <CheckoutButton
-              label="7 日間の無料トライアルを始める"
-              defaultPlan="yearly"
-              fullWidth
-            />
-          </article>
+          <PlanCard plan="monthly" />
+          <PlanCard plan="yearly" />
         </div>
+
+        <p className="mt-8 text-center text-sm leading-relaxed text-gray-400">
+          Pro は Web
+          版とアプリ版で共通の1つの契約です。「アプリ版」と付いた機能は、現在アプリ版でのみご利用いただけます。
+          <Link
+            href="#feature-comparison"
+            className="ml-1 inline-block text-[#d08000] underline"
+          >
+            全機能の比較を見る
+          </Link>
+        </p>
       </div>
     </section>
   );

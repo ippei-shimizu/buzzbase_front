@@ -54,6 +54,28 @@ describe("ProUpgradeModal", () => {
     ).toBeInTheDocument();
   });
 
+  it("trigger の機能は機能一覧で重複表示しない", () => {
+    render(
+      <ProUpgradeModal
+        isOpen
+        onClose={jest.fn()}
+        trigger="season_transition_graph"
+      />,
+    );
+
+    // 見出しの 1 箇所だけに出る。
+    expect(screen.getAllByText("シーズンを跨いだ成長を可視化")).toHaveLength(1);
+  });
+
+  it("機能一覧の訴求が Pro 機能の代表キーから作られている", () => {
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByText("方向別の打率")).toBeInTheDocument();
+    expect(screen.getByText("練習と成績の関係を発見")).toBeInTheDocument();
+    // Web 未提供の機能には「アプリ版」を添える。
+    expect(screen.getAllByText("アプリ版").length).toBeGreaterThan(0);
+  });
+
   it("プラン Radio に年額・月額の両方が表示される", () => {
     render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
     expect(screen.getByText("年額プラン")).toBeInTheDocument();

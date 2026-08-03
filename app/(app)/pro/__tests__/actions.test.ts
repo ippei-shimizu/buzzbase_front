@@ -18,7 +18,12 @@ jest.mock("../../../featureFlags/actions", () => ({
   getFeatureFlags: (keys: string[]) => mockGetFeatureFlags(keys),
 }));
 
-import { getProStatus, getProStatusResult, startProCheckout } from "../actions";
+import {
+  getProStatus,
+  getProStatusResult,
+  startProCheckout,
+  syncProStatus,
+} from "../actions";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -316,5 +321,80 @@ describe("startProCheckout", () => {
         body: expect.stringContaining("http://localhost:8100/pro/success"),
       }),
     );
+  });
+});
+
+describe("syncProStatus", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("未認証 cookie のときは fetch せずに null を返す", async () => {
+    mockGet.mockReturnValue(undefined);
+
+    await expect(syncProStatus()).resolves.toBeNull();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("同期後の Pro 状態を返す", async () => {
+    setupAuthCookies();
+    const proStatus = {
+      subscription: { status: "active", pro_active: true },
+      entitlements: ["no_ads"],
+    };
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => proStatus,
+    });
+
+    await expect(syncProStatus()).resolves.toEqual(proStatus);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://back:3000/api/v1/pro/sync",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("失敗したら null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+    });
+
+    await expect(syncProStatus()).resolves.toBeNull();
+  });
+
+  it("fetch が throw したら null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
+
+    await expect(syncProStatus()).resolves.toBeNull();
+  });
+
+  // back が RevenueCat REST を同期的に叩くため、上限が無いと再同期ボタンが永久に戻らない。
+  it("タイムアウト用の AbortSignal を渡す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ subscription: {}, entitlements: [] }),
+    });
+
+    await syncProStatus();
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
   });
 });

@@ -10,13 +10,13 @@ export default function HeroSection() {
         <h1 className="mb-6 text-3xl font-bold leading-tight text-white md:text-5xl">
           記録を、成長へ。
           <br className="md:hidden" />
-          全機能で野球を極める。
+          数字で自分を読み解く。
         </h1>
         <p className="mb-8 text-base leading-relaxed text-gray-300 md:text-lg">
-          広告なし、無制限のメディア保存、シーズン跨ぎの成績推移、
-          シーズン目標、カスタム通知。
+          方向別・カウント別・球種別・対戦投手別の打率。シーズンを跨いだ成績推移。
           <br className="hidden md:block" />
-          Pro プランで、BUZZ BASE をフル活用しよう。
+          練習と成績のつながりや週次・月次レポートまで、Pro
+          プランで解放されます。
         </p>
         <Link
           href="#pricing"

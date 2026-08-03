@@ -59,6 +59,20 @@ jest.mock("sonner", () => ({
   },
 }));
 
+jest.mock("@app/components/ad/adConfig", () => ({
+  ADSENSE_CLIENT_ID: "ca-pub-test",
+  isAdsenseEnabled: true,
+  isAdsenseScriptEnabled: true,
+  adSlots: {},
+}));
+
+jest.mock("next/script", () => ({
+  __esModule: true,
+  default: ({ src }: { src: string }) => (
+    <div data-testid="adsense-script" data-src={src} />
+  ),
+}));
+
 import { act, render, screen, type RenderResult } from "@testing-library/react";
 import ProGate from "@app/components/pro/ProGate";
 import { useProStatus } from "@app/hooks/pro/useProStatus";
@@ -237,6 +251,41 @@ describe("AppLayout の ProStatusProvider", () => {
 
     expect(mockGetProStatus).toHaveBeenCalledTimes(1);
     expect(screen.getByText("PRO")).toBeInTheDocument();
+  });
+
+  // AdsenseScript が Provider の外に出ると useProStatus が無料状態にフォールバックし、
+  // Pro 加入者にもスクリプトが読み込まれる状態へ静かに退行する
+  it("no_ads を持つ Pro 加入者には AdSense スクリプトを読み込まない", async () => {
+    setAuthCookies("pro-user@example.com");
+    mockGetProStatus.mockResolvedValue({
+      ...proStatus,
+      entitlements: [...proStatus.entitlements, "no_ads"],
+    });
+
+    await renderLayout();
+
+    expect(screen.queryByTestId("adsense-script")).not.toBeInTheDocument();
+  });
+
+  it("無料ユーザーには AdSense スクリプトを読み込む", async () => {
+    setAuthCookies("free-user@example.com");
+    mockGetProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
+
+    await renderLayout();
+
+    expect(screen.getByTestId("adsense-script")).toBeInTheDocument();
+  });
+
+  // Server Action の通信自体が失敗しても確定させないと isLoading が永久 true になり、
+  // 無料ユーザーに広告が二度と出ない
+  it("Pro status の取得が reject しても無料状態として確定する", async () => {
+    setAuthCookies("free-user@example.com");
+    mockGetProStatus.mockRejectedValue(new Error("network error"));
+
+    await renderLayout();
+
+    expect(screen.getByText("FREE")).toBeInTheDocument();
+    expect(screen.getByTestId("adsense-script")).toBeInTheDocument();
   });
 
   it("access-token が失効し uid だけ残っている場合は無料状態にする", async () => {

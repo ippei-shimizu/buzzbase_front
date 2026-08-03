@@ -16,26 +16,31 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { startProCheckout, type ProPlan } from "@app/(app)/pro/actions";
+import AvailabilityBadge from "@app/components/pro/AvailabilityBadge";
 import {
   DEFAULT_PAYWALL_COPY,
   PRO_PAYWALL_COPY,
 } from "@app/components/pro/paywallCopy";
+import {
+  FEATURE_COMPARISONS,
+  PLAN_HIGHLIGHT_FEATURES,
+} from "@app/components/pro/proFeatureCatalog";
+import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
 import { useFeatureFlag } from "@app/hooks/featureFlags/useFeatureFlag";
 
 const CHECKOUT_SUSPENDED_MESSAGE =
   "現在、新規のお申し込みを停止しています。再開までしばらくお待ちください。";
 
-const FEATURE_HIGHLIGHTS = [
-  { icon: "🚫", label: "広告非表示" },
-  { icon: "📈", label: "シーズン跨ぎ成績推移グラフ" },
-  { icon: "🌱", label: "草機能の全期間ヒートマップ" },
-  { icon: "🎥", label: "動画・画像アップロード無制限" },
-  { icon: "📋", label: "練習メニュー / メニューセット無制限" },
-  { icon: "🎯", label: "個人の期間目標（月次/週次/年間）を無制限に設定" },
-  { icon: "🏆", label: "シーズン目標・大会目標の設定" },
-  { icon: "📊", label: "方向別 / カウント別 / 球種別の打率分析" },
-  { icon: "🔔", label: "カスタム通知メッセージ" },
-] as const;
+// 年額を先に置いて既定の推奨プランとして読ませる。
+const PLAN_ORDER: ProPlan[] = ["yearly", "monthly"];
+
+// 訴求文言は ProFeature から引き、素の文字列で持たない。
+// キーが PRO_FEATURES から消えたときに、対応する機能が無い訴求だけが残るのを防ぐ。
+const FEATURE_HIGHLIGHTS = PLAN_HIGHLIGHT_FEATURES.map((feature) => ({
+  feature,
+  label: PRO_PAYWALL_COPY[feature].title,
+  availability: FEATURE_COMPARISONS[feature].availability,
+}));
 
 const NOTICES = [
   "7 日間の無料トライアル期間中に解約すれば料金はかかりません。",
@@ -78,6 +83,10 @@ export default function ProUpgradeModal({
   const proFeatures = useFeatureFlag("pro_features", { skip: !isOpen });
 
   const copy = (trigger && PRO_PAYWALL_COPY[trigger]) ?? DEFAULT_PAYWALL_COPY;
+  // 見出しで既に訴求している機能を一覧でも繰り返さない。
+  const highlights = FEATURE_HIGHLIGHTS.filter(
+    (highlight) => highlight.feature !== trigger,
+  );
 
   const handleCheckout = () => {
     startTransition(async () => {
@@ -135,10 +144,10 @@ export default function ProUpgradeModal({
               Pro で使える機能
             </h3>
             <ul className="space-y-2 text-sm">
-              {FEATURE_HIGHLIGHTS.map((feature) => (
-                <li key={feature.label} className="flex items-start gap-2">
-                  <span aria-hidden>{feature.icon}</span>
-                  <span>{feature.label}</span>
+              {highlights.map((highlight) => (
+                <li key={highlight.feature} className="flex items-start gap-2">
+                  <span>{highlight.label}</span>
+                  <AvailabilityBadge availability={highlight.availability} />
                   <span className="ml-auto text-[#d08000]">✓</span>
                 </li>
               ))}
@@ -154,38 +163,35 @@ export default function ProUpgradeModal({
               onValueChange={(value) => setPlan(value as ProPlan)}
               aria-label="Pro プラン選択"
             >
-              <Radio value="yearly" className="max-w-full">
-                <div className="flex w-full items-center justify-between gap-3">
-                  <div>
-                    <p className="font-bold text-white">
-                      年額プラン{" "}
-                      <span className="ml-1 rounded-full bg-[#d08000] px-2 py-0.5 text-[10px] font-bold text-white">
-                        2 ヶ月分お得
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray-400">月あたり ¥248</p>
-                  </div>
-                  <p className="text-base font-bold text-white">
-                    ¥2,980
-                    <span className="text-xs font-normal text-gray-400">
-                      {" "}
-                      / 年
-                    </span>
-                  </p>
-                </div>
-              </Radio>
-              <Radio value="monthly" className="max-w-full">
-                <div className="flex w-full items-center justify-between gap-3">
-                  <p className="font-bold text-white">月額プラン</p>
-                  <p className="text-base font-bold text-white">
-                    ¥300
-                    <span className="text-xs font-normal text-gray-400">
-                      {" "}
-                      / 月
-                    </span>
-                  </p>
-                </div>
-              </Radio>
+              {PLAN_ORDER.map((planType) => {
+                const price = PRO_PLAN_PRICES[planType];
+                return (
+                  <Radio key={planType} value={planType} className="max-w-full">
+                    <div className="flex w-full items-center justify-between gap-3">
+                      <div>
+                        <p className="font-bold text-white">
+                          {price.name}
+                          {price.badge ? (
+                            <span className="ml-1 rounded-full bg-[#d08000] px-2 py-0.5 text-[10px] font-bold text-white">
+                              {price.badge}
+                            </span>
+                          ) : null}
+                        </p>
+                        {price.note ? (
+                          <p className="text-xs text-gray-400">{price.note}</p>
+                        ) : null}
+                      </div>
+                      <p className="text-base font-bold text-white">
+                        {price.amount}
+                        <span className="text-xs font-normal text-gray-400">
+                          {" "}
+                          {price.period}
+                        </span>
+                      </p>
+                    </div>
+                  </Radio>
+                );
+              })}
             </RadioGroup>
           </section>
 
