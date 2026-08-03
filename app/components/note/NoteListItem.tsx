@@ -1,3 +1,5 @@
+"use client";
+
 import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
 import { Divider } from "@heroui/react";
 import Link from "next/link";
