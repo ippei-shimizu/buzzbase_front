@@ -10,11 +10,21 @@ jest.mock("@app/services/v2/baseballNoteService", () => ({
   deleteBaseballNote: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/gameResultLinkService", () => ({
+  searchGameResultOptions: jest.fn(() =>
+    Promise.resolve({ status: "ok", data: [] }),
+  ),
+}));
+
 jest.mock("@app/services/v2/mediaAttachmentService", () => ({
   presignMediaUpload: jest.fn(),
   completeMediaUpload: jest.fn(),
   updateMediaAttachmentMemo: jest.fn(),
   deleteMediaAttachment: jest.fn(),
+}));
+
+jest.mock("@app/contexts/proUpgradeModalContext", () => ({
+  useProUpgradeModal: () => ({ open: jest.fn(), close: jest.fn() }),
 }));
 
 // タグ選択 UI 側のガードを外し、フォームの送信ペイロード組み立てだけを検証する。
@@ -132,6 +142,7 @@ describe("ノートフォームの tag_ids 送信ガード（UI を迂回して�
         <NoteCreateForm
           templatesResult={templatesResult}
           tagsResult={tagsResult}
+          themesResult={{ status: "ok", data: [] }}
         />,
       );
       fireEvent.change(screen.getByLabelText("タイトル"), {
@@ -177,6 +188,8 @@ describe("ノートフォームの tag_ids 送信ガード（UI を迂回して�
           note={note}
           templatesResult={templatesResult}
           tagsResult={tagsResult}
+          themesResult={{ status: "ok", data: [] }}
+          linkedGameResults={[]}
         />,
       );
     }

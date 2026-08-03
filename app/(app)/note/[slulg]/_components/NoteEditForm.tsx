@@ -3,6 +3,8 @@
 import type { BaseballNoteV2, NoteTag } from "@app/interface/baseballNoteV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
+import type { GameResultLinkOption } from "@app/types/gameResultLink";
+import type { ImprovementTheme } from "@app/types/improvementTheme";
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -10,12 +12,18 @@ import { useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import NoteMediaSection from "@app/components/note/media/NoteMediaSection";
+import NoteGameResultSection from "@app/components/note/NoteGameResultSection";
 import NoteMenu from "@app/components/note/NoteMenu";
 import NoteTagSection from "@app/components/note/NoteTagSection";
+import NoteThemeSection from "@app/components/note/NoteThemeSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useNoteTagEditing } from "@app/hooks/note/useNoteTagEditing";
 import { updateBaseballNote } from "@app/services/v2/baseballNoteService";
+import {
+  buildGameResultIdsUpdate,
+  buildImprovementThemeIdsUpdate,
+} from "@app/utils/noteLinks";
 import {
   buildAnswerList,
   extractMemoText,
@@ -40,12 +48,17 @@ interface NoteEditFormProps {
   note: BaseballNoteV2;
   templatesResult: FetchResult<ReflectionTemplate[]>;
   tagsResult: FetchResult<NoteTag[]>;
+  themesResult: FetchResult<ImprovementTheme[]>;
+  /** 紐付け済みの試合記録。取得できなかった分は含まれない。 */
+  linkedGameResults: GameResultLinkOption[];
 }
 
 export default function NoteEditForm({
   note,
   templatesResult,
   tagsResult,
+  themesResult,
+  linkedGameResults,
 }: NoteEditFormProps) {
   const router = useRouter();
   const { canEditTags } = useNoteTagEditing();
@@ -88,6 +101,12 @@ export default function NoteEditForm({
     [note.tags],
   );
   const [tagIds, setTagIds] = useState<number[]>(initialTagIds);
+  const [themeIds, setThemeIds] = useState<number[]>(
+    note.improvement_theme_ids,
+  );
+  const [gameResultIds, setGameResultIds] = useState<number[]>(
+    note.game_result_ids,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -102,9 +121,11 @@ export default function NoteEditForm({
     reflectionAnswers: initialAnswers,
   };
 
-  // 送るのは変更したキーだけ。試合 / 課題の紐付けとテンプレ ID はこの画面で編集しないため
-  // キー自体を送らず、back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
-  // タグも Pro 判定が確定して entitlement を持ち、かつ実際に選択が変わったときだけキーを生やす。
+  // 送るのは変更したキーだけ。テンプレ ID はこの画面で編集しないためキー自体を送らず、
+  // back 側の「未送信＝変更なし」に委ねる（送ると上書きされる）。
+  // 紐付け（試合 / 課題 / タグ）も、選択が実際に変わったときだけキーを生やす。
+  // 変わったときは空配列でも必ず送る（`[]` が「全解除」の意思表示になる）。
+  // メディア添付はノート更新とは別 API で即時反映するため、この入力には含めない。
   const updateInput = {
     ...buildNoteUpdateInput(initialValues, {
       date,
@@ -114,6 +135,14 @@ export default function NoteEditForm({
       reflectionAnswers: currentAnswers,
     }),
     ...buildTagIdsUpdate({ canEditTags, initialTagIds, tagIds }),
+    ...buildImprovementThemeIdsUpdate({
+      initialIds: note.improvement_theme_ids,
+      ids: themeIds,
+    }),
+    ...buildGameResultIdsUpdate({
+      initialIds: note.game_result_ids,
+      ids: gameResultIds,
+    }),
   };
   const hasChanges = hasNoteChanges(updateInput);
 
@@ -196,6 +225,18 @@ export default function NoteEditForm({
                   selectedIds={tagIds}
                   onChange={setTagIds}
                   canEdit={canEditTags}
+                />
+                <NoteThemeSection
+                  themesResult={themesResult}
+                  selectedIds={themeIds}
+                  onChange={setThemeIds}
+                  initialCount={note.improvement_theme_ids.length}
+                />
+                <NoteGameResultSection
+                  selectedIds={gameResultIds}
+                  onChange={setGameResultIds}
+                  initialCount={note.game_result_ids.length}
+                  linkedOptions={linkedGameResults}
                 />
                 <NoteMediaSection
                   noteId={note.id}

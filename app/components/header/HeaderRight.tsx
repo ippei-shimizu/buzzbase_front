@@ -78,6 +78,16 @@ export default function HeaderRight() {
                   練習記録
                 </DropdownItem>
                 <DropdownItem
+                  key="themes"
+                  as={Link}
+                  href="/themes"
+                  startContent={
+                    <BallIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  課題
+                </DropdownItem>
+                <DropdownItem
                   key="review"
                   as={Link}
                   href="/review"

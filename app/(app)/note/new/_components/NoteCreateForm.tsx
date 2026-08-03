@@ -4,6 +4,7 @@ import type { NoteTag, ReflectionAnswer } from "@app/interface/baseballNoteV2";
 import type { StagedMediaAsset } from "@app/interface/mediaAttachmentV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
+import type { ImprovementTheme } from "@app/types/improvementTheme";
 import { Button, Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -17,7 +18,9 @@ import {
   ROLLBACK_MESSAGE,
 } from "@app/components/note/media/mediaCopy";
 import StagedMediaSection from "@app/components/note/media/StagedMediaSection";
+import NoteGameResultSection from "@app/components/note/NoteGameResultSection";
 import NoteTagSection from "@app/components/note/NoteTagSection";
+import NoteThemeSection from "@app/components/note/NoteThemeSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -32,6 +35,10 @@ import {
   summarizeStagedUploads,
   toPreparedMedia,
 } from "@app/utils/media/stagedUpload";
+import {
+  buildGameResultIdsPayload,
+  buildImprovementThemeIdsPayload,
+} from "@app/utils/noteLinks";
 import { buildAnswerList, resolveNoteMemo } from "@app/utils/noteMemo";
 import { buildTagIdsPayload } from "@app/utils/noteTags";
 
@@ -45,6 +52,9 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
 interface NoteCreateFormProps {
   templatesResult: FetchResult<ReflectionTemplate[]>;
   tagsResult: FetchResult<NoteTag[]>;
+  themesResult: FetchResult<ImprovementTheme[]>;
+  /** 課題詳細の「この課題でノートを書く」から来たときに、あらかじめ紐付けておく課題。 */
+  initialThemeIds?: number[];
 }
 
 /** 保存は済んだが、添付の一部が上がらなかったときに見せる結果。 */
@@ -64,6 +74,8 @@ function todayString(): string {
 export default function NoteCreateForm({
   templatesResult,
   tagsResult,
+  themesResult,
+  initialThemeIds = [],
 }: NoteCreateFormProps) {
   const router = useRouter();
   const { canEditTags } = useNoteTagEditing();
@@ -77,6 +89,8 @@ export default function NoteCreateForm({
   // 回答は問い文をキーに保持する。テンプレを切り替えて戻ってきても入力済みの回答が残る。
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [tagIds, setTagIds] = useState<number[]>([]);
+  const [themeIds, setThemeIds] = useState<number[]>(initialThemeIds);
+  const [gameResultIds, setGameResultIds] = useState<number[]>([]);
   const [stagedMedia, setStagedMedia] = useState<StagedMediaAsset[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -93,6 +107,8 @@ export default function NoteCreateForm({
     templateId !== null ||
     reflectionAnswers.length > 0 ||
     tagIds.length > 0 ||
+    themeIds.length !== initialThemeIds.length ||
+    gameResultIds.length > 0 ||
     stagedMedia.length > 0;
 
   const setErrorsWithTimeout = (newErrors: string[]) => {
@@ -180,7 +196,7 @@ export default function NoteCreateForm({
       return;
     }
     setIsSubmitting(true);
-    // 試合 / 課題の紐付けは新規作成画面では扱わないためキーごと送らない。
+    // 紐付けが1件も無いときはキーごと落とす。
     // タグも Pro 判定が確定して entitlement を持つときだけキーを生やす。
     const result = await createBaseballNote({
       date,
@@ -188,6 +204,8 @@ export default function NoteCreateForm({
       memo: resolveNoteMemo(memo, reflectionAnswers),
       reflection_template_id: templateId,
       reflection_answers: reflectionAnswers,
+      ...buildImprovementThemeIdsPayload(themeIds),
+      ...buildGameResultIdsPayload(gameResultIds),
       ...buildTagIdsPayload({ canEditTags, tagIds }),
     });
     if (!result.ok) {
@@ -196,6 +214,7 @@ export default function NoteCreateForm({
       return;
     }
 
+    // 添付が無いときはアップロード経路を通さず、そのまま一覧へ戻す。
     if (stagedMedia.length === 0) {
       router.push("/note");
       return;
@@ -279,6 +298,18 @@ export default function NoteCreateForm({
                     selectedIds={tagIds}
                     onChange={setTagIds}
                     canEdit={canEditTags}
+                  />
+                  <NoteThemeSection
+                    themesResult={themesResult}
+                    selectedIds={themeIds}
+                    onChange={setThemeIds}
+                    initialCount={0}
+                  />
+                  <NoteGameResultSection
+                    selectedIds={gameResultIds}
+                    onChange={setGameResultIds}
+                    initialCount={0}
+                    linkedOptions={[]}
                   />
                   <StagedMediaSection
                     assets={stagedMedia}

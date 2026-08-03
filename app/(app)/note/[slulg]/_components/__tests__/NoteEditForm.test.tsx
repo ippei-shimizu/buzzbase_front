@@ -20,6 +20,16 @@ jest.mock("@app/services/v2/noteTagService", () => ({
   createNoteTag: jest.fn(),
 }));
 
+jest.mock("@app/services/v2/gameResultLinkService", () => ({
+  searchGameResultOptions: jest.fn(() =>
+    Promise.resolve({ status: "ok", data: [] }),
+  ),
+}));
+
+jest.mock("@app/contexts/proUpgradeModalContext", () => ({
+  useProUpgradeModal: () => ({ open: jest.fn(), close: jest.fn() }),
+}));
+
 const mockHasEntitlement = jest.fn(() => false);
 const mockIsEntitlementLoading = jest.fn(() => false);
 
@@ -112,6 +122,8 @@ function renderForm(overrides: Partial<BaseballNoteV2> = {}) {
       note={{ ...note, ...overrides }}
       templatesResult={templatesResult}
       tagsResult={tagsResult}
+      themesResult={{ status: "ok", data: [] }}
+      linkedGameResults={[]}
     />,
   );
 }

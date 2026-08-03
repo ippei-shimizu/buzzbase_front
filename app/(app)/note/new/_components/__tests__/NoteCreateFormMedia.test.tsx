@@ -114,7 +114,11 @@ const emptyResult: FetchResult<never[]> = { status: "ok", data: [] };
 
 function renderForm() {
   render(
-    <NoteCreateForm templatesResult={emptyResult} tagsResult={emptyResult} />,
+    <NoteCreateForm
+      templatesResult={emptyResult}
+      tagsResult={emptyResult}
+      themesResult={emptyResult}
+    />,
   );
 }
 
