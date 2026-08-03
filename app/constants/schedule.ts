@@ -43,3 +43,17 @@ export const EVENT_TYPES: ReadonlyArray<{
 /** 種別のメタ情報を返す。未知の値は自主練にフォールバックする。 */
 export const eventTypeMeta = (value: ScheduleEventType) =>
   EVENT_TYPES.find((event) => event.value === value) ?? EVENT_TYPES[0];
+
+/**
+ * 無料プランでカレンダーを閲覧できる、今日を中心とした前後の月数。
+ *
+ * back/app/controllers/api/v2/plans_controller.rb の同名定数と揃える。範囲の判定権は
+ * back にあり（entitlement が無ければ from / to をこの幅にクランプして返す）、front の
+ * この値は「ペイウォールをどこで出すか」という表示上の目安にすぎない。back が広げても
+ * front が狭いままだと閲覧できるはずの日をロック表示してしまうため、値を変えるときは
+ * back・mobile と同時に更新する。
+ *
+ * 本来は API が上限を返し front が受け取るのが正しい（front / back / mobile の三重定義を
+ * 解消できる）が、レスポンス形式の変更は back 側の対応が要るため現時点は定数で揃える。
+ */
+export const FREE_CALENDAR_WINDOW_MONTHS = 3;
