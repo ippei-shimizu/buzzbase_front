@@ -11,7 +11,13 @@ jest.mock("@app/services/v2/practiceLogService", () => ({
 import type { FetchResult } from "@app/services/v2/requests";
 import type { Plan, PlanMenu } from "@app/types/plan";
 import type { PracticeLog } from "@app/types/practice";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   createPracticeLog,
@@ -218,8 +224,9 @@ describe("「済」トグル", () => {
     expect(mockDeleteLog).not.toHaveBeenCalled();
   });
 
-  it("連打しても作成は 1 回しか走らない", async () => {
-    const user = userEvent.setup();
+  // 再描画（disabled の反映）を挟まずに連続でクリックが届く状況を作り、
+  // 表示だけでなくトグル処理自体が二重送信を弾くことを確かめる。
+  it("再描画を挟まない連打でも作成は 1 回しか走らない", async () => {
     let resolveCreate: (
       value: ReturnType<typeof createdLog>,
     ) => void = () => {};
@@ -232,15 +239,19 @@ describe("「済」トグル", () => {
     renderSection(ok([buildPlan()]));
 
     const checkbox = screen.getByRole("checkbox", { name: /素振り/ });
-    await user.click(checkbox);
-    await user.click(checkbox);
-    await user.click(checkbox);
+    await act(async () => {
+      fireEvent.click(checkbox);
+      fireEvent.click(checkbox);
+      fireEvent.click(checkbox);
+    });
 
     expect(mockCreateLog).toHaveBeenCalledTimes(1);
     expect(mockDeleteLog).not.toHaveBeenCalled();
 
-    resolveCreate(createdLog(100));
-    await waitFor(() => expect(checkbox).toBeChecked());
+    await act(async () => {
+      resolveCreate(createdLog(100));
+    });
+    expect(checkbox).toBeChecked();
   });
 
   it("同じメニューでも別の予定なら独立してトグルできる", async () => {

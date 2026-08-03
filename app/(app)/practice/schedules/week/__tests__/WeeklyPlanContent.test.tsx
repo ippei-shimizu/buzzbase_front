@@ -29,7 +29,14 @@ jest.mock("@app/services/v2/scheduleService", () => ({
 
 import type { FetchResult } from "@app/services/v2/requests";
 import type { Schedule } from "@app/types/schedule";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { copyScheduleWeekToNext } from "@app/services/v2/scheduleService";
 import WeeklyPlanContent from "../_components/WeeklyPlanContent";
@@ -277,8 +284,9 @@ describe("来週にコピー", () => {
     expect(screen.queryByTestId("copy-lock-icon")).toBeNull();
   });
 
-  it("連打しても 1 回しか送らない", async () => {
-    const user = userEvent.setup();
+  // 再描画（disabled の反映）を挟まずに連続でクリックが届く状況を作り、
+  // 表示だけでなく送信処理自体が二重送信を弾くことを確かめる。
+  it("再描画を挟まない連打でも 1 回しか送らない", async () => {
     let resolveCopy: (value: { ok: true; data: Schedule[] }) => void = () => {};
     mockCopy.mockImplementation(
       () =>
@@ -289,20 +297,22 @@ describe("来週にコピー", () => {
     renderContent(ok([buildSchedule()]));
 
     const button = screen.getByRole("button", { name: new RegExp(COPY_LABEL) });
-    await user.click(button);
-    await user.click(button);
-    await user.click(button);
+    await act(async () => {
+      fireEvent.click(button);
+      fireEvent.click(button);
+      fireEvent.click(button);
+    });
 
     expect(mockCopy).toHaveBeenCalledTimes(1);
 
-    resolveCopy({
-      ok: true,
-      data: [buildSchedule({ id: 20, planned_on: "2026-08-10" })],
+    await act(async () => {
+      resolveCopy({
+        ok: true,
+        data: [buildSchedule({ id: 20, planned_on: "2026-08-10" })],
+      });
     });
-    await waitFor(() =>
-      expect(screen.getByTestId("week-range-label")).toHaveTextContent(
-        "8/10〜8/16",
-      ),
+    expect(screen.getByTestId("week-range-label")).toHaveTextContent(
+      "8/10〜8/16",
     );
   });
 });
