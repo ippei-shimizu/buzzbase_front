@@ -25,11 +25,11 @@ describe("FeatureHighlights", () => {
   it("アプリ版でのみ使える機能に「アプリ版」を明記する", () => {
     render(<FeatureHighlights />);
 
-    const correlationCard = screen
-      .getByRole("heading", { name: /練習と成績の関係を発見/ })
+    const grassCard = screen
+      .getByRole("heading", { name: /練習履歴を全期間で確認/ })
       .closest("article");
     expect(
-      within(correlationCard as HTMLElement).getByText("アプリ版"),
+      within(grassCard as HTMLElement).getByText("アプリ版"),
     ).toBeInTheDocument();
 
     const directionCard = screen

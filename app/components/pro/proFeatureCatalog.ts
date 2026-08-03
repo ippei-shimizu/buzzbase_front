@@ -67,7 +67,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
     pro: "無制限",
     availability: "app_only",
   },
-  correlation_insights: { free: "✕", pro: "○", availability: "app_only" },
+  correlation_insights: { free: "✕", pro: "○", availability: "web_and_app" },
   unlimited_reflection_templates: {
     free: "1件",
     pro: "無制限",

@@ -1,23 +1,11 @@
+import type { CorrelationInsight, InsightDirection } from "@app/types/insight";
 import type { DecimalValue } from "@app/types/practice";
 
 export type PeriodicReviewType = "weekly" | "monthly";
 
-export type InsightDirection = "positive" | "negative" | "unknown";
-
-/** 相関インサイト（Insights::CorrelationBuilder が生成するカード）。 */
-export interface CorrelationInsight {
-  key: string;
-  /** 自作カードは組み合わせ id を持つ。プリセットは null。 */
-  id: number | null;
-  title: string;
-  body: string;
-  metric: string;
-  dimension: string;
-  direction: InsightDirection;
-  strength: string;
-  sample_weeks: number;
-  sufficient: boolean;
-}
+// レポートに同梱されるインサイトは「練習と成績のつながり」と同一の JSON なので、
+// 型を二重に持たず insight.ts を唯一の定義とし、既存の import 先を壊さないよう再公開する。
+export type { CorrelationInsight, InsightDirection };
 
 export interface PeriodicReviewThemeBreakdown {
   id: number;

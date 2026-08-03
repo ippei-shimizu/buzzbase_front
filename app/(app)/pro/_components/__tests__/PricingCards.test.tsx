@@ -78,16 +78,19 @@ describe("PricingCards", () => {
   it("アプリ版でのみ使える機能に「アプリ版」を明記する", () => {
     render(<PricingCards />);
 
+    const reviewItem = screen
+      .getAllByText("週次・月次の振り返りレポートを受け取る")[0]
+      .closest("li");
+    expect(
+      within(reviewItem as HTMLElement).getByText("アプリ版"),
+    ).toBeInTheDocument();
+
+    // 「練習と成績のつながり」は Web でも提供しているため注記を出さない。
     const insightItem = screen
       .getAllByText("練習と成績の関係を発見")[0]
       .closest("li");
     expect(
-      within(insightItem as HTMLElement).getByText("アプリ版"),
-    ).toBeInTheDocument();
-
-    const directionItem = screen.getAllByText("方向別の打率")[0].closest("li");
-    expect(
-      within(directionItem as HTMLElement).queryByText("アプリ版"),
+      within(insightItem as HTMLElement).queryByText("アプリ版"),
     ).not.toBeInTheDocument();
   });
 
