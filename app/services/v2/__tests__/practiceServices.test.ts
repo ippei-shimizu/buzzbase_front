@@ -41,6 +41,7 @@ import {
   getMenuSummaries,
   getMenuTrend,
   getPracticeOverview,
+  getShadowSwingTrend,
 } from "../practiceSummaryService";
 import { buildQuery } from "../requests";
 
@@ -501,6 +502,39 @@ describe("練習ドメインの v2 Server Actions", () => {
       });
 
       expect(await getMenuTrend(3)).toEqual({ status: "forbidden" });
+    });
+
+    it("素振りの推移はメニュー推移とは別のエンドポイントを叩く", async () => {
+      const trend = {
+        menu: {
+          id: null,
+          name: "素振り",
+          unit: "count",
+          unit_label: "本",
+          is_weight_reps: false,
+        },
+        by_year: [],
+        by_month: [],
+        by_day: [],
+      };
+      mockResponse(200, trend);
+
+      expect(await getShadowSwingTrend()).toEqual({
+        status: "ok",
+        data: trend,
+      });
+      expect(requestedUrl()).toBe(
+        "http://back:3000/api/v2/shadow_swing_sessions/trend",
+      );
+      expect(requestedInit().method).toBeUndefined();
+    });
+
+    it("無料ユーザーの素振り推移（403）は forbidden を返す", async () => {
+      mockResponse(403, {
+        error: "メニュー推移の詳細表示は Pro プラン限定です",
+      });
+
+      expect(await getShadowSwingTrend()).toEqual({ status: "forbidden" });
     });
   });
 

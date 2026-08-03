@@ -119,7 +119,8 @@ export interface MenuTrendBucket {
  */
 export interface MenuTrend {
   menu: {
-    id: number;
+    /** 素振りの推移（shadow_swing_sessions/trend）はメニューに紐付かないため null。 */
+    id: number | null;
     name: string;
     unit: PracticeUnit;
     unit_label: string | null;
