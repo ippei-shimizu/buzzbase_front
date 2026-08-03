@@ -6,9 +6,11 @@ import type {
 } from "@app/types/practice";
 import {
   type DeletedResponse,
+  type DetailFetchResult,
   type FetchResult,
   type MutationResult,
   buildQuery,
+  fetchDetailV2,
   fetchV2,
   mutateV2,
 } from "./requests";
@@ -42,11 +44,18 @@ export async function getPracticeSessions(
   );
 }
 
-/** 日次セッションを1件取得する（GET /api/v2/practice_sessions/:id）。他ユーザーのセッションは 404。 */
+/**
+ * 日次セッションを1件取得する（GET /api/v2/practice_sessions/:id）。
+ * back は current_user のセッションだけを引くため、他ユーザーのセッションも存在しない ID も
+ * 403 ではなく 404 になる。取得失敗と区別できるよう `not_found` として返す。
+ */
 export async function getPracticeSession(
   id: number,
-): Promise<FetchResult<PracticeSession>> {
-  return fetchV2<PracticeSession>(`${BASE_PATH}/${id}`, "getPracticeSession");
+): Promise<DetailFetchResult<PracticeSession>> {
+  return fetchDetailV2<PracticeSession>(
+    `${BASE_PATH}/${id}`,
+    "getPracticeSession",
+  );
 }
 
 /**

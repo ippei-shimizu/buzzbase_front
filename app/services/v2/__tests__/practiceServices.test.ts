@@ -378,8 +378,14 @@ describe("練習ドメインの v2 Server Actions", () => {
       );
     });
 
-    it("他ユーザーのセッション（404）は error を返す", async () => {
+    it("他ユーザーのセッション（404）は取得失敗と区別して not_found を返す", async () => {
       mockResponse(404, {});
+
+      expect(await getPracticeSession(4)).toEqual({ status: "not_found" });
+    });
+
+    it("通信エラーは not_found と区別して error を返す", async () => {
+      mockResponse(500, {});
 
       expect(await getPracticeSession(4)).toEqual({ status: "error" });
     });
