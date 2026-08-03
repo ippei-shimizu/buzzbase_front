@@ -42,6 +42,14 @@ describe("HeaderRight のメニュー", () => {
     ).toHaveAttribute("href", "/practice/menus");
   });
 
+  it("振り返りテンプレへの導線を持つ", async () => {
+    await openMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /振り返りテンプレ/ }),
+    ).toHaveAttribute("href", "/note/templates");
+  });
+
   it("野球ノートとシーズン管理の導線を維持する", async () => {
     await openMenu();
 

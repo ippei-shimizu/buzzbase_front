@@ -1,14 +1,18 @@
 "use client";
 
+import type { ReflectionAnswer } from "@app/interface/baseballNoteV2";
+import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
+import type { FetchResult } from "@app/services/v2/requests";
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
+import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { createBaseballNote } from "@app/services/v2/baseballNoteService";
-import { buildMemoJson } from "@app/utils/noteMemo";
+import { buildAnswerList, resolveNoteMemo } from "@app/utils/noteMemo";
 
 const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
   ssr: false,
@@ -16,6 +20,10 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
     <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
   ),
 });
+
+interface NoteCreateFormProps {
+  templatesResult: FetchResult<ReflectionTemplate[]>;
+}
 
 /** 日付入力（`type="date"`）が要求する `YYYY-MM-DD` をローカル時刻で組み立てる。 */
 function todayString(): string {
@@ -25,21 +33,44 @@ function todayString(): string {
   return `${today.getFullYear()}-${month}-${day}`;
 }
 
-export default function NoteCreateForm() {
+export default function NoteCreateForm({
+  templatesResult,
+}: NoteCreateFormProps) {
   const router = useRouter();
   const [initialDate] = useState(todayString);
   const [date, setDate] = useState(initialDate);
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
+  const [templateId, setTemplateId] = useState<number | null>(null);
+  const [questions, setQuestions] = useState<string[]>([]);
+  // 回答は問い文をキーに保持する。テンプレを切り替えて戻ってきても入力済みの回答が残る。
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
-  const hasChanges = date !== initialDate || title !== "" || memo !== "";
+  const reflectionAnswers: ReflectionAnswer[] = buildAnswerList(
+    questions,
+    answers,
+  );
+  const hasChanges =
+    date !== initialDate ||
+    title !== "" ||
+    memo !== "" ||
+    templateId !== null ||
+    reflectionAnswers.length > 0;
 
   const setErrorsWithTimeout = (newErrors: string[]) => {
     setErrors(newErrors);
     setTimeout(() => setErrors([]), 2000);
   };
+
+  const handleSelectTemplate = (template: ReflectionTemplate | null) => {
+    setTemplateId(template?.id ?? null);
+    setQuestions(template?.questions ?? []);
+  };
+
+  const handleChangeAnswer = (question: string, answer: string) =>
+    setAnswers((prev) => ({ ...prev, [question]: answer }));
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -47,7 +78,7 @@ export default function NoteCreateForm() {
       setErrorsWithTimeout(["日付が未設定です。"]);
       return;
     }
-    if (!title && !memo) {
+    if (!title && !memo && reflectionAnswers.length === 0) {
       setErrorsWithTimeout([
         "タイトルとメモ内容のどちらかを入力してください。",
       ]);
@@ -58,7 +89,9 @@ export default function NoteCreateForm() {
     const result = await createBaseballNote({
       date,
       title: title === "" ? null : title,
-      memo: memo === "" ? buildMemoJson("") : memo,
+      memo: resolveNoteMemo(memo, reflectionAnswers),
+      reflection_template_id: templateId,
+      reflection_answers: reflectionAnswers,
     });
     if (!result.ok) {
       setErrorsWithTimeout(result.errors);
@@ -109,6 +142,14 @@ export default function NoteCreateForm() {
                 <div className="mt-10 w-full h-full">
                   <NoteEditor memo={memo} setMemo={setMemo} />
                 </div>
+                <ReflectionTemplateSection
+                  templatesResult={templatesResult}
+                  selectedTemplateId={templateId}
+                  questions={questions}
+                  answers={answers}
+                  onSelectTemplate={handleSelectTemplate}
+                  onChangeAnswer={handleChangeAnswer}
+                />
               </div>
             </form>
           </div>

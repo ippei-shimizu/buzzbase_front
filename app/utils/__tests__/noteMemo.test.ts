@@ -1,9 +1,11 @@
 import {
+  buildAnswerList,
   buildMemoJson,
   buildReflectionMemoText,
   extractMemoText,
   isReflectionMemo,
   parseMemoToSlateValue,
+  resolveNoteMemo,
 } from "../noteMemo";
 
 describe("buildMemoJson / extractMemoText", () => {
@@ -155,5 +157,59 @@ describe("parseMemoToSlateValue", () => {
   it("buildMemoJson の出力は正規化しても同じ JSON に戻る（無変更が変更扱いにならない）", () => {
     const memo = buildMemoJson("外角が詰まる");
     expect(JSON.stringify(parseMemoToSlateValue(memo))).toBe(memo);
+  });
+});
+
+describe("buildAnswerList", () => {
+  it("問いの並び順で回答を組み立てる", () => {
+    expect(buildAnswerList(["A", "B"], { B: "答えB", A: "答えA" })).toEqual([
+      { question: "A", answer: "答えA" },
+      { question: "B", answer: "答えB" },
+    ]);
+  });
+
+  it("未入力・空白だけの回答は落とす", () => {
+    expect(buildAnswerList(["A", "B", "C"], { A: "答え", B: "   " })).toEqual([
+      { question: "A", answer: "答え" },
+    ]);
+  });
+
+  it("問いから外れた回答は残っていても送らない（他の回答は消えない）", () => {
+    expect(buildAnswerList(["A"], { A: "答えA", B: "答えB" })).toEqual([
+      { question: "A", answer: "答えA" },
+    ]);
+  });
+});
+
+describe("resolveNoteMemo", () => {
+  const answers = [
+    { question: "課題", answer: "引きつけ" },
+    { question: "次やること", answer: "素振り" },
+  ];
+
+  it("自由メモが空なら回答から本文を合成する", () => {
+    expect(resolveNoteMemo("", answers)).toBe(
+      buildMemoJson("【課題】\n引きつけ\n\n【次やること】\n素振り"),
+    );
+  });
+
+  it("空段落だけの Slate JSON も未入力として合成する", () => {
+    expect(resolveNoteMemo(buildMemoJson(""), answers)).toBe(
+      buildMemoJson("【課題】\n引きつけ\n\n【次やること】\n素振り"),
+    );
+  });
+
+  it("自由メモがあれば合成で上書きしない", () => {
+    const memo = buildMemoJson("自分の言葉");
+    expect(resolveNoteMemo(memo, answers)).toBe(memo);
+  });
+
+  it("回答が無ければ空メモを返す", () => {
+    expect(resolveNoteMemo("", [])).toBe(buildMemoJson(""));
+  });
+
+  it("合成した本文は isReflectionMemo で合成と判定できる", () => {
+    const memo = resolveNoteMemo("", answers);
+    expect(isReflectionMemo(extractMemoText(memo), answers)).toBe(true);
   });
 });
