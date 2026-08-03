@@ -46,7 +46,7 @@ const FREE_LIMITS_FROM_BACK: Partial<Record<ProFeature, string>> = {
  * 逆に未実装のものを足すと「Pro なら Web でも使える」という誤った訴求になる。
  *
  * 意図的に載せていないもの:
- * - grass_full_history / correlation_insights — front に未実装
+ * - correlation_insights — front に未実装
  * - unlimited_groups — グループ作成上限のゲートが front にない（文言だけが存在する）
  * - shadow_swing_vibration / shadow_swing_background — 下のテストを参照
  */
@@ -77,6 +77,7 @@ const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "multi_improvement_theme_links",
   "schedule_calendar_full_history",
   "shadow_swing_custom_interval",
+  "grass_full_history",
 ];
 
 describe("FEATURE_COMPARISONS", () => {
