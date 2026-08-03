@@ -621,6 +621,39 @@ describe("GoalsContent", () => {
       expect(screen.getByLabelText(/期限/)).toBeInTheDocument();
     });
 
+    it("数値目標の達成条件は指標に応じて表示する", async () => {
+      const user = userEvent.setup();
+      renderContent();
+
+      await openCreateForm(user);
+      expect(screen.getByText("条件: 以上")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "防御率" }));
+      expect(screen.getByText("条件: 以下")).toBeInTheDocument();
+    });
+
+    it("自由指標で「以下」を選ぶと less_than を送る", async () => {
+      const user = userEvent.setup();
+      mockEntitlement({ features: ["manual_metric_goals"] });
+      mockCreate.mockResolvedValue({ ok: true, data: buildGoal({ id: 9 }) });
+      renderContent();
+
+      await openCreateForm(user);
+      await user.click(screen.getByRole("button", { name: "自由指標" }));
+      await user.type(screen.getByLabelText(/指標名/), "体重");
+      await user.click(screen.getByRole("button", { name: "以下" }));
+      await user.type(screen.getByLabelText(/目標値/), "70");
+      await user.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
+      expect(mockCreate.mock.calls[0][0]).toMatchObject({
+        kind: "manual",
+        custom_metric_label: "体重",
+        target_value: 70,
+        comparison_type: "less_than",
+      });
+    });
+
     it("必須項目が未入力なら送信せずエラーを出す", async () => {
       const user = userEvent.setup();
       renderContent();
