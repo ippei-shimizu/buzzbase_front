@@ -53,6 +53,31 @@ export async function updateSchedule(
 }
 
 /**
+ * 週の単発予定を翌週へ一括コピーする（POST /api/v2/schedules/week_copy）。
+ *
+ * Pro 限定（entitlement: schedule_copy_next_week）。無料プランでは 403 が返るため、
+ * 呼び出し側は reason:"forbidden" を「無料枠の超過」ではなく Pro 限定機能の案内へ倒す。
+ *
+ * コピー対象はその週（week_start 〜 +6日）の単発予定だけで、毎週の繰り返し予定は含まれない。
+ * コピー元が 0 件でも、コピー先に同じ予定が既にあってスキップされた場合も 201 + 空配列が返る
+ * （back は冪等になるよう同一内容の予定を作り直さない）。「成功したのに何も増えていない」
+ * ケースがあるため、data.length を見て案内を出し分けること。
+ *
+ * @param weekStart コピー元の週の開始日（YYYY-MM-DD、月曜）
+ * @returns 実際に作成された予定の配列（0 件なら空配列）
+ */
+export async function copyScheduleWeekToNext(
+  weekStart: string,
+): Promise<MutationResult<Schedule[]>> {
+  return mutateV2<Schedule[]>(`${BASE_PATH}/week_copy`, {
+    method: "POST",
+    body: { week_start: weekStart },
+    action: "copyScheduleWeekToNext",
+    fallbackMessage: "来週へのコピーに失敗しました",
+  });
+}
+
+/**
  * 予定を削除する（DELETE /api/v2/schedules/:id）。
  * 予定に紐づいた練習ログは実績として残り、schedule_id だけが外れる。
  */
