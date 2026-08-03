@@ -370,8 +370,9 @@ export interface Notifications {
   actor_name: string;
   event_type: string;
   event_id: number;
-  read_at: Date;
-  created_at: Date;
+  // API は ISO8601 文字列で返す。未読は null
+  read_at: string | null;
+  created_at: string;
   actor_icon: {
     url: string;
   };
