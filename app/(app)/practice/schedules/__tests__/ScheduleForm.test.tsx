@@ -288,6 +288,26 @@ describe("ScheduleForm", () => {
 
       expect(submittedInput(onSubmit).notification_message).toBe("頑張れ");
     });
+
+    // 自主練スケジュールは無料でも無制限に作れるため、件数上限の訴求を出してはいけない。
+    it("無料プランでも件数上限の訴求は出さない", () => {
+      renderForm();
+
+      const ctas = screen.getAllByRole("button", { name: /Pro プランを見る/ });
+      expect(ctas).toHaveLength(1);
+      expect(ctas[0]).toHaveAccessibleName(/通知メッセージをカスタマイズ/);
+    });
+  });
+
+  it("選んだ種別を back の enum のまま送る", async () => {
+    const user = userEvent.setup();
+    const { onSubmit } = renderForm();
+
+    await user.click(screen.getByRole("button", { name: "試合" }));
+    await user.type(screen.getByLabelText(/タイトル/), "vs 港南高");
+    await save(user);
+
+    expect(submittedInput(onSubmit).event_type).toBe("game");
   });
 
   it("Web では通知が届かないことを明示する", () => {
