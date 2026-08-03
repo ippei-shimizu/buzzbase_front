@@ -4,6 +4,7 @@ import type { SeasonData, TournamentData } from "@app/interface";
 import type { Goal } from "@app/types/goal";
 import type { PracticeMenu } from "@app/types/practice";
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
+import TrophyIcon from "@heroicons/react/24/outline/TrophyIcon";
 import {
   Button,
   Modal,
@@ -12,6 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
@@ -37,6 +39,7 @@ import {
   isAtGoalFreeLimit,
 } from "../_utils/goalList";
 import {
+  BADGES_TITLE,
   DELETE_CONFIRM_NOTICE,
   EMPTY_MESSAGE,
   FREE_LIMIT_DESCRIPTION,
@@ -198,7 +201,16 @@ export default function GoalsContent({
 
   return (
     <>
-      <h2 className="text-2xl font-bold">目標</h2>
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="text-2xl font-bold">目標</h2>
+        <Link
+          href="/goals/badges"
+          className="mt-1 inline-flex shrink-0 items-center gap-1 text-sm text-[#d08000]"
+        >
+          <TrophyIcon className="h-4 w-4" aria-hidden />
+          {BADGES_TITLE}
+        </Link>
+      </div>
       <p className="mt-2 text-sm text-zinc-300">
         練習量や成績の目標を決めると、記録した内容から進み具合を自動で計算します。数字にできない目標は達成ボタンで管理できます。
       </p>
