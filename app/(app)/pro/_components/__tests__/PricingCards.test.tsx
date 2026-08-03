@@ -12,7 +12,10 @@ jest.mock("../CheckoutButton", () => {
 });
 
 import { render, screen, within } from "@testing-library/react";
-import { PLAN_HIGHLIGHT_FEATURES } from "@app/components/pro/proFeatureCatalog";
+import {
+  APP_ONLY_LABEL,
+  PLAN_HIGHLIGHT_FEATURES,
+} from "@app/components/pro/proFeatureCatalog";
 import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
 import PricingCards from "../PricingCards";
 
@@ -75,23 +78,12 @@ describe("PricingCards", () => {
     ).toHaveLength(PLAN_HIGHLIGHT_FEATURES.length);
   });
 
-  it("アプリ版でのみ使える機能に「アプリ版」を明記する", () => {
+  it("代表機能はすべて Web 提供済みなので「アプリ版」を出さない", () => {
+    // Web でも使える機能に注記を出すと、Web ユーザーの加入動機を不当に削ぐ。
+    // app_only が代表機能に入ったらこのテストが落ちて気づける。
     render(<PricingCards />);
 
-    const reviewItem = screen
-      .getAllByText("週次・月次の振り返りレポートを受け取る")[0]
-      .closest("li");
-    expect(
-      within(reviewItem as HTMLElement).getByText("アプリ版"),
-    ).toBeInTheDocument();
-
-    // 「練習と成績のつながり」は Web でも提供しているため注記を出さない。
-    const insightItem = screen
-      .getAllByText("練習と成績の関係を発見")[0]
-      .closest("li");
-    expect(
-      within(insightItem as HTMLElement).queryByText("アプリ版"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(APP_ONLY_LABEL)).not.toBeInTheDocument();
   });
 
   it("Web とアプリで共通の契約であることを伝える", () => {

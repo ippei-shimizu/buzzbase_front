@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { PRO_PAYWALL_COPY } from "@app/components/pro/paywallCopy";
-import { SHOWCASE_FEATURES } from "@app/components/pro/proFeatureCatalog";
+import {
+  APP_ONLY_LABEL,
+  SHOWCASE_FEATURES,
+} from "@app/components/pro/proFeatureCatalog";
 import FeatureHighlights from "../FeatureHighlights";
 
 describe("FeatureHighlights", () => {
@@ -22,22 +25,10 @@ describe("FeatureHighlights", () => {
     }
   });
 
-  it("アプリ版でのみ使える機能に「アプリ版」を明記する", () => {
+  it("訴求している機能はすべて Web 提供済みなので「アプリ版」を出さない", () => {
     render(<FeatureHighlights />);
 
-    const grassCard = screen
-      .getByRole("heading", { name: /練習履歴を全期間で確認/ })
-      .closest("article");
-    expect(
-      within(grassCard as HTMLElement).getByText("アプリ版"),
-    ).toBeInTheDocument();
-
-    const directionCard = screen
-      .getByRole("heading", { name: /方向別の打率/ })
-      .closest("article");
-    expect(
-      within(directionCard as HTMLElement).queryByText("アプリ版"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(APP_ONLY_LABEL)).not.toBeInTheDocument();
   });
 
   it("実物のない「スクリーンショット」のプレースホルダを出さない", () => {

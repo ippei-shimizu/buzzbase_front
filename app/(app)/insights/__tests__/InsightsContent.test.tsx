@@ -37,11 +37,16 @@ import type { FetchResult } from "@app/services/v2/requests";
 import type { CorrelationInsight } from "@app/types/insight";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import {
   createInsightCombination,
   deleteInsightCombination,
   getCorrelationInsights,
 } from "@app/services/v2/correlationInsightService";
+import {
+  CREATE_SUCCESS_MESSAGE,
+  REFRESH_FAILED_MESSAGE,
+} from "../_components/insightCopy";
 import InsightsContent from "../_components/InsightsContent";
 
 const mockCreate = createInsightCombination as jest.MockedFunction<
@@ -367,6 +372,28 @@ describe("InsightsContent", () => {
         }),
       );
       expect(await screen.findByText("睡眠時間とOPS")).toBeInTheDocument();
+    });
+
+    it("作成できても一覧の取り直しに失敗したら、作成の成否と取り違えない文言を出す", async () => {
+      const user = userEvent.setup();
+      mockCreate.mockResolvedValue({
+        ok: true,
+        data: { message: "作成しました" },
+      });
+      mockRefetch.mockResolvedValue({ status: "error" });
+
+      renderContent(okResult([buildInsight()]));
+      await openForm(user);
+      await selectFixedCombination(user);
+
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith(REFRESH_FAILED_MESSAGE),
+      );
+      // 作成自体は成功しているので、成功トーストを出すと二重に見え、
+      // 失敗したと誤解させると同じ組み合わせを作り直そうとして重複エラーになる。
+      expect(toast.success).not.toHaveBeenCalledWith(CREATE_SUCCESS_MESSAGE);
+      // 取り直せていない以上、一覧は作成前のまま据え置く。
+      expect(screen.getByText("素振りの本数と打率")).toBeInTheDocument();
     });
 
     it("自作が上限に達したら作成ボタンを塞ぎ、Pro 訴求ではなく件数の案内を出す", () => {

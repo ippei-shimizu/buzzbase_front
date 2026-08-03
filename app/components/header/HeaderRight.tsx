@@ -118,6 +118,16 @@ export default function HeaderRight() {
                   目標
                 </DropdownItem>
                 <DropdownItem
+                  key="shadow-swing"
+                  as={Link}
+                  href="/practice/shadow-swing"
+                  startContent={
+                    <BallIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  素振りカウンター
+                </DropdownItem>
+                <DropdownItem
                   key="practice-menus"
                   as={Link}
                   href="/practice/menus"
