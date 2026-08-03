@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
+import NoteMediaSection from "@app/components/note/media/NoteMediaSection";
 import NoteMenu from "@app/components/note/NoteMenu";
 import NoteTagSection from "@app/components/note/NoteTagSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
@@ -195,6 +196,10 @@ export default function NoteEditForm({
                   selectedIds={tagIds}
                   onChange={setTagIds}
                   canEdit={canEditTags}
+                />
+                <NoteMediaSection
+                  noteId={note.id}
+                  attachments={note.media_attachments}
                 />
               </div>
             </form>
