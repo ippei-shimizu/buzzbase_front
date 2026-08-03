@@ -189,7 +189,7 @@ describe("PracticeSessionDetail のコンディション", () => {
       logged_on: "2026-07-14",
       fatigue_level: 2,
       physical_level: 3,
-      sleep_hours: "7.5",
+      sleep_hours: "7.0",
       mood: "普通",
       memo: "後半は集中が切れた",
       injuries: [{ part: "肩", memo: "軽い張り" }],
@@ -200,7 +200,8 @@ describe("PracticeSessionDetail のコンディション", () => {
     setEntitlement(true);
     renderDetail({ session: withCondition });
 
-    expect(screen.getByText("睡眠 7.5時間")).toBeInTheDocument();
+    // back の decimal は "7.0" のような文字列で返るため、数値化した表記になる。
+    expect(screen.getByText("睡眠 7時間")).toBeInTheDocument();
     expect(screen.getByText("後半は集中が切れた")).toBeInTheDocument();
     expect(screen.queryByTestId("pro-upsell-scrim")).not.toBeInTheDocument();
   });
@@ -219,7 +220,7 @@ describe("PracticeSessionDetail のコンディション", () => {
     expect(
       screen.getByText("この日のコンディションは記録されていません。"),
     ).toBeInTheDocument();
-    expect(screen.queryByText("睡眠 7.5時間")).not.toBeInTheDocument();
+    expect(screen.queryByText("睡眠 7時間")).not.toBeInTheDocument();
   });
 
   it("無料ユーザーで記録が無ければサンプルであることを明示する", () => {
