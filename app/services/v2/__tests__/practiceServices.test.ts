@@ -42,6 +42,7 @@ import {
   getMenuTrend,
   getPracticeOverview,
 } from "../practiceSummaryService";
+import { buildQuery } from "../requests";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -290,6 +291,32 @@ describe("練習ドメインの v2 Server Actions", () => {
 
       expect(requestedUrl()).toBe(
         "http://back:3000/api/v2/practice_logs?from=2026-08-01",
+      );
+    });
+
+    it("空文字の絞り込みは送らない（back が空値を条件として解釈しないようにする）", async () => {
+      mockResponse(200, []);
+
+      await getPracticeLogs({ from: "", to: "2026-08-31" });
+
+      expect(requestedUrl()).toBe(
+        "http://back:3000/api/v2/practice_logs?to=2026-08-31",
+      );
+    });
+  });
+
+  describe("buildQuery", () => {
+    it("null / undefined / 空文字のパラメータは送らない", () => {
+      expect(buildQuery({ a: "1", b: null, c: undefined, d: "" })).toBe("?a=1");
+    });
+
+    it("送る値が1つも無ければ空文字を返す（末尾の ? を付けない）", () => {
+      expect(buildQuery({ a: null, b: undefined })).toBe("");
+    });
+
+    it("数値は文字列化して送る", () => {
+      expect(buildQuery({ improvement_theme_id: 5 })).toBe(
+        "?improvement_theme_id=5",
       );
     });
   });
