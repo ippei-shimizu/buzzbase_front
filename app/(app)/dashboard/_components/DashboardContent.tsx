@@ -10,6 +10,7 @@ import { useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import { getFilteredBattingStats, getFilteredPitchingStats } from "../actions";
+import DashboardWelcome from "./DashboardWelcome";
 import GroupRankings from "./GroupRankings";
 import RecentGameResults from "./RecentGameResults";
 import RecordGameButton from "./RecordGameButton";
@@ -55,6 +56,8 @@ export default function DashboardContent({
 
   return (
     <div className="flex flex-col gap-6">
+      <DashboardWelcome data={data} />
+
       <RecordGameButton />
 
       <StatsOverview
