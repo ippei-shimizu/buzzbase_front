@@ -43,3 +43,17 @@ export async function getMenuTrend(
     "getMenuTrend",
   );
 }
+
+/**
+ * 素振り（source: shadow_swing）の推移を取得する
+ * （GET /api/v2/shadow_swing_sessions/trend）。
+ * 素振りログは practice_menu に紐付かないことがあるため、メニュー推移とは別系統になる。
+ * 推移詳細と同じ entitlement（practice_menu_trend_detail）で守られており、
+ * 無料プランでは status:"forbidden" が返る。
+ */
+export async function getShadowSwingTrend(): Promise<FetchResult<MenuTrend>> {
+  return fetchV2<MenuTrend>(
+    "/api/v2/shadow_swing_sessions/trend",
+    "getShadowSwingTrend",
+  );
+}
