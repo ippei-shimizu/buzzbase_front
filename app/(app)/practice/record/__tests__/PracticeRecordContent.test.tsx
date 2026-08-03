@@ -27,9 +27,11 @@ jest.mock("@app/services/v2/practiceSessionService", () => ({
 
 import type { ImprovementTheme } from "@app/types/improvementTheme";
 import type {
+  ConditionLog,
   PracticeLog,
   PracticeMenu,
   PracticeSession,
+  PracticeSessionInput,
   PracticeSessionItemInput,
 } from "@app/types/practice";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -192,6 +194,27 @@ function savedItems(): PracticeSessionItemInput[] {
   return [...(input?.items ?? [])].sort(
     (a, b) => a.practice_menu_id - b.practice_menu_id,
   );
+}
+
+/** 直近の保存リクエスト本体。condition キーの有無ごと検証するために生のまま返す。 */
+function savedInput(): PracticeSessionInput {
+  const input = mockUpsert.mock.calls.at(-1)?.[0];
+  if (!input) throw new Error("保存リクエストが送られていない");
+  return input;
+}
+
+function buildCondition(overrides: Partial<ConditionLog> = {}): ConditionLog {
+  return {
+    id: 5,
+    logged_on: YESTERDAY,
+    fatigue_level: 3,
+    physical_level: 2,
+    sleep_hours: "7.0",
+    mood: "普通",
+    memo: "全体的に体は軽かった",
+    injuries: [{ part: "腰", memo: "重い" }],
+    ...overrides,
+  };
 }
 
 describe("PracticeRecordContent", () => {
@@ -679,6 +702,368 @@ describe("PracticeRecordContent", () => {
       expect(
         screen.getByRole("button", { name: "野球ノートを書く" }),
       ).toBeEnabled();
+    });
+  });
+
+  describe("コンディション", () => {
+    /** 練習量とコンディションを両方入力したうえで保存する。 */
+    async function saveWithCondition(user: ReturnType<typeof userEvent.setup>) {
+      await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+      await user.click(screen.getByRole("button", { name: "疲労度: 元気" }));
+      await user.click(screen.getByRole("button", { name: "体調: 不調" }));
+      await user.type(screen.getByLabelText("睡眠時間"), "7.5");
+      await user.click(screen.getByRole("button", { name: "好調" }));
+      await user.type(screen.getByLabelText("気分のメモ"), "よく眠れた");
+      await user.click(
+        screen.getByRole("button", { name: "練習記録のみ保存" }),
+      );
+    }
+
+    describe("無料プラン", () => {
+      it("暗幕越しにサンプルのコンディションをプレビューする", () => {
+        renderContent();
+
+        expect(screen.getByTestId("pro-upsell-scrim")).toBeInTheDocument();
+        expect(
+          screen.getByText("サンプルデータ（実際の記録ではありません）"),
+        ).toBeVisible();
+        expect(screen.getByText("やや疲れ")).toBeVisible();
+        expect(screen.getByText("睡眠 7.5時間")).toBeVisible();
+        expect(screen.getByText("Pro限定")).toBeVisible();
+      });
+
+      it("入力フォームは出さない", () => {
+        renderContent();
+
+        expect(
+          screen.queryByRole("button", { name: "疲労度: 元気" }),
+        ).toBeNull();
+        expect(screen.queryByLabelText("睡眠時間")).toBeNull();
+      });
+
+      it("既存の記録があればサンプルではなく自分のコンディションをプレビューする", () => {
+        renderContent({
+          initialSession: buildSession({ condition: buildCondition() }),
+        });
+
+        // decimal は "7.0" の文字列で返るため、数値化して "7時間" と出す。
+        expect(screen.getByText("睡眠 7時間")).toBeVisible();
+        expect(screen.getByText("全体的に体は軽かった")).toBeVisible();
+        expect(screen.getByText("腰（重い）")).toBeVisible();
+        expect(
+          screen.queryByText("サンプルデータ（実際の記録ではありません）"),
+        ).toBeNull();
+      });
+
+      it("既存のコンディションが残っていても condition を送らない", async () => {
+        const user = userEvent.setup();
+        renderContent({
+          initialSession: buildSession({
+            condition: buildCondition(),
+            practice_logs: [buildLog({ practice_menu_id: 1 })],
+          }),
+        });
+
+        await user.click(
+          screen.getByRole("button", { name: "練習記録の変更を保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput()).not.toHaveProperty("condition");
+        expect(savedItems()).toEqual([
+          { practice_menu_id: 1, amount: 300, weight: null },
+        ]);
+      });
+    });
+
+    describe("Pro 判定が未確定の間", () => {
+      it("既存のコンディションがあっても condition を送らない", async () => {
+        const user = userEvent.setup();
+        mockEntitlement({ granted: true, isLoading: true });
+        renderContent({
+          initialSession: buildSession({
+            condition: buildCondition(),
+            practice_logs: [buildLog({ practice_menu_id: 1 })],
+          }),
+        });
+
+        await user.click(
+          screen.getByRole("button", { name: "練習記録の変更を保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput()).not.toHaveProperty("condition");
+      });
+
+      it("Pro 限定バッジも入力フォームも出さない", () => {
+        mockEntitlement({ granted: true, isLoading: true });
+        renderContent();
+
+        expect(screen.queryByText("Pro限定")).toBeNull();
+        expect(
+          screen.queryByRole("button", { name: "疲労度: 元気" }),
+        ).toBeNull();
+      });
+    });
+
+    describe("Pro プラン", () => {
+      beforeEach(() => {
+        mockEntitlement({ granted: true });
+      });
+
+      it("疲労度・体調とも4段階を出し、色以外にラベルでも段階が分かる", () => {
+        renderContent();
+
+        ["かなり疲れ", "やや疲れ", "ふつう", "元気"].forEach((label) => {
+          expect(
+            screen.getByRole("button", { name: `疲労度: ${label}` }),
+          ).toHaveTextContent(label);
+        });
+        ["不調", "やや不調", "ふつう", "好調"].forEach((label) => {
+          expect(
+            screen.getByRole("button", { name: `体調: ${label}` }),
+          ).toHaveTextContent(label);
+        });
+        expect(screen.queryByTestId("pro-upsell-scrim")).toBeNull();
+      });
+
+      it("入力したコンディションを練習記録と一緒に送る", async () => {
+        const user = userEvent.setup();
+        renderContent();
+
+        await saveWithCondition(user);
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput().condition).toEqual({
+          fatigue_level: 4,
+          physical_level: 1,
+          sleep_hours: 7.5,
+          mood: "好調",
+          memo: "よく眠れた",
+          injuries: [],
+        });
+        expect(savedItems()).toEqual([
+          { practice_menu_id: 1, amount: 200, weight: null },
+        ]);
+      });
+
+      it("同じ段階をもう一度押すと選択を外す", async () => {
+        const user = userEvent.setup();
+        renderContent();
+
+        await user.click(screen.getByRole("button", { name: "疲労度: 元気" }));
+        expect(
+          screen.getByRole("button", { name: "疲労度: 元気" }),
+        ).toHaveAttribute("aria-pressed", "true");
+
+        await user.click(screen.getByRole("button", { name: "疲労度: 元気" }));
+        expect(
+          screen.getByRole("button", { name: "疲労度: 元気" }),
+        ).toHaveAttribute("aria-pressed", "false");
+      });
+
+      it("気分は3つのチップから選び、もう一度押すと外れる", async () => {
+        const user = userEvent.setup();
+        renderContent();
+
+        ["好調", "普通", "不調"].forEach((mood) => {
+          expect(screen.getByRole("button", { name: mood })).toBeVisible();
+        });
+
+        await user.click(screen.getByRole("button", { name: "不調" }));
+        expect(screen.getByRole("button", { name: "不調" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+
+        await user.click(screen.getByRole("button", { name: "不調" }));
+        await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+        await user.click(
+          screen.getByRole("button", { name: "練習記録のみ保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput()).not.toHaveProperty("condition");
+      });
+
+      it("怪我は部位プリセット8種から選び、メモを添えて送れる", async () => {
+        const user = userEvent.setup();
+        renderContent();
+
+        await user.click(screen.getByRole("button", { name: "部位を追加" }));
+
+        ["肩", "肘", "手首", "腰", "股関節", "膝", "足首", "その他"].forEach(
+          (part) => {
+            expect(
+              screen.getByRole("button", {
+                name: `1件目の怪我・痛みの部位: ${part}`,
+              }),
+            ).toBeVisible();
+          },
+        );
+
+        await user.click(
+          screen.getByRole("button", { name: "1件目の怪我・痛みの部位: 肘" }),
+        );
+        await user.type(
+          screen.getByLabelText("1件目の怪我・痛みのメモ"),
+          "軽い張り",
+        );
+        await user.click(
+          screen.getByRole("button", { name: "練習記録のみ保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput().condition?.injuries).toEqual([
+          { part: "肘", memo: "軽い張り" },
+        ]);
+      });
+
+      it("怪我を削除しても他の入力は消えない", async () => {
+        const user = userEvent.setup();
+        renderContent();
+
+        await user.type(screen.getByLabelText("睡眠時間"), "6");
+        await user.click(screen.getByRole("button", { name: "部位を追加" }));
+        await user.type(
+          screen.getByLabelText("1件目の怪我・痛みのメモ"),
+          "1件目",
+        );
+        await user.click(screen.getByRole("button", { name: "部位を追加" }));
+        await user.click(
+          screen.getByRole("button", { name: "2件目の怪我・痛みの部位: 膝" }),
+        );
+        await user.type(
+          screen.getByLabelText("2件目の怪我・痛みのメモ"),
+          "2件目",
+        );
+
+        await user.click(
+          screen.getByRole("button", { name: "1件目の怪我・痛みを削除" }),
+        );
+
+        expect(screen.getByLabelText("睡眠時間")).toHaveValue(6);
+        expect(screen.getByLabelText("1件目の怪我・痛みのメモ")).toHaveValue(
+          "2件目",
+        );
+        expect(screen.queryByLabelText("2件目の怪我・痛みのメモ")).toBeNull();
+
+        await user.click(
+          screen.getByRole("button", { name: "練習記録のみ保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput().condition?.injuries).toEqual([
+          { part: "膝", memo: "2件目" },
+        ]);
+        expect(savedInput().condition?.sleep_hours).toBe(6);
+      });
+
+      it("既存セッションのコンディションを初期表示して送り直す", async () => {
+        const user = userEvent.setup();
+        renderContent({
+          initialSession: buildSession({
+            condition: buildCondition(),
+            practice_logs: [buildLog({ practice_menu_id: 1 })],
+          }),
+        });
+
+        expect(
+          screen.getByRole("button", { name: "疲労度: ふつう" }),
+        ).toHaveAttribute("aria-pressed", "true");
+        expect(
+          screen.getByRole("button", { name: "体調: やや不調" }),
+        ).toHaveAttribute("aria-pressed", "true");
+        // decimal の "7.0" をそのまま入力欄へ流し込まない。
+        expect(screen.getByLabelText("睡眠時間")).toHaveDisplayValue("7");
+        expect(screen.getByRole("button", { name: "普通" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+        expect(screen.getByLabelText("気分のメモ")).toHaveValue(
+          "全体的に体は軽かった",
+        );
+        expect(screen.getByLabelText("1件目の怪我・痛みのメモ")).toHaveValue(
+          "重い",
+        );
+
+        await user.click(
+          screen.getByRole("button", { name: "練習記録の変更を保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput().condition).toEqual({
+          fatigue_level: 3,
+          physical_level: 2,
+          sleep_hours: 7,
+          mood: "普通",
+          memo: "全体的に体は軽かった",
+          injuries: [{ part: "腰", memo: "重い" }],
+        });
+      });
+
+      it("コンディション未入力なら condition を送らない", async () => {
+        const user = userEvent.setup();
+        renderContent();
+
+        await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+        await user.click(
+          screen.getByRole("button", { name: "練習記録のみ保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput()).not.toHaveProperty("condition");
+      });
+
+      it("触っていないメニュー項目もコンディションと一緒に全件送る", async () => {
+        const user = userEvent.setup();
+        renderContent({
+          initialSession: buildSession({
+            condition: buildCondition(),
+            practice_logs: [
+              buildLog({ id: 1, practice_menu_id: 1, amount: "300.0" }),
+              buildLog({
+                id: 2,
+                practice_menu_id: 99,
+                amount: "20.0",
+                menu_name: "削除済みメニュー",
+              }),
+            ],
+          }),
+        });
+
+        await user.click(screen.getByRole("button", { name: "疲労度: 元気" }));
+        await user.click(
+          screen.getByRole("button", { name: "練習記録の変更を保存" }),
+        );
+
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedItems()).toEqual([
+          { practice_menu_id: 1, amount: 300, weight: null },
+          { practice_menu_id: 99, amount: 20, weight: null },
+        ]);
+        expect(savedInput().condition?.fatigue_level).toBe(4);
+      });
+
+      it("コンディション付きの保存が 403 ならコンディションの Pro 訴求を出す", async () => {
+        const user = userEvent.setup();
+        mockUpsert.mockResolvedValue({
+          ok: false,
+          reason: "forbidden",
+          errors: ["コンディション記録は Pro プラン限定です"],
+        });
+        renderContent();
+
+        await saveWithCondition(user);
+
+        expect(
+          await screen.findByText("コンディション記録は Pro プラン限定です"),
+        ).toBeVisible();
+        expect(mockOpenProUpgradeModal).toHaveBeenCalledWith({
+          trigger: "detailed_condition_log",
+        });
+        expect(toast.success).not.toHaveBeenCalled();
+      });
     });
   });
 });
