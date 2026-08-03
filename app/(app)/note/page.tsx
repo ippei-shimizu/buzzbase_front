@@ -5,12 +5,14 @@ import AdInFeed from "@app/components/ad/AdInFeed";
 import NoteAddButton from "@app/components/button/NoteAddButton";
 import Header from "@app/components/header/Header";
 import NoteListComponent from "@app/components/note/NoteListComponent";
+import { getBaseballNotes } from "@app/services/v2/baseballNoteService";
 
 export default async function NoteList() {
   const cookieStore = await cookies();
   if (!cookieStore.get("access-token")) {
     redirect("/signup?auth_required=true");
   }
+  const result = await getBaseballNotes();
   return (
     <>
       <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
@@ -20,7 +22,7 @@ export default async function NoteList() {
             <div className="pt-20 px-4 lg:px-6">
               <h2 className="text-2xl font-bold">野球ノート</h2>
               <div className="my-6">
-                <NoteListComponent />
+                <NoteListComponent result={result} />
               </div>
               <AdInFeed
                 slot={adSlots.noteListInFeed}

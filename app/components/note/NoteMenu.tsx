@@ -18,7 +18,7 @@ import { useState } from "react";
 import { DeleteDocumentIcon } from "@app/components/icon/DeleteDocumentIcon";
 import { MoreIcon } from "@app/components/icon/MoreIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { deleteBaseballNote } from "@app/services/baseballNoteService";
+import { deleteBaseballNote } from "@app/services/v2/baseballNoteService";
 
 export default function NoteMenu({ noteId }: { noteId: number }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -27,15 +27,12 @@ export default function NoteMenu({ noteId }: { noteId: number }) {
 
   const handleDeleteNote = async () => {
     setIsLoading(true);
-    try {
-      await deleteBaseballNote(noteId);
-      setTimeout(() => {
-        router.push(`/note`);
-        setIsLoading(false);
-      }, 1000);
-    } catch {
+    const result = await deleteBaseballNote(noteId);
+    if (!result.ok) {
       setIsLoading(false);
+      return;
     }
+    router.push(`/note`);
   };
 
   return (
