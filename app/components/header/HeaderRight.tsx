@@ -87,6 +87,16 @@ export default function HeaderRight() {
                   練習メニュー
                 </DropdownItem>
                 <DropdownItem
+                  key="menu-sets"
+                  as={Link}
+                  href="/practice/menu-sets"
+                  startContent={
+                    <BallIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  メニューセット
+                </DropdownItem>
+                <DropdownItem
                   key="practice-schedules"
                   as={Link}
                   href="/practice/schedules"
