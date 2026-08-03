@@ -32,10 +32,3 @@ export interface ActivityHeatmap {
   total_active_days: number;
   data: ActivityLog[];
 }
-
-/** GET /api/v2/shadow_swing_sessions/stats のレスポンス。 */
-export interface ShadowSwingStats {
-  today_count: DecimalValue;
-  month_count: DecimalValue;
-  total_count: DecimalValue;
-}

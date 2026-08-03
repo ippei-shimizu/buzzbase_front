@@ -8,14 +8,14 @@ import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
 import { GRASS_HISTORY_DAYS } from "@app/constants/activity";
-import {
-  getActivityHeatmap,
-  getShadowSwingStats,
-} from "@app/services/v2/activityService";
+import { getActivityHeatmap } from "@app/services/v2/activityService";
 import { getPeriodicReviews } from "@app/services/v2/periodicReviewService";
+import { getDayPlan } from "@app/services/v2/planService";
+import { getShadowSwingStats } from "@app/services/v2/shadowSwingService";
 import ActivityGrassSection from "./_components/ActivityGrassSection";
 import DashboardContent from "./_components/DashboardContent";
 import PeriodicReviewBanner from "./_components/PeriodicReviewBanner";
+import TodayTasksSection from "./_components/TodayTasksSection";
 import { getAvailableSeasons, getDashboardData } from "./actions";
 
 export const metadata = {
@@ -28,18 +28,22 @@ export default async function DashboardPage() {
     redirect("/signup?auth_required=true");
   }
 
+  // 「今日」は back の集計と同じ Asia/Tokyo 基準で決める。実行環境のタイムゾーンに任せると
+  // 日付が 1 日ずれ、当日の予定と「済」の判定日が食い違う。
+  const today = todayInTokyo();
   // 草グラフは今日を含む 1 年ぶんを要求する。無料プランでは back が直近30日へ
   // クランプして返すため、要求した開始日を Container へ渡してクランプを検出させる。
-  const today = todayInTokyo();
   const grassFrom = addDays(today, -(GRASS_HISTORY_DAYS - 1));
 
-  const [data, seasons, reviews, heatmap, swingStats] = await Promise.all([
-    getDashboardData(),
-    getAvailableSeasons(),
-    getPeriodicReviews(),
-    getActivityHeatmap(grassFrom, today),
-    getShadowSwingStats(),
-  ]);
+  const [data, seasons, reviews, todayPlans, heatmap, swingStats] =
+    await Promise.all([
+      getDashboardData(),
+      getAvailableSeasons(),
+      getPeriodicReviews(),
+      getDayPlan(today),
+      getActivityHeatmap(grassFrom, today),
+      getShadowSwingStats(),
+    ]);
 
   return (
     <>
@@ -57,6 +61,7 @@ export default async function DashboardPage() {
                   heatmap={heatmap}
                   swingStats={swingStats}
                 />
+                <TodayTasksSection today={today} result={todayPlans} />
                 <DashboardContent data={data} seasons={seasons} />
                 <AdInFeed
                   slot={adSlots.dashboardInFeed}

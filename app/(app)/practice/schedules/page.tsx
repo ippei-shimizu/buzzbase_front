@@ -11,6 +11,7 @@ import {
   LOAD_ERROR,
   PAGE_DESCRIPTION,
   PAGE_TITLE,
+  WEEKLY_PLAN_LABEL,
 } from "./_components/scheduleCopy";
 import ScheduleList from "./_components/ScheduleList";
 
@@ -34,13 +35,21 @@ export default async function SchedulesPage() {
           <div className="pt-20 px-4 lg:px-6">
             <div className="flex items-start justify-between gap-3">
               <h2 className="text-2xl font-bold">{PAGE_TITLE}</h2>
-              <Link
-                href="/practice/schedules/calendar"
-                className="mt-1 inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
-              >
-                <CalendarIcon fill="currentColor" width="14" height="14" />
-                {CALENDAR_LABEL}
-              </Link>
+              <div className="mt-1 flex shrink-0 items-center gap-2">
+                <Link
+                  href="/practice/schedules/week"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
+                >
+                  {WEEKLY_PLAN_LABEL}
+                </Link>
+                <Link
+                  href="/practice/schedules/calendar"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
+                >
+                  <CalendarIcon fill="currentColor" width="14" height="14" />
+                  {CALENDAR_LABEL}
+                </Link>
+              </div>
             </div>
             <p className="mt-2 text-sm text-zinc-300">{PAGE_DESCRIPTION}</p>
 

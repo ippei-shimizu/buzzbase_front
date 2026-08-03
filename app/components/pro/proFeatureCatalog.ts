@@ -91,7 +91,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
   shadow_swing_custom_interval: {
     free: "5〜10秒",
     pro: "1〜20秒",
-    availability: "app_only",
+    availability: "web_and_app",
   },
   shadow_swing_vibration: { free: "✕", pro: "○", availability: "app_only" },
   shadow_swing_background: {

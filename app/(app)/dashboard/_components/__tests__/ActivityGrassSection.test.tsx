@@ -20,11 +20,8 @@ jest.mock("@app/lib/analytics", () => ({
 }));
 
 import type { FetchResult } from "@app/services/v2/requests";
-import type {
-  ActivityHeatmap,
-  ActivityLog,
-  ShadowSwingStats,
-} from "@app/types/activity";
+import type { ActivityHeatmap, ActivityLog } from "@app/types/activity";
+import type { ShadowSwingStats } from "@app/types/shadowSwing";
 import { render, screen } from "@testing-library/react";
 import {
   EMPTY_MESSAGE,

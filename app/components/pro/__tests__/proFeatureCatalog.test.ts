@@ -48,6 +48,7 @@ const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "pitch_type_average",
   "pitcher_faceoff_average",
   "unlimited_media_uploads",
+  "shadow_swing_custom_interval",
 ];
 
 describe("FEATURE_COMPARISONS", () => {
@@ -79,7 +80,9 @@ describe("FEATURE_COMPARISONS", () => {
   });
 
   it("ブラウザで成立しない素振りカウンターの機能を Web 提供として扱わない", () => {
-    // バックグラウンド継続とバイブレーションはブラウザの制約で Web では実現できない。
+    // バックグラウンド継続はブラウザが非アクティブタブのタイマーを間引くため Web では成立しない。
+    // バイブレーションは iOS Safari が navigator.vibrate を持たず全ての Web 利用者には
+    // 届かないため、比較表では Web 提供として訴求しない（対応ブラウザでは機能検出のうえ提供する）。
     expect(FEATURE_COMPARISONS.shadow_swing_background.availability).toBe(
       "app_only",
     );

@@ -1,6 +1,6 @@
 "use server";
 
-import type { ActivityHeatmap, ShadowSwingStats } from "@app/types/activity";
+import type { ActivityHeatmap } from "@app/types/activity";
 import { type FetchResult, buildQuery, fetchV2 } from "./requests";
 
 const BASE_PATH = "/api/v2/activity_logs";
@@ -23,20 +23,5 @@ export async function getActivityHeatmap(
   return fetchV2<ActivityHeatmap>(
     `${BASE_PATH}${buildQuery({ from, to })}`,
     "getActivityHeatmap",
-  );
-}
-
-/**
- * 素振りの累計本数を取得する（GET /api/v2/shadow_swing_sessions/stats）。
- *
- * 素振りカウンター本体はまだ front に無く、この累計は草セクションの節目表示だけが使う。
- * 取得できなくても草グラフ・Streak は成立するので、呼び出し側は失敗を握りつぶしてよい。
- */
-export async function getShadowSwingStats(): Promise<
-  FetchResult<ShadowSwingStats>
-> {
-  return fetchV2<ShadowSwingStats>(
-    "/api/v2/shadow_swing_sessions/stats",
-    "getShadowSwingStats",
   );
 }

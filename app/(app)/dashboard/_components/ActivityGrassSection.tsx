@@ -1,11 +1,11 @@
 "use client";
 
 import type { FetchResult } from "@app/services/v2/requests";
-import type { ActivityHeatmap, ShadowSwingStats } from "@app/types/activity";
+import type { ActivityHeatmap } from "@app/types/activity";
+import type { ShadowSwingStats } from "@app/types/shadowSwing";
 import TrophyIcon from "@heroicons/react/24/outline/TrophyIcon";
 import FireIcon from "@heroicons/react/24/solid/FireIcon";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
-import { parseDecimal } from "@app/constants/practice";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import {
   activeDayMilestoneText,
@@ -32,7 +32,7 @@ interface ActivityGrassSectionProps {
   /** front が要求した期間の開始日。back のクランプを検出するために渡す。 */
   requestedFrom: string;
   heatmap: FetchResult<ActivityHeatmap>;
-  /** 素振り累計。素振りカウンターは未実装のため、取得できなくても本体は成立する。 */
+  /** 素振り累計。節目表示にしか使わないので、取得できなくても Streak と草グラフは成立する。 */
   swingStats: FetchResult<ShadowSwingStats>;
 }
 
@@ -83,9 +83,7 @@ export default function ActivityGrassSection({
   );
   const activeDayMilestone = activeDayMilestoneText(totalActiveDays);
   const swingTotal =
-    swingStats.status === "ok"
-      ? parseDecimal(swingStats.data.total_count)
-      : null;
+    swingStats.status === "ok" ? swingStats.data.total_count : null;
   const swingMilestone = swingMilestoneText(swingTotal);
 
   return (

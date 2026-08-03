@@ -12,7 +12,7 @@ jest.mock("../../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
-import { getActivityHeatmap, getShadowSwingStats } from "../activityService";
+import { getActivityHeatmap } from "../activityService";
 
 function setupAuthCookies() {
   mockGet.mockImplementation((key: string) => {
@@ -87,28 +87,5 @@ describe("getActivityHeatmap", () => {
     mockResponse(500, {});
 
     expect(await getActivityHeatmap()).toEqual({ status: "error" });
-  });
-});
-
-describe("getShadowSwingStats", () => {
-  it("素振りの累計を取得する", async () => {
-    mockResponse(200, { today_count: 0, month_count: 30, total_count: 1200 });
-
-    const result = await getShadowSwingStats();
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "http://back:3000/api/v2/shadow_swing_sessions/stats",
-      expect.objectContaining({ cache: "no-store" }),
-    );
-    expect(result).toEqual({
-      status: "ok",
-      data: { today_count: 0, month_count: 30, total_count: 1200 },
-    });
-  });
-
-  it("取得できなくてもエラーとして返し、0 本とは扱わない", async () => {
-    mockResponse(500, {});
-
-    expect(await getShadowSwingStats()).toEqual({ status: "error" });
   });
 });
