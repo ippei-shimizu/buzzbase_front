@@ -14,6 +14,7 @@ import { CalendarIcon } from "@app/components/icon/CalendarIcon";
 import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
+import { RankingIcon } from "@app/components/icon/RankingIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -76,6 +77,16 @@ export default function HeaderRight() {
                   練習記録
                 </DropdownItem>
                 <DropdownItem
+                  key="goals"
+                  as={Link}
+                  href="/goals"
+                  startContent={
+                    <RankingIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  目標
+                </DropdownItem>
+                <DropdownItem
                   key="practice-menus"
                   as={Link}
                   href="/practice/menus"
@@ -84,6 +95,16 @@ export default function HeaderRight() {
                   }
                 >
                   練習メニュー
+                </DropdownItem>
+                <DropdownItem
+                  key="practice-schedules"
+                  as={Link}
+                  href="/practice/schedules"
+                  startContent={
+                    <CalendarIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  練習スケジュール
                 </DropdownItem>
                 <DropdownItem
                   key="seasons"
