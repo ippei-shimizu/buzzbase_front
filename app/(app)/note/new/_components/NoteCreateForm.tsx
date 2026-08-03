@@ -3,17 +3,24 @@
 import type { NoteTag, ReflectionAnswer } from "@app/interface/baseballNoteV2";
 import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
+import type { ImprovementTheme } from "@app/types/improvementTheme";
 import { Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
+import NoteGameResultSection from "@app/components/note/NoteGameResultSection";
 import NoteTagSection from "@app/components/note/NoteTagSection";
+import NoteThemeSection from "@app/components/note/NoteThemeSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { useNoteTagEditing } from "@app/hooks/note/useNoteTagEditing";
 import { createBaseballNote } from "@app/services/v2/baseballNoteService";
+import {
+  buildGameResultIdsPayload,
+  buildImprovementThemeIdsPayload,
+} from "@app/utils/noteLinks";
 import { buildAnswerList, resolveNoteMemo } from "@app/utils/noteMemo";
 import { buildTagIdsPayload } from "@app/utils/noteTags";
 
@@ -27,6 +34,9 @@ const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
 interface NoteCreateFormProps {
   templatesResult: FetchResult<ReflectionTemplate[]>;
   tagsResult: FetchResult<NoteTag[]>;
+  themesResult: FetchResult<ImprovementTheme[]>;
+  /** 課題詳細の「この課題でノートを書く」から来たときに、あらかじめ紐付けておく課題。 */
+  initialThemeIds?: number[];
 }
 
 /** 日付入力（`type="date"`）が要求する `YYYY-MM-DD` をローカル時刻で組み立てる。 */
@@ -40,6 +50,8 @@ function todayString(): string {
 export default function NoteCreateForm({
   templatesResult,
   tagsResult,
+  themesResult,
+  initialThemeIds = [],
 }: NoteCreateFormProps) {
   const router = useRouter();
   const { canEditTags } = useNoteTagEditing();
@@ -52,6 +64,8 @@ export default function NoteCreateForm({
   // 回答は問い文をキーに保持する。テンプレを切り替えて戻ってきても入力済みの回答が残る。
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [tagIds, setTagIds] = useState<number[]>([]);
+  const [themeIds, setThemeIds] = useState<number[]>(initialThemeIds);
+  const [gameResultIds, setGameResultIds] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -65,7 +79,9 @@ export default function NoteCreateForm({
     memo !== "" ||
     templateId !== null ||
     reflectionAnswers.length > 0 ||
-    tagIds.length > 0;
+    tagIds.length > 0 ||
+    themeIds.length !== initialThemeIds.length ||
+    gameResultIds.length > 0;
 
   const setErrorsWithTimeout = (newErrors: string[]) => {
     setErrors(newErrors);
@@ -93,7 +109,7 @@ export default function NoteCreateForm({
       return;
     }
     setIsSubmitting(true);
-    // 試合 / 課題の紐付けは新規作成画面では扱わないためキーごと送らない。
+    // 紐付けが1件も無いときはキーごと落とす。
     // タグも Pro 判定が確定して entitlement を持つときだけキーを生やす。
     const result = await createBaseballNote({
       date,
@@ -101,6 +117,8 @@ export default function NoteCreateForm({
       memo: resolveNoteMemo(memo, reflectionAnswers),
       reflection_template_id: templateId,
       reflection_answers: reflectionAnswers,
+      ...buildImprovementThemeIdsPayload(themeIds),
+      ...buildGameResultIdsPayload(gameResultIds),
       ...buildTagIdsPayload({ canEditTags, tagIds }),
     });
     if (!result.ok) {
@@ -165,6 +183,18 @@ export default function NoteCreateForm({
                   selectedIds={tagIds}
                   onChange={setTagIds}
                   canEdit={canEditTags}
+                />
+                <NoteThemeSection
+                  themesResult={themesResult}
+                  selectedIds={themeIds}
+                  onChange={setThemeIds}
+                  initialCount={0}
+                />
+                <NoteGameResultSection
+                  selectedIds={gameResultIds}
+                  onChange={setGameResultIds}
+                  initialCount={0}
+                  linkedOptions={[]}
                 />
               </div>
             </form>
