@@ -117,3 +117,21 @@ export interface GoalUpdateInput {
   custom_unit?: string | null;
   manual_current_value?: number;
 }
+
+/**
+ * 目標達成バッジ1件。
+ * back/app/serializers/v2/goal_badge_serializer.rb に対応する。
+ *
+ * 付与するのは FinalizeGoalsJob だけで、フロントから作成・削除はできない。
+ */
+export interface GoalBadge {
+  id: number;
+  /** `<period_type>_achieved` 形式の種別。表示は badge_name を使い、種別の判定にだけ使う。 */
+  badge_type: string;
+  badge_name: string;
+  /** 付与日時（ISO8601）。back は Asia/Tokyo のオフセット付きで返す。 */
+  awarded_at: string;
+  goal_id: number;
+  /** 付与時点の目標タイトル。目標が削除されるとバッジも消えるため常に存在する。 */
+  goal_title: string;
+}

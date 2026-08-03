@@ -10,6 +10,20 @@ import { parseDecimal } from "@app/constants/practice";
 // back/app/models/concerns/plan_limits.rb の MONTHLY_GOAL_FREE_LIMIT と一致させる。
 export const MONTHLY_GOAL_FREE_LIMIT = 2;
 
+// オンボーディング（buzzbase.onboarding.*）とは別機能なので接頭辞を分ける。
+const GOAL_STORAGE_PREFIX = "buzzbase.goal.";
+
+/**
+ * 達成サマリーモーダルを対象月について表示済みか、を保持する localStorage キー。
+ *
+ * 「月に一度だけ」を値ではなくキーの一部（YYYY-MM）で表すことで、既存の
+ * readOnboardingFlag / writeOnboardingFlag（boolean 前提）をそのまま使える。
+ *
+ * @param monthKey 対象月（YYYY-MM）
+ */
+export const achievementSummaryShownKey = (monthKey: string): string =>
+  `${GOAL_STORAGE_PREFIX}achievementSummaryShown.${monthKey}`;
+
 /**
  * 無料枠を共有する個人の期間目標。back の Goal::PERSONAL_PERIOD_TYPES と一致させる。
  * season / tournament は件数ではなく Pro 限定機能として別に判定される。

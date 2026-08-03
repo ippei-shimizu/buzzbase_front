@@ -42,6 +42,14 @@ describe("HeaderRight のメニュー", () => {
     ).toHaveAttribute("href", "/practice/menus");
   });
 
+  it("メニューセットへの導線を持つ", async () => {
+    await openMenu();
+
+    expect(
+      screen.getByRole("menuitem", { name: /メニューセット/ }),
+    ).toHaveAttribute("href", "/practice/menu-sets");
+  });
+
   it("練習スケジュールへの導線を持つ", async () => {
     await openMenu();
 
