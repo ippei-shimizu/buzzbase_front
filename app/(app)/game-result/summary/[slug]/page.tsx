@@ -126,15 +126,11 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchCurrentResultData(JSON.parse(savedGameResultId));
-    }
-    if (!savedGameResultId) {
-      localStorage.setItem("gameResultId", JSON.stringify(id));
-    }
+    // URLのidを常に正とする。localStorageの値は編集/削除継続フローに引き継ぐためのものであり、
+    // 表示対象の特定に使うと前回訪問した別試合のidが残っていた場合に誤表示・所有者判定ズレが起きる。
+    localStorage.setItem("gameResultId", JSON.stringify(id));
+    setLocalStorageGameResultId(id);
+    fetchCurrentResultData(id);
   }, [pathname, id]);
 
   useEffect(() => {
