@@ -91,9 +91,6 @@ export default function ResultsSummary() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [memo, setMemo] = useState<string | null>();
   const [currentUserPage, setCurrentUserPage] = useState(false);
-  const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
-    number | null
-  >(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -129,7 +126,6 @@ export default function ResultsSummary() {
     // URLのidを常に正とする。localStorageの値は編集/削除継続フローに引き継ぐためのものであり、
     // 表示対象の特定に使うと前回訪問した別試合のidが残っていた場合に誤表示・所有者判定ズレが起きる。
     localStorage.setItem("gameResultId", JSON.stringify(id));
-    setLocalStorageGameResultId(id);
     fetchCurrentResultData(id);
   }, [pathname, id]);
 
@@ -142,7 +138,7 @@ export default function ResultsSummary() {
   }, [matchResult, isDetailDataFetched, currentUserId]);
 
   // 試合データ取得
-  const fetchCurrentResultData = async (localStorageGameResultId: number) => {
+  const fetchCurrentResultData = async (gameResultId: number) => {
     try {
       const [
         matchResultData,
@@ -152,11 +148,11 @@ export default function ResultsSummary() {
         plateAppearancesV2Data,
         currentUserIdData,
       ] = await Promise.all([
-        getUserMatchResult(localStorageGameResultId),
-        getUserBattingAverage(localStorageGameResultId),
-        getUserPitchingResult(localStorageGameResultId),
-        getUserPlateAppearance(localStorageGameResultId),
-        getPlateAppearancesByGame(localStorageGameResultId),
+        getUserMatchResult(gameResultId),
+        getUserBattingAverage(gameResultId),
+        getUserPitchingResult(gameResultId),
+        getUserPlateAppearance(gameResultId),
+        getPlateAppearancesByGame(gameResultId),
         getCurrentUserId(),
       ]);
       setPlateAppearancesV2(plateAppearancesV2Data);
@@ -615,9 +611,7 @@ export default function ResultsSummary() {
                         <Button
                           color="danger"
                           radius="sm"
-                          onPress={() =>
-                            handleDeleteGameResult(localStorageGameResultId)
-                          }
+                          onPress={() => handleDeleteGameResult(id)}
                         >
                           削除する
                         </Button>
