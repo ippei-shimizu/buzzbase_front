@@ -17,7 +17,7 @@ export default function Footer() {
         <footer className="border-t border-t-zinc-500 pt-12 px-4 pb-24 bg-main lg:pb-12 lg:relative lg:z-100 lg:pl-[8%] lg:pr-auto">
           <div className="lg:max-w-[900px] lg:mx-auto lg:flex lg:items-center lg:gap-x-8 lg:justify-center">
             <div className="max-w-[692px] mx-auto mb-6 lg:mb-0 lg:mx-0 lg:m-[0_0_0_32%] lg:max-w-full">
-              <Link href={isLoggedIn ? "/dashboard" : "/"}>
+              <Link href={isLoggedIn ? "/dashboard" : "/"} prefetch={false}>
                 <Image
                   src="/images/buzz-logo-v2.png"
                   width="184"
@@ -38,27 +38,35 @@ export default function Footer() {
                 )}
               </li>
               <li>
-                <Link href="/calculation-of-grades" className="text-sm">
+                <Link
+                  href="/calculation-of-grades"
+                  prefetch={false}
+                  className="text-sm"
+                >
                   成績の算出方法
                 </Link>
               </li>
               <li>
-                <Link href="/tools" className="text-sm">
+                <Link href="/tools" prefetch={false} className="text-sm">
                   計算ツール
                 </Link>
               </li>
               <li>
-                <Link href="/column" className="text-sm">
+                <Link href="/column" prefetch={false} className="text-sm">
                   コラム
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm">
+                <Link href="/contact" prefetch={false} className="text-sm">
                   お問い合わせ
                 </Link>
               </li>
               <li>
-                <Link href="/notice-from-management" className="text-sm">
+                <Link
+                  href="/notice-from-management"
+                  prefetch={false}
+                  className="text-sm"
+                >
                   運営からのお知らせ
                 </Link>
               </li>
@@ -76,17 +84,29 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/privacypolicy" className="text-sm">
+                <Link
+                  href="/privacypolicy"
+                  prefetch={false}
+                  className="text-sm"
+                >
                   プライバシーポリシー
                 </Link>
               </li>
               <li>
-                <Link href="/termsofservice" className="text-sm">
+                <Link
+                  href="/termsofservice"
+                  prefetch={false}
+                  className="text-sm"
+                >
                   利用規約
                 </Link>
               </li>
               <li>
-                <Link href="/account-deletion" className="text-sm">
+                <Link
+                  href="/account-deletion"
+                  prefetch={false}
+                  className="text-sm"
+                >
                   アカウント削除について
                 </Link>
               </li>

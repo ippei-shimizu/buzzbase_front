@@ -91,9 +91,6 @@ export default function ResultsSummary() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [memo, setMemo] = useState<string | null>();
   const [currentUserPage, setCurrentUserPage] = useState(false);
-  const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
-    number | null
-  >(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -126,15 +123,12 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchCurrentResultData(JSON.parse(savedGameResultId));
-    }
-    if (!savedGameResultId) {
-      localStorage.setItem("gameResultId", JSON.stringify(id));
-    }
+    // 表示対象の特定は常にURLのidを正とする。localStorageは書き込まない
+    // （record/page.tsxは記録中の下書きIDとしてlocalStorageを信頼して送信時に
+    // 既存MatchResultの上書き判定をするため、単に閲覧しただけでここを書き換えると
+    // 進行中の別の記録セッションを巻き込んでしまう。書き込みは編集を選択した
+    // handleResultComplete内でのみ行う）。
+    fetchCurrentResultData(id);
   }, [pathname, id]);
 
   useEffect(() => {
@@ -146,7 +140,7 @@ export default function ResultsSummary() {
   }, [matchResult, isDetailDataFetched, currentUserId]);
 
   // 試合データ取得
-  const fetchCurrentResultData = async (localStorageGameResultId: number) => {
+  const fetchCurrentResultData = async (gameResultId: number) => {
     try {
       const [
         matchResultData,
@@ -156,11 +150,11 @@ export default function ResultsSummary() {
         plateAppearancesV2Data,
         currentUserIdData,
       ] = await Promise.all([
-        getUserMatchResult(localStorageGameResultId),
-        getUserBattingAverage(localStorageGameResultId),
-        getUserPitchingResult(localStorageGameResultId),
-        getUserPlateAppearance(localStorageGameResultId),
-        getPlateAppearancesByGame(localStorageGameResultId),
+        getUserMatchResult(gameResultId),
+        getUserBattingAverage(gameResultId),
+        getUserPitchingResult(gameResultId),
+        getUserPlateAppearance(gameResultId),
+        getPlateAppearancesByGame(gameResultId),
         getCurrentUserId(),
       ]);
       setPlateAppearancesV2(plateAppearancesV2Data);
@@ -249,6 +243,9 @@ export default function ResultsSummary() {
 
   const handleResultComplete = () => {
     // 既存試合の編集として試合情報入力画面へ入ることを記録する。
+    // record/page.tsxはgameResultIdを送信対象の試合として信頼するため、ここで
+    // 明示的に「今表示している（＝自分の所有と確認済みの）試合」のidをセットする。
+    localStorage.setItem("gameResultId", JSON.stringify(id));
     localStorage.setItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY, "true");
     router.push("/game-result/record");
   };
@@ -619,9 +616,7 @@ export default function ResultsSummary() {
                         <Button
                           color="danger"
                           radius="sm"
-                          onPress={() =>
-                            handleDeleteGameResult(localStorageGameResultId)
-                          }
+                          onPress={() => handleDeleteGameResult(id)}
                         >
                           削除する
                         </Button>
