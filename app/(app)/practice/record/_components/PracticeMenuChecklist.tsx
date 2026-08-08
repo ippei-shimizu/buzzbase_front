@@ -70,17 +70,28 @@ export default function PracticeMenuChecklist({
                 return (
                   <li
                     key={menu.id}
-                    className="rounded-[10px] bg-sub px-3.5 py-3"
+                    className="cursor-pointer rounded-[10px] bg-sub px-3.5 py-3"
+                    onClick={() => onToggle(menu)}
                   >
-                    <Checkbox
-                      isSelected={isSelected}
-                      onValueChange={() => onToggle(menu)}
-                      classNames={{ label: "text-sm font-bold text-white" }}
-                    >
-                      {menu.name}
-                    </Checkbox>
+                    {/* Checkbox 自体のクリックは onValueChange 側で処理するため、li への伝播を止めて二重トグルを防ぐ。 */}
+                    <div onClick={(event) => event.stopPropagation()}>
+                      <Checkbox
+                        isSelected={isSelected}
+                        onValueChange={() => onToggle(menu)}
+                        classNames={{
+                          label: "text-sm font-bold text-white",
+                          // 未選択時の枠線がデフォルトの default カラーだと bg-sub と同化して見えないため明るくする。
+                          wrapper: "before:border-zinc-400",
+                        }}
+                      >
+                        {menu.name}
+                      </Checkbox>
+                    </div>
                     {isSelected ? (
-                      <div className="mt-2.5 flex items-center gap-2 pl-8">
+                      <div
+                        className="mt-2.5 flex items-center gap-2 pl-8"
+                        onClick={(event) => event.stopPropagation()}
+                      >
                         {isWeightReps(menu.unit) ? (
                           <>
                             <Input

@@ -13,7 +13,6 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import NoteMediaSection from "@app/components/note/media/NoteMediaSection";
 import NoteGameResultSection from "@app/components/note/NoteGameResultSection";
-import NoteMenu from "@app/components/note/NoteMenu";
 import NoteTagSection from "@app/components/note/NoteTagSection";
 import NoteThemeSection from "@app/components/note/NoteThemeSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
@@ -157,7 +156,7 @@ export default function NoteEditForm({
   const handleSubmit = async () => {
     if (isSubmitting) return;
     if (!hasChanges) {
-      router.push("/note");
+      router.push(`/note/${note.id}`);
       return;
     }
     setIsSubmitting(true);
@@ -167,7 +166,7 @@ export default function NoteEditForm({
       setIsSubmitting(false);
       return;
     }
-    router.push("/note");
+    router.push(`/note/${note.id}`);
   };
 
   return (
@@ -180,21 +179,18 @@ export default function NoteEditForm({
           <div className="pt-14 px-4 lg:px-6 lg:pb-14">
             <form>
               <div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-sm font-bold text-zinc-400">日付</h3>
-                    <Input
-                      isRequired
-                      type="date"
-                      size="sm"
-                      variant="underlined"
-                      className="w-28 [&>div&>div]:p-0"
-                      aria-label="日付"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                    />
-                  </div>
-                  <NoteMenu noteId={note.id} />
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-400">日付</h3>
+                  <Input
+                    isRequired
+                    type="date"
+                    size="sm"
+                    variant="underlined"
+                    className="w-28 [&>div&>div]:p-0"
+                    aria-label="日付"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
                 </div>
                 <div className="mt-4">
                   <h3 className="text-sm font-bold text-zinc-400">

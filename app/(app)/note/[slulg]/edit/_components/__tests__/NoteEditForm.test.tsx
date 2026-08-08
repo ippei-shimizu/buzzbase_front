@@ -196,7 +196,7 @@ describe("NoteEditForm", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note/12"));
     expect(mockUpdateBaseballNote).not.toHaveBeenCalled();
   });
 
@@ -223,7 +223,7 @@ describe("NoteEditForm", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note/12"));
     expect(mockUpdateBaseballNote).not.toHaveBeenCalled();
   });
 
@@ -272,7 +272,7 @@ describe("NoteEditForm", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "保存" }));
 
-      await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+      await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note/12"));
       expect(mockUpdateBaseballNote).not.toHaveBeenCalled();
     });
 

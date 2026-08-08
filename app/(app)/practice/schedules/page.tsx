@@ -32,9 +32,9 @@ export default async function SchedulesPage() {
       <Header />
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-20 px-4 lg:px-6">
+          <div className="pt-[74px] px-4 lg:px-6">
             <div className="flex items-start justify-between gap-3">
-              <h2 className="text-2xl font-bold">{PAGE_TITLE}</h2>
+              <h2 className="text-lg font-bold">{PAGE_TITLE}</h2>
               <div className="mt-1 flex shrink-0 items-center gap-2">
                 <Link
                   href="/practice/schedules/week"
@@ -51,7 +51,7 @@ export default async function SchedulesPage() {
                 </Link>
               </div>
             </div>
-            <p className="mt-2 text-sm text-zinc-300">{PAGE_DESCRIPTION}</p>
+            <p className="mt-2 text-xs text-zinc-300">{PAGE_DESCRIPTION}</p>
 
             <div className="my-6">
               {result.status === "ok" ? (

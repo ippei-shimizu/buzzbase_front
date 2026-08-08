@@ -87,15 +87,19 @@ export default function PracticeRecordContent({
 
   return (
     <>
-      <h1 className="text-2xl font-bold">{PAGE_TITLE}</h1>
-      <p className="mt-2 text-sm text-zinc-300">{PAGE_DESCRIPTION}</p>
+      <h1 className="text-lg font-bold">{PAGE_TITLE}</h1>
+      <p className="mt-2 text-xs text-zinc-300">{PAGE_DESCRIPTION}</p>
 
-      <div className="mt-6">
+      <div className="mt-14">
         <Input
           type="date"
-          size="sm"
+          size="lg"
           radius="sm"
-          className="w-44"
+          className="w-full"
+          classNames={{
+            label: "text-[13px] font-semibold",
+            input: "text-[15px]",
+          }}
           label={DATE_LABEL}
           labelPlacement="outside"
           max={today}
@@ -109,7 +113,7 @@ export default function PracticeRecordContent({
           <p className="text-base font-bold text-white">{MENUS_EMPTY_TITLE}</p>
           <p className="text-sm text-zinc-400">{MENUS_EMPTY_DESCRIPTION}</p>
           <Link
-            href="/practice/menus"
+            href={`/practice/menus?returnTo=${encodeURIComponent(`/practice/record?date=${date}`)}`}
             className="mt-3 inline-flex items-center gap-1.5 rounded-[10px] bg-[#d08000] px-5 py-3 text-sm font-bold text-white"
           >
             <PlusIcon className="h-5 w-5" aria-hidden />

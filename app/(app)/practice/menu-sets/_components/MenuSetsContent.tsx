@@ -47,8 +47,8 @@ export default function MenuSetsContent({ menuSets }: MenuSetsContentProps) {
 
   return (
     <>
-      <h2 className="text-2xl font-bold">{PAGE_TITLE}</h2>
-      <p className="mt-2 text-sm text-zinc-300">{PAGE_DESCRIPTION}</p>
+      <h2 className="text-lg font-bold">{PAGE_TITLE}</h2>
+      <p className="mt-2 text-xs text-zinc-300">{PAGE_DESCRIPTION}</p>
 
       <div className="my-6">
         <MenuSetList menuSets={menuSets} />

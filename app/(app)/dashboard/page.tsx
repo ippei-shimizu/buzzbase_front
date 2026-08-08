@@ -49,11 +49,8 @@ export default async function DashboardPage({
       <Header />
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-20 px-4 lg:px-6">
-            <h2 className="text-2xl font-bold">{HOME_PAGE_TITLE}</h2>
-            <div className="mt-5">
-              <HomeTabBar active={isActivity ? "activity" : "dashboard"} />
-            </div>
+          <div className="pt-12 px-4 lg:px-6">
+            <HomeTabBar active={isActivity ? "activity" : "dashboard"} />
             <div className="my-6">
               {activity ? (
                 <ActivityView data={activity} today={today} />

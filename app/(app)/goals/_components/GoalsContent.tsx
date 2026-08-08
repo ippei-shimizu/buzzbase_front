@@ -202,7 +202,7 @@ export default function GoalsContent({
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <h2 className="text-2xl font-bold">目標</h2>
+        <h2 className="text-lg font-bold">目標</h2>
         <Link
           href="/goals/badges"
           className="mt-1 inline-flex shrink-0 items-center gap-1 text-sm text-[#d08000]"
@@ -211,7 +211,7 @@ export default function GoalsContent({
           {BADGES_TITLE}
         </Link>
       </div>
-      <p className="mt-2 text-sm text-zinc-300">
+      <p className="mt-2 text-xs text-zinc-300">
         練習量や成績の目標を決めると、記録した内容から進み具合を自動で計算します。数字にできない目標は達成ボタンで管理できます。
       </p>
 

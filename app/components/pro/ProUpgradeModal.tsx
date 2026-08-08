@@ -1,15 +1,28 @@
 "use client";
 
 import type { ProFeature } from "@app/types/pro";
+import type { ComponentType, SVGProps } from "react";
+import {
+  ArrowTrendingUpIcon,
+  BookOpenIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  ClipboardDocumentListIcon,
+  ClockIcon,
+  EllipsisHorizontalCircleIcon,
+  FireIcon,
+  FlagIcon,
+  SparklesIcon,
+  TrophyIcon,
+  UsersIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import {
   Button,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
-  ModalHeader,
-  Radio,
-  RadioGroup,
 } from "@heroui/react";
 import { useMediaQuery } from "@mantine/hooks";
 import Link from "next/link";
@@ -23,27 +36,39 @@ import {
 } from "@app/components/pro/paywallCopy";
 import {
   FEATURE_COMPARISONS,
-  PLAN_HIGHLIGHT_FEATURES,
+  FEATURE_GROUPS,
+  filterFeatureGroups,
 } from "@app/components/pro/proFeatureCatalog";
 import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
 import { useFeatureFlag } from "@app/hooks/featureFlags/useFeatureFlag";
+import { useProStatus } from "@app/hooks/pro/useProStatus";
 
 const CHECKOUT_SUSPENDED_MESSAGE =
   "現在、新規のお申し込みを停止しています。再開までしばらくお待ちください。";
 
+const TRIAL_NOTICE =
+  "7 日間の無料トライアル期間中に解約すれば料金はかかりません。";
+
 // 年額を先に置いて既定の推奨プランとして読ませる。
 const PLAN_ORDER: ProPlan[] = ["yearly", "monthly"];
 
-// 訴求文言は ProFeature から引き、素の文字列で持たない。
-// キーが PRO_FEATURES から消えたときに、対応する機能が無い訴求だけが残るのを防ぐ。
-const FEATURE_HIGHLIGHTS = PLAN_HIGHLIGHT_FEATURES.map((feature) => ({
-  feature,
-  label: PRO_PAYWALL_COPY[feature].title,
-  availability: FEATURE_COMPARISONS[feature].availability,
-}));
+// グループ見出しのアイコン。mobile 版（Ionicons）の見た目に合わせて選定。
+const GROUP_ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
+  成績分析: ChartBarIcon,
+  振り返りレポート: SparklesIcon,
+  練習と成績のつながり: ArrowTrendingUpIcon,
+  野球ノート: BookOpenIcon,
+  練習の記録: ClipboardDocumentListIcon,
+  "予定・プラン管理": CalendarIcon,
+  目標管理: TrophyIcon,
+  課題管理: FlagIcon,
+  練習ツール: ClockIcon,
+  継続: FireIcon,
+  グループ: UsersIcon,
+  その他: EllipsisHorizontalCircleIcon,
+};
 
-const NOTICES = [
-  "7 日間の無料トライアル期間中に解約すれば料金はかかりません。",
+const NOTICES_AFTER_TRIAL = [
   "アプリを削除しても支払い情報は残ります。",
   "契約期間は開始日から月額（月額プラン）または1年（年額プラン）ごとに自動更新されます。",
   "解約手続き後は次回課金日まで Pro 機能を利用できます。それ以降は Pro 限定機能の表示が制限されます。",
@@ -81,12 +106,14 @@ export default function ProUpgradeModal({
   const [isRedirecting, setIsRedirecting] = useState(false);
   // このモーダルは全ページに常設されているため、開くまでは flag を引かない。
   const proFeatures = useFeatureFlag("pro_features", { skip: !isOpen });
+  // back の trial_days_calculator と同じ判定（has_used_trial）。既に使い切ったユーザーに
+  // 「7日間無料」と誤案内しないため、CTA まわりの文言はここで出し分ける。
+  const { proStatus } = useProStatus();
+  const isTrialEligible = !proStatus.subscription.has_used_trial;
 
   const copy = (trigger && PRO_PAYWALL_COPY[trigger]) ?? DEFAULT_PAYWALL_COPY;
-  // 見出しで既に訴求している機能を一覧でも繰り返さない。
-  const highlights = FEATURE_HIGHLIGHTS.filter(
-    (highlight) => highlight.feature !== trigger,
-  );
+  // ハイライトカードで既に訴求している機能を比較表でも繰り返さない。
+  const visibleGroups = filterFeatureGroups(FEATURE_GROUPS, trigger);
 
   const handleCheckout = () => {
     startTransition(async () => {
@@ -121,78 +148,164 @@ export default function ProUpgradeModal({
       isOpen={isOpen}
       onClose={onClose}
       placement={isMobile ? "bottom" : "center"}
-      size={isMobile ? "full" : "2xl"}
+      size={isMobile ? undefined : "2xl"}
       scrollBehavior="inside"
-      className="buzz-dark"
+      // モバイル下部タブバー（NavigationMenu.tsx、z-100）より上に重ねないと
+      // フッターの CTA ボタンが隠れてしまう。
+      classNames={{ wrapper: "z-[110]" }}
+      className={
+        isMobile
+          ? "buzz-dark z-[110] m-0 h-[92dvh] max-h-[92dvh] w-full max-w-full rounded-b-none rounded-t-2xl"
+          : "buzz-dark z-[110]"
+      }
+      hideCloseButton
       data-testid="pro-upgrade-modal"
     >
       <ModalContent>
-        <ModalHeader className="flex flex-col gap-1 text-white">
-          <span className="inline-block self-start rounded-full bg-[#d08000]/20 px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-[#d08000]">
-            BUZZ BASE Pro
-          </span>
-          <span className="text-lg">{copy.title}</span>
-        </ModalHeader>
+        <ModalBody className="pt-6 text-gray-100">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-extrabold tracking-wide text-white">
+              BUZZ BASE
+            </span>
+            <span className="rounded-md bg-[#d08000] px-2.5 py-1 text-sm font-extrabold text-white">
+              PRO
+            </span>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="閉じる"
+              className="ml-auto rounded-full p-1 text-gray-300 hover:bg-white/10"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          </div>
 
-        <ModalBody className="text-gray-100">
-          <p className="text-sm leading-relaxed text-gray-200">
-            {copy.description}
+          <div className="mt-4 rounded-xl border border-[#d08000]/40 bg-[#d08000]/10 p-4">
+            <p className="mb-1.5 text-sm font-bold text-white">{copy.title}</p>
+            <p className="text-sm leading-relaxed text-gray-200">
+              {copy.description}
+            </p>
+          </div>
+
+          <p className="mt-3 text-sm text-gray-400">
+            すべての機能が使い放題になります
           </p>
 
           <section className="mt-2">
-            <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-              Pro で使える機能
+            <h3 className="mb-2.5 text-xs font-bold uppercase tracking-wider text-gray-400">
+              PRO でできること
             </h3>
-            <ul className="space-y-2 text-sm">
-              {highlights.map((highlight) => (
-                <li key={highlight.feature} className="flex items-start gap-2">
-                  <span>{highlight.label}</span>
-                  <AvailabilityBadge availability={highlight.availability} />
-                  <span className="ml-auto text-[#d08000]">✓</span>
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-4">
+              {visibleGroups.map((group) => {
+                const GroupIcon = GROUP_ICONS[group.title];
+                return (
+                  <div key={group.title}>
+                    <div className="mb-2 flex items-center gap-1.5">
+                      {GroupIcon ? (
+                        <GroupIcon className="h-4 w-4 text-[#d08000]" />
+                      ) : null}
+                      <h4 className="text-sm font-bold text-white">
+                        {group.title}
+                      </h4>
+                    </div>
+                    <div className="overflow-hidden rounded-xl bg-[#3A3A3A]">
+                      <div className="flex items-center border-b border-[#4A4A4A] px-3 pb-1.5 pt-2.5">
+                        <span className="flex-[1.6]" />
+                        <span className="flex-[0.65] text-center text-[11px] font-bold text-gray-400">
+                          無料
+                        </span>
+                        <span className="flex-[0.75] text-center text-[11px] font-bold text-[#d08000]">
+                          PRO
+                        </span>
+                      </div>
+                      {group.keys.map((key, index) => (
+                        <div
+                          key={key}
+                          className={`flex items-center px-3 py-2.5 ${
+                            index === group.keys.length - 1
+                              ? ""
+                              : "border-b border-[#333333]"
+                          }`}
+                        >
+                          <span className="flex flex-[1.6] flex-wrap items-center gap-1.5 pr-1.5 text-sm text-gray-200">
+                            {PRO_PAYWALL_COPY[key].title}
+                            <AvailabilityBadge
+                              availability={
+                                FEATURE_COMPARISONS[key].availability
+                              }
+                            />
+                          </span>
+                          <span className="flex-[0.65] text-center text-sm text-gray-400">
+                            {FEATURE_COMPARISONS[key].free}
+                          </span>
+                          <span className="flex-[0.75] text-center text-sm font-bold text-[#d08000]">
+                            {FEATURE_COMPARISONS[key].pro}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </section>
 
-          <section className="mt-4">
+          <section className="mt-4 w-full">
             <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-              プランを選ぶ
+              プランを選択
             </h3>
-            <RadioGroup
-              value={plan}
-              onValueChange={(value) => setPlan(value as ProPlan)}
+            <div
+              role="radiogroup"
               aria-label="Pro プラン選択"
+              className="flex flex-col gap-2.5"
             >
               {PLAN_ORDER.map((planType) => {
                 const price = PRO_PLAN_PRICES[planType];
+                const isSelected = plan === planType;
                 return (
-                  <Radio key={planType} value={planType} className="max-w-full">
-                    <div className="flex w-full items-center justify-between gap-3">
-                      <div>
-                        <p className="font-bold text-white">
-                          {price.name}
-                          {price.badge ? (
-                            <span className="ml-1 rounded-full bg-[#d08000] px-2 py-0.5 text-[10px] font-bold text-white">
-                              {price.badge}
-                            </span>
-                          ) : null}
-                        </p>
-                        {price.note ? (
-                          <p className="text-xs text-gray-400">{price.note}</p>
-                        ) : null}
-                      </div>
-                      <p className="text-base font-bold text-white">
-                        {price.amount}
-                        <span className="text-xs font-normal text-gray-400">
-                          {" "}
-                          {price.period}
+                  <button
+                    key={planType}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => setPlan(planType)}
+                    className={`flex items-center gap-3 rounded-xl border p-3.5 text-left ${
+                      isSelected
+                        ? "border-[#d08000] bg-[#d08000]/10"
+                        : "border-transparent bg-[#424242]"
+                    }`}
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#d08000]">
+                      {isSelected ? (
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#d08000]" />
+                      ) : null}
+                    </span>
+                    <span className="flex flex-1 flex-wrap items-center gap-2">
+                      <span className="text-[15px] font-bold text-white">
+                        {price.name}
+                      </span>
+                      {price.badge ? (
+                        <span className="rounded-full bg-[#d08000] px-2 py-0.5 text-[13px] font-bold text-white">
+                          {price.badge}
                         </span>
-                      </p>
-                    </div>
-                  </Radio>
+                      ) : null}
+                      {price.note ? (
+                        <span className="w-full text-xs text-gray-400">
+                          {price.note}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="ml-2 text-base font-extrabold text-white">
+                      {price.amount}
+                      <span className="text-xs font-normal text-gray-400">
+                        {" "}
+                        {price.period}
+                      </span>
+                    </span>
+                  </button>
                 );
               })}
-            </RadioGroup>
+            </div>
           </section>
 
           <section className="mt-4">
@@ -200,7 +313,10 @@ export default function ProUpgradeModal({
               注意事項
             </h3>
             <ul className="space-y-1.5 text-xs leading-relaxed text-gray-300">
-              {NOTICES.map((notice) => (
+              {(isTrialEligible
+                ? [TRIAL_NOTICE, ...NOTICES_AFTER_TRIAL]
+                : NOTICES_AFTER_TRIAL
+              ).map((notice) => (
                 <li key={notice} className="flex gap-2">
                   <span className="text-gray-500">•</span>
                   <span>{notice}</span>
@@ -234,26 +350,25 @@ export default function ProUpgradeModal({
               {CHECKOUT_SUSPENDED_MESSAGE}
             </p>
           ) : (
-            <Button
-              color="primary"
-              onPress={handleCheckout}
-              isDisabled={ctaBusy}
-              isLoading={ctaBusy}
-              fullWidth
-              className="font-bold"
-              data-testid="pro-upgrade-cta"
-            >
-              7 日間の無料トライアルを始める
-            </Button>
+            <>
+              {isTrialEligible ? (
+                <p className="text-center text-xs text-gray-400">
+                  7 日間の無料トライアル期間中に解約すれば料金はかかりません
+                </p>
+              ) : null}
+              <Button
+                color="primary"
+                onPress={handleCheckout}
+                isDisabled={ctaBusy}
+                isLoading={ctaBusy}
+                fullWidth
+                className="font-bold"
+                data-testid="pro-upgrade-cta"
+              >
+                PROを始める
+              </Button>
+            </>
           )}
-          <Button
-            variant="light"
-            onPress={onClose}
-            fullWidth
-            className="text-white"
-          >
-            閉じる
-          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

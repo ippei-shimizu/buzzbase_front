@@ -32,8 +32,8 @@ const FREE_LIMITS_FROM_BACK: Partial<Record<ProFeature, string>> = {
   grass_full_history: "直近30日",
   // Api::V2::PlansController::FREE_CALENDAR_WINDOW_MONTHS = 3
   schedule_calendar_full_history: "前後3ヶ月",
-  // Entitlement の shadow_swing_custom_interval コメント（無料は5〜10秒のみ）
-  shadow_swing_custom_interval: "5〜10秒",
+  // back/app/models/shadow_swing_session.rb の FREE_INTERVAL_RANGE（無料は5〜8秒のみ）
+  shadow_swing_custom_interval: "5〜8秒",
   multi_game_result_notes: "1件",
   multi_improvement_theme_links: "1件",
 };

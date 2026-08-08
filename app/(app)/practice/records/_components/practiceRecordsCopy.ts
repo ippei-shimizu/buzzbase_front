@@ -3,8 +3,6 @@
  * mobile の記録タブ / 練習記録詳細と表記を揃えるため1箇所にまとめる。
  */
 
-export const PAGE_TITLE = "記録";
-
 export const PRACTICE_TAB_LABEL = "練習記録";
 
 export const NOTE_TAB_LABEL = "野球ノート";

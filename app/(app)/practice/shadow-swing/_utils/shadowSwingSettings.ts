@@ -5,11 +5,11 @@
 
 /**
  * 無料プランで選べるインターバルの範囲（秒）。
- * back/app/models/concerns/entitlement.rb の
- * `shadow_swing_custom_interval`（無料は5〜10秒のみ）と一致させる。
+ * back/app/models/shadow_swing_session.rb の
+ * `FREE_INTERVAL_RANGE`（無料は5〜8秒のみ）と一致させる。
  */
 export const FREE_INTERVAL_MIN_SECONDS = 5;
-export const FREE_INTERVAL_MAX_SECONDS = 10;
+export const FREE_INTERVAL_MAX_SECONDS = 8;
 
 /** Pro プランで選べるインターバルの範囲（秒）。 */
 export const PRO_INTERVAL_MIN_SECONDS = 1;

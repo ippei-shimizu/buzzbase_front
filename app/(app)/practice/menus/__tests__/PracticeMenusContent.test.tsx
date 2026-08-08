@@ -1,10 +1,15 @@
 const mockOpenProUpgradeModal = jest.fn();
+const mockPush = jest.fn();
 
 jest.mock("@app/contexts/proUpgradeModalContext", () => ({
   useProUpgradeModal: () => ({
     open: mockOpenProUpgradeModal,
     close: jest.fn(),
   }),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
 }));
 
 jest.mock("@app/hooks/pro/useEntitlement", () => ({
@@ -225,6 +230,27 @@ describe("PracticeMenusContent", () => {
       await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
       expect(mockCreate.mock.calls[0][0].default_value).toBeNull();
     });
+
+    it("returnTo 付きで作成すると元の画面へ戻る", async () => {
+      const user = userEvent.setup();
+      mockCreate.mockResolvedValue({ ok: true, data: buildMenu({ id: 9 }) });
+      render(
+        <PracticeMenusContent
+          initialMenus={[]}
+          returnTo="/practice/record?date=2026-08-08"
+        />,
+      );
+
+      await openCreateForm(user);
+      await user.type(screen.getByLabelText(/名前/), "アップ");
+      await user.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() =>
+        expect(mockPush).toHaveBeenCalledWith(
+          "/practice/record?date=2026-08-08",
+        ),
+      );
+    });
   });
 
   describe("計測タイプと unit_label の連動", () => {
@@ -339,6 +365,24 @@ describe("PracticeMenusContent", () => {
         expect.objectContaining({ name: "連続素振り" }),
       );
       expect(await screen.findByText("連続素振り")).toBeVisible();
+    });
+
+    it("returnTo 付きでも編集時は遷移しない", async () => {
+      const user = userEvent.setup();
+      const menu = buildMenu({ id: 4, name: "素振り" });
+      mockUpdate.mockResolvedValue({ ok: true, data: menu });
+      render(
+        <PracticeMenusContent
+          initialMenus={[menu]}
+          returnTo="/practice/record?date=2026-08-08"
+        />,
+      );
+
+      await user.click(screen.getByRole("button", { name: "素振りを編集" }));
+      await user.click(screen.getByRole("button", { name: "保存" }));
+
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      expect(mockPush).not.toHaveBeenCalled();
     });
 
     it("編集時は無料枠の上限に達していてもフォームを開ける", async () => {

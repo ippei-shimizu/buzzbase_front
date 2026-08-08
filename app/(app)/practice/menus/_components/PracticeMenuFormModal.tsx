@@ -110,6 +110,11 @@ export default function PracticeMenuFormModal({
           <Input
             type="text"
             variant="bordered"
+            classNames={{
+              label: "text-zinc-300",
+              input: "text-white",
+              inputWrapper: "border-zinc-600 hover:border-zinc-400",
+            }}
             label="名前"
             labelPlacement="outside"
             isRequired
@@ -137,10 +142,10 @@ export default function PracticeMenuFormModal({
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => handleCategoryChange(item.key)}
-                    className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors ${
+                    className={`rounded-full border px-3.5 py-2 text-xs font-bold transition-colors ${
                       isActive
-                        ? "bg-[#d08000] text-white"
-                        : "bg-sub text-zinc-400 hover:text-white"
+                        ? "border-[#d08000] bg-[#d08000] text-white"
+                        : "border-zinc-600 bg-sub text-zinc-400 hover:text-white"
                     }`}
                   >
                     {item.label}
@@ -183,6 +188,11 @@ export default function PracticeMenuFormModal({
           <Input
             type="number"
             variant="bordered"
+            classNames={{
+              label: "text-zinc-300",
+              input: "text-white",
+              inputWrapper: "border-zinc-600 hover:border-zinc-400",
+            }}
             label="初期値（任意）"
             labelPlacement="outside"
             placeholder={`例: ${unitMeta.placeholderValue}`}

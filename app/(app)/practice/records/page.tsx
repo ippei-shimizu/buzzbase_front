@@ -7,7 +7,6 @@ import { getBaseballNotes } from "@app/services/v2/baseballNoteService";
 import { getNoteTags } from "@app/services/v2/noteTagService";
 import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
 import { getPracticeSessions } from "@app/services/v2/practiceSessionService";
-import { PAGE_TITLE } from "./_components/practiceRecordsCopy";
 import PracticeRecordsSection from "./_components/PracticeRecordsSection";
 import RecordsTabBar from "./_components/RecordsTabBar";
 
@@ -49,11 +48,8 @@ export default async function PracticeRecordsPage({
       <Header />
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-20 px-4 lg:px-6">
-            <h2 className="text-2xl font-bold">{PAGE_TITLE}</h2>
-            <div className="mt-5">
-              <RecordsTabBar active={activeTab} />
-            </div>
+          <div className="pt-12 px-4 lg:px-6">
+            <RecordsTabBar active={activeTab} />
             <div className="my-6">
               {sessionsResult && menusResult ? (
                 <PracticeRecordsSection

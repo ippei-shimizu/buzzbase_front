@@ -79,7 +79,7 @@ beforeEach(() => {
 });
 
 describe("インターバルの制限", () => {
-  it("無料ユーザーは5〜10秒の外を選べず、Pro 訴求が開く", async () => {
+  it("無料ユーザーは5〜8秒の外を選べず、Pro 訴求が開く", async () => {
     const { onStart, user } = renderSetup();
 
     await user.click(
@@ -100,7 +100,7 @@ describe("インターバルの制限", () => {
     );
   });
 
-  it("無料ユーザーは10秒より長いインターバルも選べない", async () => {
+  it("無料ユーザーは8秒より長いインターバルも選べない", async () => {
     const { onStart, user } = renderSetup();
 
     await user.click(
@@ -113,17 +113,17 @@ describe("インターバルの制限", () => {
     );
   });
 
-  it("無料ユーザーでも境界の10秒は選べる", async () => {
+  it("無料ユーザーでも境界の8秒は選べる", async () => {
     const { onStart, user } = renderSetup();
 
     await user.click(
-      within(intervalGroup()).getByRole("button", { name: "10.0秒" }),
+      within(intervalGroup()).getByRole("button", { name: "8.0秒" }),
     );
     await user.click(screen.getByRole("button", { name: "開始する" }));
 
     expect(mockOpenProUpgradeModal).not.toHaveBeenCalled();
     expect(onStart).toHaveBeenCalledWith(
-      expect.objectContaining({ intervalSeconds: 10 }),
+      expect.objectContaining({ intervalSeconds: 8 }),
     );
   });
 
