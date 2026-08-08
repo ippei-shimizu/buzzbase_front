@@ -8,7 +8,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CheckoutButton from "../CheckoutButton";
 
-describe("CheckoutButton (LP CTA)", () => {
+describe("CheckoutButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

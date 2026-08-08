@@ -44,6 +44,10 @@ jest.mock("@app/components/header/Header", () => ({
   default: () => <header />,
 }));
 
+jest.mock("@app/contexts/proUpgradeModalContext", () => ({
+  useProUpgradeModal: () => ({ open: jest.fn(), close: jest.fn() }),
+}));
+
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
@@ -297,8 +301,8 @@ describe("加入 CTA", () => {
       await renderPage({ status });
 
       expect(
-        screen.getByRole("link", { name: "Pro に加入する" }),
-      ).toHaveAttribute("href", "/pro");
+        screen.getByRole("button", { name: "Pro に加入する" }),
+      ).toBeInTheDocument();
     },
   );
 
@@ -312,7 +316,7 @@ describe("加入 CTA", () => {
     await renderPage({ status, pro_active: true });
 
     expect(
-      screen.queryByRole("link", { name: "Pro に加入する" }),
+      screen.queryByRole("button", { name: "Pro に加入する" }),
     ).not.toBeInTheDocument();
   });
 });
@@ -1144,7 +1148,7 @@ describe("取得失敗", () => {
 
     expect(screen.queryByText("無料プラン")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Pro に加入する" }),
+      screen.queryByRole("button", { name: "Pro に加入する" }),
     ).not.toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(
       "加入状態を取得できませんでした",
