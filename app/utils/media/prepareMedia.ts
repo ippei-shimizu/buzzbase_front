@@ -1,11 +1,17 @@
 import type { PreparedMedia } from "./uploadPipeline";
 import { resolveMediaKind } from "./mediaFile";
-import { validateImageSize, validateVideoMeta } from "./mediaLimits";
+import {
+  longEdge,
+  mediaLimitsFor,
+  validateImageSize,
+  validateVideoMeta,
+} from "./mediaLimits";
 import {
   captureVideoThumbnail,
   processImage,
   readVideoMeta,
 } from "./mediaProcessing";
+import { isVideoResizeSupported, resizeVideoToLongEdge } from "./videoResize";
 
 export type PrepareMediaResult =
   | { ok: true; prepared: PreparedMedia }
@@ -80,6 +86,28 @@ async function prepareVideo(
     };
   }
 
+  const { videoMaxDurationSeconds, videoMaxHeight } = mediaLimitsFor(isPro);
+  const durationExceeded = meta.durationSeconds > videoMaxDurationSeconds;
+  const resolutionExceeded = longEdge(meta) > videoMaxHeight;
+
+  let resultFile: Blob = file;
+  let resultContentType = contentType;
+
+  // 長さは収まっているが解像度だけ超過している場合のみリサイズで救える可能性がある。
+  // 長さの超過はリサイズでは解決しないため試みない。
+  if (!durationExceeded && resolutionExceeded && isVideoResizeSupported()) {
+    try {
+      const resized = await resizeVideoToLongEdge(file, meta, videoMaxHeight);
+      if (!validateVideoMeta(resized.meta, isPro)) {
+        meta = resized.meta;
+        resultFile = resized.file;
+        resultContentType = resized.contentType;
+      }
+    } catch {
+      // 非対応環境や変換失敗時は元ファイルのバリデーション結果に委ねる（下のエラーで弾かれる）。
+    }
+  }
+
   const metaError = validateVideoMeta(meta, isPro);
   if (metaError) return { ok: false, message: metaError };
 
@@ -87,9 +115,9 @@ async function prepareVideo(
     ok: true,
     prepared: {
       mediaType: "video",
-      contentType,
-      file,
-      thumbnail: await captureVideoThumbnail(file),
+      contentType: resultContentType,
+      file: resultFile,
+      thumbnail: await captureVideoThumbnail(resultFile),
       durationSeconds: meta.durationSeconds,
       width: meta.width,
       height: meta.height,

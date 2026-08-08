@@ -4,12 +4,21 @@ jest.mock("@app/utils/media/mediaProcessing", () => ({
   captureVideoThumbnail: jest.fn(),
 }));
 
+jest.mock("@app/utils/media/videoResize", () => ({
+  isVideoResizeSupported: jest.fn(),
+  resizeVideoToLongEdge: jest.fn(),
+}));
+
 import {
   captureVideoThumbnail,
   processImage,
   readVideoMeta,
 } from "@app/utils/media/mediaProcessing";
 import { prepareMediaFile } from "@app/utils/media/prepareMedia";
+import {
+  isVideoResizeSupported,
+  resizeVideoToLongEdge,
+} from "@app/utils/media/videoResize";
 
 const mockProcessImage = processImage as jest.MockedFunction<
   typeof processImage
@@ -19,6 +28,11 @@ const mockReadVideoMeta = readVideoMeta as jest.MockedFunction<
 >;
 const mockCaptureThumbnail = captureVideoThumbnail as jest.MockedFunction<
   typeof captureVideoThumbnail
+>;
+const mockIsVideoResizeSupported =
+  isVideoResizeSupported as jest.MockedFunction<typeof isVideoResizeSupported>;
+const mockResizeVideoToLongEdge = resizeVideoToLongEdge as jest.MockedFunction<
+  typeof resizeVideoToLongEdge
 >;
 
 function imageFile(type = "image/jpeg", size = 1) {
@@ -45,6 +59,9 @@ beforeEach(() => {
   mockCaptureThumbnail.mockResolvedValue(
     new Blob(["t"], { type: "image/jpeg" }),
   );
+  // 大半のテストは「WebCodecs非対応（選択時点で弾く）」を前提にしている。
+  // リサイズ経路を検証するテストだけ個別に true を設定する。
+  mockIsVideoResizeSupported.mockReturnValue(false);
 });
 
 describe("prepareMediaFile", () => {
@@ -145,6 +162,91 @@ describe("prepareMediaFile", () => {
 
     expect(await prepareMediaFile(videoFile(), false)).toMatchObject({
       ok: false,
+    });
+  });
+
+  describe("WebCodecs 対応ブラウザでの自動リサイズ", () => {
+    it("解像度超過のみなら自動でリサイズしてから通す", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 20,
+        width: 1920,
+        height: 1080,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+      const resizedFile = new Blob(["resized"], { type: "video/mp4" });
+      mockResizeVideoToLongEdge.mockResolvedValue({
+        file: resizedFile,
+        contentType: "video/mp4",
+        meta: { durationSeconds: 20, width: 480, height: 270 },
+      });
+
+      const result = await prepareMediaFile(videoFile(), false);
+
+      expect(mockResizeVideoToLongEdge).toHaveBeenCalledWith(
+        expect.anything(),
+        { durationSeconds: 20, width: 1920, height: 1080 },
+        480,
+      );
+      expect(result).toMatchObject({
+        ok: true,
+        prepared: {
+          file: resizedFile,
+          contentType: "video/mp4",
+          durationSeconds: 20,
+          width: 480,
+          height: 270,
+        },
+      });
+    });
+
+    it("長さも超過している場合はリサイズを試みず弾く", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 45,
+        width: 1920,
+        height: 1080,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+
+      const result = await prepareMediaFile(videoFile(), false);
+
+      expect(mockResizeVideoToLongEdge).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ ok: false });
+    });
+
+    it("リサイズが失敗したら元のバリデーションエラーで弾く", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 20,
+        width: 1920,
+        height: 1080,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+      mockResizeVideoToLongEdge.mockRejectedValue(
+        new Error("この動画は変換できません"),
+      );
+
+      const result = await prepareMediaFile(videoFile(), false);
+
+      expect(result).toMatchObject({ ok: false });
+      expect((result as { message: string }).message).toContain("480px");
+    });
+
+    it("リサイズ後もなお上限を超えていれば弾く", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 20,
+        width: 3840,
+        height: 2160,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+      mockResizeVideoToLongEdge.mockResolvedValue({
+        file: new Blob(["still-too-big"], { type: "video/mp4" }),
+        contentType: "video/mp4",
+        // 実装バグ等でリサイズしても上限を割り込めなかった想定。
+        meta: { durationSeconds: 20, width: 900, height: 506 },
+      });
+
+      const result = await prepareMediaFile(videoFile(), false);
+
+      expect(result).toMatchObject({ ok: false });
     });
   });
 });

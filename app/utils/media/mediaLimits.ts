@@ -89,7 +89,7 @@ export function validateVideoMeta(
   return null;
 }
 
-function longEdge(meta: VideoMeta): number {
+export function longEdge(meta: VideoMeta): number {
   return Math.max(meta.width, meta.height);
 }
 
