@@ -18,4 +18,8 @@ describe("resolveReturnTo", () => {
   it("`//` 始まりの値は null（プロトコル相対 URL のオープンリダイレクト防止）", () => {
     expect(resolveReturnTo("//evil.example.com")).toBeNull();
   });
+
+  it("`/\\` 始まりの値は null（ブラウザが `\\` を `/` と同一視するバイパス防止）", () => {
+    expect(resolveReturnTo("/\\evil.example.com")).toBeNull();
+  });
 });
