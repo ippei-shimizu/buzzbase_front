@@ -310,13 +310,11 @@ describe("ScheduleForm", () => {
     expect(submittedInput(onSubmit).event_type).toBe("game");
   });
 
-  it("Web では通知が届かないことを明示する", () => {
+  it("リマインド通知のオン・オフは web からは変更できない（アプリ側でのみ設定）", () => {
     renderForm();
 
     expect(
-      screen.getByText(
-        "通知は iOS / Android アプリ版でのみ届きます。ブラウザには通知されません（設定はアプリと共通です）。",
-      ),
-    ).toBeInTheDocument();
+      screen.queryByRole("switch", { name: "リマインド通知" }),
+    ).not.toBeInTheDocument();
   });
 });

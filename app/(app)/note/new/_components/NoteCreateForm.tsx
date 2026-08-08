@@ -224,11 +224,7 @@ export default function NoteCreateForm({
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <HeaderNote
-        onNoteSave={handleSubmit}
-        isSubmitting={isSubmitting}
-        hasChanges={hasChanges && saveOutcome === null}
-      />
+      <HeaderNote hasChanges={hasChanges && saveOutcome === null} />
       {isSubmitting ? <LoadingSpinner /> : null}
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
@@ -259,6 +255,7 @@ export default function NoteCreateForm({
               <form>
                 <div>
                   <div>
+                    <h3 className="text-sm font-bold text-zinc-400">日付</h3>
                     <Input
                       isRequired
                       type="date"
@@ -270,7 +267,10 @@ export default function NoteCreateForm({
                       onChange={(e) => setDate(e.target.value)}
                     />
                   </div>
-                  <div>
+                  <div className="mt-4">
+                    <h3 className="text-sm font-bold text-zinc-400">
+                      タイトル（任意）
+                    </h3>
                     <Input
                       type="text"
                       size="lg"
@@ -282,9 +282,20 @@ export default function NoteCreateForm({
                       onChange={(e) => setTitle(e.target.value)}
                     />
                   </div>
-                  <div className="mt-10 w-full h-full">
+                  <div className="mt-8 w-full h-full">
+                    <h3 className="mb-2 text-sm font-bold text-zinc-400">
+                      メモ
+                    </h3>
                     <NoteEditor memo={memo} setMemo={setMemo} />
                   </div>
+                  <StagedMediaSection
+                    assets={stagedMedia}
+                    onStage={(asset) =>
+                      setStagedMedia((prev) => [...prev, asset])
+                    }
+                    onRemove={handleRemoveStaged}
+                    onUpdateMemo={handleUpdateStagedMemo}
+                  />
                   <ReflectionTemplateSection
                     templatesResult={templatesResult}
                     selectedTemplateId={templateId}
@@ -311,14 +322,17 @@ export default function NoteCreateForm({
                     initialCount={0}
                     linkedOptions={[]}
                   />
-                  <StagedMediaSection
-                    assets={stagedMedia}
-                    onStage={(asset) =>
-                      setStagedMedia((prev) => [...prev, asset])
-                    }
-                    onRemove={handleRemoveStaged}
-                    onUpdateMemo={handleUpdateStagedMemo}
-                  />
+                  <Button
+                    type="button"
+                    color="primary"
+                    radius="sm"
+                    fullWidth
+                    className="mt-8 font-bold"
+                    onPress={handleSubmit}
+                    isDisabled={isSubmitting}
+                  >
+                    保存
+                  </Button>
                 </div>
               </form>
             )}

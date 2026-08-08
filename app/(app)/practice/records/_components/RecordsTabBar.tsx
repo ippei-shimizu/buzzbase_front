@@ -32,7 +32,7 @@ export default function RecordsTabBar({ active }: RecordsTabBarProps) {
           key={tab.key}
           href={tab.href}
           aria-current={tab.key === active ? "page" : undefined}
-          className={`flex-1 border-b-2 pb-2.5 text-center text-sm font-bold transition-colors ${
+          className={`flex-1 border-b-2 py-3 text-center text-sm font-bold transition-colors ${
             tab.key === active
               ? "border-[#d08000] text-[#d08000]"
               : "border-transparent text-zinc-400"

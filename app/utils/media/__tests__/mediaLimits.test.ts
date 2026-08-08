@@ -22,7 +22,7 @@ describe("プラン別の上限値", () => {
     expect(FREE_VIDEO_MAX_DURATION_SECONDS).toBe(30);
     expect(PRO_VIDEO_MAX_DURATION_SECONDS).toBe(180);
     expect(FREE_VIDEO_MAX_HEIGHT).toBe(480);
-    expect(PRO_VIDEO_MAX_HEIGHT).toBe(1080);
+    expect(PRO_VIDEO_MAX_HEIGHT).toBe(1280);
     expect(FREE_IMAGE_MAX_BYTES).toBe(5 * 1024 * 1024);
     expect(PRO_IMAGE_MAX_BYTES).toBe(10 * 1024 * 1024);
   });
@@ -35,7 +35,7 @@ describe("プラン別の上限値", () => {
     });
     expect(mediaLimitsFor(true)).toEqual({
       videoMaxDurationSeconds: 180,
-      videoMaxHeight: 1080,
+      videoMaxHeight: 1280,
       imageMaxBytes: 10 * 1024 * 1024,
     });
   });
@@ -59,10 +59,10 @@ describe("validateImageSize", () => {
 });
 
 describe("validateVideoMeta", () => {
-  it("無料は30秒・480pまで通す", () => {
+  it("無料は30秒・長辺480pxまで通す", () => {
     expect(
       validateVideoMeta(
-        { durationSeconds: 30, width: 854, height: 480 },
+        { durationSeconds: 30, width: 480, height: 270 },
         false,
       ),
     ).toBeNull();
@@ -70,14 +70,14 @@ describe("validateVideoMeta", () => {
 
   it("無料で30秒を超える動画は弾く", () => {
     const message = validateVideoMeta(
-      { durationSeconds: 31, width: 854, height: 480 },
+      { durationSeconds: 31, width: 480, height: 270 },
       false,
     );
     expect(message).toContain("30秒");
     expect(message).toContain("180");
   });
 
-  it("無料で縦解像度が480pxを超える動画は弾く", () => {
+  it("無料で解像度が長辺480pxを超える動画は弾く", () => {
     expect(
       validateVideoMeta(
         { durationSeconds: 10, width: 1920, height: 1080 },
@@ -86,16 +86,25 @@ describe("validateVideoMeta", () => {
     ).toContain("480px");
   });
 
-  it("Pro は180秒・1080pまで通し、超えたら弾く", () => {
+  it("横持ち動画は width が長辺になる。height だけでは480px以内でも width超過なら弾く", () => {
     expect(
       validateVideoMeta(
-        { durationSeconds: 180, width: 1920, height: 1080 },
+        { durationSeconds: 10, width: 4000, height: 1200 },
+        false,
+      ),
+    ).toContain("480px");
+  });
+
+  it("Pro は180秒・長辺1280pxまで通し、超えたら弾く", () => {
+    expect(
+      validateVideoMeta(
+        { durationSeconds: 180, width: 1280, height: 720 },
         true,
       ),
     ).toBeNull();
     expect(
       validateVideoMeta(
-        { durationSeconds: 181, width: 1920, height: 1080 },
+        { durationSeconds: 181, width: 1280, height: 720 },
         true,
       ),
     ).toContain("180秒");
@@ -104,7 +113,22 @@ describe("validateVideoMeta", () => {
         { durationSeconds: 10, width: 3840, height: 2160 },
         true,
       ),
-    ).toContain("1080px");
+    ).toContain("1280px");
+  });
+
+  it("Pro でも縦持ち動画は height が長辺になる", () => {
+    expect(
+      validateVideoMeta(
+        { durationSeconds: 10, width: 720, height: 1280 },
+        true,
+      ),
+    ).toBeNull();
+    expect(
+      validateVideoMeta(
+        { durationSeconds: 10, width: 720, height: 1281 },
+        true,
+      ),
+    ).toContain("1280px");
   });
 });
 

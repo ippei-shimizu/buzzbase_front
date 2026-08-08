@@ -86,8 +86,8 @@ export default function ThemesContent({ initialThemes }: ThemesContentProps) {
 
   return (
     <>
-      <h2 className="text-2xl font-bold">課題</h2>
-      <p className="mt-2 text-sm text-zinc-300">
+      <h2 className="text-lg font-bold">課題</h2>
+      <p className="mt-2 text-xs text-zinc-300">
         いま集中して取り組むテーマを決めると、練習記録やノートをその課題に束ねて振り返れます。
       </p>
 

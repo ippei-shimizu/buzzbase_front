@@ -9,7 +9,9 @@ export const MEDIA_UPLOAD_FREE_LIMIT_PER_MONTH = 3;
 export const FREE_VIDEO_MAX_DURATION_SECONDS = 30;
 export const PRO_VIDEO_MAX_DURATION_SECONDS = 180;
 export const FREE_VIDEO_MAX_HEIGHT = 480;
-export const PRO_VIDEO_MAX_HEIGHT = 1080;
+// クライアントは長辺基準で縮小するため、縦持ち動画は長辺がそのまま height になる。
+// back/mobile の PRO_VIDEO_MAX_HEIGHT と揃えておかないと縦動画だけ弾かれる。
+export const PRO_VIDEO_MAX_HEIGHT = 1280;
 export const FREE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const PRO_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 

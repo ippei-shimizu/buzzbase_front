@@ -32,7 +32,7 @@ jest.mock("@app/services/v2/practiceMenuService", () => ({
   getPracticeMenus: () => mockGetPracticeMenus(),
 }));
 
-jest.mock("@app/components/header/Header", () => ({
+jest.mock("@app/components/header/HeaderBack", () => ({
   __esModule: true,
   default: () => <header />,
 }));

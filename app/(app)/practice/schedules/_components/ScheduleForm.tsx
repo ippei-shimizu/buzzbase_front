@@ -8,7 +8,7 @@ import type {
   ScheduleInput,
 } from "@app/types/schedule";
 import LockClosedIcon from "@heroicons/react/24/solid/LockClosedIcon";
-import { Button, Input, Switch } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import { useState } from "react";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { parseDecimal } from "@app/constants/practice";
@@ -36,10 +36,8 @@ import {
   MENU_SETS_EMPTY,
   MENU_SOURCE_INDIVIDUAL_LABEL,
   MENU_SOURCE_SET_LABEL,
-  NOTIFICATION_LABEL,
   NOTIFICATION_MESSAGE_LABEL,
   NOTIFICATION_MESSAGE_PLACEHOLDER,
-  NOTIFICATION_WEB_NOTICE,
   RECURRENCE_LABEL,
   RECURRENCE_SINGLE_LABEL,
   RECURRENCE_WEEKLY_LABEL,
@@ -147,9 +145,8 @@ export default function ScheduleForm({
   const [menuAmounts, setMenuAmounts] = useState<Record<number, string>>(() =>
     initialMenuAmounts(schedule, lockedIds),
   );
-  const [notificationEnabled, setNotificationEnabled] = useState(
-    schedule?.notification_enabled ?? true,
-  );
+  // オン・オフはアプリ側でのみ変更させるため、web では既存値をそのまま引き継ぐ。
+  const notificationEnabled = schedule?.notification_enabled ?? true;
   const [notificationMessage, setNotificationMessage] = useState(
     schedule?.notification_message ?? "",
   );
@@ -271,7 +268,7 @@ export default function ScheduleForm({
             })}
           </div>
         ) : (
-          <div className="mt-3">
+          <div className="pt-5">
             <Input
               type="date"
               variant="bordered"
@@ -483,21 +480,6 @@ export default function ScheduleForm({
             )}
           </div>
         )}
-      </div>
-
-      <div>
-        <Switch
-          isSelected={notificationEnabled}
-          onValueChange={setNotificationEnabled}
-          color="primary"
-          size="sm"
-          classNames={{ label: "text-sm text-white" }}
-        >
-          {NOTIFICATION_LABEL}
-        </Switch>
-        <p className="mt-1.5 text-xs text-zinc-400">
-          {NOTIFICATION_WEB_NOTICE}
-        </p>
       </div>
 
       {isEntitlementLoading ? null : canCustomizeMessage ? (

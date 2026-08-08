@@ -10,8 +10,8 @@ export const LOAD_ERROR =
 export const ADD_PLAN_LABEL = "今日やることを登録";
 export const RECORD_PRACTICE_LABEL = "今日の練習を記録する";
 export const RECORD_GAME_LABEL = "試合結果を記録する";
-export const WEEKLY_PLAN_LABEL = "週の練習プラン";
 export const CALENDAR_LABEL = "カレンダー";
+export const MANAGE_PLAN_LABEL = "プランを管理";
 
 /** 引き継がれるのが「済」にしたメニューだけであることを明示する。 */
 export const RECORD_PRACTICE_HELPER =

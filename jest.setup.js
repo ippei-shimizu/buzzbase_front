@@ -1,5 +1,12 @@
 // Testing Libraryのカスタムマッチャーを追加
 import "@testing-library/jest-dom";
+import { TextDecoder, TextEncoder } from "util";
+
+// jsdom には TextEncoder/TextDecoder が無く、mediabunny がモジュール読み込み時に
+// 参照するため、prepareMedia 等の import チェーンでエラーになる。Node.js 標準の
+// util 実装をグローバルに補う。
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // ResizeObserverのモック（HeroUI Tabsコンポーネント用）
 global.ResizeObserver = class ResizeObserver {

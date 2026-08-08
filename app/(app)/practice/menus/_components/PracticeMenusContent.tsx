@@ -10,6 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
@@ -32,6 +33,8 @@ import PracticeMenuList from "./PracticeMenuList";
 
 interface PracticeMenusContentProps {
   initialMenus: PracticeMenu[];
+  /** 登録完了後に戻る画面。練習記録画面等からメニュー未登録で誘導された場合に渡される。 */
+  returnTo?: string | null;
 }
 
 /** フォームを開くたびに増やし、key の付け替えで入力状態を初期化するための識別子。 */
@@ -46,7 +49,9 @@ interface FormTarget {
  */
 export default function PracticeMenusContent({
   initialMenus,
+  returnTo,
 }: PracticeMenusContentProps) {
+  const router = useRouter();
   const [menus, setMenus] = useState<PracticeMenu[]>(initialMenus);
   const [form, setForm] = useState<FormTarget | null>(null);
   const [formErrors, setFormErrors] = useState<string[]>([]);
@@ -96,6 +101,10 @@ export default function PracticeMenusContent({
       toast.success(
         editing ? "練習メニューを更新しました" : "練習メニューを作成しました",
       );
+      // メニュー未登録で誘導された直後の新規作成のみ、元の画面へ戻す。
+      if (!editing && returnTo) {
+        router.push(returnTo);
+      }
       return;
     }
 
@@ -126,8 +135,8 @@ export default function PracticeMenusContent({
 
   return (
     <>
-      <h2 className="text-2xl font-bold">練習メニュー</h2>
-      <p className="mt-2 text-sm text-zinc-300">
+      <h2 className="text-lg font-bold">練習メニュー</h2>
+      <p className="mt-2 text-xs text-zinc-300">
         練習の記録に使うメニューを登録します。カテゴリと計測タイプを決めておくと、記録するときに量をそのまま入力できます。
       </p>
 

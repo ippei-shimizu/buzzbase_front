@@ -101,7 +101,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
   custom_period_goals: { free: "✕", pro: "○", availability: "web_and_app" },
   manual_metric_goals: { free: "✕", pro: "○", availability: "web_and_app" },
   shadow_swing_custom_interval: {
-    free: "5〜10秒",
+    free: "5〜8秒",
     pro: "1〜20秒",
     availability: "web_and_app",
   },
@@ -239,3 +239,19 @@ export const SHOWCASE_FEATURES: readonly ProFeature[] = [
 
 /** availability が app_only の機能に添えるラベル。 */
 export const APP_ONLY_LABEL = "アプリ版";
+
+/**
+ * ハイライトカードで既に強調表示中の feature をグループ内から除外し、0件になった
+ * グループは非表示にする。
+ */
+export function filterFeatureGroups(
+  groups: FeatureGroup[],
+  excludeFeature?: ProFeature,
+): FeatureGroup[] {
+  return groups
+    .map((group) => ({
+      ...group,
+      keys: group.keys.filter((key) => key !== excludeFeature),
+    }))
+    .filter((group) => group.keys.length > 0);
+}

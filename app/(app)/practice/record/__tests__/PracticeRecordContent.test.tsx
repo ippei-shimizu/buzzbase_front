@@ -304,6 +304,26 @@ describe("PracticeRecordContent", () => {
       expect(screen.getByLabelText("素振りの量")).toHaveValue(200);
     });
 
+    it("チェックボックス以外の行クリックでも選択できる", async () => {
+      const user = userEvent.setup();
+      renderContent();
+
+      await user.click(screen.getByText("素振り"));
+
+      expect(screen.getByRole("checkbox", { name: "素振り" })).toBeChecked();
+      expect(screen.getByLabelText("素振りの量")).toHaveValue(200);
+    });
+
+    it("選択後、量の入力欄をクリックしても選択は解除されない", async () => {
+      const user = userEvent.setup();
+      renderContent();
+
+      await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+      await user.click(screen.getByLabelText("素振りの量"));
+
+      expect(screen.getByRole("checkbox", { name: "素振り" })).toBeChecked();
+    });
+
     it("重さ×回数のメニューは kg と回の2入力になる", async () => {
       const user = userEvent.setup();
       renderContent();
@@ -487,7 +507,10 @@ describe("PracticeRecordContent", () => {
       expect(screen.getByText("まだ練習メニューがありません")).toBeVisible();
       expect(
         screen.getByRole("link", { name: "最初のメニューを作る" }),
-      ).toHaveAttribute("href", "/practice/menus");
+      ).toHaveAttribute(
+        "href",
+        "/practice/menus?returnTo=%2Fpractice%2Frecord%3Fdate%3D2026-08-08",
+      );
       expect(screen.queryByRole("checkbox")).toBeNull();
     });
   });

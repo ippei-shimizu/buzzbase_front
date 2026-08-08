@@ -2,6 +2,8 @@
 
 import type { FetchResult } from "@app/services/v2/requests";
 import type { Plan, PlanMenu } from "@app/types/plan";
+import CalendarIcon from "@heroicons/react/24/outline/CalendarIcon";
+import ListBulletIcon from "@heroicons/react/24/outline/ListBulletIcon";
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 import CheckCircleIcon from "@heroicons/react/24/solid/CheckCircleIcon";
 import Link from "next/link";
@@ -25,13 +27,13 @@ import {
   CALENDAR_LABEL,
   EMPTY_MESSAGE,
   LOAD_ERROR,
+  MANAGE_PLAN_LABEL,
   RECORD_GAME_LABEL,
   RECORD_PRACTICE_HELPER,
   RECORD_PRACTICE_LABEL,
   SECTION_TITLE,
   TOGGLE_DONE_ERROR,
   TOGGLE_UNDONE_ERROR,
-  WEEKLY_PLAN_LABEL,
   menuSetHint,
 } from "./todayTasksCopy";
 
@@ -126,15 +128,7 @@ export default function TodayTasksSection({
 
   return (
     <section>
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-lg font-bold">{SECTION_TITLE}</h3>
-        <Link
-          href="/practice/schedules/week"
-          className="text-sm text-yellow-500 hover:underline"
-        >
-          {WEEKLY_PLAN_LABEL}
-        </Link>
-      </div>
+      <h3 className="mb-3 text-lg font-bold">{SECTION_TITLE}</h3>
 
       {result.status !== "ok" ? (
         // 取得失敗を「予定なし」と同じ見た目にすると、予定があるのに無いと誤読される。
@@ -252,19 +246,28 @@ export default function TodayTasksSection({
           </>
         ) : null}
 
+        <Link
+          href={`/practice/schedules/new?date=${today}`}
+          className="flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#d08000] px-3 py-2.5 text-sm font-bold text-[#d08000] transition-colors hover:bg-[#d08000]/10"
+        >
+          <PlusIcon className="h-4 w-4 shrink-0" aria-hidden />
+          {ADD_PLAN_LABEL}
+        </Link>
+
         <div className="flex gap-2">
           <Link
-            href={`/practice/schedules/new?date=${today}`}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-[#d08000] px-3 py-2.5 text-xs font-bold text-[#d08000] transition-colors hover:bg-[#d08000]/10"
+            href="/practice/schedules/calendar"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-zinc-600 px-3 py-2.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
           >
-            <PlusIcon className="h-4 w-4 shrink-0" aria-hidden />
-            {ADD_PLAN_LABEL}
+            <CalendarIcon className="h-4 w-4 shrink-0" aria-hidden />
+            {CALENDAR_LABEL}
           </Link>
           <Link
-            href="/practice/schedules/calendar"
-            className="flex flex-1 items-center justify-center rounded-[10px] border border-zinc-600 px-3 py-2.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
+            href="/practice/menu-sets"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-zinc-600 px-3 py-2.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
           >
-            {CALENDAR_LABEL}
+            <ListBulletIcon className="h-4 w-4 shrink-0" aria-hidden />
+            {MANAGE_PLAN_LABEL}
           </Link>
         </div>
       </div>

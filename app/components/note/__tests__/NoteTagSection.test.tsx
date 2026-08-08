@@ -11,6 +11,13 @@ jest.mock("@app/hooks/pro/useEntitlement", () => ({
   }),
 }));
 
+jest.mock("@app/contexts/proUpgradeModalContext", () => ({
+  useProUpgradeModal: () => ({
+    open: jest.fn(),
+    close: jest.fn(),
+  }),
+}));
+
 jest.mock("@app/services/v2/noteTagService", () => ({
   createNoteTag: jest.fn(),
 }));

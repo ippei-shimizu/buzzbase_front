@@ -162,8 +162,8 @@ export default function ReflectionTemplatesContent({
 
   return (
     <>
-      <h2 className="text-2xl font-bold">振り返りテンプレ</h2>
-      <p className="mt-2 text-sm text-zinc-300">
+      <h2 className="text-lg font-bold">振り返りテンプレ</h2>
+      <p className="mt-2 text-xs text-zinc-300">
         野球ノートに使う問いかけのセットです。空欄のメモより「何を書くか」が決まっている方が、振り返りが続きます。
       </p>
 

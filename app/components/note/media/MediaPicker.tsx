@@ -2,6 +2,7 @@
 
 import type { StagedMediaAsset } from "@app/interface/mediaAttachmentV2";
 import type { PreparedMedia } from "@app/utils/media/uploadPipeline";
+import { PhotoIcon } from "@heroicons/react/24/outline";
 import { Button } from "@heroui/react";
 import { useRef, useState } from "react";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
@@ -120,6 +121,7 @@ export default function MediaPicker({
         radius="sm"
         variant="bordered"
         className="text-white"
+        startContent={<PhotoIcon className="h-4 w-4" aria-hidden />}
         isDisabled={isBusy}
         onPress={() => inputRef.current?.click()}
       >

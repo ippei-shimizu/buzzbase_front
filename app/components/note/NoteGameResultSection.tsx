@@ -2,6 +2,7 @@
 
 import type { GameResultLinkOption } from "@app/types/gameResultLink";
 import { useState } from "react";
+import { BallIcon } from "@app/components/icon/BallIcon";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useGameResultSearch } from "@app/hooks/note/useGameResultSearch";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
@@ -76,11 +77,12 @@ export default function NoteGameResultSection({
     onChange(selectedIds.filter((selected) => selected !== id));
 
   return (
-    <section aria-labelledby="note-game-section-heading" className="mt-8">
+    <section aria-labelledby="note-game-section-heading" className="mt-2">
       <h3
         id="note-game-section-heading"
-        className="text-sm font-bold text-zinc-400"
+        className="flex items-center gap-1.5 text-sm font-bold text-zinc-400"
       >
+        <BallIcon width="14" height="14" fill="#d08000" />
         試合記録との紐付け（任意）
       </h3>
 

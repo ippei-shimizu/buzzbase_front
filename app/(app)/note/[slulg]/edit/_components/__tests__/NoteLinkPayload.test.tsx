@@ -289,7 +289,7 @@ describe("ノート更新時の紐付けペイロード", () => {
     save();
 
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-    expect(mockPush).toHaveBeenCalledWith("/note");
+    expect(mockPush).toHaveBeenCalledWith("/note/12");
   });
 });
 

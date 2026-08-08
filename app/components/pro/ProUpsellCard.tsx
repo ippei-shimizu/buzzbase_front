@@ -46,7 +46,7 @@ const DEFAULT_CTA_LABEL = "Pro プランを見る";
 const UNSPECIFIED_FEATURE = "unspecified";
 
 const APPEARANCE_CLASS = {
-  solid: "bg-sub",
+  solid: "bg-[#3A3A3A]",
   translucent: "bg-[#3A3A3A]/90 backdrop-blur-sm",
 } as const;
 

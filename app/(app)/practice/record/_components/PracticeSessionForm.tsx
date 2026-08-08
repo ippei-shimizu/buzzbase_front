@@ -192,7 +192,7 @@ export default function PracticeSessionForm({
       <div className="mt-8 flex items-center justify-between gap-3">
         <h2 className="text-sm font-bold text-white">{MENU_SECTION_TITLE}</h2>
         <Link
-          href="/practice/menus"
+          href={`/practice/menus?returnTo=${encodeURIComponent(`/practice/record?date=${date}`)}`}
           className="flex shrink-0 items-center gap-1 rounded-[10px] border border-[#d08000] px-3 py-1.5 text-xs font-bold text-[#d08000]"
         >
           <PlusIcon className="h-4 w-4" aria-hidden />

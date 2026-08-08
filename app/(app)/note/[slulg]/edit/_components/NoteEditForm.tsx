@@ -5,7 +5,7 @@ import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
 import type { GameResultLinkOption } from "@app/types/gameResultLink";
 import type { ImprovementTheme } from "@app/types/improvementTheme";
-import { Input } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -13,7 +13,6 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import NoteMediaSection from "@app/components/note/media/NoteMediaSection";
 import NoteGameResultSection from "@app/components/note/NoteGameResultSection";
-import NoteMenu from "@app/components/note/NoteMenu";
 import NoteTagSection from "@app/components/note/NoteTagSection";
 import NoteThemeSection from "@app/components/note/NoteThemeSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
@@ -157,7 +156,7 @@ export default function NoteEditForm({
   const handleSubmit = async () => {
     if (isSubmitting) return;
     if (!hasChanges) {
-      router.push("/note");
+      router.push(`/note/${note.id}`);
       return;
     }
     setIsSubmitting(true);
@@ -167,16 +166,12 @@ export default function NoteEditForm({
       setIsSubmitting(false);
       return;
     }
-    router.push("/note");
+    router.push(`/note/${note.id}`);
   };
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <HeaderNote
-        onNoteSave={handleSubmit}
-        isSubmitting={isSubmitting}
-        hasChanges={hasChanges}
-      />
+      <HeaderNote hasChanges={hasChanges} />
       {isSubmitting ? <LoadingSpinner /> : null}
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
@@ -184,7 +179,8 @@ export default function NoteEditForm({
           <div className="pt-14 px-4 lg:px-6 lg:pb-14">
             <form>
               <div>
-                <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-400">日付</h3>
                   <Input
                     isRequired
                     type="date"
@@ -195,9 +191,11 @@ export default function NoteEditForm({
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                   />
-                  <NoteMenu noteId={note.id} />
                 </div>
-                <div>
+                <div className="mt-4">
+                  <h3 className="text-sm font-bold text-zinc-400">
+                    タイトル（任意）
+                  </h3>
                   <Input
                     type="text"
                     size="lg"
@@ -209,9 +207,14 @@ export default function NoteEditForm({
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
-                <div className="mt-10 w-full h-full">
+                <div className="mt-8 w-full h-full">
+                  <h3 className="mb-2 text-sm font-bold text-zinc-400">メモ</h3>
                   <NoteEditor memo={editorMemo} setMemo={setMemo} />
                 </div>
+                <NoteMediaSection
+                  noteId={note.id}
+                  attachments={note.media_attachments}
+                />
                 <ReflectionTemplateSection
                   templatesResult={templatesResult}
                   selectedTemplateId={note.reflection_template_id}
@@ -238,10 +241,17 @@ export default function NoteEditForm({
                   initialCount={note.game_result_ids.length}
                   linkedOptions={linkedGameResults}
                 />
-                <NoteMediaSection
-                  noteId={note.id}
-                  attachments={note.media_attachments}
-                />
+                <Button
+                  type="button"
+                  color="primary"
+                  radius="sm"
+                  fullWidth
+                  className="mt-8 font-bold"
+                  onPress={handleSubmit}
+                  isDisabled={isSubmitting}
+                >
+                  保存
+                </Button>
               </div>
             </form>
           </div>

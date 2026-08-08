@@ -39,8 +39,8 @@ describe("resolveIntervalAccess", () => {
 });
 
 describe("intervalRange", () => {
-  it("無料は5〜10秒", () => {
-    expect(intervalRange("free")).toEqual({ min: 5, max: 10 });
+  it("無料は5〜8秒", () => {
+    expect(intervalRange("free")).toEqual({ min: 5, max: 8 });
   });
 
   it("Pro は1〜20秒", () => {
@@ -53,17 +53,17 @@ describe("intervalRange", () => {
 });
 
 describe("isIntervalAllowed", () => {
-  it("無料ユーザーは5〜10秒の外を選べない", () => {
+  it("無料ユーザーは5〜8秒の外を選べない", () => {
     expect(isIntervalAllowed(4.9, "free")).toBe(false);
     expect(isIntervalAllowed(1, "free")).toBe(false);
     expect(isIntervalAllowed(1.5, "free")).toBe(false);
-    expect(isIntervalAllowed(10.1, "free")).toBe(false);
+    expect(isIntervalAllowed(8.1, "free")).toBe(false);
     expect(isIntervalAllowed(20, "free")).toBe(false);
   });
 
-  it("無料ユーザーでも境界の5秒・10秒は選べる", () => {
+  it("無料ユーザーでも境界の5秒・8秒は選べる", () => {
     expect(isIntervalAllowed(5, "free")).toBe(true);
-    expect(isIntervalAllowed(10, "free")).toBe(true);
+    expect(isIntervalAllowed(8, "free")).toBe(true);
   });
 
   it("Pro は1.0〜20秒を選べ、その外は選べない", () => {
@@ -80,11 +80,11 @@ describe("isIntervalAllowed", () => {
     expect(isIntervalAllowed(5, "pending")).toBe(true);
   });
 
-  it("選択肢のうち無料で選べるのは5〜10秒の6つだけ", () => {
+  it("選択肢のうち無料で選べるのは5〜8秒の4つだけ", () => {
     const allowed = INTERVAL_OPTIONS.filter((seconds) =>
       isIntervalAllowed(seconds, "free"),
     );
-    expect(allowed).toEqual([5, 6, 7, 8, 9, 10]);
+    expect(allowed).toEqual([5, 6, 7, 8]);
   });
 
   it("既定のインターバルは無料でもそのまま開始できる", () => {
@@ -95,7 +95,7 @@ describe("isIntervalAllowed", () => {
 describe("clampIntervalToAccess", () => {
   it("Pro 判定が確定して範囲が狭まったら、無料の範囲へ引き戻す", () => {
     expect(clampIntervalToAccess(1, "free")).toBe(5);
-    expect(clampIntervalToAccess(20, "free")).toBe(10);
+    expect(clampIntervalToAccess(20, "free")).toBe(8);
   });
 
   it("範囲内の値はそのまま返す", () => {

@@ -68,13 +68,13 @@ describe("ProUpgradeModal", () => {
     expect(screen.getAllByText("シーズンを跨いだ成長を可視化")).toHaveLength(1);
   });
 
-  it("機能一覧の訴求が Pro 機能の代表キーから作られている", () => {
+  it("Free/Pro 比較表が全機能グループを表示する", () => {
     render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
 
     expect(screen.getByText("方向別の打率")).toBeInTheDocument();
     expect(screen.getByText("練習と成績の関係を発見")).toBeInTheDocument();
-    // 代表機能はすべて Web 提供済みなので「アプリ版」は出ない。
-    expect(screen.queryByText(APP_ONLY_LABEL)).not.toBeInTheDocument();
+    // アプリ版限定機能には案内バッジが付く。
+    expect(screen.getAllByText(APP_ONLY_LABEL).length).toBeGreaterThan(0);
   });
 
   it("プラン Radio に年額・月額の両方が表示される", () => {
