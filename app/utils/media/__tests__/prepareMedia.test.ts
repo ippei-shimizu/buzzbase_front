@@ -39,8 +39,8 @@ beforeEach(() => {
   });
   mockReadVideoMeta.mockResolvedValue({
     durationSeconds: 20,
-    width: 854,
-    height: 480,
+    width: 480,
+    height: 270,
   });
   mockCaptureThumbnail.mockResolvedValue(
     new Blob(["t"], { type: "image/jpeg" }),
@@ -98,8 +98,8 @@ describe("prepareMediaFile", () => {
         mediaType: "video",
         contentType: "video/mp4",
         durationSeconds: 20,
-        width: 854,
-        height: 480,
+        width: 480,
+        height: 270,
       },
     });
   });
@@ -107,8 +107,8 @@ describe("prepareMediaFile", () => {
   it("上限を超える動画はサムネイル生成前に弾く", async () => {
     mockReadVideoMeta.mockResolvedValue({
       durationSeconds: 45,
-      width: 854,
-      height: 480,
+      width: 480,
+      height: 270,
     });
 
     const result = await prepareMediaFile(videoFile(), false);
@@ -120,8 +120,8 @@ describe("prepareMediaFile", () => {
   it("Pro なら無料では超過する動画も通す", async () => {
     mockReadVideoMeta.mockResolvedValue({
       durationSeconds: 120,
-      width: 1920,
-      height: 1080,
+      width: 1280,
+      height: 720,
     });
 
     expect(await prepareMediaFile(videoFile(), true)).toMatchObject({

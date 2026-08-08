@@ -79,13 +79,18 @@ export function validateVideoMeta(
       : `動画は${videoMaxDurationSeconds}秒以内にしてください（Pro プランなら${PRO_VIDEO_MAX_DURATION_SECONDS}秒まで）。`;
   }
 
-  if (meta.height > videoMaxHeight) {
+  // 横持ち動画は長辺が width 側に来るため、height だけでは検証をすり抜ける。
+  if (longEdge(meta) > videoMaxHeight) {
     return isPro
-      ? `動画の縦解像度は${videoMaxHeight}px 以内にしてください。`
-      : `動画の縦解像度は${videoMaxHeight}px 以内にしてください（Pro プランなら${PRO_VIDEO_MAX_HEIGHT}px まで）。`;
+      ? `動画の解像度は長辺${videoMaxHeight}px以内にしてください。`
+      : `動画の解像度は長辺${videoMaxHeight}px以内にしてください（Pro プランなら${PRO_VIDEO_MAX_HEIGHT}pxまで）。`;
   }
 
   return null;
+}
+
+function longEdge(meta: VideoMeta): number {
+  return Math.max(meta.width, meta.height);
 }
 
 /**
