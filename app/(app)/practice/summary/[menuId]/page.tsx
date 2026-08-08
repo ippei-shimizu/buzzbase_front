@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCachedProStatus } from "@app/(app)/pro/proStatus";
-import Header from "@app/components/header/Header";
+import HeaderBack from "@app/components/header/HeaderBack";
 import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
 import {
   getMenuTrend,
@@ -130,7 +130,7 @@ export default async function PracticeMenuTrendPage({
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <Header />
+      <HeaderBack />
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-20 px-4 lg:px-6">
