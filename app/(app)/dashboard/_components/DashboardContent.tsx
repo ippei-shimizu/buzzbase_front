@@ -5,6 +5,7 @@ import type {
   DashboardData,
   PitchingStats,
   SeasonOption,
+  TournamentOption,
 } from "../actions";
 import { useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
@@ -19,11 +20,13 @@ import StatsOverview from "./StatsOverview";
 interface DashboardContentProps {
   data: DashboardData | null;
   seasons: SeasonOption[];
+  tournaments: TournamentOption[];
 }
 
 export default function DashboardContent({
   data,
   seasons,
+  tournaments,
 }: DashboardContentProps) {
   const [battingStats, setBattingStats] = useState<BattingStats | null>(
     data?.batting_stats ?? null,
@@ -36,8 +39,18 @@ export default function DashboardContent({
     year: string,
     matchType: string,
     seasonId?: string,
+    tournamentId?: string,
+    startMonth?: string,
+    endMonth?: string,
   ) => {
-    const filtered = await getFilteredBattingStats(year, matchType, seasonId);
+    const filtered = await getFilteredBattingStats(
+      year,
+      matchType,
+      seasonId,
+      tournamentId,
+      startMonth,
+      endMonth,
+    );
     if (filtered) {
       setBattingStats(filtered);
     }
@@ -47,8 +60,18 @@ export default function DashboardContent({
     year: string,
     matchType: string,
     seasonId?: string,
+    tournamentId?: string,
+    startMonth?: string,
+    endMonth?: string,
   ) => {
-    const filtered = await getFilteredPitchingStats(year, matchType, seasonId);
+    const filtered = await getFilteredPitchingStats(
+      year,
+      matchType,
+      seasonId,
+      tournamentId,
+      startMonth,
+      endMonth,
+    );
     if (filtered) {
       setPitchingStats(filtered);
     }
@@ -66,7 +89,9 @@ export default function DashboardContent({
         hasBattingRecord={!!data?.batting_stats?.calculated}
         hasPitchingRecord={!!data?.pitching_stats?.calculated}
         availableYears={data?.available_years ?? []}
+        availableMonths={data?.available_months ?? []}
         availableSeasons={seasons}
+        availableTournaments={tournaments}
         onBattingFilterChange={handleBattingFilterChange}
         onPitchingFilterChange={handlePitchingFilterChange}
       />

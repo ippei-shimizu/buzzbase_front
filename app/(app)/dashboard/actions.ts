@@ -58,12 +58,18 @@ export interface SeasonOption {
   name: string;
 }
 
+export interface TournamentOption {
+  id: number;
+  name: string;
+}
+
 export interface DashboardData {
   recent_game_results: RecentGameResult[];
   batting_stats: BattingStats;
   pitching_stats: PitchingStats;
   group_rankings: GroupRanking[];
   available_years: number[];
+  available_months?: string[];
 }
 
 export async function getDashboardData(
@@ -131,11 +137,17 @@ function buildFilterQuery(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): string {
   const params = new URLSearchParams();
   if (year && year !== "通算") params.append("year", year);
   if (matchType && matchType !== "全て") params.append("match_type", matchType);
   if (seasonId) params.append("season_id", seasonId);
+  if (tournamentId) params.append("tournament_id", tournamentId);
+  if (startMonth) params.append("start_month", startMonth);
+  if (endMonth) params.append("end_month", endMonth);
   const query = params.toString();
   return query ? `?${query}` : "";
 }
@@ -161,16 +173,48 @@ export async function getAvailableSeasons(): Promise<SeasonOption[]> {
   }
 }
 
+export async function getAvailableTournaments(): Promise<TournamentOption[]> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return [];
+
+    // 全大会ではなく、自分が記録した大会のみを候補にする。
+    const url = `${RAILS_API_URL}/api/v1/tournaments/user_tournaments`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    captureServerActionError(error, { action: "getAvailableTournaments" });
+    console.error("Error fetching tournaments:", error);
+    return [];
+  }
+}
+
 export async function getFilteredBattingStats(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<BattingStats | null> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
-    const query = buildFilterQuery(year, matchType, seasonId);
+    const query = buildFilterQuery(
+      year,
+      matchType,
+      seasonId,
+      tournamentId,
+      startMonth,
+      endMonth,
+    );
     const url = `${RAILS_API_URL}/api/v2/dashboard/batting_stats${query}`;
 
     const response = await fetch(url, {
@@ -192,12 +236,22 @@ export async function getFilteredPitchingStats(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<PitchingStats | null> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
-    const query = buildFilterQuery(year, matchType, seasonId);
+    const query = buildFilterQuery(
+      year,
+      matchType,
+      seasonId,
+      tournamentId,
+      startMonth,
+      endMonth,
+    );
     const url = `${RAILS_API_URL}/api/v2/dashboard/pitching_stats${query}`;
 
     const response = await fetch(url, {

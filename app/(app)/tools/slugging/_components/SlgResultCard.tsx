@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { SITE_URL } from "@app/constants/app";
 import { classifySlg } from "@app/data/baseball-stats/slgLevel";
 import { trackEvent } from "@app/lib/analytics";
@@ -35,9 +34,6 @@ export default function SlgResultCard({ slg }: Props) {
   };
   const handleLineShare = () => {
     trackEvent("share", { method: "line", content_type: "slg_result" });
-  };
-  const handleSignupClick = () => {
-    trackEvent("generate_lead", { source_tool: "slugging" });
   };
 
   const badgeClass: Record<typeof level.key, string> = {
@@ -87,20 +83,6 @@ export default function SlgResultCard({ slg }: Props) {
         >
           LINEでシェア
         </a>
-      </div>
-
-      <div className="rounded-lg border border-yellow-600/40 bg-yellow-900/20 px-4 py-4">
-        <p className="text-sm text-zinc-200 leading-6">
-          BUZZ BASE に無料登録すると、試合ごとに
-          長打率・打率・OPS・出塁率をまとめて記録できます。グラフで成績推移を確認したり、チーム内ランキングで比較したりも可能です。
-        </p>
-        <Link
-          href="/signup"
-          onClick={handleSignupClick}
-          className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-yellow-500 px-4 py-2.5 text-sm font-bold text-zinc-900 transition-colors hover:bg-yellow-400"
-        >
-          無料登録して成績を記録する &rarr;
-        </Link>
       </div>
     </div>
   );

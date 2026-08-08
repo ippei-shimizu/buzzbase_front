@@ -10,7 +10,11 @@ import DashboardContent from "./_components/DashboardContent";
 import HomeTabBar from "./_components/HomeTabBar";
 import { loadActivityData } from "./_utils/homeData";
 import { parseHomeTab } from "./_utils/homeTab";
-import { getAvailableSeasons, getDashboardData } from "./actions";
+import {
+  getAvailableSeasons,
+  getAvailableTournaments,
+  getDashboardData,
+} from "./actions";
 
 export const metadata = {
   title: HOME_PAGE_TITLE,
@@ -38,10 +42,11 @@ export default async function DashboardPage({
   const today = todayInTokyo();
 
   // 表示しない面のデータは取りに行かない。面の中の取得は互いに独立なので並列で待つ。
-  const [activity, dashboard, seasons] = await Promise.all([
+  const [activity, dashboard, seasons, tournaments] = await Promise.all([
     isActivity ? loadActivityData(today) : null,
     isActivity ? null : getDashboardData(),
     isActivity ? null : getAvailableSeasons(),
+    isActivity ? null : getAvailableTournaments(),
   ]);
 
   return (
@@ -56,7 +61,11 @@ export default async function DashboardPage({
                 <ActivityView data={activity} today={today} />
               ) : (
                 <div className="flex flex-col gap-6">
-                  <DashboardContent data={dashboard} seasons={seasons ?? []} />
+                  <DashboardContent
+                    data={dashboard}
+                    seasons={seasons ?? []}
+                    tournaments={tournaments ?? []}
+                  />
                   <AdInFeed
                     slot={adSlots.dashboardInFeed}
                     layoutKey="-6t+ed+2i-1n-4w"

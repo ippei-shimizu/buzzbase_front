@@ -14,6 +14,7 @@ const mockGetActivityHeatmap = jest.fn();
 const mockGetShadowSwingStats = jest.fn();
 const mockGetDashboardData = jest.fn();
 const mockGetAvailableSeasons = jest.fn();
+const mockGetAvailableTournaments = jest.fn();
 
 jest.mock("next/headers", () => ({
   cookies: () => Promise.resolve({ get: mockCookieGet }),
@@ -66,6 +67,7 @@ jest.mock("@app/services/v2/periodicReviewService", () => ({
 jest.mock("../actions", () => ({
   getDashboardData: () => mockGetDashboardData(),
   getAvailableSeasons: () => mockGetAvailableSeasons(),
+  getAvailableTournaments: () => mockGetAvailableTournaments(),
 }));
 
 jest.mock("@app/components/header/Header", () => ({
@@ -284,6 +286,7 @@ async function renderPage({
   resolveWith(mockGetShadowSwingStats, swingStats);
   mockGetDashboardData.mockResolvedValue(null);
   mockGetAvailableSeasons.mockResolvedValue([]);
+  mockGetAvailableTournaments.mockResolvedValue([]);
 
   render(
     await DashboardPage({

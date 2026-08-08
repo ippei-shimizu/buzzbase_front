@@ -10,6 +10,20 @@ export interface SignInData {
   password: string;
 }
 
+export interface ResetPasswordData {
+  password: string;
+  passwordConfirmation: string;
+}
+
+// パスワード再設定メールのリンクから受け取るワンタイムトークン。
+// ログイン中セッションのCookieと混同しないよう、PUT /api/v1/auth/passwordの
+// リクエストヘッダーへ明示的に渡す。
+export interface ResetPasswordAuthHeaders {
+  accessToken: string;
+  client: string;
+  uid: string;
+}
+
 export interface EmailInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

@@ -125,10 +125,11 @@ export default function ResultsSummary() {
 
   useEffect(() => {
     // 表示対象は URL の id だけで決める。localStorage を優先すると、記録フローの
-    // 残骸がある状態で他人の試合を開いたときに別の試合を表示してしまう。
+    // 残骸がある状態で他人の試合を開いたときに別の試合を表示してしまう
+    // （書き込みは編集を選択した handleResultComplete 内でのみ行う）。
     if (!Number.isInteger(id) || id <= 0) return;
     fetchCurrentResultData(id);
-  }, [id]);
+  }, [pathname, id]);
 
   useEffect(() => {
     if (matchResult.length > 0 && !isDetailDataFetched) {
@@ -241,7 +242,9 @@ export default function ResultsSummary() {
   };
 
   const handleResultComplete = () => {
-    // 記録フロー側は localStorage の試合 ID を見るため、編集対象をここで確定させる。
+    // 既存試合の編集として試合情報入力画面へ入ることを記録する。
+    // record/page.tsxはgameResultIdを送信対象の試合として信頼するため、ここで
+    // 明示的に「今表示している（＝自分の所有と確認済みの）試合」のidをセットする。
     saveGameResultId(id);
     localStorage.setItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY, "true");
     router.push("/game-result/record");

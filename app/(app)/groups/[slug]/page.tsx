@@ -303,6 +303,8 @@ export default function GroupDetail(props: GroupDetailProps) {
     fetchData();
   }, [filters, params.slug, router]);
 
+  const hideRankChange = Boolean(filters.startMonth || filters.endMonth);
+
   if (!groupData) {
     return <LoadingSpinner />;
   }
@@ -404,6 +406,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                       <GroupBattingRankingTable
                         battingAverage={battingAverage}
                         battingStats={battingStats}
+                        hideRankChange={hideRankChange}
                       />
                     </div>
                   </Tab>
@@ -431,6 +434,7 @@ export default function GroupDetail(props: GroupDetailProps) {
                       <GroupPitchingRankingTable
                         pitchingAggregate={pitchingAggregate}
                         pitchingStats={pitchingStats}
+                        hideRankChange={hideRankChange}
                       />
                     </div>
                   </Tab>

@@ -509,7 +509,7 @@ describe("PracticeRecordContent", () => {
         screen.getByRole("link", { name: "最初のメニューを作る" }),
       ).toHaveAttribute(
         "href",
-        "/practice/menus?returnTo=%2Fpractice%2Frecord%3Fdate%3D2026-08-08",
+        `/practice/menus?returnTo=${encodeURIComponent(`/practice/record?date=${TODAY}`)}`,
       );
       expect(screen.queryByRole("checkbox")).toBeNull();
     });
