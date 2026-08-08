@@ -39,6 +39,12 @@ jest.mock("@app/utils/media/uploadPipeline", () => ({
   uploadPreparedMedia: jest.fn(),
 }));
 
+const mockToastError = jest.fn();
+
+jest.mock("sonner", () => ({
+  toast: { error: (...args: unknown[]) => mockToastError(...args) },
+}));
+
 // 実エディタは Slate に依存するため、メモ入力だけを模した textarea に差し替える。
 jest.mock("next/dynamic", () => () => {
   const react = jest.requireActual<typeof ReactModule>("react");
@@ -218,6 +224,29 @@ describe("新規作成時の staged media", () => {
 
     await waitFor(() => expect(mockDeleteNote).toHaveBeenCalled());
     expect(screen.getByLabelText("タイトル")).toHaveValue("本日の練習");
+  });
+
+  it("ロールバックの削除自体が失敗したら、重複送信を防ぐため一覧へ逃がす", async () => {
+    mockUpload.mockResolvedValue({
+      ok: false,
+      reason: "technical",
+      message: "アップロードに失敗しました",
+    });
+    mockDeleteNote.mockResolvedValue({
+      ok: false,
+      errors: ["ノートの削除に失敗しました"],
+    });
+    renderForm();
+    typeTitle();
+    await stageFile();
+
+    save();
+
+    await waitFor(() => expect(mockDeleteNote).toHaveBeenCalledWith(42));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+    expect(mockToastError).toHaveBeenCalledWith(
+      "メディアの保存に失敗し、ノートの削除にも失敗しました。ノートが残っている場合があるため、一覧をご確認のうえ必要であれば削除してください。",
+    );
   });
 
   it("ユーザーが中断した場合はロールバックしない", async () => {
