@@ -89,11 +89,7 @@ export default function NoteTagSection({
       >
         タグ（任意・複数選択可）
       </h3>
-      <ProUpsellOverlay
-        feature="note_tags"
-        lockedIndicator="badge"
-        className="mt-2"
-      >
+      <ProUpsellOverlay feature="note_tags" className="mt-2">
         {tags === null ? (
           <p className="text-xs text-zinc-400">
             タグを取得できませんでした。メモはそのまま入力できます。

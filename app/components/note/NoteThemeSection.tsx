@@ -2,6 +2,7 @@
 
 import type { FetchResult } from "@app/services/v2/requests";
 import type { ImprovementTheme } from "@app/types/improvementTheme";
+import { FlagIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { themeCategoryLabel } from "@app/constants/improvementTheme";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
@@ -77,8 +78,9 @@ export default function NoteThemeSection({
     <section aria-labelledby="note-theme-section-heading" className="mt-8">
       <h3
         id="note-theme-section-heading"
-        className="text-sm font-bold text-zinc-400"
+        className="flex items-center gap-1.5 text-sm font-bold text-zinc-400"
       >
+        <FlagIcon className="h-[18px] w-[18px] shrink-0 text-[#d08000]" />
         取り組む課題（任意）
       </h3>
 

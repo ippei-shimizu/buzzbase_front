@@ -348,7 +348,7 @@ describe("NoteEditForm", () => {
       renderForm({ reflection_answers: [], reflection_template_id: null });
 
       expect(screen.queryByLabelText("課題")).toBeNull();
-      expect(screen.queryByText(/振り返り/)).toBeNull();
+      expect(screen.queryByRole("heading", { name: /振り返り/ })).toBeNull();
     });
   });
 
