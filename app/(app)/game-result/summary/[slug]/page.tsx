@@ -124,9 +124,11 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // 表示対象は URL の id だけで決める。localStorage を優先すると、記録フローの
-    // 残骸がある状態で他人の試合を開いたときに別の試合を表示してしまう
-    // （書き込みは編集を選択した handleResultComplete 内でのみ行う）。
+    // 表示対象の特定は常にURLのidを正とする。localStorageは書き込まない
+    // （record/page.tsxは記録中の下書きIDとしてlocalStorageを信頼して送信時に
+    // 既存MatchResultの上書き判定をするため、単に閲覧しただけでここを書き換えると
+    // 進行中の別の記録セッションを巻き込んでしまう。書き込みは編集を選択した
+    // handleResultComplete内でのみ行う）。
     if (!Number.isInteger(id) || id <= 0) return;
     fetchCurrentResultData(id);
   }, [pathname, id]);
