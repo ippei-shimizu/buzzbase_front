@@ -132,9 +132,11 @@ export async function readVideoMeta(file: Blob): Promise<VideoMeta> {
   try {
     const video = await loadVideoElement(objectUrl);
     return {
+      // duration が取得できない（Infinity 等）動画は「上限内」と誤判定して
+      // 無駄に全量アップロードさせないよう、長さ超過扱いにして弾く側へ倒す。
       durationSeconds: Number.isFinite(video.duration)
         ? Math.round(video.duration)
-        : 0,
+        : Infinity,
       width: video.videoWidth,
       height: video.videoHeight,
     };
