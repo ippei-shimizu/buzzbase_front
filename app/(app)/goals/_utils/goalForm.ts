@@ -209,8 +209,14 @@ export function validateGoalForm(values: GoalFormValues): string[] {
   if (isManual && values.customMetricLabel.trim() === "") {
     errors.push("指標名を入力してください");
   }
-  if (!isQualitative && parseDecimal(values.targetValue) === null) {
-    errors.push("目標値を入力してください");
+  if (!isQualitative) {
+    const parsedTarget = parseDecimal(values.targetValue);
+    if (parsedTarget === null) {
+      errors.push("目標値を入力してください");
+    } else if (parsedTarget < 0) {
+      // 0 は「エラー0」「四球0」のような正当な目標値として許容する。負値だけを弾く。
+      errors.push("目標値は0以上の数値を入力してください");
+    }
   }
   if (isMenuMetric(values) && values.practiceMenuId === null) {
     errors.push("対象の練習メニューを選択してください");
@@ -221,8 +227,18 @@ export function validateGoalForm(values: GoalFormValues): string[] {
   if (values.periodType === "tournament" && values.tournamentId === null) {
     errors.push("大会を選択してください");
   }
-  if (values.periodType === "custom" && values.startDate > values.deadline) {
-    errors.push("終了日は開始日以降にしてください");
+  if (
+    (values.periodType === "season" || values.periodType === "tournament") &&
+    values.deadline.trim() === ""
+  ) {
+    errors.push("期限を入力してください");
+  }
+  if (values.periodType === "custom") {
+    if (values.startDate.trim() === "" || values.deadline.trim() === "") {
+      errors.push("開始日と終了日を入力してください");
+    } else if (values.startDate > values.deadline) {
+      errors.push("終了日は開始日以降にしてください");
+    }
   }
   return errors;
 }
