@@ -33,48 +33,21 @@ describe("HeaderRight のメニュー", () => {
     mockIsLoggedIn.mockReturnValue(true);
   });
 
-  // 導線が無いと機能そのものに到達できないため、リンク先まで固定する
-  it("練習メニューへの導線を持つ", async () => {
+  // mobileのGlobalMenuOverlayと項目・並び順を揃えるため、4項目のみに固定する
+  it("練習記録・野球ノート・シーズン管理・設定への導線をこの順で持つ", async () => {
     await openMenu();
 
-    expect(
-      screen.getByRole("menuitem", { name: /練習メニュー/ }),
-    ).toHaveAttribute("href", "/practice/menus");
-  });
-
-  it("メニューセットへの導線を持つ", async () => {
-    await openMenu();
-
-    expect(
-      screen.getByRole("menuitem", { name: /メニューセット/ }),
-    ).toHaveAttribute("href", "/practice/menu-sets");
-  });
-
-  it("練習スケジュールへの導線を持つ", async () => {
-    await openMenu();
-
-    expect(
-      screen.getByRole("menuitem", { name: /練習スケジュール/ }),
-    ).toHaveAttribute("href", "/practice/schedules");
-  });
-
-  it("振り返りテンプレへの導線を持つ", async () => {
-    await openMenu();
-
-    expect(
-      screen.getByRole("menuitem", { name: /振り返りテンプレ/ }),
-    ).toHaveAttribute("href", "/note/templates");
-  });
-
-  it("野球ノートとシーズン管理の導線を維持する", async () => {
-    await openMenu();
-
-    expect(
-      screen.getByRole("menuitem", { name: /野球ノート/ }),
-    ).toHaveAttribute("href", "/note");
-    expect(
-      screen.getByRole("menuitem", { name: /シーズン管理/ }),
-    ).toHaveAttribute("href", "/seasons");
+    const items = screen.getAllByRole("menuitem");
+    expect(items.map((item) => item.textContent)).toEqual([
+      "練習記録",
+      "野球ノート",
+      "シーズン管理",
+      "設定",
+    ]);
+    expect(items[0]).toHaveAttribute("href", "/practice/records");
+    expect(items[1]).toHaveAttribute("href", "/note");
+    expect(items[2]).toHaveAttribute("href", "/seasons");
+    expect(items[3]).toHaveAttribute("href", "/settings");
   });
 
   it("未ログインではメニューを出さない", () => {

@@ -11,11 +11,9 @@ import Link from "next/link";
 import HeaderLoginAndSignUp from "@app/components/auth/HeaderLoginAndSignUp";
 import { BallIcon } from "@app/components/icon/BallIcon";
 import { CalendarIcon } from "@app/components/icon/CalendarIcon";
-import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
-import { RankingIcon } from "@app/components/icon/RankingIcon";
-import { StatsIcon } from "@app/components/icon/StatsIcon";
+import { SettingsIcon } from "@app/components/icon/SettingsIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
 import { useAuthContext } from "@app/contexts/useAuthContext";
@@ -48,26 +46,6 @@ export default function HeaderRight() {
               </DropdownTrigger>
               <DropdownMenu aria-label="Header menu">
                 <DropdownItem
-                  key="note"
-                  as={Link}
-                  href="/note"
-                  startContent={
-                    <NoteIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  野球ノート
-                </DropdownItem>
-                <DropdownItem
-                  key="reflection-templates"
-                  as={Link}
-                  href="/note/templates"
-                  startContent={
-                    <NoteIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  振り返りテンプレ
-                </DropdownItem>
-                <DropdownItem
                   key="practice-records"
                   as={Link}
                   href="/practice/records"
@@ -78,94 +56,14 @@ export default function HeaderRight() {
                   練習記録
                 </DropdownItem>
                 <DropdownItem
-                  key="themes"
+                  key="note"
                   as={Link}
-                  href="/themes"
+                  href="/note"
                   startContent={
-                    <BallIcon fill="currentColor" width="18" height="18" />
+                    <NoteIcon fill="currentColor" width="18" height="18" />
                   }
                 >
-                  課題
-                </DropdownItem>
-                <DropdownItem
-                  key="review"
-                  as={Link}
-                  href="/review"
-                  startContent={
-                    <StatsIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  振り返りレポート
-                </DropdownItem>
-                <DropdownItem
-                  key="insights"
-                  as={Link}
-                  href="/insights"
-                  startContent={
-                    <StatsIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  練習と成績のつながり
-                </DropdownItem>
-                <DropdownItem
-                  key="goals"
-                  as={Link}
-                  href="/goals"
-                  startContent={
-                    <RankingIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  目標
-                </DropdownItem>
-                <DropdownItem
-                  key="shadow-swing"
-                  as={Link}
-                  href="/practice/shadow-swing"
-                  startContent={
-                    <BallIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  素振りカウンター
-                </DropdownItem>
-                <DropdownItem
-                  key="practice-menus"
-                  as={Link}
-                  href="/practice/menus"
-                  startContent={
-                    <BallIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  練習メニュー
-                </DropdownItem>
-                <DropdownItem
-                  key="menu-sets"
-                  as={Link}
-                  href="/practice/menu-sets"
-                  startContent={
-                    <BallIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  メニューセット
-                </DropdownItem>
-                <DropdownItem
-                  key="practice-schedules"
-                  as={Link}
-                  href="/practice/schedules"
-                  startContent={
-                    <CalendarIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  練習スケジュール
-                </DropdownItem>
-                <DropdownItem
-                  key="practice-schedules-calendar"
-                  as={Link}
-                  href="/practice/schedules/calendar"
-                  startContent={
-                    <CalendarIcon fill="currentColor" width="18" height="18" />
-                  }
-                >
-                  予定カレンダー
+                  野球ノート
                 </DropdownItem>
                 <DropdownItem
                   key="seasons"
@@ -178,14 +76,14 @@ export default function HeaderRight() {
                   シーズン管理
                 </DropdownItem>
                 <DropdownItem
-                  key="contact"
+                  key="settings"
                   as={Link}
-                  href="/contact"
+                  href="/settings"
                   startContent={
-                    <MailIcon fill="currentColor" width="18" height="18" />
+                    <SettingsIcon fill="currentColor" width="18" height="18" />
                   }
                 >
-                  ご意見・改善案
+                  設定
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
