@@ -17,7 +17,10 @@ const forbiddenError = () =>
   new AxiosError("forbidden", "ERR_BAD_REQUEST", undefined, undefined, {
     status: 403,
     statusText: "Forbidden",
-    data: { error: "Pro プランでグループを無制限に作成・参加できます" },
+    data: {
+      error: "group_limit_exceeded",
+      message: "Pro プランでグループを無制限に作成・参加できます",
+    },
     headers: new AxiosHeaders(),
     config: { headers: new AxiosHeaders() },
   });
