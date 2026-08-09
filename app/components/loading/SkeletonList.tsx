@@ -18,7 +18,6 @@ export default function SkeletonList({
   return (
     <div className={`flex flex-col ${gapClassName}`}>
       {Array.from({ length: count }).map((_, index) => (
-         
         <SkeletonBlock
           key={index}
           className={itemClassName}
