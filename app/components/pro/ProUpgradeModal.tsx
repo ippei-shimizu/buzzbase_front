@@ -365,7 +365,7 @@ export default function ProUpgradeModal({
                 className="font-bold"
                 data-testid="pro-upgrade-cta"
               >
-                PROを始める
+                {isTrialEligible ? "7日間無料で試す" : "Proに加入する"}
               </Button>
             </>
           )}
