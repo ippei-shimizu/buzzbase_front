@@ -71,6 +71,44 @@ describe("ProUpgradeModal", () => {
     );
   });
 
+  it("Pro状態の判定確定前は、実際はトライアル利用済みでもCTAボタンに中立文言を表示する", () => {
+    mockUseProStatus.mockReturnValue({
+      proStatus: {
+        ...DEFAULT_PRO_STATUS,
+        subscription: {
+          ...DEFAULT_PRO_STATUS.subscription,
+          has_used_trial: true,
+        },
+      },
+      isPro: false,
+      isLoading: true,
+      isRefreshing: false,
+      refresh: jest.fn(),
+    });
+
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+    expect(screen.getByTestId("pro-upgrade-cta")).toHaveTextContent(
+      "PROを始める",
+    );
+  });
+
+  it("Pro状態の判定確定前はトライアル案内文を表示しない", () => {
+    mockUseProStatus.mockReturnValue({
+      proStatus: DEFAULT_PRO_STATUS,
+      isPro: false,
+      isLoading: true,
+      isRefreshing: false,
+      refresh: jest.fn(),
+    });
+
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+    expect(
+      screen.queryByText(
+        "7 日間の無料トライアル期間中に解約すれば料金はかかりません",
+      ),
+    ).not.toBeInTheDocument();
+  });
+
   it("isOpen が false のときは何も描画しない", () => {
     render(<ProUpgradeModal isOpen={false} onClose={jest.fn()} />);
     expect(screen.queryByText("BUZZ BASE Pro")).not.toBeInTheDocument();

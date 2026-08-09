@@ -108,8 +108,11 @@ export default function ProUpgradeModal({
   const proFeatures = useFeatureFlag("pro_features", { skip: !isOpen });
   // back の trial_days_calculator と同じ判定（has_used_trial）。既に使い切ったユーザーに
   // 「7日間無料」と誤案内しないため、CTA まわりの文言はここで出し分ける。
-  const { proStatus } = useProStatus();
-  const isTrialEligible = !proStatus.subscription.has_used_trial;
+  // 判定確定前（isLoading）は DEFAULT_PRO_STATUS（has_used_trial: false）にフォールバックし
+  // isTrialEligible が常に true になるため、確定するまではトライアル訴求を一切出さない。
+  const { proStatus, isLoading: isProStatusLoading } = useProStatus();
+  const isTrialEligible =
+    !isProStatusLoading && !proStatus.subscription.has_used_trial;
 
   const copy = (trigger && PRO_PAYWALL_COPY[trigger]) ?? DEFAULT_PAYWALL_COPY;
   // ハイライトカードで既に訴求している機能を比較表でも繰り返さない。
@@ -365,7 +368,11 @@ export default function ProUpgradeModal({
                 className="font-bold"
                 data-testid="pro-upgrade-cta"
               >
-                {isTrialEligible ? "7日間無料で試す" : "Proに加入する"}
+                {isProStatusLoading
+                  ? "PROを始める"
+                  : isTrialEligible
+                    ? "7日間無料で試す"
+                    : "Proに加入する"}
               </Button>
             </>
           )}
