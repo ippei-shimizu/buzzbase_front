@@ -5,7 +5,6 @@ import type {
   GameSummaryResult,
 } from "../gameSummaryTypes";
 import type { FilterOption } from "@app/components/filter/filterTypes";
-import { Spinner } from "@heroui/react";
 import { useEffect, useState, useTransition } from "react";
 import FilterBar from "@app/components/filter/FilterBar";
 import { MATCH_TYPE_OPTIONS } from "@app/components/filter/matchTypeOptions";
@@ -15,6 +14,7 @@ import {
   getGameSummaryFilterOptions,
 } from "../gameSummaryActions";
 import { GameResultSummary } from "./summary/GameResultSummary";
+import { GameSummarySkeleton } from "./summary/GameSummarySkeleton";
 
 /** サマリータブ本体。フィルタ（年度/月範囲/種別/シーズン/大会）変更で再取得し、結果を表示する。 */
 export function GameSummaryContainer() {
@@ -55,11 +55,7 @@ export function GameSummaryContainer() {
   }, [filters, startRefetch]);
 
   if (!result) {
-    return (
-      <div className="flex justify-center py-16">
-        <Spinner color="default" size="sm" />
-      </div>
-    );
+    return <GameSummarySkeleton />;
   }
 
   if (result.status === "unauthenticated") {
