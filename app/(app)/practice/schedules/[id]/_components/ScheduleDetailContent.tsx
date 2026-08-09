@@ -74,7 +74,11 @@ export default function ScheduleDetailContent({
   const router = useRouter();
   const [doneLogIds, setDoneLogIds] =
     useState<Record<number, number[]>>(initialDoneLogIds);
-  const [togglingMenuId, setTogglingMenuId] = useState<number | null>(null);
+  // メニューごとに進行中のリクエストを追跡する（単一値だと、別メニューのトグルで
+  // 前のメニューが再送信可能になり、同じメニューの練習ログが二重作成されうるため）。
+  const [togglingMenuIds, setTogglingMenuIds] = useState<Set<number>>(
+    new Set(),
+  );
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -85,15 +89,27 @@ export default function ScheduleDetailContent({
 
   const isDone = (menuId: number) => (doneLogIds[menuId]?.length ?? 0) > 0;
 
+  const setToggling = (menuId: number, isToggling: boolean) =>
+    setTogglingMenuIds((prev) => {
+      const next = new Set(prev);
+      if (isToggling) {
+        next.add(menuId);
+      } else {
+        next.delete(menuId);
+      }
+      return next;
+    });
+
   const handleToggle = async (menuId: number) => {
-    setTogglingMenuId(menuId);
+    if (togglingMenuIds.has(menuId)) return;
+    setToggling(menuId, true);
     const logIds = doneLogIds[menuId] ?? [];
 
     if (logIds.length > 0) {
       const results = await Promise.all(
         logIds.map((logId) => deletePracticeLog(logId)),
       );
-      setTogglingMenuId(null);
+      setToggling(menuId, false);
       if (results.some((result) => !result.ok)) {
         toast.error("「済」の解除に失敗しました");
         return;
@@ -113,7 +129,7 @@ export default function ScheduleDetailContent({
       schedule_id: schedule.id,
       logged_on: contextDate,
     });
-    setTogglingMenuId(null);
+    setToggling(menuId, false);
     if (!result.ok) {
       toast.error(result.errors[0]);
       return;
@@ -218,7 +234,7 @@ export default function ScheduleDetailContent({
                       checked={done}
                       disabled={
                         logsLoadFailed ||
-                        togglingMenuId === menu.practice_menu_id
+                        togglingMenuIds.has(menu.practice_menu_id)
                       }
                       onChange={() => handleToggle(menu.practice_menu_id)}
                       className="h-4 w-4 accent-[#d08000] disabled:opacity-50"

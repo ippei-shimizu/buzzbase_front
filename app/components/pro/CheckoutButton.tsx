@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProPlan } from "../actions";
+import type { ProPlan } from "@app/(app)/pro/actions";
 import { Button } from "@heroui/react";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 
@@ -14,7 +14,7 @@ interface CheckoutButtonProps {
 }
 
 /**
- * LP /pro 内の CTA ボタン。
+ * Pro 加入 CTA ボタン。
  * 直接 Stripe Checkout は呼ばず、共通の Pro 加入モーダル（ProUpgradeModal）を開く。
  * モーダル内でプラン選択 → Stripe Checkout へ遷移する。
  */

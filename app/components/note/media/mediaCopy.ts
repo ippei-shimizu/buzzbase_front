@@ -44,6 +44,13 @@ export const LEAVE_WARNING_MESSAGE =
 export const ROLLBACK_MESSAGE =
   "メディアの保存に失敗したため、ノートは保存されませんでした。もう一度お試しください。";
 
+/**
+ * ロールバック（作成済みノートの削除）自体が失敗したときに出す文言。
+ * サーバー側にノートが残っている可能性があるため、再送信を促さず一覧の確認を案内する。
+ */
+export const ROLLBACK_FAILED_MESSAGE =
+  "メディアの保存に失敗し、ノートの削除にも失敗しました。ノートが残っている場合があるため、一覧をご確認のうえ必要であれば削除してください。";
+
 export const DELETE_CONFIRM_TITLE = "この添付を削除しますか？";
 
 export const DELETE_CONFIRM_BODY =

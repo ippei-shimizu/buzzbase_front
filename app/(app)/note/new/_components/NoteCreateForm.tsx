@@ -9,12 +9,14 @@ import { Button, Input } from "@heroui/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderNote from "@app/components/header/HeaderNote";
 import {
   FREE_LIMIT_DESCRIPTION,
   FREE_LIMIT_NOTICE,
   FREE_LIMIT_TITLE,
+  ROLLBACK_FAILED_MESSAGE,
   ROLLBACK_MESSAGE,
 } from "@app/components/note/media/mediaCopy";
 import StagedMediaSection from "@app/components/note/media/StagedMediaSection";
@@ -153,7 +155,17 @@ export default function NoteCreateForm({
     const summary = summarizeStagedUploads(results);
 
     if (summary.shouldRollbackNote) {
-      await deleteBaseballNote(noteId);
+      const rollbackResult = await deleteBaseballNote(noteId);
+      if (!rollbackResult.ok) {
+        // 削除自体が失敗した場合、本文を含むノートがサーバーに残っている可能性が高い。
+        // 作成フォームに留めて再送信させると重複ノートを生むため、一覧へ逃がす。
+        stagedMedia.forEach((asset) => {
+          if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
+        });
+        toast.error(ROLLBACK_FAILED_MESSAGE);
+        router.push("/note");
+        return;
+      }
       setErrorsWithTimeout([ROLLBACK_MESSAGE]);
       setIsSubmitting(false);
       return;

@@ -186,6 +186,7 @@ describe("prepareMediaFile", () => {
         expect.anything(),
         { durationSeconds: 20, width: 1920, height: 1080 },
         480,
+        { signal: undefined },
       );
       expect(result).toMatchObject({
         ok: true,
@@ -197,6 +198,30 @@ describe("prepareMediaFile", () => {
           height: 270,
         },
       });
+    });
+
+    it("呼び出し元の signal をリサイズへそのまま橋渡しする（圧縮中のキャンセルを効かせるため）", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 20,
+        width: 1920,
+        height: 1080,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+      mockResizeVideoToLongEdge.mockResolvedValue({
+        file: new Blob(["resized"], { type: "video/mp4" }),
+        contentType: "video/mp4",
+        meta: { durationSeconds: 20, width: 480, height: 270 },
+      });
+      const controller = new AbortController();
+
+      await prepareMediaFile(videoFile(), false, { signal: controller.signal });
+
+      expect(mockResizeVideoToLongEdge).toHaveBeenCalledWith(
+        expect.anything(),
+        { durationSeconds: 20, width: 1920, height: 1080 },
+        480,
+        { signal: controller.signal },
+      );
     });
 
     it("長さも超過している場合はリサイズを試みず弾く", async () => {
@@ -211,6 +236,25 @@ describe("prepareMediaFile", () => {
 
       expect(mockResizeVideoToLongEdge).not.toHaveBeenCalled();
       expect(result).toMatchObject({ ok: false });
+    });
+
+    it("キャンセルによる中断（AbortError）は、通常のバリデーションエラーではなくキャンセル専用メッセージを返す", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 20,
+        width: 1920,
+        height: 1080,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+      mockResizeVideoToLongEdge.mockRejectedValue(
+        new DOMException("動画の変換が中断されました", "AbortError"),
+      );
+
+      const result = await prepareMediaFile(videoFile(), false);
+
+      expect(result).toEqual({
+        ok: false,
+        message: "動画の圧縮をキャンセルしました。",
+      });
     });
 
     it("リサイズが失敗したら元のバリデーションエラーで弾く", async () => {

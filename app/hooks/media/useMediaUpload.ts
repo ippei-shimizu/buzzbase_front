@@ -63,8 +63,15 @@ export function useMediaUpload(): UseMediaUploadReturn {
 
   const prepare = useCallback(
     async (file: File): Promise<PrepareMediaResult> => {
+      // 圧縮中に cancel() が押されたら実際に中断できるよう、uploadAll と同様に
+      // abortRef へ積む（動画リサイズは mediabunny の Conversion#cancel() に橋渡しする）。
+      const controller = new AbortController();
+      abortRef.current = controller;
       setPhase("compressing");
-      const result = await prepareMediaFile(file, isPro);
+      const result = await prepareMediaFile(file, isPro, {
+        signal: controller.signal,
+      });
+      abortRef.current = null;
       setPhase(result.ok ? "idle" : "error");
       return result;
     },

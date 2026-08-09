@@ -143,6 +143,44 @@ describe("ScheduleDetailContent", () => {
       );
     });
 
+    it("別メニューのトグル中でも、リクエストが進行中のメニューは操作できず二重送信しない", async () => {
+      const user = userEvent.setup();
+      let resolveFirstCreate: (
+        value: Awaited<ReturnType<typeof createPracticeLog>>,
+      ) => void = () => {};
+      mockCreateLog.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirstCreate = resolve;
+          }),
+      );
+      renderDetail();
+
+      await user.click(screen.getByRole("checkbox", { name: /素振り/ }));
+      expect(screen.getByRole("checkbox", { name: /素振り/ })).toBeDisabled();
+
+      mockCreateLog.mockResolvedValueOnce({
+        ok: true,
+        data: { id: 200 },
+      } as Awaited<ReturnType<typeof createPracticeLog>>);
+      await user.click(screen.getByRole("checkbox", { name: /ランニング/ }));
+
+      // 別メニューをトグルしても、進行中の素振りは無効のまま（再送信不可）。
+      expect(screen.getByRole("checkbox", { name: /素振り/ })).toBeDisabled();
+      await user.click(screen.getByRole("checkbox", { name: /素振り/ }));
+      expect(mockCreateLog).toHaveBeenCalledTimes(2);
+
+      resolveFirstCreate({
+        ok: true,
+        data: { id: 99 },
+      } as Awaited<ReturnType<typeof createPracticeLog>>);
+      await waitFor(() =>
+        expect(screen.getByRole("checkbox", { name: /素振り/ })).toBeChecked(),
+      );
+      // 進行中に押し直しても handleToggle 自体は増えていない（1件目の解決分のみ）。
+      expect(mockCreateLog).toHaveBeenCalledTimes(2);
+    });
+
     it("当日ログの取得に失敗したときは済の状態を触らせない", () => {
       renderDetail({ logsLoadFailed: true });
 

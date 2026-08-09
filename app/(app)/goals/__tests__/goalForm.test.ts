@@ -229,6 +229,12 @@ describe("validateGoalForm", () => {
     expect(validateGoalForm(buildValues({ targetValue: "0" }))).toEqual([]);
   });
 
+  it("目標値に負の数は入力できない", () => {
+    expect(validateGoalForm(buildValues({ targetValue: "-5" }))).toEqual([
+      "目標値は0以上の数値を入力してください",
+    ]);
+  });
+
   it("定性目標は目標（タイトル）が必須で、目標値は不要", () => {
     expect(
       validateGoalForm(buildValues({ kind: "qualitative", title: "" })),
@@ -296,6 +302,52 @@ describe("validateGoalForm", () => {
         }),
       ),
     ).toEqual([]);
+  });
+
+  it("カスタム期間は開始日・終了日のどちらも未入力を許さない", () => {
+    expect(
+      validateGoalForm(
+        buildValues({
+          periodType: "custom",
+          targetValue: "20",
+          startDate: "2026-08-10",
+          deadline: "",
+        }),
+      ),
+    ).toEqual(["開始日と終了日を入力してください"]);
+    expect(
+      validateGoalForm(
+        buildValues({
+          periodType: "custom",
+          targetValue: "20",
+          startDate: "",
+          deadline: "2026-08-10",
+        }),
+      ),
+    ).toEqual(["開始日と終了日を入力してください"]);
+  });
+
+  it("シーズン目標・大会目標は期限（日付入力のクリア等での空文字）を許さない", () => {
+    expect(
+      validateGoalForm(
+        buildValues({
+          periodType: "season",
+          targetValue: "0.3",
+          seasonId: 1,
+          deadline: "",
+        }),
+      ),
+    ).toEqual(["期限を入力してください"]);
+    expect(
+      validateGoalForm(
+        buildValues({
+          periodType: "tournament",
+          targetValue: "0.3",
+          tournamentId: 1,
+          deadline: "",
+        }),
+      ),
+    ).toEqual(["期限を入力してください"]);
   });
 });
 

@@ -11,7 +11,6 @@ import AchievementSummaryModal from "./_components/AchievementSummaryModal";
 import { LOAD_ERROR_MESSAGE } from "./_components/goalCopy";
 import GoalsContent from "./_components/GoalsContent";
 import { previousMonthKey } from "./_utils/achievementSummary";
-import { todayString } from "./_utils/goalForm";
 import { getGoalSeasonOptions, getGoalTournamentOptions } from "./actions";
 
 export const metadata = {
@@ -65,7 +64,6 @@ export default async function GoalsPage() {
                     : []
                 }
                 menus={menus.status === "ok" ? menus.data : []}
-                today={todayString()}
               />
             ) : (
               // 取得失敗を空配列に丸めると「目標が未設定」と誤表示し、同じ目標の重複作成を招く。

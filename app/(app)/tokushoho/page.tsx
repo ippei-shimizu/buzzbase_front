@@ -32,16 +32,8 @@ const ITEMS: { term: string; description: React.ReactNode }[] = [
   },
   {
     term: "販売価格",
-    description: (
-      <>
-        月額プラン ¥300（税込）／月、年額プラン
-        ¥2,980（税込）／年（月あたり¥248相当）。7日間の無料トライアルがあります。詳細は
-        <Link href="/pro" className="text-blue-400 underline">
-          Proプランのご案内
-        </Link>
-        ページをご確認ください。
-      </>
-    ),
+    description:
+      "月額プラン ¥300（税込）／月、年額プラン ¥2,980（税込）／年（月あたり¥248相当）。7日間の無料トライアルがあります。",
   },
   {
     term: "商品代金以外の必要料金",

@@ -52,8 +52,6 @@ const mockUnachieve = unachieveGoal as jest.MockedFunction<
   typeof unachieveGoal
 >;
 
-const TODAY = "2026-08-03";
-
 function buildGoal(overrides: Partial<Goal> = {}): Goal {
   return {
     id: 1,
@@ -117,7 +115,6 @@ function renderContent(
           sort_order: 1,
         },
       ]}
-      today={TODAY}
       {...props}
     />,
   );

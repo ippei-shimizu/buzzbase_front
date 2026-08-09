@@ -1,5 +1,5 @@
 import type { ProSubscription, SubscriptionStatus } from "@app/types/pro";
-import Link from "next/link";
+import CheckoutButton from "@app/components/pro/CheckoutButton";
 import BillingIssueGuide from "./BillingIssueGuide";
 import CancelGuide from "./CancelGuide";
 import PlanChangeGuide from "./PlanChangeGuide";
@@ -27,12 +27,7 @@ export default function SubscriptionOverview({
       <BillingIssueGuide subscription={subscription} />
       <PlanChangeGuide subscription={subscription} />
       {JOINABLE_STATUSES.includes(subscription.status) ? (
-        <Link
-          href="/pro"
-          className="rounded-lg bg-[#d08000] px-4 py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90"
-        >
-          Pro に加入する
-        </Link>
+        <CheckoutButton label="Pro に加入する" fullWidth />
       ) : null}
       <CancelGuide subscription={subscription} surveyEnabled={surveyEnabled} />
     </div>

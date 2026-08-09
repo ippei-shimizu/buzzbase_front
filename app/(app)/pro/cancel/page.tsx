@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import CheckoutButton from "@app/components/pro/CheckoutButton";
 
 export const metadata: Metadata = {
   title: "Pro 加入手続きを中断しました — BUZZ BASE",
@@ -19,12 +20,7 @@ export default function ProCancelPage() {
           日間の無料トライアル付きなので、いつでもお気軽にお試しください。
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Link
-            href="/pro"
-            className="inline-block rounded-lg bg-[#d08000] px-6 py-3 font-bold text-white transition hover:bg-[#b66c00]"
-          >
-            プランをもう一度見る
-          </Link>
+          <CheckoutButton label="プランをもう一度見る" />
           <Link
             href="/dashboard"
             className="inline-block rounded-lg border border-gray-600 px-6 py-3 font-bold text-gray-200 transition hover:bg-[#2E2E2E]"

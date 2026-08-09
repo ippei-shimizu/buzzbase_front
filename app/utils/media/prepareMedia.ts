@@ -20,6 +20,12 @@ export type PrepareMediaResult =
 const UNSUPPORTED_MESSAGE =
   "対応していない形式です。JPEG / PNG / HEIC の画像、MP4 / MOV の動画を選んでください。";
 
+const CANCELED_MESSAGE = "動画の圧縮をキャンセルしました。";
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 /**
  * 選択されたファイルを、そのままアップロードできる形まで整える。
  *
@@ -30,13 +36,14 @@ const UNSUPPORTED_MESSAGE =
 export async function prepareMediaFile(
   file: File,
   isPro: boolean,
+  options?: { signal?: AbortSignal },
 ): Promise<PrepareMediaResult> {
   const kind = resolveMediaKind(file.type);
   if (!kind) return { ok: false, message: UNSUPPORTED_MESSAGE };
 
   return kind.mediaType === "image"
     ? prepareImage(file, kind.contentType, isPro)
-    : prepareVideo(file, kind.contentType, isPro);
+    : prepareVideo(file, kind.contentType, isPro, options?.signal);
 }
 
 async function prepareImage(
@@ -74,6 +81,7 @@ async function prepareVideo(
   file: File,
   contentType: string,
   isPro: boolean,
+  signal?: AbortSignal,
 ): Promise<PrepareMediaResult> {
   let meta;
   try {
@@ -97,14 +105,19 @@ async function prepareVideo(
   // 長さの超過はリサイズでは解決しないため試みない。
   if (!durationExceeded && resolutionExceeded && isVideoResizeSupported()) {
     try {
-      const resized = await resizeVideoToLongEdge(file, meta, videoMaxHeight);
+      const resized = await resizeVideoToLongEdge(file, meta, videoMaxHeight, {
+        signal,
+      });
       if (!validateVideoMeta(resized.meta, isPro)) {
         meta = resized.meta;
         resultFile = resized.file;
         resultContentType = resized.contentType;
       }
-    } catch {
-      // 非対応環境や変換失敗時は元ファイルのバリデーション結果に委ねる（下のエラーで弾かれる）。
+    } catch (error) {
+      // ユーザーが圧縮中にキャンセルした場合は、元メタデータでの再検証に流さず
+      // 「キャンセルした」ことが伝わる専用メッセージを返す。
+      if (isAbortError(error)) return { ok: false, message: CANCELED_MESSAGE };
+      // それ以外（非対応環境・変換失敗・タイムアウト）は元ファイルのバリデーション結果に委ねる（下のエラーで弾かれる）。
     }
   }
 
