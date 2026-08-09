@@ -2,6 +2,7 @@ import Header from "@app/components/header/Header";
 import LoadingFrame from "@app/components/loading/LoadingFrame";
 import SkeletonBlock from "@app/components/loading/SkeletonBlock";
 import SkeletonList from "@app/components/loading/SkeletonList";
+import { AnalysisSkeleton } from "./_components/analysis/AnalysisSkeleton";
 
 export default function Loading() {
   return (
@@ -10,11 +11,8 @@ export default function Loading() {
         <SkeletonBlock className="h-11 flex-1" rounded="rounded-none" />
         <SkeletonBlock className="h-11 flex-1" rounded="rounded-none" />
       </div>
-      <div className="mt-5 flex flex-col gap-4">
-        <SkeletonBlock className="h-10 w-full" />
-        <SkeletonBlock className="h-28 w-full" rounded="rounded-xl" />
-        <SkeletonBlock className="h-48 w-full" rounded="rounded-xl" />
-        <SkeletonBlock className="h-64 w-full" rounded="rounded-xl" />
+      <div className="mt-5">
+        <AnalysisSkeleton />
       </div>
       <div className="mt-6 flex items-center justify-between">
         <SkeletonBlock className="h-5 w-20" />
