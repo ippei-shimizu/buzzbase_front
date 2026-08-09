@@ -180,7 +180,9 @@ describe("resizeVideoToLongEdge", () => {
     );
     controller.abort();
 
-    await expect(promise).rejects.toThrow();
+    // タイムアウト等の他の失敗要因と区別できるよう、signal起因のときは
+    // 常に AbortError として投げる（呼び出し元がキャンセル専用メッセージを出すため）。
+    await expect(promise).rejects.toMatchObject({ name: "AbortError" });
     expect(cancel).toHaveBeenCalledTimes(1);
   });
 

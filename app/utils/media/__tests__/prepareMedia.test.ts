@@ -238,6 +238,25 @@ describe("prepareMediaFile", () => {
       expect(result).toMatchObject({ ok: false });
     });
 
+    it("キャンセルによる中断（AbortError）は、通常のバリデーションエラーではなくキャンセル専用メッセージを返す", async () => {
+      mockReadVideoMeta.mockResolvedValue({
+        durationSeconds: 20,
+        width: 1920,
+        height: 1080,
+      });
+      mockIsVideoResizeSupported.mockReturnValue(true);
+      mockResizeVideoToLongEdge.mockRejectedValue(
+        new DOMException("動画の変換が中断されました", "AbortError"),
+      );
+
+      const result = await prepareMediaFile(videoFile(), false);
+
+      expect(result).toEqual({
+        ok: false,
+        message: "動画の圧縮をキャンセルしました。",
+      });
+    });
+
     it("リサイズが失敗したら元のバリデーションエラーで弾く", async () => {
       mockReadVideoMeta.mockResolvedValue({
         durationSeconds: 20,

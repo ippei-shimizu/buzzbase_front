@@ -74,7 +74,14 @@ export async function resizeVideoToLongEdge(
     throw new DOMException("動画の変換が中断されました", "AbortError");
   }
 
-  const handleAbort = () => void conversion.cancel();
+  // タイムアウトによる cancel() と signal による cancel() は mediabunny 側では
+  // 区別されず同じ例外になるため、呼び出し元に「ユーザーの中断か」を伝えられるよう
+  // ここでどちらが引き金だったかを覚えておく。
+  let canceledBySignal = false;
+  const handleAbort = () => {
+    canceledBySignal = true;
+    void conversion.cancel();
+  };
   signal?.addEventListener("abort", handleAbort);
   const timeoutId = setTimeout(
     () => void conversion.cancel(),
@@ -83,6 +90,11 @@ export async function resizeVideoToLongEdge(
 
   try {
     await conversion.execute();
+  } catch (error) {
+    if (canceledBySignal) {
+      throw new DOMException("動画の変換が中断されました", "AbortError");
+    }
+    throw error;
   } finally {
     clearTimeout(timeoutId);
     signal?.removeEventListener("abort", handleAbort);

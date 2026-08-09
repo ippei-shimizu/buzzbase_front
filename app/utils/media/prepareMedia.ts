@@ -20,6 +20,12 @@ export type PrepareMediaResult =
 const UNSUPPORTED_MESSAGE =
   "対応していない形式です。JPEG / PNG / HEIC の画像、MP4 / MOV の動画を選んでください。";
 
+const CANCELED_MESSAGE = "動画の圧縮をキャンセルしました。";
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 /**
  * 選択されたファイルを、そのままアップロードできる形まで整える。
  *
@@ -107,8 +113,11 @@ async function prepareVideo(
         resultFile = resized.file;
         resultContentType = resized.contentType;
       }
-    } catch {
-      // 非対応環境や変換失敗時は元ファイルのバリデーション結果に委ねる（下のエラーで弾かれる）。
+    } catch (error) {
+      // ユーザーが圧縮中にキャンセルした場合は、元メタデータでの再検証に流さず
+      // 「キャンセルした」ことが伝わる専用メッセージを返す。
+      if (isAbortError(error)) return { ok: false, message: CANCELED_MESSAGE };
+      // それ以外（非対応環境・変換失敗・タイムアウト）は元ファイルのバリデーション結果に委ねる（下のエラーで弾かれる）。
     }
   }
 
