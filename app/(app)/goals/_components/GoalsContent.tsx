@@ -31,6 +31,7 @@ import {
   type GoalFormValues,
   buildGoalCreatePayload,
   buildGoalUpdatePayload,
+  todayString,
 } from "../_utils/goalForm";
 import {
   GOAL_TABS,
@@ -59,7 +60,6 @@ interface GoalsContentProps {
   seasons: SeasonData[];
   tournaments: TournamentData[];
   menus: PracticeMenu[];
-  today: string;
 }
 
 /** フォームを開くたびに増やし、key の付け替えで入力状態を初期化するための識別子。 */
@@ -79,8 +79,10 @@ export default function GoalsContent({
   seasons,
   tournaments,
   menus,
-  today,
 }: GoalsContentProps) {
+  // SSR 時点で固定せず render のたびに評価する。目標画面を開きっぱなしのタブで
+  // 日付をまたいでも、期限の既定値や送信payloadの today が古いまま固定されないようにする。
+  const today = todayString();
   const [goals, setGoals] = useState<Goal[]>(initialGoals);
   const [history, setHistory] = useState<Goal[]>(initialHistory);
   const [tab, setTab] = useState<GoalTab>("in_progress");
