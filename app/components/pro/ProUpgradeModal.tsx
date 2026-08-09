@@ -272,7 +272,7 @@ export default function ProUpgradeModal({
                     className={`flex items-center gap-3 rounded-xl border p-3.5 text-left ${
                       isSelected
                         ? "border-[#d08000] bg-[#d08000]/10"
-                        : "border-transparent bg-[#424242]"
+                        : "border-zinc-600 bg-[#424242]"
                     }`}
                   >
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#d08000]">
