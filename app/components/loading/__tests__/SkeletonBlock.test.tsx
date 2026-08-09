@@ -22,4 +22,10 @@ describe("SkeletonBlock", () => {
     expect(container.querySelector(".rounded-none")).not.toBeNull();
     expect(container.querySelector(".rounded-lg")).toBeNull();
   });
+
+  it("最も外側の要素にもサイズ指定を適用する（flex-1 等が兄弟レイアウトに効くように）", () => {
+    const { container } = render(<SkeletonBlock className="h-24 w-full" />);
+
+    expect(container.firstElementChild).toHaveClass("h-24", "w-full");
+  });
 });

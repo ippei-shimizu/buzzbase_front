@@ -25,14 +25,18 @@ export default function Loading() {
         {/* RecordButtonsSection: カード枠なし。ボタン2つ + リンク1つ */}
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <SkeletonBlock
-              className="h-[52px] flex-1"
-              rounded="rounded-[10px]"
-            />
-            <SkeletonBlock
-              className="h-[52px] flex-1"
-              rounded="rounded-[10px]"
-            />
+            <div className="flex-1">
+              <SkeletonBlock
+                className="h-[52px] w-full"
+                rounded="rounded-[10px]"
+              />
+            </div>
+            <div className="flex-1">
+              <SkeletonBlock
+                className="h-[52px] w-full"
+                rounded="rounded-[10px]"
+              />
+            </div>
           </div>
           <SkeletonBlock className="h-11 w-full" rounded="rounded-[10px]" />
         </div>

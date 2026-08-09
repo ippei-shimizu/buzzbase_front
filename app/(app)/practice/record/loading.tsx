@@ -7,8 +7,12 @@ export default function Loading() {
   return (
     <LoadingFrame header={<HeaderBack />} paddingTop="pt-[74px]">
       <SkeletonBlock className="h-6 w-40" />
-      <SkeletonBlock className="mt-2 h-4 w-64" />
-      <SkeletonBlock className="mt-8 h-14 w-full" />
+      <div className="mt-2">
+        <SkeletonBlock className="h-4 w-64" />
+      </div>
+      <div className="mt-8">
+        <SkeletonBlock className="h-14 w-full" />
+      </div>
       <div className="mt-8">
         <SkeletonList
           count={5}
