@@ -30,13 +30,14 @@ const UNSUPPORTED_MESSAGE =
 export async function prepareMediaFile(
   file: File,
   isPro: boolean,
+  options?: { signal?: AbortSignal },
 ): Promise<PrepareMediaResult> {
   const kind = resolveMediaKind(file.type);
   if (!kind) return { ok: false, message: UNSUPPORTED_MESSAGE };
 
   return kind.mediaType === "image"
     ? prepareImage(file, kind.contentType, isPro)
-    : prepareVideo(file, kind.contentType, isPro);
+    : prepareVideo(file, kind.contentType, isPro, options?.signal);
 }
 
 async function prepareImage(
@@ -74,6 +75,7 @@ async function prepareVideo(
   file: File,
   contentType: string,
   isPro: boolean,
+  signal?: AbortSignal,
 ): Promise<PrepareMediaResult> {
   let meta;
   try {
@@ -97,7 +99,9 @@ async function prepareVideo(
   // 長さの超過はリサイズでは解決しないため試みない。
   if (!durationExceeded && resolutionExceeded && isVideoResizeSupported()) {
     try {
-      const resized = await resizeVideoToLongEdge(file, meta, videoMaxHeight);
+      const resized = await resizeVideoToLongEdge(file, meta, videoMaxHeight, {
+        signal,
+      });
       if (!validateVideoMeta(resized.meta, isPro)) {
         meta = resized.meta;
         resultFile = resized.file;

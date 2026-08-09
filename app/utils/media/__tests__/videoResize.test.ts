@@ -72,6 +72,7 @@ describe("resizeVideoToLongEdge", () => {
     mockConversionInit.mockResolvedValue({
       isValid: true,
       execute: jest.fn().mockResolvedValue(undefined),
+      cancel: jest.fn(),
     });
 
     await resizeVideoToLongEdge(
@@ -139,5 +140,69 @@ describe("resizeVideoToLongEdge", () => {
       width: 480,
       height: 270,
     });
+  });
+
+  it("signal が既に abort 済みなら変換を実行せず conversion.cancel() して例外を投げる", async () => {
+    const execute = jest.fn();
+    const cancel = jest.fn().mockResolvedValue(undefined);
+    mockConversionInit.mockResolvedValue({ isValid: true, execute, cancel });
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      resizeVideoToLongEdge(
+        videoFile(),
+        { durationSeconds: 20, width: 1920, height: 1080 },
+        480,
+        { signal: controller.signal },
+      ),
+    ).rejects.toThrow();
+
+    expect(execute).not.toHaveBeenCalled();
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("実行中に signal が abort されたら conversion.cancel() を呼ぶ（キャンセルボタンを有効にする）", async () => {
+    const cancel = jest.fn().mockResolvedValue(undefined);
+    const execute = jest
+      .fn()
+      .mockImplementation(
+        () => new Promise((_resolve, reject) => reject(new Error("canceled"))),
+      );
+    mockConversionInit.mockResolvedValue({ isValid: true, execute, cancel });
+    const controller = new AbortController();
+
+    const promise = resizeVideoToLongEdge(
+      videoFile(),
+      { durationSeconds: 20, width: 1920, height: 1080 },
+      480,
+      { signal: controller.signal },
+    );
+    controller.abort();
+
+    await expect(promise).rejects.toThrow();
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("変換が既定時間内に終わらなければタイムアウトして conversion.cancel() を呼ぶ", async () => {
+    jest.useFakeTimers();
+    const cancel = jest.fn().mockResolvedValue(undefined);
+    // 実運用の execute() は解決も拒否もせず固まるケースを模す。
+    const execute = jest.fn().mockImplementation(() => new Promise(() => {}));
+    mockConversionInit.mockResolvedValue({ isValid: true, execute, cancel });
+
+    resizeVideoToLongEdge(
+      videoFile(),
+      { durationSeconds: 20, width: 1920, height: 1080 },
+      480,
+    );
+    // Conversion.init は Promise なので、setTimeout 登録まで一度マイクロタスクを進める。
+    await Promise.resolve();
+    await Promise.resolve();
+
+    jest.advanceTimersByTime(60_000);
+
+    expect(cancel).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
   });
 });
