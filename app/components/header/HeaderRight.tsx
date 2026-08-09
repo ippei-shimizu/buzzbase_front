@@ -15,6 +15,7 @@ import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
 import { RankingIcon } from "@app/components/icon/RankingIcon";
+import { SettingsIcon } from "@app/components/icon/SettingsIcon";
 import { StatsIcon } from "@app/components/icon/StatsIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
@@ -181,11 +182,22 @@ export default function HeaderRight() {
                   key="contact"
                   as={Link}
                   href="/contact"
+                  showDivider
                   startContent={
                     <MailIcon fill="currentColor" width="18" height="18" />
                   }
                 >
                   ご意見・改善案
+                </DropdownItem>
+                <DropdownItem
+                  key="settings"
+                  as={Link}
+                  href="/settings"
+                  startContent={
+                    <SettingsIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  設定
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
