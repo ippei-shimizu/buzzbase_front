@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
@@ -25,7 +26,15 @@ export default async function NoteList() {
         <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
             <div className="pt-20 px-4 lg:px-6">
-              <h2 className="text-2xl font-bold">野球ノート</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold">野球ノート</h2>
+                <Link
+                  href="/note/templates"
+                  className="text-sm font-semibold text-[#d08000]"
+                >
+                  振り返りテンプレを管理
+                </Link>
+              </div>
               <div className="my-6">
                 <NoteListComponent result={result} tagsResult={tagsResult} />
               </div>
