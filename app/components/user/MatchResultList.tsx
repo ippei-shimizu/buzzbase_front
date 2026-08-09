@@ -6,7 +6,6 @@ import type {
 } from "@app/components/filter/filterTypes";
 import type { SeasonData, TournamentData } from "@app/interface";
 import type { PaginationInfo } from "@app/services/gameResultsService";
-import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import FilterBar from "@app/components/filter/FilterBar";
@@ -16,6 +15,7 @@ import GamePagination from "@app/components/game/GamePagination";
 import GameSearchInput from "@app/components/game/GameSearchInput";
 import GameSortSelect from "@app/components/game/GameSortSelect";
 import MatchResultsItem from "@app/components/listItem/MatchResultsItem";
+import SkeletonList from "@app/components/loading/SkeletonList";
 import {
   getFilterGameResultsV2,
   getFilterGameResultsUserIdV2,
@@ -249,9 +249,11 @@ export default function MatchResultList(props: MatchResultListProps) {
         <div className="mt-8">
           <div className="mt-8 grid gap-y-5">
             {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Spinner color="default" size="sm" />
-              </div>
+              <SkeletonList
+                count={4}
+                itemClassName="h-36 w-full"
+                rounded="rounded-xl"
+              />
             ) : gameResultIndex.length > 0 ? (
               <>
                 <MatchResultsItem gameResult={gameResultIndex.slice(0, 5)} />
