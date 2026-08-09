@@ -250,7 +250,7 @@ export default function MatchResultList(props: MatchResultListProps) {
           <div className="mt-8 grid gap-y-5">
             {isLoading ? (
               <SkeletonList
-                count={4}
+                count={paginationInfo?.per_page ?? 4}
                 itemClassName="h-36 w-full"
                 rounded="rounded-xl"
               />
