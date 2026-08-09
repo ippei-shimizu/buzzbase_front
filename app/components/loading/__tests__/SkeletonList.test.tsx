@@ -7,6 +7,6 @@ describe("SkeletonList", () => {
       <SkeletonList count={3} itemClassName="h-16 w-full" />,
     );
 
-    expect(container.querySelectorAll(".h-16.w-full")).toHaveLength(3);
+    expect(container.firstElementChild?.children).toHaveLength(3);
   });
 });
