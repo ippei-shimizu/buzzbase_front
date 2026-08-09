@@ -1,5 +1,6 @@
 import type { Notifications } from "@app/interface";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { AxiosError, AxiosHeaders } from "axios";
 import React from "react";
 import { toast } from "sonner";
 import { SWRConfig } from "swr";
@@ -37,7 +38,13 @@ jest.mock("@sentry/nextjs", () => ({
   captureException: jest.fn(),
 }));
 
+const mockOpenProUpgradeModal = jest.fn();
+jest.mock("@app/contexts/proUpgradeModalContext", () => ({
+  useProUpgradeModal: () => ({ open: mockOpenProUpgradeModal }),
+}));
+
 const mockGet = axiosInstance.get as jest.Mock;
+const mockPost = axiosInstance.post as jest.Mock;
 const mockDelete = axiosInstance.delete as jest.Mock;
 const mockToastError = toast.error as jest.Mock;
 
@@ -270,5 +277,29 @@ describe("NotificationItem", () => {
         ).not.toBeInTheDocument();
       },
     );
+
+    it("無料枠の上限で参加を拒否されたら専用文言とPro訴求モーダルを出す", async () => {
+      mockPost.mockRejectedValue(
+        new AxiosError("forbidden", "ERR_BAD_REQUEST", undefined, undefined, {
+          status: 403,
+          statusText: "Forbidden",
+          data: { error: "Pro プランでグループを無制限に作成・参加できます" },
+          headers: new AxiosHeaders(),
+          config: { headers: new AxiosHeaders() },
+        }),
+      );
+      renderNotifications([groupInvitation("pending")]);
+
+      fireEvent.click(await screen.findByRole("button", { name: "参加する" }));
+
+      await waitFor(() =>
+        expect(mockToastError).toHaveBeenCalledWith(
+          expect.stringContaining("無料プランで参加できるグループは1つまで"),
+        ),
+      );
+      expect(mockOpenProUpgradeModal).toHaveBeenCalledWith({
+        trigger: "unlimited_groups",
+      });
+    });
   });
 });
