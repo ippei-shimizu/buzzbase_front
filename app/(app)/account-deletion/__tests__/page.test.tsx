@@ -3,10 +3,19 @@ import userEvent from "@testing-library/user-event";
 import { AxiosError, AxiosHeaders } from "axios";
 import AccountDeletionPage from "../page";
 
-const mockPush = jest.fn();
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: jest.fn() }),
   usePathname: () => "/account-deletion",
+}));
+
+const mockClearAuthCookies = jest.fn();
+jest.mock("@app/services/authService", () => ({
+  clearAuthCookies: () => mockClearAuthCookies(),
+}));
+
+const mockResetUser = jest.fn();
+jest.mock("@app/utils/posthog", () => ({
+  resetUser: () => mockResetUser(),
 }));
 
 jest.mock("@app/contexts/useAuthContext", () => ({
@@ -62,7 +71,7 @@ describe("アカウント削除ページ", () => {
       "href",
       "/account/subscription",
     );
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockClearAuthCookies).not.toHaveBeenCalled();
   });
 
   it("Pro 加入以外の失敗では汎用文言だけを出す", async () => {
@@ -75,10 +84,11 @@ describe("アカウント削除ページ", () => {
     expect(screen.queryByText("Pro プランの解約手続きへ")).toBeNull();
   });
 
-  it("削除に成功したらログイン画面へ遷移する", async () => {
+  it("削除に成功したら認証cookieとPostHogの識別子を破棄する", async () => {
     await confirmDeletion();
 
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/signin"));
+    await waitFor(() => expect(mockClearAuthCookies).toHaveBeenCalled());
+    expect(mockResetUser).toHaveBeenCalled();
     expect(screen.queryByRole("alert")).toBeNull();
   });
 });

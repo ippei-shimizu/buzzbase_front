@@ -11,11 +11,12 @@ import {
 } from "@heroui/react";
 import { isAxiosError } from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Header from "@app/components/header/Header";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { clearAuthCookies } from "@app/services/authService";
 import { deleteUser, getCurrentUserId } from "@app/services/userService";
+import { resetUser } from "@app/utils/posthog";
 
 type DeletionError = "pro_active" | "unknown";
 
@@ -36,7 +37,6 @@ const isProActiveError = (error: unknown): boolean =>
   error.response.data?.error === "pro_active";
 
 export default function AccountDeletionPage() {
-  const router = useRouter();
   useRequireAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,7 +55,13 @@ export default function AccountDeletionPage() {
 
       await deleteUser(currentUserId);
 
-      router.push("/signin");
+      // 削除済みユーザーの cookie が残ると、次回アクセス時に失効トークンのまま
+      // ログイン中と判定されて画面が壊れる。
+      clearAuthCookies();
+      resetUser();
+      // router.push だと AuthContext や PostHog の識別子がクライアントに残るため、
+      // 存在しなくなったユーザーの状態を確実に捨てられるフルリロードで遷移する。
+      window.location.assign("/signin");
     } catch (error) {
       if (isProActiveError(error)) {
         setDeletionError("pro_active");
