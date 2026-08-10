@@ -20,16 +20,16 @@ export interface ProPlanPrice {
 export const PRO_PLAN_PRICES: Record<PlanType, ProPlanPrice> = {
   monthly: {
     name: "月額プラン",
-    amount: "¥300",
+    amount: "¥480",
     period: "/ 月",
     note: null,
     badge: null,
   },
   yearly: {
     name: "年額プラン",
-    amount: "¥2,980",
+    amount: "¥4,800",
     period: "/ 年",
-    note: "月あたり ¥248",
+    note: "月あたり ¥400",
     badge: "2 ヶ月分お得",
   },
 };
