@@ -160,8 +160,8 @@ describe("ProUpgradeModal", () => {
     render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
     expect(screen.getByText("年額プラン")).toBeInTheDocument();
     expect(screen.getByText("月額プラン")).toBeInTheDocument();
-    expect(screen.getByText("¥4,800")).toBeInTheDocument();
-    expect(screen.getByText("¥480")).toBeInTheDocument();
+    expect(screen.getByText("¥2,980")).toBeInTheDocument();
+    expect(screen.getByText("¥300")).toBeInTheDocument();
   });
 
   it("CTA ボタンが配置されている", () => {
