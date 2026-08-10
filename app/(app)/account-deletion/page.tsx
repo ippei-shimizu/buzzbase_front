@@ -9,20 +9,44 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@heroui/react";
-import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
+import Link from "next/link";
 import { useState } from "react";
 import Header from "@app/components/header/Header";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { clearAuthCookies } from "@app/services/authService";
 import { deleteUser, getCurrentUserId } from "@app/services/userService";
+import { resetUser } from "@app/utils/posthog";
+
+type DeletionError = "pro_active" | "unknown";
+
+const DELETION_ERROR_MESSAGES: Record<DeletionError, string> = {
+  pro_active:
+    "Pro に加入中のためアカウントを削除できません。自動課金が続いてしまうため、先に Pro プランを解約してください。",
+  unknown:
+    "アカウントの削除に失敗しました。しばらく時間をおいてから再度お試しください。",
+};
+
+/**
+ * back の users#destroy が Pro 加入中を理由に削除を拒否したか。
+ * 同じ 422 でもバリデーション由来のものと区別する必要があるため error キーまで見る。
+ */
+const isProActiveError = (error: unknown): boolean =>
+  isAxiosError(error) &&
+  error.response?.status === 422 &&
+  error.response.data?.error === "pro_active";
 
 export default function AccountDeletionPage() {
-  const router = useRouter();
   useRequireAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deletionError, setDeletionError] = useState<DeletionError | null>(
+    null,
+  );
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
+    setDeletionError(null);
     try {
       const currentUserId = await getCurrentUserId();
       if (!currentUserId) {
@@ -31,12 +55,20 @@ export default function AccountDeletionPage() {
 
       await deleteUser(currentUserId);
 
-      router.push("/signin");
+      // 削除済みユーザーの cookie が残ると、次回アクセス時に失効トークンのまま
+      // ログイン中と判定されて画面が壊れる。
+      clearAuthCookies();
+      resetUser();
+      // router.push だと AuthContext や PostHog の識別子がクライアントに残るため、
+      // 存在しなくなったユーザーの状態を確実に捨てられるフルリロードで遷移する。
+      window.location.assign("/signin");
     } catch (error) {
+      if (isProActiveError(error)) {
+        setDeletionError("pro_active");
+        return;
+      }
       console.error("アカウント削除エラー:", error);
-      alert(
-        "アカウントの削除に失敗しました。しばらく時間をおいてから再度お試しください。",
-      );
+      setDeletionError("unknown");
     } finally {
       setIsDeleting(false);
       onClose();
@@ -90,6 +122,22 @@ export default function AccountDeletionPage() {
                   </p>
                 </div>
               </div>
+              {deletionError ? (
+                <div
+                  role="alert"
+                  className="mt-8 rounded-lg border border-danger-400 bg-danger-400/10 p-4 text-sm leading-relaxed text-danger-400"
+                >
+                  <p>{DELETION_ERROR_MESSAGES[deletionError]}</p>
+                  {deletionError === "pro_active" ? (
+                    <Link
+                      href="/account/subscription"
+                      className="mt-3 inline-block font-bold underline"
+                    >
+                      Pro プランの解約手続きへ
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="text-center mt-8">
                 <Button
                   color="danger"

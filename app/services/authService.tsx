@@ -44,12 +44,17 @@ export const signIn = async (data: SignInData) => {
   return response;
 };
 
-export const signOut = async () => {
-  const response = await axiosInstance.delete("/api/v1/auth/sign_out");
-
+/** devise_token_auth の認証 cookie 3点を破棄する。 */
+export const clearAuthCookies = () => {
   Cookies.remove("access-token");
   Cookies.remove("client");
   Cookies.remove("uid");
+};
+
+export const signOut = async () => {
+  const response = await axiosInstance.delete("/api/v1/auth/sign_out");
+
+  clearAuthCookies();
 
   return response;
 };
