@@ -80,10 +80,10 @@ function ChoiceChip({
       aria-pressed={isActive}
       disabled={isDisabled}
       onClick={onSelect}
-      className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed ${
+      className={`rounded-full border-2 px-3.5 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed ${
         isActive
-          ? "bg-[#d08000] text-white"
-          : "bg-sub text-zinc-400 hover:text-white disabled:opacity-40"
+          ? "border-[#d08000] bg-[#d08000] text-white"
+          : "border-zinc-600 bg-sub text-zinc-400 hover:text-white disabled:opacity-40"
       }`}
     >
       {label}

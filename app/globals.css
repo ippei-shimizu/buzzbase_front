@@ -66,6 +66,30 @@ label {
   border-bottom: 2px solid #52525b;
 }
 
+/* HeroUI bordered variant の線幅復元（ダークテーマ）
+   underlined と同じく border-medium が Tailwind v4 で解決されず線幅が 0 になる。 */
+.buzz-dark [data-slot="input-wrapper"][class*="border-medium"],
+.buzz-dark [data-slot="trigger"][class*="border-medium"] {
+  border-width: 2px;
+}
+
+/* 既定色 default-200 は背景 #2E2E2E とほぼ同色で見えないため引き上げる。
+   呼び出し側が色を指定した場合は border-default-200 ごと差し替わるので、ここには入らない。 */
+.buzz-dark [data-slot="input-wrapper"][class*="border-default-200"],
+.buzz-dark [data-slot="trigger"][class*="border-default-200"] {
+  border-color: #52525b;
+}
+
+/* 上の指定でフォーカス時の色変化まで潰れるため、フォーカス表示を明示的に戻す */
+.buzz-dark
+  .group[data-focus="true"]
+  [data-slot="input-wrapper"][class*="border-default-200"],
+.buzz-dark
+  .group[data-focus="true"]
+  [data-slot="trigger"][class*="border-default-200"] {
+  border-color: #d08000;
+}
+
 /* flex-col min-h-screen コンテナ内のコンテンツが画面いっぱいに伸びるように */
 .flex.flex-col.min-h-screen > .bg-main {
   flex-grow: 1;
