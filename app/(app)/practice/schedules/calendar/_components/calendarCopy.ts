@@ -15,7 +15,7 @@ export const PREV_LABEL = "前へ";
 export const NEXT_LABEL = "次へ";
 export const TODAY_LABEL = "今日";
 
-export const ADD_PLAN_LABEL = "この日の予定を追加";
+export const ADD_PLAN_LABEL = "予定追加";
 export const EMPTY_MESSAGE = "予定はありません";
 export const LOADING_MESSAGE = "予定を読み込み中";
 
