@@ -101,13 +101,29 @@ const billingSection = () =>
 const planChangeSection = () =>
   screen.queryByRole("region", { name: "プラン変更について" });
 
+/**
+ * flag の decision をキーごとに差し替える。
+ * pro_features を無効にするとページ自体がリダイレクトするため、既定では有効にしておく。
+ */
+function setFeatureFlags({
+  survey = "disabled",
+  proFeatures = "enabled",
+}: {
+  survey?: string;
+  proFeatures?: string;
+} = {}) {
+  mockGetCachedFeatureFlagDecision.mockImplementation((key: string) =>
+    Promise.resolve(key === "cancellation_survey" ? survey : proFeatures),
+  );
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   // 既定は同期成功。プラン変更の成功パスは必ずここを通るため、
   // 明示しないテストが「同期できていない」表示に引きずられないようにする。
   mockSyncProStatus.mockResolvedValue(DEFAULT_PRO_STATUS);
   // アンケートは opt-in の flag。既定を無効にして、明示したテストだけがモーダルを見る。
-  mockGetCachedFeatureFlagDecision.mockResolvedValue("disabled");
+  setFeatureFlags();
 });
 
 describe("メタデータ", () => {
@@ -136,6 +152,30 @@ describe("未認証", () => {
 
     await expect(AccountSubscriptionPage()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/signup?auth_required=true");
+  });
+});
+
+describe("pro_features が無効なとき", () => {
+  it("設定画面の導線を隠しても URL 直打ちで到達できるためリダイレクトする", async () => {
+    setAuthCookies();
+    setFeatureFlags({ proFeatures: "disabled" });
+    mockGetCachedProStatusResult.mockResolvedValueOnce({
+      status: "ok",
+      proStatus: buildStatus({ status: "free", pro_active: false }),
+    });
+
+    await expect(AccountSubscriptionPage()).rejects.toThrow("NEXT_REDIRECT");
+    expect(mockRedirect).toHaveBeenCalledWith("/");
+  });
+
+  // cookie が届かないだけで indeterminate になるため、ここで閉じると課金中のユーザーが
+  // 加入状態を確認できなくなる。
+  it("判定不能なら閉じずに表示する", async () => {
+    setFeatureFlags({ proFeatures: "indeterminate" });
+    await renderPage({ status: "active", pro_active: true });
+
+    expect(screen.getByText("Pro 加入中")).toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
   });
 });
 
@@ -1354,7 +1394,7 @@ describe("解約アンケート", () => {
   const surveyReasons = () => screen.queryAllByRole("radio");
 
   async function cancel(decision = "enabled") {
-    mockGetCachedFeatureFlagDecision.mockResolvedValue(decision);
+    setFeatureFlags({ survey: decision });
     mockCancelWebSubscription.mockResolvedValue({ ok: true });
     await renderPage({ status: "active", pro_active: true, platform: "web" });
     await userEvent.click(
@@ -1411,7 +1451,7 @@ describe("解約アンケート", () => {
   );
 
   it("解約を確定するまではアンケートを出さない", async () => {
-    mockGetCachedFeatureFlagDecision.mockResolvedValue("enabled");
+    setFeatureFlags({ survey: "enabled" });
     await renderPage({ status: "active", pro_active: true, platform: "web" });
     await userEvent.click(
       screen.getByRole("button", { name: "この画面で解約する" }),
@@ -1421,7 +1461,7 @@ describe("解約アンケート", () => {
   });
 
   it("解約が失敗したときはアンケートを出さない", async () => {
-    mockGetCachedFeatureFlagDecision.mockResolvedValue("enabled");
+    setFeatureFlags({ survey: "enabled" });
     mockCancelWebSubscription.mockResolvedValue({
       ok: false,
       error: "stripe_api_error",

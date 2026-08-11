@@ -59,7 +59,10 @@ describe("useCurrentUserId", () => {
 
     expect(result.current.currentUserId).toEqual(mockUserId);
     expect(result.current.isErrorCurrentUserId).toBeUndefined();
-    expect(axiosInstance.get).toHaveBeenCalledWith("/api/v1/users/current");
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      "/api/v1/users/current",
+      expect.objectContaining({ timeout: expect.any(Number) }),
+    );
   });
 
   it("API がエラーを返した場合、エラー状態になる", async () => {
