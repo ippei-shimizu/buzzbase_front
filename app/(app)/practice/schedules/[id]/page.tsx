@@ -73,7 +73,7 @@ function PageShell({ children }: { children: React.ReactNode }) {
       <HeaderBackTo href="/dashboard" label="ホームに戻る" />
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-20 px-4 lg:px-6">{children}</div>
+          <div className="pt-[74px] px-4 lg:px-6">{children}</div>
         </div>
       </main>
     </div>
