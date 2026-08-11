@@ -11,6 +11,7 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { NOTE_LIST_PATH } from "@app/constants/note";
@@ -31,6 +32,7 @@ export default function HeaderNoteDetail({ noteId }: HeaderNoteDetailProps) {
     const result = await deleteBaseballNote(noteId);
     if (!result.ok) {
       setIsDeleting(false);
+      toast.error(result.errors[0] ?? "ノートの削除に失敗しました");
       return;
     }
     router.push(NOTE_LIST_PATH);

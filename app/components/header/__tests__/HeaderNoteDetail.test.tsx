@@ -9,8 +9,13 @@ jest.mock("@app/services/v2/baseballNoteService", () => ({
   deleteBaseballNote: jest.fn(),
 }));
 
+jest.mock("sonner", () => ({
+  toast: { error: jest.fn(), success: jest.fn() },
+}));
+
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NOTE_LIST_PATH } from "@app/constants/note";
+import { toast } from "sonner";
 import { deleteBaseballNote } from "@app/services/v2/baseballNoteService";
 import HeaderNoteDetail from "../HeaderNoteDetail";
 
@@ -81,6 +86,22 @@ describe("HeaderNoteDetail", () => {
       expect(mockDeleteBaseballNote).toHaveBeenCalledTimes(1),
     );
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  // 失敗を黙って飲み込むと、消えたのか失敗したのかが利用者に分からない。
+  it("削除に失敗したら理由を通知する", async () => {
+    mockDeleteBaseballNote.mockResolvedValue({
+      ok: false,
+      errors: ["削除に失敗しました"],
+    });
+    render(<HeaderNoteDetail noteId={12} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "ノートを削除" }));
+    fireEvent.click(screen.getByRole("button", { name: "削除する" }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("削除に失敗しました"),
+    );
   });
 
   it("キャンセルすると確認ダイアログが閉じる", () => {
