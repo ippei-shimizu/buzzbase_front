@@ -11,6 +11,8 @@ export const MANAGE_MENUS_LABEL = "練習メニューを管理";
 
 export const RECORD_PRACTICE_LABEL = "練習を記録";
 
+export const RECORD_NOTE_LABEL = "野球ノートを記録";
+
 export const MENU_SUMMARY_LABEL = "メニュー別の積み上げを見る";
 
 export const SEARCH_LABEL = "練習記録を検索";
