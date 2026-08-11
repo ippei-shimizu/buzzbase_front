@@ -115,6 +115,7 @@ describe("toPreparedMedia", () => {
       contentType: "video/mp4",
       thumbnail,
       previewUrl: "blob:preview",
+      playbackUrl: "blob:playback",
       durationSeconds: 12,
       width: 854,
       height: 480,

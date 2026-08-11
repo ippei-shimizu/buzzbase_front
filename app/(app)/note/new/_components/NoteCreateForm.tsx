@@ -34,6 +34,7 @@ import {
 } from "@app/services/v2/baseballNoteService";
 import {
   buildStagedUploadNotice,
+  revokeStagedObjectUrls,
   summarizeStagedUploads,
   toPreparedMedia,
 } from "@app/utils/media/stagedUpload";
@@ -130,7 +131,7 @@ export default function NoteCreateForm({
     setStagedMedia((prev) =>
       prev.filter((asset) => {
         if (asset.localId !== localId) return true;
-        if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
+        revokeStagedObjectUrls(asset);
         return false;
       }),
     );
@@ -159,9 +160,7 @@ export default function NoteCreateForm({
       if (!rollbackResult.ok) {
         // 削除自体が失敗した場合、本文を含むノートがサーバーに残っている可能性が高い。
         // 作成フォームに留めて再送信させると重複ノートを生むため、一覧へ逃がす。
-        stagedMedia.forEach((asset) => {
-          if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-        });
+        stagedMedia.forEach(revokeStagedObjectUrls);
         toast.error(ROLLBACK_FAILED_MESSAGE);
         router.push("/note");
         return;
@@ -171,9 +170,7 @@ export default function NoteCreateForm({
       return;
     }
 
-    stagedMedia.forEach((asset) => {
-      if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-    });
+    stagedMedia.forEach(revokeStagedObjectUrls);
     setStagedMedia([]);
 
     if (

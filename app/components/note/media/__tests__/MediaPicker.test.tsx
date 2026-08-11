@@ -114,6 +114,45 @@ describe("MediaPicker", () => {
     expect((onStage.mock.calls[0][0] as StagedMediaAsset).memo).toBe("");
   });
 
+  // previewUrl はサムネイル画像を指すため、これを video 要素へ渡すと再生できない。
+  it("動画はサムネイルとは別に再生用の object URL を持たせる", async () => {
+    URL.createObjectURL = jest
+      .fn()
+      .mockReturnValueOnce("blob:thumbnail")
+      .mockReturnValueOnce("blob:playback");
+    mockPrepare.mockResolvedValue({
+      ok: true,
+      prepared: {
+        mediaType: "video",
+        contentType: "video/mp4",
+        file: new Blob(["x"], { type: "video/mp4" }),
+        thumbnail: new Blob(["t"], { type: "image/jpeg" }),
+        durationSeconds: 10,
+      },
+    });
+    const onStage = jest.fn();
+    render(<MediaPicker onStage={onStage} />);
+
+    selectFile();
+
+    await waitFor(() => expect(onStage).toHaveBeenCalled());
+    const staged = onStage.mock.calls[0][0] as StagedMediaAsset;
+    expect(staged.previewUrl).toBe("blob:thumbnail");
+    expect(staged.playbackUrl).toBe("blob:playback");
+  });
+
+  it("画像は再生用 URL を持たない", async () => {
+    const onStage = jest.fn();
+    render(<MediaPicker onStage={onStage} />);
+
+    selectFile();
+
+    await waitFor(() => expect(onStage).toHaveBeenCalled());
+    expect(
+      (onStage.mock.calls[0][0] as StagedMediaAsset).playbackUrl,
+    ).toBeNull();
+  });
+
   it("クライアント側の上限チェックで弾かれたらアップロードしない", async () => {
     mockPrepare.mockResolvedValue({
       ok: false,

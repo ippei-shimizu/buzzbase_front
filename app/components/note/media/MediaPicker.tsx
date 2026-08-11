@@ -38,6 +38,13 @@ function buildPreviewUrl(prepared: PreparedMedia): string | null {
   return null;
 }
 
+/** 動画は再生用に実データの object URL を別途持つ（previewUrl はサムネイル画像を指すため）。 */
+function buildPlaybackUrl(prepared: PreparedMedia): string | null {
+  return prepared.mediaType === "video"
+    ? URL.createObjectURL(prepared.file)
+    : null;
+}
+
 /** ノートに画像・動画を添付するためのファイル選択。 */
 export default function MediaPicker({
   baseballNoteId,
@@ -76,6 +83,7 @@ export default function MediaPicker({
         contentType: prepared.prepared.contentType,
         thumbnail: prepared.prepared.thumbnail,
         previewUrl: buildPreviewUrl(prepared.prepared),
+        playbackUrl: buildPlaybackUrl(prepared.prepared),
         durationSeconds: prepared.prepared.durationSeconds,
         width: prepared.prepared.width,
         height: prepared.prepared.height,

@@ -15,6 +15,12 @@ export function toPreparedMedia(asset: StagedMediaAsset): PreparedMedia {
   };
 }
 
+/** ステージ中メディアが持つ object URL をまとめて解放する（サムネイル用と再生用の2本）。 */
+export function revokeStagedObjectUrls(asset: StagedMediaAsset): void {
+  if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
+  if (asset.playbackUrl) URL.revokeObjectURL(asset.playbackUrl);
+}
+
 export interface StagedUploadSummary {
   uploaded: number;
   canceled: number;
