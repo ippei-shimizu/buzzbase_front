@@ -484,13 +484,23 @@ export async function getEraTrend(
   // era_trend は year/season/tournament のみで絞る。match_type は構造的に除外し、
   // 誤って matchType 付きで呼ばれても送信されないことを関数自身で保証する。
   const { matchType: _matchType, ...eraFilters } = filters;
-  return fetchProGatedAnalysis<EraTrendData>(
+  const result = await fetchProGatedAnalysis<EraTrendData>(
     "era_trend",
     seasonAwareFilters(eraFilters, granularity),
     "getEraTrend",
     { granularity, points: [] },
     { granularity },
   );
+  // fetchProGatedAnalysis は 200 応答のボディ形状を検証しないため、
+  // back側のレスポンス形式変更未反映時などpointsが欠けていてもクラッシュしないよう防御する。
+  if (result.status !== "ok") return result;
+  return {
+    status: "ok",
+    data: {
+      granularity: result.data.granularity,
+      points: result.data.points ?? [],
+    },
+  };
 }
 
 export async function getPlateAppearanceBreakdown(
