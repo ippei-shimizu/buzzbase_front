@@ -20,6 +20,7 @@ export const ANALYTICS_EVENTS = {
   PROFILE_UPDATED: "profile updated",
   STATS_FILTER_CHANGED: "stats filter changed",
   BATTING_TREND_GRANULARITY_CHANGED: "batting trend granularity changed",
+  ERA_TREND_GRANULARITY_CHANGED: "era trend granularity changed",
   PRO_FEATURE_TAPPED: "pro feature tapped",
 } as const;
 
@@ -80,6 +81,12 @@ export const trackStatsFilterChanged = (props: {
 /** 打撃成績推移グラフの粒度切替（試合 / 月 / 年 / シーズン）。 */
 export const trackBattingTrendGranularityChanged = (granularity: string) =>
   capture(ANALYTICS_EVENTS.BATTING_TREND_GRANULARITY_CHANGED, {
+    granularity,
+  });
+
+/** 防御率推移グラフの粒度切替（月 / シーズン）。 */
+export const trackEraTrendGranularityChanged = (granularity: string) =>
+  capture(ANALYTICS_EVENTS.ERA_TREND_GRANULARITY_CHANGED, {
     granularity,
   });
 

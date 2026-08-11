@@ -3,8 +3,10 @@ import type { FilterOption } from "@app/components/filter/filterTypes";
 import type { ProFeature } from "@app/types/pro";
 import { useEffect, useRef, useState, useTransition } from "react";
 import FilterBar from "@app/components/filter/FilterBar";
+import { trackFilterChanges } from "@app/components/filter/trackFilterChange";
 import { buildRecentYearOptions } from "@app/components/filter/yearOptions";
 import { useSeasonTrendGranularity } from "@app/hooks/pro/useSeasonTrendGranularity";
+import { trackEraTrendGranularityChanged } from "@app/utils/analytics";
 import {
   type AnalysisFilters as Filters,
   type EraTrendGranularity,
@@ -65,12 +67,22 @@ export function PitchingAnalysisContainer({
     };
   }, [filters, granularity, resolveTrend, startRefetch]);
 
+  const handleFiltersChange = (next: Filters) => {
+    trackFilterChanges(filters, next);
+    setFilters(next);
+  };
+
+  const handleGranularityChange = (next: EraTrendGranularity) => {
+    trackEraTrendGranularityChanged(next);
+    requestGranularity(next);
+  };
+
   return (
     <div className="flex flex-col gap-y-5">
       {/* 種別チップは出さない（防御率推移が match_type で絞れないため）。 */}
       <FilterBar
         values={filters}
-        onChange={setFilters}
+        onChange={handleFiltersChange}
         options={{
           years: yearOptions,
           months: monthOptions,
@@ -84,7 +96,7 @@ export function PitchingAnalysisContainer({
         <EraTrendChart
           points={eraTrend}
           granularity={granularity}
-          onGranularityChange={requestGranularity}
+          onGranularityChange={handleGranularityChange}
         />
       </div>
     </div>

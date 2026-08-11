@@ -128,6 +128,11 @@ const MOBILE_EVENT_CASES: {
     run: (a) => a.trackBattingTrendGranularityChanged("season"),
   },
   {
+    event: "era trend granularity changed",
+    properties: { granularity: "season" },
+    run: (a) => a.trackEraTrendGranularityChanged("season"),
+  },
+  {
     event: "pro feature tapped",
     properties: { feature: "hit_direction_average" },
     run: (a) => a.trackProFeatureTapped("hit_direction_average"),
@@ -163,6 +168,7 @@ describe("analytics", () => {
         PROFILE_UPDATED: "profile updated",
         STATS_FILTER_CHANGED: "stats filter changed",
         BATTING_TREND_GRANULARITY_CHANGED: "batting trend granularity changed",
+        ERA_TREND_GRANULARITY_CHANGED: "era trend granularity changed",
         PRO_FEATURE_TAPPED: "pro feature tapped",
       });
     });
