@@ -14,8 +14,8 @@ jest.mock("sonner", () => ({
 }));
 
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { NOTE_LIST_PATH } from "@app/constants/note";
 import { toast } from "sonner";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import { deleteBaseballNote } from "@app/services/v2/baseballNoteService";
 import HeaderNoteDetail from "../HeaderNoteDetail";
 
