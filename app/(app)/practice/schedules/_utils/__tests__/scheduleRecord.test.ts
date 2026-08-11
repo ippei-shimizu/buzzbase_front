@@ -104,14 +104,12 @@ describe("doneMenusAsPresets", () => {
       {
         practice_menu_id: 1,
         name: "素振り",
-        unit: "count",
         unit_label: "本",
         target_value: 200,
       },
       {
         practice_menu_id: 2,
         name: "ランニング",
-        unit: "count",
         unit_label: "km",
         target_value: 5,
       },

@@ -230,7 +230,6 @@ describe("ScheduleForm", () => {
         {
           practice_menu_id: 1,
           name: "素振り",
-          unit: "count",
           unit_label: "本",
           target_value: 200,
         },
@@ -275,7 +274,6 @@ describe("ScheduleForm", () => {
             {
               practice_menu_id: 1,
               name: "素振り",
-              unit: "count",
               unit_label: "本",
               target_value: 200,
             },

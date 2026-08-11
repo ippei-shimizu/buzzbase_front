@@ -4,7 +4,6 @@
  * キー名は back の JSON をそのまま使う（snake_case のまま扱い、変換しない）。
  */
 
-import type { PracticeUnit } from "@app/types/practice";
 import type { ScheduleEventType } from "@app/types/schedule";
 
 /**
@@ -16,8 +15,6 @@ import type { ScheduleEventType } from "@app/types/schedule";
 export interface PlanMenu {
   practice_menu_id: number;
   name: string | null;
-  /** 入力ウィジェットの出し分けに使う。メニューが削除されている場合は null。 */
-  unit: PracticeUnit | null;
   unit_label: string | null;
   target_value: number | null;
   sort_order: number;
