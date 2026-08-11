@@ -35,7 +35,7 @@ export default function HeaderDetailActions({
   const router = useRouter();
 
   return (
-    <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--top-banner-offset,0px)] w-full bg-main z-50">
+    <header className="py-2 px-3 border-b border-b-zinc-500 fixed inset-x-0 top-[var(--top-banner-offset,0px)] bg-main z-50">
       <div className="flex items-center justify-between h-full max-w-[692px] mx-auto lg:m-[0_auto_0_28%]">
         {backHref ? (
           <Link href={backHref} aria-label="戻る">

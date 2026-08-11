@@ -254,7 +254,7 @@ describe("ScheduleDetailContent", () => {
   it("編集への導線を持つ", () => {
     renderDetail();
 
-    expect(screen.getByRole("button", { name: "編集" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "編集" })).toHaveAttribute(
       "href",
       "/practice/schedules/10/edit",
     );

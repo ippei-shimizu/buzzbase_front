@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
 import {
   dayLabels,
   eventTypeMeta,
@@ -168,6 +169,15 @@ export default function ScheduleDetailContent({
 
   return (
     <>
+      <HeaderDetailActions
+        backHref="/dashboard"
+        editHref={`/practice/schedules/${schedule.id}/edit`}
+        editLabel={EDIT_LABEL}
+        deleteLabel={DELETE_LABEL}
+        onDeleteClick={() => setIsDeleteOpen(true)}
+        isDeleting={isDeleting}
+      />
+
       <div className="flex items-start gap-3">
         <span
           aria-hidden
@@ -296,27 +306,6 @@ export default function ScheduleDetailContent({
             <p className="text-xs text-zinc-400">{RECORD_PRACTICE_HELPER}</p>
           </>
         )}
-      </div>
-
-      <div className="mt-4 flex gap-3">
-        <Button
-          as={Link}
-          href={`/practice/schedules/${schedule.id}/edit`}
-          variant="flat"
-          radius="sm"
-          className="flex-1"
-        >
-          {EDIT_LABEL}
-        </Button>
-        <Button
-          color="danger"
-          variant="flat"
-          radius="sm"
-          className="flex-1"
-          onPress={() => setIsDeleteOpen(true)}
-        >
-          {DELETE_LABEL}
-        </Button>
       </div>
 
       <Modal
