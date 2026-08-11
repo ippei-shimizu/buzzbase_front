@@ -27,8 +27,8 @@ import { APP_ONLY_LABEL } from "@app/components/pro/proFeatureCatalog";
 import { DEFAULT_PRO_STATUS } from "@app/types/pro";
 import ProUpgradeModal from "../ProUpgradeModal";
 
-const SUSPENDED_MESSAGE =
-  "現在、新規のお申し込みを停止しています。再開までしばらくお待ちください。";
+const UNRELEASED_MESSAGE =
+  "Proプランは近日公開予定です。もうしばらくお待ちください。";
 
 describe("ProUpgradeModal", () => {
   beforeEach(() => {
@@ -178,22 +178,22 @@ describe("ProUpgradeModal", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("pro_features が無効なら CTA を出さず販売停止を伝える", () => {
+  it("pro_features が無効なら CTA を出さず未公開であることを伝える", () => {
     mockUseFeatureFlag.mockReturnValue("disabled");
 
     render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
 
     expect(screen.queryByTestId("pro-upgrade-cta")).not.toBeInTheDocument();
-    expect(screen.getByText(SUSPENDED_MESSAGE)).toBeInTheDocument();
+    expect(screen.getByText(UNRELEASED_MESSAGE)).toBeInTheDocument();
   });
 
-  it("判定不能のときは販売停止を告知せず CTA を残す", () => {
+  it("判定不能のときは未公開と告知せず CTA を残す", () => {
     mockUseFeatureFlag.mockReturnValue("indeterminate");
 
     render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
 
     expect(screen.getByTestId("pro-upgrade-cta")).toBeInTheDocument();
-    expect(screen.queryByText(SUSPENDED_MESSAGE)).not.toBeInTheDocument();
+    expect(screen.queryByText(UNRELEASED_MESSAGE)).not.toBeInTheDocument();
   });
 
   it("閉じている間は flag を評価しない", () => {

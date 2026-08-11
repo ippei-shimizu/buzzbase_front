@@ -43,8 +43,10 @@ import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
 import { useFeatureFlag } from "@app/hooks/featureFlags/useFeatureFlag";
 import { useProStatus } from "@app/hooks/pro/useProStatus";
 
-const CHECKOUT_SUSPENDED_MESSAGE =
-  "現在、新規のお申し込みを停止しています。再開までしばらくお待ちください。";
+// pro_features は初回リリース前の状態で無効になっている。「停止」「再開」と書くと
+// 一度公開して取り下げたように読めるため、未公開であることをそのまま伝える。
+const CHECKOUT_UNRELEASED_MESSAGE =
+  "Proプランは近日公開予定です。もうしばらくお待ちください。";
 
 const TRIAL_NOTICE =
   "7 日間の無料トライアル期間中に解約すれば料金はかかりません。";
@@ -130,7 +132,7 @@ export default function ProUpgradeModal({
 
       const messages: Record<typeof result.error, string> = {
         unauthorized: "ログインしてからお試しください",
-        feature_disabled: CHECKOUT_SUSPENDED_MESSAGE,
+        feature_disabled: CHECKOUT_UNRELEASED_MESSAGE,
         already_subscribed: "すでに Pro に加入済みです",
         invalid_plan: "プランの指定が不正です",
         stripe_api_error:
@@ -142,9 +144,9 @@ export default function ProUpgradeModal({
   };
 
   const ctaBusy = isPending || isRedirecting;
-  // 「判定不能」で CTA を隠すと、cookie が届かないだけのユーザーに販売停止を誤って告知する。
+  // 「判定不能」で CTA を隠すと、cookie が届かないだけのユーザーに未公開だと誤って告知する。
   // 実際の決済は startProCheckout 側で改めて flag を検証しているので、ここは確定時のみ畳む。
-  const isCheckoutSuspended = proFeatures === "disabled";
+  const isCheckoutUnreleased = proFeatures === "disabled";
 
   return (
     <Modal
@@ -345,12 +347,12 @@ export default function ProUpgradeModal({
         </ModalBody>
 
         <ModalFooter className="flex-col gap-2">
-          {isCheckoutSuspended ? (
+          {isCheckoutUnreleased ? (
             <p
               role="status"
               className="w-full rounded-medium bg-sub px-3 py-3 text-center text-sm text-gray-200"
             >
-              {CHECKOUT_SUSPENDED_MESSAGE}
+              {CHECKOUT_UNRELEASED_MESSAGE}
             </p>
           ) : (
             <>
