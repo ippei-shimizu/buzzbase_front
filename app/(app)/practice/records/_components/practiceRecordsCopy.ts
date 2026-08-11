@@ -51,8 +51,6 @@ export const DETAIL_LOAD_ERROR =
 
 export const DETAIL_FORBIDDEN = "この練習記録を表示する権限がありません。";
 
-export const BACK_TO_LIST_LABEL = "練習記録の一覧へ戻る";
-
 export const EDIT_LABEL = "編集する";
 
 export const DELETE_LABEL = "削除する";
