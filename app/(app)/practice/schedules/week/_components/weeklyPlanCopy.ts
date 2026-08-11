@@ -1,9 +1,5 @@
 /** 週の練習プラン画面の文言。表示のゆれを避けるため 1 箇所に集約する。 */
 
-export const PAGE_TITLE = "週の練習プラン";
-export const PAGE_DESCRIPTION =
-  "月曜はじまりの1週間で、その日だけの予定を並べて確認できます。「＋」から曜日ごとに予定を足せます。";
-
 export const PREV_WEEK_LABEL = "前の週";
 export const NEXT_WEEK_LABEL = "次の週";
 export const THIS_WEEK_LABEL = "今週";
@@ -19,7 +15,7 @@ export const COPY_RUNNING_LABEL = "コピー中";
 
 /** 週プランに並ぶのが単発予定だけであることと、繰り返しの登録先を示す。 */
 export const RECURRING_NOTICE =
-  "毎週くり返す予定はここには並びません。カレンダーや予定一覧から登録・確認できます。";
+  "毎週くり返す予定はここには並びません。カレンダーから登録・確認できます。";
 
 /** コピー元が 0 件、または既にコピー済みで新しく作られなかったとき。 */
 export const COPY_EMPTY_MESSAGE =

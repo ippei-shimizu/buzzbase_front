@@ -2,10 +2,6 @@ import { FREE_CALENDAR_WINDOW_MONTHS } from "@app/constants/schedule";
 
 /** 予定カレンダー画面の文言。表示のゆれを避けるため 1 箇所に集約する。 */
 
-export const PAGE_TITLE = "予定カレンダー";
-export const PAGE_DESCRIPTION =
-  "登録した予定を月・週・日の3つの見え方で確認できます。毎週くり返す予定も、その週の日付に展開して表示します。";
-
 export const MODE_MONTH_LABEL = "月";
 export const MODE_WEEK_LABEL = "週";
 export const MODE_DAY_LABEL = "日";

@@ -157,7 +157,7 @@ export default function ScheduleDetailContent({
       return;
     }
     toast.success("予定を削除しました");
-    router.push("/practice/schedules");
+    router.push("/practice/plans?tab=calendar");
     router.refresh();
   };
 

@@ -61,7 +61,7 @@ export default function ScheduleFormContent({
     router.push(
       schedule
         ? `/practice/schedules/${result.data.id}`
-        : "/practice/schedules/calendar",
+        : "/practice/plans?tab=calendar",
     );
   };
 

@@ -274,6 +274,6 @@ describe("ScheduleDetailContent", () => {
     );
 
     await waitFor(() => expect(mockDeleteSchedule).toHaveBeenCalledWith(10));
-    expect(mockPush).toHaveBeenCalledWith("/practice/schedules");
+    expect(mockPush).toHaveBeenCalledWith("/practice/plans?tab=calendar");
   });
 });

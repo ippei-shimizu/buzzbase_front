@@ -91,7 +91,7 @@ describe("ScheduleFormContent", () => {
     await user.click(screen.getByRole("button", { name: "登録する" }));
 
     await waitFor(() =>
-      expect(mockPush).toHaveBeenCalledWith("/practice/schedules/calendar"),
+      expect(mockPush).toHaveBeenCalledWith("/practice/plans?tab=calendar"),
     );
   });
 

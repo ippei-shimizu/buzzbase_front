@@ -2,16 +2,6 @@ import { SCHEDULE_TITLE_MAX_LENGTH } from "@app/constants/schedule";
 
 /** 練習スケジュール画面の文言。表示のゆれを避けるため 1 箇所に集約する。 */
 
-export const PAGE_TITLE = "練習スケジュール";
-export const PAGE_DESCRIPTION =
-  "この日だけの予定と、毎週くり返す予定を登録できます。メニューを紐付けておくと、その日の練習記録にそのまま引き継げます。";
-
-export const CREATE_LABEL = "予定を作る";
-export const CALENDAR_LABEL = "カレンダー";
-export const WEEKLY_PLAN_LABEL = "週プラン";
-export const EMPTY_MESSAGE = "まだ予定がありません";
-export const RECURRING_SECTION_TITLE = "毎週の予定";
-export const SINGLE_SECTION_TITLE = "この日だけの予定";
 export const LOAD_ERROR =
   "予定を取得できませんでした。時間を置いて再度お試しください。";
 
