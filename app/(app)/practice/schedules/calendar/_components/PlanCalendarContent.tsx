@@ -71,6 +71,11 @@ interface PlanCalendarContentProps {
   /** Server Component が先に取得した初期表示範囲。 */
   initialRange: CalendarRange;
   initialResult: FetchResult<CalendarResponse>;
+  /**
+   * 横スワイプで月/週/日を切り替えるか。
+   * 練習プランのタブに埋め込むときは外側のタブ送りと競合するため false にする。
+   */
+  swipeEnabled?: boolean;
 }
 
 /**
@@ -86,6 +91,7 @@ export default function PlanCalendarContent({
   today,
   initialRange,
   initialResult,
+  swipeEnabled = true,
 }: PlanCalendarContentProps) {
   const { hasEntitlement, isLoading: isEntitlementLoading } = useEntitlement();
 
@@ -161,7 +167,7 @@ export default function PlanCalendarContent({
   const agendaDates = mode === "week" ? weekDays(cursor) : [cursor];
 
   return (
-    <div className="flex flex-col gap-4" {...swipeHandlers}>
+    <div className="flex flex-col gap-4" {...(swipeEnabled ? swipeHandlers : {})}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div
           role="group"

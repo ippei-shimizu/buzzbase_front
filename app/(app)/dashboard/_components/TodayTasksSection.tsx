@@ -256,14 +256,14 @@ export default function TodayTasksSection({
 
         <div className="flex gap-2">
           <Link
-            href="/practice/schedules/calendar"
+            href="/practice/plans?tab=calendar"
             className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-zinc-600 px-3 py-2.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
           >
             <CalendarIcon className="h-4 w-4 shrink-0" aria-hidden />
             {CALENDAR_LABEL}
           </Link>
           <Link
-            href="/practice/menu-sets"
+            href="/practice/plans"
             className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-zinc-600 px-3 py-2.5 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
           >
             <ListBulletIcon className="h-4 w-4 shrink-0" aria-hidden />
