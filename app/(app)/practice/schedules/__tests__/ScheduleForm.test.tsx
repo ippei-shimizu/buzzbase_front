@@ -13,7 +13,7 @@ jest.mock("@app/lib/analytics", () => ({
 import type { MenuSet } from "@app/types/menuSet";
 import type { PracticeMenu } from "@app/types/practice";
 import type { Schedule, ScheduleInput } from "@app/types/schedule";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import ScheduleForm from "../_components/ScheduleForm";
@@ -295,6 +295,51 @@ describe("ScheduleForm", () => {
       expect(
         screen.queryByRole("button", { name: /Pro プランを見る/ }),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("終了時刻とメモ", () => {
+    it("入力した終了時刻とメモを送信する", async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
+
+      await user.type(screen.getByLabelText(/タイトル/), "全体練習");
+      fireEvent.change(screen.getByLabelText("終了時刻"), {
+        target: { value: "12:30" },
+      });
+      await user.type(screen.getByLabelText("メモ"), "集合はグラウンド前");
+      await save(user);
+
+      const input = submittedInput(onSubmit);
+      expect(input.end_time).toBe("12:30");
+      expect(input.note).toBe("集合はグラウンド前");
+    });
+
+    // 省略すると back の assign_attributes で既存値が残るため、クリア時は null を送る。
+    it("未入力の終了時刻は null で送る", async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
+
+      await user.type(screen.getByLabelText(/タイトル/), "朝練");
+      await save(user);
+
+      expect(submittedInput(onSubmit).end_time).toBeNull();
+    });
+
+    it("終了時刻が開始時刻以前ならエラーにして送信しない", async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
+
+      await user.type(screen.getByLabelText(/タイトル/), "朝練");
+      fireEvent.change(screen.getByLabelText("終了時刻"), {
+        target: { value: "06:00" },
+      });
+      await save(user);
+
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(
+        screen.getByText("終了時刻は開始時刻より後にしてください"),
+      ).toBeInTheDocument();
     });
   });
 

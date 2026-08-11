@@ -6,6 +6,7 @@ import BellSlashIcon from "@heroicons/react/24/outline/BellSlashIcon";
 import CalendarDaysIcon from "@heroicons/react/24/outline/CalendarDaysIcon";
 import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
 import ClockIcon from "@heroicons/react/24/outline/ClockIcon";
+import DocumentTextIcon from "@heroicons/react/24/outline/DocumentTextIcon";
 import {
   Button,
   Modal,
@@ -18,7 +19,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { dayLabels, eventTypeMeta } from "@app/constants/schedule";
+import {
+  dayLabels,
+  eventTypeMeta,
+  scheduleTimeLabel,
+} from "@app/constants/schedule";
 import {
   createPracticeLog,
   deletePracticeLog,
@@ -83,6 +88,10 @@ export default function ScheduleDetailContent({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const meta = eventTypeMeta(schedule.event_type);
+  const timeLabel = scheduleTimeLabel(
+    schedule.scheduled_time,
+    schedule.end_time,
+  );
   const whenLabel = schedule.days_of_week
     ? `毎週 ${dayLabels(schedule.days_of_week)}`
     : (schedule.planned_on ?? contextDate);
@@ -183,10 +192,16 @@ export default function ScheduleDetailContent({
           icon={<CalendarDaysIcon className={ICON_CLASS} aria-hidden />}
           label={whenLabel}
         />
-        {schedule.scheduled_time ? (
+        {timeLabel ? (
           <InfoRow
             icon={<ClockIcon className={ICON_CLASS} aria-hidden />}
-            label={schedule.scheduled_time}
+            label={timeLabel}
+          />
+        ) : null}
+        {schedule.note ? (
+          <InfoRow
+            icon={<DocumentTextIcon className={ICON_CLASS} aria-hidden />}
+            label={schedule.note}
           />
         ) : null}
         <InfoRow

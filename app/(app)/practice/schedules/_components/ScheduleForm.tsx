@@ -8,7 +8,7 @@ import type {
   ScheduleInput,
 } from "@app/types/schedule";
 import LockClosedIcon from "@heroicons/react/24/solid/LockClosedIcon";
-import { Button, Input } from "@heroui/react";
+import { Button, Input, Textarea } from "@heroui/react";
 import { useState } from "react";
 import { parseDecimal } from "@app/constants/practice";
 import {
@@ -35,10 +35,13 @@ import {
   MENU_SETS_EMPTY,
   MENU_SOURCE_INDIVIDUAL_LABEL,
   MENU_SOURCE_SET_LABEL,
+  NOTE_LABEL,
+  NOTE_PLACEHOLDER,
   RECURRENCE_LABEL,
   RECURRENCE_SINGLE_LABEL,
   RECURRENCE_WEEKLY_LABEL,
   SAVE_LABEL,
+  END_TIME_LABEL,
   TIME_LABEL,
   TITLE_HELPER,
   TITLE_LABEL,
@@ -133,6 +136,7 @@ export default function ScheduleForm({
   const [scheduledTime, setScheduledTime] = useState(
     schedule?.scheduled_time ?? "06:00",
   );
+  const [endTime, setEndTime] = useState(schedule?.end_time ?? "");
   const [menuSource, setMenuSource] = useState<ScheduleMenuSource>(
     schedule?.menu_set_id ? "set" : "individual",
   );
@@ -142,6 +146,7 @@ export default function ScheduleForm({
   const [menuAmounts, setMenuAmounts] = useState<Record<number, string>>(() =>
     initialMenuAmounts(schedule, lockedIds),
   );
+  const [note, setNote] = useState(schedule?.note ?? "");
   // 通知は端末（アプリ版）のローカル通知でのみ動くため、web では既存値をそのまま引き継ぐ。
   const notificationEnabled = schedule?.notification_enabled ?? true;
   const notificationMessage = schedule?.notification_message ?? "";
@@ -186,11 +191,13 @@ export default function ScheduleForm({
         days,
         plannedOn,
         scheduledTime,
+        endTime,
         menuSource,
         menuSetId,
         menuAmounts,
         notificationEnabled,
         notificationMessage,
+        note,
       },
       { canCustomizeMessage, lockedMenus },
     );
@@ -321,17 +328,30 @@ export default function ScheduleForm({
         onChange={(event) => setTitle(event.target.value)}
       />
 
-      <Input
-        type="time"
-        variant="bordered"
-        size="sm"
-        radius="sm"
-        className="w-40"
-        label={TIME_LABEL}
-        labelPlacement="outside"
-        value={scheduledTime}
-        onChange={(event) => setScheduledTime(event.target.value)}
-      />
+      <div className="flex flex-wrap gap-4">
+        <Input
+          type="time"
+          variant="bordered"
+          size="sm"
+          radius="sm"
+          className="w-40"
+          label={TIME_LABEL}
+          labelPlacement="outside"
+          value={scheduledTime}
+          onChange={(event) => setScheduledTime(event.target.value)}
+        />
+        <Input
+          type="time"
+          variant="bordered"
+          size="sm"
+          radius="sm"
+          className="w-40"
+          label={END_TIME_LABEL}
+          labelPlacement="outside"
+          value={endTime}
+          onChange={(event) => setEndTime(event.target.value)}
+        />
+      </div>
 
       <div>
         <p className="mb-1.5 text-sm text-white">{MENU_LABEL}</p>
@@ -476,6 +496,16 @@ export default function ScheduleForm({
           </div>
         )}
       </div>
+
+      <Textarea
+        variant="bordered"
+        minRows={3}
+        label={NOTE_LABEL}
+        labelPlacement="outside"
+        placeholder={NOTE_PLACEHOLDER}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
 
       {messages.length > 0 ? (
         <ul role="alert" className="space-y-1 text-sm text-danger">

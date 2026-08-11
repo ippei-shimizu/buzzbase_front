@@ -3,6 +3,21 @@ import type { ScheduleEventType } from "@app/types/schedule";
 // back/app/models/schedule.rb の `validates :title, length: { maximum: 50 }` と一致させる。
 export const SCHEDULE_TITLE_MAX_LENGTH = 50;
 
+// back/app/models/schedule.rb の `validates :note, length: { maximum: 2000 }` と一致させる。
+export const SCHEDULE_NOTE_MAX_LENGTH = 2000;
+
+/**
+ * 時刻の表示文字列。終了時刻があれば「開始〜終了」で返す。
+ * 開始時刻が無い（終日）場合は null。
+ */
+export const scheduleTimeLabel = (
+  scheduledTime: string | null,
+  endTime: string | null,
+): string | null => {
+  if (!scheduledTime) return null;
+  return endTime ? `${scheduledTime}〜${endTime}` : scheduledTime;
+};
+
 /**
  * 曜日マスタ。num は back の Schedule#day_numbers と同じ「月=1〜日=7」。
  * JavaScript の Date#getDay（日=0〜土=6）とはずれるため、変換せずこの番号だけを使う。

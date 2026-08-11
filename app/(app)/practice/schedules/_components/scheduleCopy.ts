@@ -39,6 +39,10 @@ export const LOCKED_MENU_BADGE = "変更不可";
 export const LOCKED_MENU_SOURCE_NOTICE =
   "「済」のメニューがあるため、メニューセットへの切り替えはできません。";
 
+export const END_TIME_LABEL = "終了時刻";
+export const NOTE_LABEL = "メモ";
+export const NOTE_PLACEHOLDER = "集合場所や持ち物など";
+
 export const SAVE_LABEL = "登録する";
 export const UPDATE_LABEL = "更新する";
 export const CANCEL_LABEL = "キャンセル";

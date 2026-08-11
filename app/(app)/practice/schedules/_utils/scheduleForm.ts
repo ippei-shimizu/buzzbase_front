@@ -3,7 +3,10 @@ import type {
   ScheduleInput,
   ScheduleMenu,
 } from "@app/types/schedule";
-import { SCHEDULE_TITLE_MAX_LENGTH } from "@app/constants/schedule";
+import {
+  SCHEDULE_NOTE_MAX_LENGTH,
+  SCHEDULE_TITLE_MAX_LENGTH,
+} from "@app/constants/schedule";
 
 /** 繰り返し種別。single = この日だけ（planned_on）／weekly = 毎週（days_of_week）。 */
 export type ScheduleRecurrence = "single" | "weekly";
@@ -21,12 +24,16 @@ export interface ScheduleFormValues {
   plannedOn: string;
   /** HH:MM。空文字は終日（時刻未設定）。 */
   scheduledTime: string;
+  /** HH:MM。空文字は終了時刻なし。 */
+  endTime: string;
   menuSource: ScheduleMenuSource;
   menuSetId: number | null;
   /** practice_menu_id → 目標量の入力文字列。キーの存在が「選択中」を意味する。 */
   menuAmounts: Record<number, string>;
   notificationEnabled: boolean;
   notificationMessage: string;
+  /** 自由記述のメモ。 */
+  note: string;
 }
 
 export interface BuildScheduleInputOptions {
@@ -42,6 +49,11 @@ export const RECURRENCE_MISSING_ERROR =
 export const TITLE_REQUIRED_ERROR =
   "タイトルを入力してください（メニューセットを選ぶと省略できます）";
 export const TITLE_TOO_LONG_ERROR = `タイトルは${SCHEDULE_TITLE_MAX_LENGTH}文字以内で入力してください`;
+export const END_TIME_WITHOUT_START_ERROR =
+  "終了時刻は開始時刻とセットで指定してください";
+export const END_TIME_NOT_AFTER_START_ERROR =
+  "終了時刻は開始時刻より後にしてください";
+export const NOTE_TOO_LONG_ERROR = `メモは${SCHEDULE_NOTE_MAX_LENGTH}文字以内で入力してください`;
 
 /** 入力欄の文字列を送信値へ変換する。空文字・非数は null（未指定）として送る。 */
 function toNumberOrNull(value: string | undefined): number | null {
@@ -104,6 +116,9 @@ export function buildScheduleInput(
     planned_on:
       values.recurrence === "single" ? values.plannedOn || null : null,
     scheduled_time: values.scheduledTime || null,
+    // 省略すると back の assign_attributes で既存値が残るため、クリア時は null を明示する。
+    end_time: values.endTime || null,
+    note: values.note.trim() || null,
     menu_set_id: usingSet ? values.menuSetId : null,
     notification_enabled: values.notificationEnabled,
     notification_message: canCustomizeMessage && message ? message : null,
@@ -134,6 +149,17 @@ export function validateScheduleInput(input: ScheduleInput): string[] {
   if (!input.menu_set_id && title === "") errors.push(TITLE_REQUIRED_ERROR);
   if (title.length > SCHEDULE_TITLE_MAX_LENGTH)
     errors.push(TITLE_TOO_LONG_ERROR);
+
+  if (input.end_time) {
+    if (!input.scheduled_time) {
+      errors.push(END_TIME_WITHOUT_START_ERROR);
+    } else if (input.end_time <= input.scheduled_time) {
+      errors.push(END_TIME_NOT_AFTER_START_ERROR);
+    }
+  }
+
+  if ((input.note ?? "").length > SCHEDULE_NOTE_MAX_LENGTH)
+    errors.push(NOTE_TOO_LONG_ERROR);
 
   return errors;
 }
