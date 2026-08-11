@@ -15,10 +15,21 @@ export const metadata = {
   title: "課題の詳細",
 };
 
-function ThemeDetailShell({ children }: { children: React.ReactNode }) {
+/**
+ * 詳細のガワ。ヘッダーは呼び出し元が渡す。
+ * 正常系は本文側（ThemeDetailContent）が編集・削除つきヘッダーを自分で描くため、
+ * ここでは戻る動線だけのヘッダーを渡せるようにしている。
+ */
+function ThemeDetailShell({
+  header,
+  children,
+}: {
+  header?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <HeaderBackTo href="/themes" label="課題一覧に戻る" />
+      {header}
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
           <div className="pt-[74px] px-4 lg:px-6">{children}</div>
@@ -27,6 +38,8 @@ function ThemeDetailShell({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+const FALLBACK_HEADER = <HeaderBackTo href="/themes" label="課題一覧に戻る" />;
 
 export default async function ThemeDetailPage(props: {
   params: Promise<{ id: string }>;
@@ -40,7 +53,7 @@ export default async function ThemeDetailPage(props: {
   const themeId = Number(id);
   if (!Number.isInteger(themeId) || themeId <= 0) {
     return (
-      <ThemeDetailShell>
+      <ThemeDetailShell header={FALLBACK_HEADER}>
         <p className="py-8 text-center text-sm text-zinc-400">
           {NOT_FOUND_MESSAGE}
         </p>
@@ -58,7 +71,7 @@ export default async function ThemeDetailPage(props: {
 
   if (themesResult.status !== "ok") {
     return (
-      <ThemeDetailShell>
+      <ThemeDetailShell header={FALLBACK_HEADER}>
         <p className="py-8 text-center text-sm text-zinc-400">
           {LOAD_ERROR_MESSAGE}
         </p>

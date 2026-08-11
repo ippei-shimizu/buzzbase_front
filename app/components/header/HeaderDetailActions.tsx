@@ -9,7 +9,9 @@ import { BackIcon } from "@app/components/icon/BackIcon";
 interface HeaderDetailActionsProps {
   /** 戻り先。省略すると履歴を1つ戻る。 */
   backHref?: string;
-  editHref: string;
+  /** 編集先のパス。モーダルなどページ遷移しない編集は onEditClick を使う。 */
+  editHref?: string;
+  onEditClick?: () => void;
   editLabel: string;
   deleteLabel: string;
   onDeleteClick: () => void;
@@ -24,6 +26,7 @@ interface HeaderDetailActionsProps {
 export default function HeaderDetailActions({
   backHref,
   editHref,
+  onEditClick,
   editLabel,
   deleteLabel,
   onDeleteClick,
@@ -44,9 +47,15 @@ export default function HeaderDetailActions({
           </button>
         )}
         <div className="flex items-center gap-4">
-          <Link href={editHref} aria-label={editLabel}>
-            <PencilSquareIcon className="h-6 w-6 text-white" aria-hidden />
-          </Link>
+          {editHref ? (
+            <Link href={editHref} aria-label={editLabel}>
+              <PencilSquareIcon className="h-6 w-6 text-white" aria-hidden />
+            </Link>
+          ) : (
+            <button type="button" onClick={onEditClick} aria-label={editLabel}>
+              <PencilSquareIcon className="h-6 w-6 text-white" aria-hidden />
+            </button>
+          )}
           <button
             type="button"
             onClick={onDeleteClick}

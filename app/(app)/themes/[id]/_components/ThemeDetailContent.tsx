@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
 import { themeCategoryLabel } from "@app/constants/improvementTheme";
 import {
   deleteImprovementTheme,
@@ -120,37 +121,27 @@ export default function ThemeDetailContent({
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-2xl font-bold text-white">{theme.title}</h2>
-          <p className="mt-2 text-sm text-zinc-400">
-            {themeCategoryLabel(theme.category)}・
-            {formatJaFullDate(theme.started_on)} 開始
-            {theme.achieved_on
-              ? `・${formatJaFullDate(theme.achieved_on)} 克服`
-              : ""}
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-2">
-          <Button
-            size="sm"
-            variant="flat"
-            onPress={() => {
-              setFormErrors([]);
-              setFormToken(Date.now());
-            }}
-          >
-            編集
-          </Button>
-          <Button
-            size="sm"
-            variant="flat"
-            color="danger"
-            onPress={() => setDeleteOpen(true)}
-          >
-            削除
-          </Button>
-        </div>
+      <HeaderDetailActions
+        backHref="/themes"
+        onEditClick={() => {
+          setFormErrors([]);
+          setFormToken(Date.now());
+        }}
+        editLabel="編集"
+        deleteLabel="削除"
+        onDeleteClick={() => setDeleteOpen(true)}
+        isDeleting={isDeleting}
+      />
+
+      <div className="min-w-0">
+        <h2 className="text-2xl font-bold text-white">{theme.title}</h2>
+        <p className="mt-2 text-sm text-zinc-400">
+          {themeCategoryLabel(theme.category)}・
+          {formatJaFullDate(theme.started_on)} 開始
+          {theme.achieved_on
+            ? `・${formatJaFullDate(theme.achieved_on)} 克服`
+            : ""}
+        </p>
       </div>
 
       {theme.purpose ? (
