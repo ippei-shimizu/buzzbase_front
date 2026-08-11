@@ -1,4 +1,5 @@
 import type { GoalTab } from "../_utils/goalList";
+import type { GoalMetricKey } from "@app/types/goal";
 import { MONTHLY_GOAL_FREE_LIMIT } from "@app/constants/goal";
 
 export const FREE_LIMIT_TITLE = `無料プランで同時に設定できる目標は${MONTHLY_GOAL_FREE_LIMIT}件までです`;
@@ -46,8 +47,12 @@ export const DELETE_CONFIRM_NOTICE =
 export const IMMUTABLE_FIELDS_NOTICE =
   "目標タイプ・期間・指標・条件は作成後に変更できません。変更したい場合は削除して作り直してください。";
 
-export const MENU_METRIC_HINT =
-  "期間内にこのメニューを実施した「日数」を数えます。";
+/** メニュー指定が必須な指標の説明。数え方が指標ごとに違うため文言も分ける。 */
+export const MENU_METRIC_HINTS: Partial<Record<GoalMetricKey, string>> = {
+  menu_practice_days: "期間内にこのメニューを実施した「日数」を数えます。",
+  menu_practice_amount:
+    "期間内にこのメニューでこなした量を合計します。単位はメニューの設定に従います。",
+};
 
 export const MANUAL_CURRENT_VALUE_HINT =
   "現在値は手入力で更新します（自動集計はしません）。";

@@ -42,7 +42,7 @@ import {
   AUTO_RANGE_HINTS,
   IMMUTABLE_FIELDS_NOTICE,
   MANUAL_CURRENT_VALUE_HINT,
-  MENU_METRIC_HINT,
+  MENU_METRIC_HINTS,
   NO_PRACTICE_MENU_MESSAGE,
   NO_SEASON_MESSAGE,
   NO_TOURNAMENT_MESSAGE,
@@ -382,7 +382,9 @@ export default function GoalFormModal({
                     </div>
                   )}
                   <p className="mt-2 text-xs text-zinc-500">
-                    {MENU_METRIC_HINT}
+                    {values.metricKey === null
+                      ? ""
+                      : (MENU_METRIC_HINTS[values.metricKey] ?? "")}
                   </p>
                 </div>
               ) : (
