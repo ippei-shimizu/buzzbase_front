@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { deleteMenuSet } from "@app/services/v2/menuSetService";
+import { formatMenuSetItem } from "../../../_utils/menuSetDisplay";
 import {
   CANCEL_LABEL,
   DELETE_CONFIRM_TITLE,
@@ -24,7 +25,6 @@ import {
   EDIT_LABEL,
   ITEMS_EMPTY,
 } from "../../_components/menuSetCopy";
-import { formatMenuSetItem } from "../../_utils/menuSetDisplay";
 
 interface MenuSetDetailContentProps {
   menuSet: MenuSet;

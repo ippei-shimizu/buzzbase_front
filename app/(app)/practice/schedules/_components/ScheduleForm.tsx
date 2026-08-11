@@ -17,6 +17,7 @@ import {
   WEEK_DAYS,
 } from "@app/constants/schedule";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { menuNamesText } from "../../_utils/menuSetDisplay";
 import {
   type ScheduleMenuSource,
   type ScheduleRecurrence,
@@ -34,6 +35,7 @@ import {
   MENU_LABEL,
   MENU_SETS_EMPTY,
   MENU_SOURCE_INDIVIDUAL_LABEL,
+  MENU_SET_ITEMS_EMPTY,
   MENU_SOURCE_SET_LABEL,
   NOTE_LABEL,
   NOTE_PLACEHOLDER,
@@ -395,12 +397,13 @@ export default function ScheduleForm({
               <p className="text-xs text-zinc-400">{MENU_SETS_EMPTY}</p>
             ) : (
               <div
-                className="flex flex-wrap gap-2"
+                className="flex flex-col gap-2"
                 role="group"
                 aria-label={MENU_SOURCE_SET_LABEL}
               >
                 {menuSets.map((set) => {
                   const isActive = menuSetId === set.id;
+                  const menuNames = menuNamesText(set);
                   return (
                     <button
                       key={set.id}
@@ -411,13 +414,22 @@ export default function ScheduleForm({
                           prev === set.id ? null : set.id,
                         )
                       }
-                      className={`${CHIP_BASE} ${
+                      className={`w-full rounded-lg border-2 px-3.5 py-2.5 text-left transition-colors ${
                         isActive
-                          ? "bg-[#d08000] text-white"
-                          : "bg-sub text-zinc-400 hover:text-white"
+                          ? "border-[#d08000] bg-[#d08000]/10"
+                          : "border-zinc-600 bg-sub hover:border-zinc-500"
                       }`}
                     >
-                      {set.name}
+                      <span
+                        className={`block text-sm font-bold ${
+                          isActive ? "text-[#d08000]" : "text-white"
+                        }`}
+                      >
+                        {set.name}
+                      </span>
+                      <span className="mt-1 block text-xs text-zinc-400">
+                        {menuNames === "" ? MENU_SET_ITEMS_EMPTY : menuNames}
+                      </span>
                     </button>
                   );
                 })}

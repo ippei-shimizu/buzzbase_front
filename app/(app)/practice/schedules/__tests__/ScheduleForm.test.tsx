@@ -56,7 +56,27 @@ const menus: PracticeMenu[] = [
 ];
 
 const menuSets: MenuSet[] = [
-  { id: 3, name: "オフ日ルーティン", note: null, sort_order: 1, items: [] },
+  {
+    id: 3,
+    name: "オフ日ルーティン",
+    note: null,
+    sort_order: 1,
+    items: [
+      {
+        practice_menu_id: 1,
+        name: "素振り",
+        unit_label: "本",
+        target_value: 200,
+      },
+      {
+        practice_menu_id: 2,
+        name: "ランニング",
+        unit_label: "km",
+        target_value: 5,
+      },
+    ],
+  },
+  { id: 4, name: "空のセット", note: null, sort_order: 2, items: [] },
 ];
 
 function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
@@ -187,7 +207,7 @@ describe("ScheduleForm", () => {
 
       await user.click(screen.getByRole("button", { name: "セットから" }));
       await user.click(
-        screen.getByRole("button", { name: "オフ日ルーティン" }),
+        screen.getByRole("button", { name: /オフ日ルーティン/ }),
       );
       await save(user);
 
@@ -296,6 +316,27 @@ describe("ScheduleForm", () => {
         screen.queryByRole("button", { name: /Pro プランを見る/ }),
       ).not.toBeInTheDocument();
     });
+  });
+
+  // セット名だけでは中身が分からず、意図しないセットを選んでしまう。
+  it("セット選択ではセット名の下に含まれるメニューを見せる", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("button", { name: "セットから" }));
+
+    expect(
+      screen.getByRole("button", { name: /オフ日ルーティン/ }),
+    ).toHaveAccessibleName(/素振り \/ ランニング/);
+  });
+
+  it("メニュー未設定のセットはその旨を出す", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("button", { name: "セットから" }));
+
+    expect(screen.getByText("メニュー未設定")).toBeInTheDocument();
   });
 
   describe("終了時刻とメモ", () => {
