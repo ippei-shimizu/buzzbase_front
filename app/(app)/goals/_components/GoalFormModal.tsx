@@ -42,7 +42,7 @@ import {
   AUTO_RANGE_HINTS,
   IMMUTABLE_FIELDS_NOTICE,
   MANUAL_CURRENT_VALUE_HINT,
-  MENU_METRIC_HINT,
+  MENU_METRIC_HINTS,
   NO_PRACTICE_MENU_MESSAGE,
   NO_SEASON_MESSAGE,
   NO_TOURNAMENT_MESSAGE,
@@ -80,10 +80,10 @@ function ChoiceChip({
       aria-pressed={isActive}
       disabled={isDisabled}
       onClick={onSelect}
-      className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed ${
+      className={`rounded-full border-2 px-3.5 py-2 text-xs font-bold transition-colors disabled:cursor-not-allowed ${
         isActive
-          ? "bg-[#d08000] text-white"
-          : "bg-sub text-zinc-400 hover:text-white disabled:opacity-40"
+          ? "border-[#d08000] bg-[#d08000] text-white"
+          : "border-zinc-600 bg-sub text-zinc-400 hover:text-white disabled:opacity-40"
       }`}
     >
       {label}
@@ -382,7 +382,9 @@ export default function GoalFormModal({
                     </div>
                   )}
                   <p className="mt-2 text-xs text-zinc-500">
-                    {MENU_METRIC_HINT}
+                    {values.metricKey === null
+                      ? ""
+                      : (MENU_METRIC_HINTS[values.metricKey] ?? "")}
                   </p>
                 </div>
               ) : (

@@ -32,6 +32,7 @@ function buildGoal(overrides: Partial<Goal> = {}): Goal {
     comparison_type: "greater_than",
     practice_menu_id: null,
     practice_menu_name: null,
+    practice_menu_unit_label: null,
     custom_metric_label: null,
     custom_unit: null,
     manual_current_value: 0,
@@ -148,6 +149,12 @@ describe("initialGoalFormValues", () => {
 });
 
 describe("isMenuMetric", () => {
+  it("メニュー回数もメニュー指定が必須になる", () => {
+    expect(
+      isMenuMetric(buildValues({ metricKey: "menu_practice_amount" })),
+    ).toBe(true);
+  });
+
   it("数値目標でメニュー継続日数を選んだときだけ true", () => {
     expect(isMenuMetric(buildValues({ metricKey: "menu_practice_days" }))).toBe(
       true,

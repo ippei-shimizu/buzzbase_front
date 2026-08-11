@@ -69,6 +69,7 @@ import type { FetchResult } from "@app/services/v2/requests";
 import type { PreparedMedia } from "@app/utils/media/uploadPipeline";
 import type ReactModule from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import {
   createBaseballNote,
   deleteBaseballNote,
@@ -172,7 +173,7 @@ describe("新規作成時の staged media", () => {
       42,
       expect.anything(),
     );
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith(NOTE_LIST_PATH));
   });
 
   it("ノートの保存に失敗したらアップロードしない", async () => {
@@ -243,7 +244,7 @@ describe("新規作成時の staged media", () => {
     save();
 
     await waitFor(() => expect(mockDeleteNote).toHaveBeenCalledWith(42));
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith(NOTE_LIST_PATH));
     expect(mockToastError).toHaveBeenCalledWith(
       "メディアの保存に失敗し、ノートの削除にも失敗しました。ノートが残っている場合があるため、一覧をご確認のうえ必要であれば削除してください。",
     );
@@ -306,7 +307,7 @@ describe("新規作成時の staged media", () => {
 
     save();
 
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/note"));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith(NOTE_LIST_PATH));
     expect(mockUpload).not.toHaveBeenCalled();
   });
 

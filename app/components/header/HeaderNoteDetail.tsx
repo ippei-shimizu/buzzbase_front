@@ -1,7 +1,5 @@
 "use client";
 
-import PencilSquareIcon from "@heroicons/react/24/outline/PencilSquareIcon";
-import TrashIcon from "@heroicons/react/24/outline/TrashIcon";
 import {
   Button,
   Modal,
@@ -11,11 +9,12 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@heroui/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BackIcon } from "@app/components/icon/BackIcon";
+import { toast } from "sonner";
+import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import { deleteBaseballNote } from "@app/services/v2/baseballNoteService";
 
 interface HeaderNoteDetailProps {
@@ -33,34 +32,22 @@ export default function HeaderNoteDetail({ noteId }: HeaderNoteDetailProps) {
     const result = await deleteBaseballNote(noteId);
     if (!result.ok) {
       setIsDeleting(false);
+      toast.error(result.errors[0] ?? "ノートの削除に失敗しました");
       return;
     }
-    router.push("/note");
+    router.push(NOTE_LIST_PATH);
   };
 
   return (
     <>
       {isDeleting ? <LoadingSpinner /> : null}
-      <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--top-banner-offset,0px)] w-full bg-main z-50">
-        <div className="flex items-center justify-between h-full max-w-[692px] mx-auto lg:m-[0_auto_0_28%]">
-          <button onClick={() => router.back()} aria-label="戻る">
-            <BackIcon width="24" height="24" fill="" stroke="white" />
-          </button>
-          <div className="flex items-center gap-4">
-            <Link href={`/note/${noteId}/edit`} aria-label="ノートを編集">
-              <PencilSquareIcon className="h-6 w-6 text-white" aria-hidden />
-            </Link>
-            <button
-              type="button"
-              onClick={onOpen}
-              aria-label="ノートを削除"
-              disabled={isDeleting}
-            >
-              <TrashIcon className="h-6 w-6 text-danger" aria-hidden />
-            </button>
-          </div>
-        </div>
-      </header>
+      <HeaderDetailActions
+        editHref={`/note/${noteId}/edit`}
+        editLabel="ノートを編集"
+        deleteLabel="ノートを削除"
+        onDeleteClick={onOpen}
+        isDeleting={isDeleting}
+      />
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}

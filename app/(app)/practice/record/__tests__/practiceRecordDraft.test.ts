@@ -50,6 +50,7 @@ function buildSession(logs: PracticeLog[]): PracticeSession {
     id: 10,
     logged_on: "2026-08-01",
     memo: null,
+    practice_type: "self_practice" as const,
     improvement_theme_ids: [],
     practice_logs: logs,
     condition: null,
@@ -133,6 +134,31 @@ describe("buildInitialAmounts", () => {
         { practice_menu_id: 2, target_value: 50 },
       ]),
     ).toEqual({ 1: "300", 2: "50" });
+  });
+
+  // 予定のメニューをチェックすると量なしのログが先に作られ、
+  // それが先勝ちすると予定の目標量が引き継がれない。
+  it("量が入っていない既存ログはプリセットの目標量で埋める", () => {
+    const session = buildSession([
+      buildLog({ practice_menu_id: 1, amount: null }),
+    ]);
+    expect(
+      buildInitialAmounts(session, [
+        { practice_menu_id: 1, target_value: 200 },
+      ]),
+    ).toEqual({ 1: "200" });
+  });
+
+  // 「やったが 0 だった」も実績なので、プリセットで塗り替えない。
+  it("量が 0 の既存ログはプリセットで上書きしない", () => {
+    const session = buildSession([
+      buildLog({ practice_menu_id: 1, amount: "0.0" }),
+    ]);
+    expect(
+      buildInitialAmounts(session, [
+        { practice_menu_id: 1, target_value: 200 },
+      ]),
+    ).toEqual({ 1: "0" });
   });
 
   it("記録が無い日は空になる", () => {

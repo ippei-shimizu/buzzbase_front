@@ -1,6 +1,6 @@
 import type { MenuSet, MenuSetItem } from "@app/types/menuSet";
 import { formatPracticeValue } from "@app/constants/practice";
-import { UNKNOWN_MENU_NAME } from "../_components/menuSetCopy";
+import { UNKNOWN_MENU_NAME } from "../menu-sets/_components/menuSetCopy";
 
 /** セット内メニューの表示名。メニューが削除されていると serializer が null を返す。 */
 function itemName(item: MenuSetItem): string {

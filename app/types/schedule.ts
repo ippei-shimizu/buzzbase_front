@@ -30,6 +30,8 @@ export interface Schedule {
   planned_on: string | null;
   /** "06:00"。時刻未設定（終日）は null。 */
   scheduled_time: string | null;
+  /** "12:30"。開始時刻とセットでのみ設定でき、開始より後であること。 */
+  end_time: string | null;
   event_type: ScheduleEventType;
   /** days_of_week を持つ（毎週繰り返し）か。 */
   recurring: boolean;
@@ -58,6 +60,11 @@ export interface ScheduleInput {
   days_of_week?: string | null;
   planned_on?: string | null;
   scheduled_time?: string | null;
+  /**
+   * 終了時刻をクリアするときは省略ではなく null を送る。
+   * back は assign_attributes のため、省略すると既存値が残る。
+   */
+  end_time?: string | null;
   event_type?: ScheduleEventType;
   menu_set_id?: number | null;
   note?: string | null;

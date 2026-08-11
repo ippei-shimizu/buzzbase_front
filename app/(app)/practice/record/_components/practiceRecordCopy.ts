@@ -10,6 +10,15 @@ export const PAGE_DESCRIPTION =
 
 export const DATE_LABEL = "日付";
 
+export const PRACTICE_TYPE_SECTION_TITLE = "練習の種別";
+export const PRACTICE_TYPE_LABELS: ReadonlyArray<{
+  value: "self_practice" | "team_practice";
+  label: string;
+}> = [
+  { value: "self_practice", label: "自主練習" },
+  { value: "team_practice", label: "チーム練習" },
+];
+
 export const MENU_SECTION_TITLE = "練習メニュー（複数選択可）";
 
 export const ADD_MENU_LABEL = "新しいメニューを追加";

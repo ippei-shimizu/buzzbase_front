@@ -25,6 +25,7 @@ function buildPlan(overrides: Partial<Plan> = {}): Plan {
     title: "朝練",
     event_type: "self_practice",
     scheduled_time: "06:00",
+    end_time: null,
     recurring: true,
     menu_set_id: null,
     game_result_id: null,

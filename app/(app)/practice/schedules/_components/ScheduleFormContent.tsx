@@ -4,7 +4,7 @@ import type { MenuSet } from "@app/types/menuSet";
 import type { PracticeMenu } from "@app/types/practice";
 import type { Schedule, ScheduleInput } from "@app/types/schedule";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   createSchedule,
@@ -33,8 +33,13 @@ export default function ScheduleFormContent({
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [serverErrors, setServerErrors] = useState<string[]>([]);
+  // isSaving は再レンダリング後にしかボタンへ反映されず、同一フレーム内の2度押しを
+  // 止められない。同じ予定が2件登録されるのを防ぐため ref でも実行中を持つ。
+  const isSavingRef = useRef(false);
 
   const handleSubmit = async (input: ScheduleInput) => {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setIsSaving(true);
     setServerErrors([]);
 
@@ -44,13 +49,20 @@ export default function ScheduleFormContent({
     setIsSaving(false);
 
     if (!result.ok) {
+      isSavingRef.current = false;
       setServerErrors(result.errors);
       return;
     }
 
     toast.success(schedule ? "予定を更新しました" : "予定を登録しました");
-    router.push(`/practice/schedules/${result.data.id}`);
+    // 新規登録はフォームに留まらせない。追加の起点であるカレンダーへ戻し、
+    // 同じ内容を続けて送信できる状態を残さない。
     router.refresh();
+    router.push(
+      schedule
+        ? `/practice/schedules/${result.data.id}`
+        : "/practice/plans?tab=calendar",
+    );
   };
 
   return (

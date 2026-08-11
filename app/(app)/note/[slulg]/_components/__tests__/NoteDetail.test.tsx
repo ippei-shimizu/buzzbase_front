@@ -17,6 +17,7 @@ import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
 import type { FetchResult } from "@app/services/v2/requests";
 import type { GameResultLinkOption } from "@app/types/gameResultLink";
 import type { ImprovementTheme } from "@app/types/improvementTheme";
+import type { PracticeSession } from "@app/types/practice";
 import { render, screen } from "@testing-library/react";
 import NoteDetail from "../NoteDetail";
 
@@ -60,17 +61,70 @@ const linkedGameResults: GameResultLinkOption[] = [
   { game_result_id: 101, date: "2026-07-30", opponent_team_name: "青葉高校" },
 ];
 
-function renderDetail(overrides: Partial<BaseballNoteV2> = {}) {
+const practiceSession: PracticeSession = {
+  id: 55,
+  logged_on: "2026-08-01",
+  memo: null,
+  practice_type: "self_practice",
+  improvement_theme_ids: [],
+  practice_logs: [
+    {
+      id: 1,
+      practice_menu_id: 1,
+      schedule_id: null,
+      logged_on: "2026-08-01",
+      amount: 200,
+      weight: null,
+      menu_name: "素振り",
+      unit_label: "本",
+      source: "manual",
+      memo: null,
+      created_at: "2026-08-01T00:00:00Z",
+    },
+  ],
+  condition: null,
+  created_at: "2026-08-01T00:00:00Z",
+};
+
+function renderDetail(
+  overrides: Partial<BaseballNoteV2> = {},
+  session: PracticeSession | null = null,
+) {
   return render(
     <NoteDetail
       note={{ ...note, ...overrides }}
       themesResult={themesResult}
       linkedGameResults={linkedGameResults}
+      practiceSession={session}
+      practiceMenus={[]}
     />,
   );
 }
 
 describe("NoteDetail", () => {
+  describe("紐付けた練習", () => {
+    it("紐付けが無ければセクションを出さない", () => {
+      renderDetail();
+
+      expect(screen.queryByText("紐付けた練習")).not.toBeInTheDocument();
+    });
+
+    it("紐付いた練習の日付とメニューを表示する", () => {
+      renderDetail({}, practiceSession);
+
+      expect(screen.getByText("紐付けた練習")).toBeVisible();
+      expect(screen.getByText("8月1日(土)")).toBeVisible();
+      expect(screen.getByText("素振り")).toBeVisible();
+      expect(screen.getByText("200本")).toBeVisible();
+    });
+
+    it("メニューの記録が無ければその旨を出す", () => {
+      renderDetail({}, { ...practiceSession, practice_logs: [] });
+
+      expect(screen.getByText("メニューの記録はありません")).toBeVisible();
+    });
+  });
+
   it("日付・タイトル・メモを表示する", () => {
     renderDetail();
 

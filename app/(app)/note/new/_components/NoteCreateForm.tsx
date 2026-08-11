@@ -26,6 +26,7 @@ import NoteThemeSection from "@app/components/note/NoteThemeSection";
 import ReflectionTemplateSection from "@app/components/note/ReflectionTemplateSection";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import { useMediaUpload } from "@app/hooks/media/useMediaUpload";
 import { useNoteTagEditing } from "@app/hooks/note/useNoteTagEditing";
 import {
@@ -34,6 +35,7 @@ import {
 } from "@app/services/v2/baseballNoteService";
 import {
   buildStagedUploadNotice,
+  revokeStagedObjectUrls,
   summarizeStagedUploads,
   toPreparedMedia,
 } from "@app/utils/media/stagedUpload";
@@ -130,7 +132,7 @@ export default function NoteCreateForm({
     setStagedMedia((prev) =>
       prev.filter((asset) => {
         if (asset.localId !== localId) return true;
-        if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
+        revokeStagedObjectUrls(asset);
         return false;
       }),
     );
@@ -159,11 +161,9 @@ export default function NoteCreateForm({
       if (!rollbackResult.ok) {
         // 削除自体が失敗した場合、本文を含むノートがサーバーに残っている可能性が高い。
         // 作成フォームに留めて再送信させると重複ノートを生むため、一覧へ逃がす。
-        stagedMedia.forEach((asset) => {
-          if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-        });
+        stagedMedia.forEach(revokeStagedObjectUrls);
         toast.error(ROLLBACK_FAILED_MESSAGE);
-        router.push("/note");
+        router.push(NOTE_LIST_PATH);
         return;
       }
       setErrorsWithTimeout([ROLLBACK_MESSAGE]);
@@ -171,9 +171,7 @@ export default function NoteCreateForm({
       return;
     }
 
-    stagedMedia.forEach((asset) => {
-      if (asset.previewUrl) URL.revokeObjectURL(asset.previewUrl);
-    });
+    stagedMedia.forEach(revokeStagedObjectUrls);
     setStagedMedia([]);
 
     if (
@@ -192,7 +190,7 @@ export default function NoteCreateForm({
       return;
     }
 
-    router.push("/note");
+    router.push(NOTE_LIST_PATH);
   };
 
   const handleSubmit = async () => {
@@ -228,7 +226,7 @@ export default function NoteCreateForm({
 
     // 添付が無いときはアップロード経路を通さず、そのまま一覧へ戻す。
     if (stagedMedia.length === 0) {
-      router.push("/note");
+      router.push(NOTE_LIST_PATH);
       return;
     }
     await uploadStagedMedia(result.data.id);
@@ -258,7 +256,7 @@ export default function NoteCreateForm({
                   radius="sm"
                   fullWidth
                   className="mt-6 font-bold"
-                  onPress={() => router.push("/note")}
+                  onPress={() => router.push(NOTE_LIST_PATH)}
                 >
                   ノート一覧へ
                 </Button>

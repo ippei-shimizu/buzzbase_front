@@ -102,9 +102,9 @@ describe("NoteListComponent", () => {
     ]);
 
     expect(screen.getByText("#打撃")).toBeInTheDocument();
-    expect(screen.getByText("試合 2件")).toBeInTheDocument();
+    expect(screen.getByText("試合に紐付け")).toBeInTheDocument();
+    expect(screen.getByText("練習に紐付け")).toBeInTheDocument();
     expect(screen.getByText("課題 1件")).toBeInTheDocument();
-    expect(screen.getByText("練習記録")).toBeInTheDocument();
   });
 });
 

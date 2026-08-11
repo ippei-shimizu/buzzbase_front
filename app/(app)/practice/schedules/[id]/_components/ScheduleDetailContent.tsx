@@ -6,6 +6,7 @@ import BellSlashIcon from "@heroicons/react/24/outline/BellSlashIcon";
 import CalendarDaysIcon from "@heroicons/react/24/outline/CalendarDaysIcon";
 import ChatBubbleLeftEllipsisIcon from "@heroicons/react/24/outline/ChatBubbleLeftEllipsisIcon";
 import ClockIcon from "@heroicons/react/24/outline/ClockIcon";
+import DocumentTextIcon from "@heroicons/react/24/outline/DocumentTextIcon";
 import {
   Button,
   Modal,
@@ -18,7 +19,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { dayLabels, eventTypeMeta } from "@app/constants/schedule";
+import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
+import {
+  dayLabels,
+  eventTypeMeta,
+  scheduleTimeLabel,
+} from "@app/constants/schedule";
 import {
   createPracticeLog,
   deletePracticeLog,
@@ -83,6 +89,10 @@ export default function ScheduleDetailContent({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const meta = eventTypeMeta(schedule.event_type);
+  const timeLabel = scheduleTimeLabel(
+    schedule.scheduled_time,
+    schedule.end_time,
+  );
   const whenLabel = schedule.days_of_week
     ? `毎週 ${dayLabels(schedule.days_of_week)}`
     : (schedule.planned_on ?? contextDate);
@@ -148,7 +158,7 @@ export default function ScheduleDetailContent({
       return;
     }
     toast.success("予定を削除しました");
-    router.push("/practice/schedules");
+    router.push("/practice/plans?tab=calendar");
     router.refresh();
   };
 
@@ -159,6 +169,15 @@ export default function ScheduleDetailContent({
 
   return (
     <>
+      <HeaderDetailActions
+        backHref="/dashboard"
+        editHref={`/practice/schedules/${schedule.id}/edit`}
+        editLabel={EDIT_LABEL}
+        deleteLabel={DELETE_LABEL}
+        onDeleteClick={() => setIsDeleteOpen(true)}
+        isDeleting={isDeleting}
+      />
+
       <div className="flex items-start gap-3">
         <span
           aria-hidden
@@ -183,10 +202,16 @@ export default function ScheduleDetailContent({
           icon={<CalendarDaysIcon className={ICON_CLASS} aria-hidden />}
           label={whenLabel}
         />
-        {schedule.scheduled_time ? (
+        {timeLabel ? (
           <InfoRow
             icon={<ClockIcon className={ICON_CLASS} aria-hidden />}
-            label={schedule.scheduled_time}
+            label={timeLabel}
+          />
+        ) : null}
+        {schedule.note ? (
+          <InfoRow
+            icon={<DocumentTextIcon className={ICON_CLASS} aria-hidden />}
+            label={schedule.note}
           />
         ) : null}
         <InfoRow
@@ -281,27 +306,6 @@ export default function ScheduleDetailContent({
             <p className="text-xs text-zinc-400">{RECORD_PRACTICE_HELPER}</p>
           </>
         )}
-      </div>
-
-      <div className="mt-4 flex gap-3">
-        <Button
-          as={Link}
-          href={`/practice/schedules/${schedule.id}/edit`}
-          variant="flat"
-          radius="sm"
-          className="flex-1"
-        >
-          {EDIT_LABEL}
-        </Button>
-        <Button
-          color="danger"
-          variant="flat"
-          radius="sm"
-          className="flex-1"
-          onPress={() => setIsDeleteOpen(true)}
-        >
-          {DELETE_LABEL}
-        </Button>
       </div>
 
       <Modal

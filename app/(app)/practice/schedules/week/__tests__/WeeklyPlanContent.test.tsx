@@ -65,6 +65,7 @@ function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
     days_of_week: null,
     planned_on: MONDAY,
     scheduled_time: "06:00",
+    end_time: null,
     event_type: "self_practice",
     recurring: false,
     menu_set_id: null,

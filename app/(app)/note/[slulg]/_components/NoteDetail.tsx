@@ -4,6 +4,7 @@ import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
 import type { FetchResult } from "@app/services/v2/requests";
 import type { GameResultLinkOption } from "@app/types/gameResultLink";
 import type { ImprovementTheme } from "@app/types/improvementTheme";
+import type { PracticeMenu, PracticeSession } from "@app/types/practice";
 import { FlagIcon } from "@heroicons/react/24/outline";
 import HeaderNoteDetail from "@app/components/header/HeaderNoteDetail";
 import { BallIcon } from "@app/components/icon/BallIcon";
@@ -12,12 +13,17 @@ import { themeCategoryLabel } from "@app/constants/improvementTheme";
 import { formatJaFullDate } from "@app/utils/formatDate";
 import { extractMemoText, isReflectionMemo } from "@app/utils/noteMemo";
 import { tagLabel } from "@app/utils/noteTags";
+import LinkedPracticeSection from "./LinkedPracticeSection";
 
 interface NoteDetailProps {
   note: BaseballNoteV2;
   themesResult: FetchResult<ImprovementTheme[]>;
   /** 紐付け済みの試合記録。取得できなかった分は含まれない。 */
   linkedGameResults: GameResultLinkOption[];
+  /** 紐付いた練習記録。紐付けが無い、または取得に失敗した場合は null。 */
+  practiceSession: PracticeSession | null;
+  /** アイコンのカテゴリ判定用。取得に失敗した場合は空配列で既定アイコンに倒す。 */
+  practiceMenus: PracticeMenu[];
 }
 
 function gameLabel(option: GameResultLinkOption): string {
@@ -30,6 +36,8 @@ export default function NoteDetail({
   note,
   themesResult,
   linkedGameResults,
+  practiceSession,
+  practiceMenus,
 }: NoteDetailProps) {
   const memoText = extractMemoText(note.memo);
   // 回答から自動合成された memo は回答欄と同じ内容が並ぶため、メモ欄には出さない。
@@ -37,6 +45,9 @@ export default function NoteDetail({
     memoText.trim() !== "" &&
     !isReflectionMemo(memoText, note.reflection_answers);
   const themes = themesResult.status === "ok" ? themesResult.data : null;
+  const categoryById = new Map(
+    practiceMenus.map((menu) => [menu.id, menu.category]),
+  );
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
@@ -153,6 +164,13 @@ export default function NoteDetail({
                   })}
                 </ul>
               </section>
+            ) : null}
+
+            {practiceSession ? (
+              <LinkedPracticeSection
+                session={practiceSession}
+                categoryById={categoryById}
+              />
             ) : null}
 
             {note.game_result_ids.length > 0 ? (

@@ -8,16 +8,15 @@ import type {
   ScheduleInput,
 } from "@app/types/schedule";
 import LockClosedIcon from "@heroicons/react/24/solid/LockClosedIcon";
-import { Button, Input } from "@heroui/react";
+import { Button, Input, Textarea } from "@heroui/react";
 import { useState } from "react";
-import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { parseDecimal } from "@app/constants/practice";
 import {
   EVENT_TYPES,
   SCHEDULE_TITLE_MAX_LENGTH,
   WEEK_DAYS,
 } from "@app/constants/schedule";
-import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { menuNamesText } from "../../_utils/menuSetDisplay";
 import {
   type ScheduleMenuSource,
   type ScheduleRecurrence,
@@ -35,13 +34,15 @@ import {
   MENU_LABEL,
   MENU_SETS_EMPTY,
   MENU_SOURCE_INDIVIDUAL_LABEL,
+  MENU_SET_ITEMS_EMPTY,
   MENU_SOURCE_SET_LABEL,
-  NOTIFICATION_MESSAGE_LABEL,
-  NOTIFICATION_MESSAGE_PLACEHOLDER,
+  NOTE_LABEL,
+  NOTE_PLACEHOLDER,
   RECURRENCE_LABEL,
   RECURRENCE_SINGLE_LABEL,
   RECURRENCE_WEEKLY_LABEL,
   SAVE_LABEL,
+  END_TIME_LABEL,
   TIME_LABEL,
   TITLE_HELPER,
   TITLE_LABEL,
@@ -109,9 +110,6 @@ export default function ScheduleForm({
   onSubmit,
   onCancel,
 }: ScheduleFormProps) {
-  const { hasEntitlement, isLoading: isEntitlementLoading } = useEntitlement();
-  const canCustomizeMessage = hasEntitlement("custom_notification_messages");
-
   // 記録済みメニューは「済」判定の整合が壊れるため、選択解除も目標量の変更もさせない。
   const lockedIds = new Set(schedule?.logged_practice_menu_ids ?? []);
   const lockedMenus = (schedule?.menus ?? []).filter((menu) =>
@@ -136,6 +134,7 @@ export default function ScheduleForm({
   const [scheduledTime, setScheduledTime] = useState(
     schedule?.scheduled_time ?? "06:00",
   );
+  const [endTime, setEndTime] = useState(schedule?.end_time ?? "");
   const [menuSource, setMenuSource] = useState<ScheduleMenuSource>(
     schedule?.menu_set_id ? "set" : "individual",
   );
@@ -145,11 +144,9 @@ export default function ScheduleForm({
   const [menuAmounts, setMenuAmounts] = useState<Record<number, string>>(() =>
     initialMenuAmounts(schedule, lockedIds),
   );
-  // オン・オフはアプリ側でのみ変更させるため、web では既存値をそのまま引き継ぐ。
+  const [note, setNote] = useState(schedule?.note ?? "");
+  // 通知は端末（アプリ版）のローカル通知でのみ動くため、web では既存値をそのまま引き継ぐ。
   const notificationEnabled = schedule?.notification_enabled ?? true;
-  const [notificationMessage, setNotificationMessage] = useState(
-    schedule?.notification_message ?? "",
-  );
   const [errors, setErrors] = useState<string[]>([]);
 
   const usingSet = menuSource === "set" && menuSetId !== null;
@@ -191,13 +188,14 @@ export default function ScheduleForm({
         days,
         plannedOn,
         scheduledTime,
+        endTime,
         menuSource,
         menuSetId,
         menuAmounts,
         notificationEnabled,
-        notificationMessage,
+        note,
       },
-      { canCustomizeMessage, lockedMenus },
+      { lockedMenus },
     );
 
     const validationErrors = validateScheduleInput(input);
@@ -326,17 +324,30 @@ export default function ScheduleForm({
         onChange={(event) => setTitle(event.target.value)}
       />
 
-      <Input
-        type="time"
-        variant="bordered"
-        size="sm"
-        radius="sm"
-        className="w-40"
-        label={TIME_LABEL}
-        labelPlacement="outside"
-        value={scheduledTime}
-        onChange={(event) => setScheduledTime(event.target.value)}
-      />
+      <div className="flex flex-wrap gap-4">
+        <Input
+          type="time"
+          variant="bordered"
+          size="sm"
+          radius="sm"
+          className="w-40"
+          label={TIME_LABEL}
+          labelPlacement="outside"
+          value={scheduledTime}
+          onChange={(event) => setScheduledTime(event.target.value)}
+        />
+        <Input
+          type="time"
+          variant="bordered"
+          size="sm"
+          radius="sm"
+          className="w-40"
+          label={END_TIME_LABEL}
+          labelPlacement="outside"
+          value={endTime}
+          onChange={(event) => setEndTime(event.target.value)}
+        />
+      </div>
 
       <div>
         <p className="mb-1.5 text-sm text-white">{MENU_LABEL}</p>
@@ -380,12 +391,13 @@ export default function ScheduleForm({
               <p className="text-xs text-zinc-400">{MENU_SETS_EMPTY}</p>
             ) : (
               <div
-                className="flex flex-wrap gap-2"
+                className="flex flex-col gap-2"
                 role="group"
                 aria-label={MENU_SOURCE_SET_LABEL}
               >
                 {menuSets.map((set) => {
                   const isActive = menuSetId === set.id;
+                  const menuNames = menuNamesText(set);
                   return (
                     <button
                       key={set.id}
@@ -396,13 +408,22 @@ export default function ScheduleForm({
                           prev === set.id ? null : set.id,
                         )
                       }
-                      className={`${CHIP_BASE} ${
+                      className={`w-full rounded-lg border-2 px-3.5 py-2.5 text-left transition-colors ${
                         isActive
-                          ? "bg-[#d08000] text-white"
-                          : "bg-sub text-zinc-400 hover:text-white"
+                          ? "border-[#d08000] bg-[#d08000]/10"
+                          : "border-zinc-600 bg-sub hover:border-zinc-500"
                       }`}
                     >
-                      {set.name}
+                      <span
+                        className={`block text-sm font-bold ${
+                          isActive ? "text-[#d08000]" : "text-white"
+                        }`}
+                      >
+                        {set.name}
+                      </span>
+                      <span className="mt-1 block text-xs text-zinc-400">
+                        {menuNames === "" ? MENU_SET_ITEMS_EMPTY : menuNames}
+                      </span>
                     </button>
                   );
                 })}
@@ -482,19 +503,15 @@ export default function ScheduleForm({
         )}
       </div>
 
-      {isEntitlementLoading ? null : canCustomizeMessage ? (
-        <Input
-          type="text"
-          variant="bordered"
-          label={NOTIFICATION_MESSAGE_LABEL}
-          labelPlacement="outside"
-          placeholder={NOTIFICATION_MESSAGE_PLACEHOLDER}
-          value={notificationMessage}
-          onChange={(event) => setNotificationMessage(event.target.value)}
-        />
-      ) : (
-        <ProUpsellCard feature="custom_notification_messages" />
-      )}
+      <Textarea
+        variant="bordered"
+        minRows={3}
+        label={NOTE_LABEL}
+        labelPlacement="outside"
+        placeholder={NOTE_PLACEHOLDER}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
 
       {messages.length > 0 ? (
         <ul role="alert" className="space-y-1 text-sm text-danger">

@@ -45,6 +45,7 @@ function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
     days_of_week: "1,3,5",
     planned_on: null,
     scheduled_time: "06:00",
+    end_time: null,
     event_type: "self_practice",
     recurring: true,
     menu_set_id: null,
@@ -253,7 +254,7 @@ describe("ScheduleDetailContent", () => {
   it("編集への導線を持つ", () => {
     renderDetail();
 
-    expect(screen.getByRole("button", { name: "編集" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "編集" })).toHaveAttribute(
       "href",
       "/practice/schedules/10/edit",
     );
@@ -273,6 +274,6 @@ describe("ScheduleDetailContent", () => {
     );
 
     await waitFor(() => expect(mockDeleteSchedule).toHaveBeenCalledWith(10));
-    expect(mockPush).toHaveBeenCalledWith("/practice/schedules");
+    expect(mockPush).toHaveBeenCalledWith("/practice/plans?tab=calendar");
   });
 });

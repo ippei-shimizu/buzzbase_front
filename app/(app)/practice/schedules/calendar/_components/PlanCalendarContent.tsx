@@ -5,10 +5,10 @@ import type { FetchResult } from "@app/services/v2/requests";
 import type { CalendarEntry, CalendarResponse } from "@app/types/plan";
 import ChevronLeftIcon from "@heroicons/react/24/outline/ChevronLeftIcon";
 import ChevronRightIcon from "@heroicons/react/24/outline/ChevronRightIcon";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
-import { useIsNarrowViewport } from "@app/hooks/useIsNarrowViewport";
+import { useHorizontalSwipe } from "@app/hooks/useHorizontalSwipe";
 import { getPlanCalendar } from "@app/services/v2/planService";
 import {
   fetchRange,
@@ -71,6 +71,11 @@ interface PlanCalendarContentProps {
   /** Server Component が先に取得した初期表示範囲。 */
   initialRange: CalendarRange;
   initialResult: FetchResult<CalendarResponse>;
+  /**
+   * 横スワイプで月/週/日を切り替えるか。
+   * 練習プランのタブに埋め込むときは外側のタブ送りと競合するため false にする。
+   */
+  swipeEnabled?: boolean;
 }
 
 /**
@@ -86,17 +91,11 @@ export default function PlanCalendarContent({
   today,
   initialRange,
   initialResult,
+  swipeEnabled = true,
 }: PlanCalendarContentProps) {
   const { hasEntitlement, isLoading: isEntitlementLoading } = useEntitlement();
-  const isNarrowViewport = useIsNarrowViewport();
 
-  // 明示的に切り替えるまでは画面幅に合わせた既定モード（SP は週、デスクトップは月）。
-  // 一度でも選んだら以降は画面幅で上書きしない。
-  const [selectedMode, setSelectedMode] = useState<CalendarViewMode | null>(
-    null,
-  );
-  const mode: CalendarViewMode =
-    selectedMode ?? (isNarrowViewport ? "week" : "month");
+  const [mode, setMode] = useState<CalendarViewMode>("month");
 
   const [cursor, setCursor] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -107,15 +106,24 @@ export default function PlanCalendarContent({
   const currentKey = rangeKey(fetchRange(cursor));
   const result = resultsByRange[currentKey];
 
+  // 取得中のレンジ。解決前に予約しておかないと、前後を連打したときに
+  // 同じレンジへ何度もリクエストが飛ぶ。
+  const inFlightRangesRef = useRef<Set<string>>(new Set());
+
   const loadRange = (nextCursor: string) => {
     const range = fetchRange(nextCursor);
     const key = rangeKey(range);
-    if (resultsByRange[key]) return;
+    if (resultsByRange[key] || inFlightRangesRef.current.has(key)) return;
+    inFlightRangesRef.current.add(key);
     // 範囲外でも取得はする。back がクランプした実データを持っておくことで、
     // Pro 判定が後から確定しても取得済みの内容をそのまま出せる。
-    void getPlanCalendar(range.from, range.to).then((fetched) => {
-      setResultsByRange((previous) => ({ ...previous, [key]: fetched }));
-    });
+    void getPlanCalendar(range.from, range.to)
+      .then((fetched) => {
+        setResultsByRange((previous) => ({ ...previous, [key]: fetched }));
+      })
+      .finally(() => {
+        inFlightRangesRef.current.delete(key);
+      });
   };
 
   const moveTo = (nextCursor: string) => {
@@ -123,10 +131,23 @@ export default function PlanCalendarContent({
     // 月をまたぐ移動では選択日が画面外になるため、移動先の先頭日へ寄せる。
     setSelectedDate(nextCursor);
     loadRange(nextCursor);
+    // 前後の月を先読みしておき、連続して送るときに待たせない。
+    loadRange(shiftCursor("month", nextCursor, 1));
+    loadRange(shiftCursor("month", nextCursor, -1));
   };
 
   const shift = (direction: 1 | -1) =>
     moveTo(shiftCursor(mode, cursor, direction));
+
+  // 横スワイプは月/週/日の切り替えに割り当てる（日付送りは前後ボタンが担う）。
+  const swipeHandlers = useHorizontalSwipe((direction) => {
+    const currentIndex = VIEW_MODES.findIndex((item) => item.value === mode);
+    const nextIndex =
+      direction === "left"
+        ? Math.min(currentIndex + 1, VIEW_MODES.length - 1)
+        : Math.max(currentIndex - 1, 0);
+    setMode(VIEW_MODES[nextIndex].value);
+  });
 
   // Pro 判定が未確定の間は範囲外扱いにしない。先に無料前提でロックすると、
   // 加入済みユーザーに一瞬ペイウォールが見えてしまう。
@@ -146,7 +167,10 @@ export default function PlanCalendarContent({
   const agendaDates = mode === "week" ? weekDays(cursor) : [cursor];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className="flex flex-col gap-4"
+      {...(swipeEnabled ? swipeHandlers : {})}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div
           role="group"
@@ -158,7 +182,7 @@ export default function PlanCalendarContent({
               key={item.value}
               type="button"
               aria-pressed={mode === item.value}
-              onClick={() => setSelectedMode(item.value)}
+              onClick={() => setMode(item.value)}
               className={`w-12 rounded-md py-1.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d08000] ${
                 mode === item.value
                   ? "bg-[#d08000] text-white"

@@ -52,6 +52,8 @@ const entry = (overrides: Partial<CalendarEntry> = {}): CalendarEntry => ({
   event_type: "self_practice",
   title: "朝練",
   schedule_id: 1,
+  scheduled_time: null,
+  end_time: null,
   ...overrides,
 });
 
@@ -186,11 +188,11 @@ describe("PlanCalendarContent", () => {
       );
     });
 
-    it("SP 幅では週表示を既定にする", () => {
+    it("画面幅によらず月表示を既定にする", () => {
       isNarrowViewport = true;
       renderCalendar();
 
-      expect(screen.getByRole("button", { name: "週" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "月" })).toHaveAttribute(
         "aria-pressed",
         "true",
       );
@@ -212,12 +214,12 @@ describe("PlanCalendarContent", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("モード未選択なら画面幅の変化に追従する", () => {
+    it("画面幅が変わっても表示モードを勝手に切り替えない", () => {
       renderCalendar();
 
       setNarrowViewport(true);
 
-      expect(screen.getByRole("button", { name: "週" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "月" })).toHaveAttribute(
         "aria-pressed",
         "true",
       );
@@ -526,9 +528,25 @@ describe("PlanCalendarContent", () => {
       await clickNext(user, 4);
 
       await waitFor(() =>
-        expect(mockGetPlanCalendar).toHaveBeenLastCalledWith(
+        expect(mockGetPlanCalendar).toHaveBeenCalledWith(
           "2026-11-30",
           "2027-01-03",
+        ),
+      );
+    });
+  });
+
+  describe("取得の先読み", () => {
+    it("前後の月を先読みしておく", async () => {
+      const user = userEvent.setup();
+      renderCalendar();
+
+      await clickNext(user);
+
+      await waitFor(() =>
+        expect(mockGetPlanCalendar).toHaveBeenCalledWith(
+          "2026-09-28",
+          "2026-11-01",
         ),
       );
     });

@@ -2,16 +2,6 @@ import { SCHEDULE_TITLE_MAX_LENGTH } from "@app/constants/schedule";
 
 /** 練習スケジュール画面の文言。表示のゆれを避けるため 1 箇所に集約する。 */
 
-export const PAGE_TITLE = "練習スケジュール";
-export const PAGE_DESCRIPTION =
-  "この日だけの予定と、毎週くり返す予定を登録できます。メニューを紐付けておくと、その日の練習記録にそのまま引き継げます。";
-
-export const CREATE_LABEL = "予定を作る";
-export const CALENDAR_LABEL = "カレンダー";
-export const WEEKLY_PLAN_LABEL = "週プラン";
-export const EMPTY_MESSAGE = "まだ予定がありません";
-export const RECURRING_SECTION_TITLE = "毎週の予定";
-export const SINGLE_SECTION_TITLE = "この日だけの予定";
 export const LOAD_ERROR =
   "予定を取得できませんでした。時間を置いて再度お試しください。";
 
@@ -39,17 +29,10 @@ export const LOCKED_MENU_BADGE = "変更不可";
 export const LOCKED_MENU_SOURCE_NOTICE =
   "「済」のメニューがあるため、メニューセットへの切り替えはできません。";
 
-export const NOTIFICATION_LABEL = "リマインド通知";
-
-/**
- * Web にはプッシュ通知の配信基盤が無く、この設定は端末（アプリ版）のローカル通知にだけ効く。
- * 「設定したのに通知が来ない」と誤解させないため、保存先と配信先が違うことを明示する。
- */
-export const NOTIFICATION_WEB_NOTICE =
-  "通知は iOS / Android アプリ版でのみ届きます。ブラウザには通知されません（設定はアプリと共通です）。";
-
-export const NOTIFICATION_MESSAGE_LABEL = "カスタム通知文";
-export const NOTIFICATION_MESSAGE_PLACEHOLDER = "おはよう！今日も素振りしよう";
+export const MENU_SET_ITEMS_EMPTY = "メニュー未設定";
+export const END_TIME_LABEL = "終了時刻";
+export const NOTE_LABEL = "メモ";
+export const NOTE_PLACEHOLDER = "集合場所や持ち物など";
 
 export const SAVE_LABEL = "登録する";
 export const UPDATE_LABEL = "更新する";

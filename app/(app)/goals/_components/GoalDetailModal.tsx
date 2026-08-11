@@ -30,7 +30,7 @@ function formatDeadline(iso: string): string {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-xl bg-sub px-2 py-3 text-center">
+    <div className="flex-1 rounded-xl bg-main px-2 py-3 text-center">
       <p className="text-base font-bold text-[#d08000]">{value}</p>
       <p className="mt-1 text-xs text-zinc-400">{label}</p>
     </div>
@@ -61,7 +61,7 @@ export default function GoalDetailModal({
             {GOAL_PERIOD_LABELS[goal.period_type]}
           </p>
 
-          <div className="rounded-[10px] bg-sub px-3.5 py-3">
+          <div className="rounded-[10px] bg-main px-3.5 py-3">
             <GoalProgressBar goal={goal} />
           </div>
 

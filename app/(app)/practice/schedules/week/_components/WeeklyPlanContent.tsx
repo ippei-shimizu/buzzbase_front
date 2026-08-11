@@ -218,6 +218,8 @@ export default function WeeklyPlanContent({
                             event_type: schedule.event_type,
                             title: schedule.title,
                             schedule_id: schedule.id,
+                            scheduled_time: schedule.scheduled_time,
+                            end_time: schedule.end_time,
                           })}
                           className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-sub px-3 py-1.5 text-xs text-white transition-opacity hover:opacity-90"
                         >

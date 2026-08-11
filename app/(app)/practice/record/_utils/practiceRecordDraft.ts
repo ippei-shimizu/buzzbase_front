@@ -120,7 +120,9 @@ export function buildInitialAmounts(
     amounts[log.practice_menu_id as number] = toInputValue(log.amount);
   });
   presetMenus.forEach((preset) => {
-    if (preset.practice_menu_id in amounts) return;
+    // 予定のメニューをチェックすると量なしのログが先に作られるため、
+    // 既存ログが空のときは予定の目標量で埋める。実績は 0 でも上書きしない。
+    if ((amounts[preset.practice_menu_id] ?? "") !== "") return;
     amounts[preset.practice_menu_id] = toInputValue(preset.target_value);
   });
   return amounts;

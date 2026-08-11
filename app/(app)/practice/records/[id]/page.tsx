@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Header from "@app/components/header/Header";
+import HeaderBackTo from "@app/components/header/HeaderBackTo";
 import { getBaseballNotes } from "@app/services/v2/baseballNoteService";
 import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
 import { getPracticeSession } from "@app/services/v2/practiceSessionService";
@@ -15,18 +15,33 @@ export const metadata = {
   title: "練習記録の詳細",
 };
 
-function DetailShell({ children }: { children: React.ReactNode }) {
+/**
+ * 詳細のガワ。ヘッダーは呼び出し元が渡す。
+ * 正常系は本文側（PracticeSessionDetail）が編集・削除つきヘッダーを自分で描くため、
+ * ここでは戻る動線だけのヘッダーを渡せるようにしている。
+ */
+function DetailShell({
+  header,
+  children,
+}: {
+  header?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <Header />
+      {header}
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-20 px-4 lg:px-6">{children}</div>
+          <div className="pt-[74px] px-4 lg:px-6">{children}</div>
         </div>
       </main>
     </div>
   );
 }
+
+const FALLBACK_HEADER = (
+  <HeaderBackTo href="/practice/records" label="練習記録一覧に戻る" />
+);
 
 export default async function PracticeSessionDetailPage({
   params,
@@ -42,7 +57,7 @@ export default async function PracticeSessionDetailPage({
   const sessionId = Number(id);
   if (!Number.isInteger(sessionId) || sessionId <= 0) {
     return (
-      <DetailShell>
+      <DetailShell header={FALLBACK_HEADER}>
         <p className="py-8 text-center text-sm text-zinc-400">
           {DETAIL_NOT_FOUND}
         </p>
@@ -65,7 +80,7 @@ export default async function PracticeSessionDetailPage({
           ? DETAIL_FORBIDDEN
           : DETAIL_LOAD_ERROR;
     return (
-      <DetailShell>
+      <DetailShell header={FALLBACK_HEADER}>
         <p className="py-8 text-center text-sm text-zinc-400">{message}</p>
       </DetailShell>
     );

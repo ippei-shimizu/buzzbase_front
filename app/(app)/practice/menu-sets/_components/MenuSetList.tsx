@@ -1,7 +1,7 @@
 import type { MenuSet } from "@app/types/menuSet";
 import ChevronRightIcon from "@heroicons/react/24/outline/ChevronRightIcon";
 import Link from "next/link";
-import { menuNamesText } from "../_utils/menuSetDisplay";
+import { menuNamesText } from "../../_utils/menuSetDisplay";
 import { EMPTY_MESSAGE, ITEMS_EMPTY } from "./menuSetCopy";
 
 interface MenuSetListProps {

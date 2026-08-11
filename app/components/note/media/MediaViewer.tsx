@@ -52,7 +52,7 @@ function MemoEditor({ initialMemo, isSaving, onSave }: MemoEditorProps) {
         value={memo}
         onChange={(event) => setMemo(event.target.value)}
         rows={4}
-        className="w-full rounded-lg bg-sub p-3 text-sm text-white placeholder:text-zinc-500"
+        className="w-full rounded-lg border-2 border-zinc-600 bg-sub p-3 text-sm text-white placeholder:text-zinc-500 focus:border-[#d08000] focus:outline-none"
       />
       <Button
         color="primary"

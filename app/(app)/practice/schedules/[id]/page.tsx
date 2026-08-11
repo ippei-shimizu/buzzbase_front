@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import Header from "@app/components/header/Header";
+import HeaderBackTo from "@app/components/header/HeaderBackTo";
 import { getPracticeLogs } from "@app/services/v2/practiceLogService";
 import { getSchedules } from "@app/services/v2/scheduleService";
 import { todayString } from "../../record/_utils/practiceRecordDraft";
@@ -36,7 +36,7 @@ export default async function ScheduleDetailPage({
   const schedulesResult = await getSchedules();
   if (schedulesResult.status !== "ok") {
     return (
-      <PageShell>
+      <PageShell header={FALLBACK_HEADER}>
         <p className="py-8 text-center text-sm text-zinc-400">{LOAD_ERROR}</p>
       </PageShell>
     );
@@ -67,13 +67,26 @@ export default async function ScheduleDetailPage({
   );
 }
 
-function PageShell({ children }: { children: React.ReactNode }) {
+const FALLBACK_HEADER = <HeaderBackTo href="/dashboard" label="ホームに戻る" />;
+
+/**
+ * 詳細のガワ。ヘッダーは呼び出し元が渡す。
+ * 正常系は本文側（ScheduleDetailContent）が編集・削除つきヘッダーを自分で描くため、
+ * ここでは戻る動線だけのヘッダーを渡せるようにしている。
+ */
+function PageShell({
+  header,
+  children,
+}: {
+  header?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <Header />
+      {header}
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-20 px-4 lg:px-6">{children}</div>
+          <div className="pt-[74px] px-4 lg:px-6">{children}</div>
         </div>
       </main>
     </div>

@@ -13,14 +13,22 @@ export function goalDisplayValues(goal: Goal): {
   remainingText: string;
 } {
   const isManual = goal.kind === "manual";
-  // 単位はユーザーが定義した自由指標だけが持つ。自動集計の指標は指標名（meta 行）で判別できる。
-  const unit = isManual ? (goal.custom_unit ?? "") : "";
+  const isMenuAmount = goal.metric_key === "menu_practice_amount";
+  // 自由指標はユーザー定義の単位、メニュー回数は対象メニューの単位を使う。
+  // その他の自動集計指標は指標名（meta 行）で単位が判別できるため付けない。
+  const unit = isManual
+    ? (goal.custom_unit ?? "")
+    : isMenuAmount
+      ? (goal.practice_menu_unit_label ?? "")
+      : "";
 
   const metricText = isManual
     ? (goal.custom_metric_label ?? "")
     : goal.metric_key === "menu_practice_days" && goal.practice_menu_name
       ? `${goal.practice_menu_name} 継続日数`
-      : metricLabel(goal.metric_key);
+      : isMenuAmount && goal.practice_menu_name
+        ? `${goal.practice_menu_name} 回数`
+        : metricLabel(goal.metric_key);
 
   return {
     metricText,

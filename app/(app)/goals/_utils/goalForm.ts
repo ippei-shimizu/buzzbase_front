@@ -7,7 +7,7 @@ import type {
   GoalPeriodType,
   GoalUpdateInput,
 } from "@app/types/goal";
-import { GOAL_METRICS, MENU_METRIC_KEY, metricFor } from "@app/constants/goal";
+import { GOAL_METRICS, isMenuMetricKey, metricFor } from "@app/constants/goal";
 import { parseDecimal } from "@app/constants/practice";
 
 /**
@@ -153,9 +153,9 @@ export function initialGoalFormValues(
   };
 }
 
-/** 継続日数（対象メニューの指定が必須）の指標を選んでいるか。 */
+/** 対象メニューの指定が必須になる指標を選んでいるか。 */
 export function isMenuMetric(values: GoalFormValues): boolean {
-  return values.kind === "numeric" && values.metricKey === MENU_METRIC_KEY;
+  return values.kind === "numeric" && isMenuMetricKey(values.metricKey);
 }
 
 /**

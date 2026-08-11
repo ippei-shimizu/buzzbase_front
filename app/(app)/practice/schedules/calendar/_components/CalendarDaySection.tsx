@@ -54,7 +54,7 @@ export default function CalendarDaySection({
         <Link
           href={addPlanHref(date)}
           aria-label={`${formatDayLabel(date)} ${ADD_PLAN_LABEL}`}
-          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-600 px-2.5 py-1 text-xs font-bold text-zinc-200 transition-colors hover:border-[#d08000] hover:text-[#d08000]"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#d08000] px-2.5 py-1 text-xs font-bold text-[#d08000] transition-colors"
         >
           <PlusIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
           {ADD_PLAN_LABEL}

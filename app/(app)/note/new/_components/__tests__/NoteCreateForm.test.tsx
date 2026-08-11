@@ -67,6 +67,7 @@ import type { ReflectionTemplate } from "@app/interface/reflectionTemplate";
 import type { FetchResult } from "@app/services/v2/requests";
 import type ReactModule from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import { createBaseballNote } from "@app/services/v2/baseballNoteService";
 import NoteCreateForm from "../NoteCreateForm";
 
@@ -267,7 +268,7 @@ describe("NoteCreateForm", () => {
     });
     await save();
 
-    expect(mockPush).toHaveBeenCalledWith("/note");
+    expect(mockPush).toHaveBeenCalledWith(NOTE_LIST_PATH);
   });
 
   it("タイトル・メモ・回答が全て空なら保存しない", async () => {

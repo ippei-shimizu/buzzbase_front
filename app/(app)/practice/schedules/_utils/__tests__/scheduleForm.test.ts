@@ -20,11 +20,12 @@ function buildValues(
     days: [],
     plannedOn: "2026-08-10",
     scheduledTime: "06:00",
+    endTime: "",
     menuSource: "individual",
     menuSetId: null,
     menuAmounts: {},
     notificationEnabled: true,
-    notificationMessage: "",
+    note: "",
     ...overrides,
   };
 }
@@ -39,7 +40,6 @@ const lockedMenu: ScheduleMenu = {
 describe("buildScheduleInput", () => {
   it("この日だけの予定は planned_on だけを送り、days_of_week は null にする", () => {
     const input = buildScheduleInput(buildValues(), {
-      canCustomizeMessage: false,
       lockedMenus: [],
     });
 
@@ -50,7 +50,7 @@ describe("buildScheduleInput", () => {
   it("毎週の予定は days_of_week だけを送り、planned_on は null にする", () => {
     const input = buildScheduleInput(
       buildValues({ recurrence: "weekly", days: [5, 1, 3] }),
-      { canCustomizeMessage: false, lockedMenus: [] },
+      { lockedMenus: [] },
     );
 
     expect(input.days_of_week).toBe("1,3,5");
@@ -60,7 +60,7 @@ describe("buildScheduleInput", () => {
   it("曜日は月=1〜日=7 の番号で送る", () => {
     const input = buildScheduleInput(
       buildValues({ recurrence: "weekly", days: [7, 6] }),
-      { canCustomizeMessage: false, lockedMenus: [] },
+      { lockedMenus: [] },
     );
 
     expect(input.days_of_week).toBe("6,7");
@@ -73,26 +73,19 @@ describe("buildScheduleInput", () => {
         menuSetId: 3,
         menuAmounts: { 1: "100" },
       }),
-      { canCustomizeMessage: false, lockedMenus: [] },
+      { lockedMenus: [] },
     );
 
     expect(input.menu_set_id).toBe(3);
     expect(input.menus).toEqual([]);
   });
 
-  it("カスタム通知文は Pro を持たないと送らない", () => {
-    const values = buildValues({ notificationMessage: "頑張れ" });
+  // web からは通知文を編集できない。キーごと送らず back の既存値を残す
+  // （Pro 判定が未確定のまま送ると、アプリ側で設定した文言を消してしまう）。
+  it("カスタム通知文はキーごと送らない", () => {
+    const input = buildScheduleInput(buildValues(), { lockedMenus: [] });
 
-    expect(
-      buildScheduleInput(values, {
-        canCustomizeMessage: false,
-        lockedMenus: [],
-      }).notification_message,
-    ).toBeNull();
-    expect(
-      buildScheduleInput(values, { canCustomizeMessage: true, lockedMenus: [] })
-        .notification_message,
-    ).toBe("頑張れ");
+    expect(input).not.toHaveProperty("notification_message");
   });
 });
 

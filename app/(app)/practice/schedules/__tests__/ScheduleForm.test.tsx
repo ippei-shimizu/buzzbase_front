@@ -13,7 +13,7 @@ jest.mock("@app/lib/analytics", () => ({
 import type { MenuSet } from "@app/types/menuSet";
 import type { PracticeMenu } from "@app/types/practice";
 import type { Schedule, ScheduleInput } from "@app/types/schedule";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import ScheduleForm from "../_components/ScheduleForm";
@@ -56,7 +56,27 @@ const menus: PracticeMenu[] = [
 ];
 
 const menuSets: MenuSet[] = [
-  { id: 3, name: "オフ日ルーティン", note: null, sort_order: 1, items: [] },
+  {
+    id: 3,
+    name: "オフ日ルーティン",
+    note: null,
+    sort_order: 1,
+    items: [
+      {
+        practice_menu_id: 1,
+        name: "素振り",
+        unit_label: "本",
+        target_value: 200,
+      },
+      {
+        practice_menu_id: 2,
+        name: "ランニング",
+        unit_label: "km",
+        target_value: 5,
+      },
+    ],
+  },
+  { id: 4, name: "空のセット", note: null, sort_order: 2, items: [] },
 ];
 
 function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
@@ -66,6 +86,7 @@ function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
     days_of_week: null,
     planned_on: "2026-08-10",
     scheduled_time: "06:00",
+    end_time: null,
     event_type: "self_practice",
     recurring: false,
     menu_set_id: null,
@@ -186,7 +207,7 @@ describe("ScheduleForm", () => {
 
       await user.click(screen.getByRole("button", { name: "セットから" }));
       await user.click(
-        screen.getByRole("button", { name: "オフ日ルーティン" }),
+        screen.getByRole("button", { name: /オフ日ルーティン/ }),
       );
       await save(user);
 
@@ -267,35 +288,97 @@ describe("ScheduleForm", () => {
     });
   });
 
-  describe("カスタム通知文の Pro ゲート", () => {
-    it("無料プランでは入力欄を出さず訴求カードを見せる", () => {
+  // web には通知の配信基盤が無いため、Pro 有無に関わらず通知文の設定自体を置かない。
+  describe("カスタム通知文", () => {
+    it("無料プランでは入力欄も訴求カードも出さない", () => {
       renderForm();
 
       expect(screen.queryByLabelText("カスタム通知文")).not.toBeInTheDocument();
       expect(
-        screen.getByText("通知メッセージをカスタマイズ"),
-      ).toBeInTheDocument();
+        screen.queryByText("通知メッセージをカスタマイズ"),
+      ).not.toBeInTheDocument();
     });
 
-    it("Pro なら入力した文言を送信する", async () => {
+    it("Pro でも入力欄を出さない", () => {
       mockEntitlement(true);
+      renderForm();
+
+      expect(screen.queryByLabelText("カスタム通知文")).not.toBeInTheDocument();
+    });
+
+    // 自主練スケジュールは無料でも無制限に作れるため、件数上限の訴求を出してはいけない。
+    it("無料プランでも Pro 訴求は出さない", () => {
+      renderForm();
+
+      expect(
+        screen.queryByRole("button", { name: /Pro プランを見る/ }),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  // セット名だけでは中身が分からず、意図しないセットを選んでしまう。
+  it("セット選択ではセット名の下に含まれるメニューを見せる", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("button", { name: "セットから" }));
+
+    expect(
+      screen.getByRole("button", { name: /オフ日ルーティン/ }),
+    ).toHaveAccessibleName(/素振り \/ ランニング/);
+  });
+
+  it("メニュー未設定のセットはその旨を出す", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("button", { name: "セットから" }));
+
+    expect(screen.getByText("メニュー未設定")).toBeInTheDocument();
+  });
+
+  describe("終了時刻とメモ", () => {
+    it("入力した終了時刻とメモを送信する", async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
+
+      await user.type(screen.getByLabelText(/タイトル/), "全体練習");
+      fireEvent.change(screen.getByLabelText("終了時刻"), {
+        target: { value: "12:30" },
+      });
+      await user.type(screen.getByLabelText("メモ"), "集合はグラウンド前");
+      await save(user);
+
+      const input = submittedInput(onSubmit);
+      expect(input.end_time).toBe("12:30");
+      expect(input.note).toBe("集合はグラウンド前");
+    });
+
+    // 省略すると back の assign_attributes で既存値が残るため、クリア時は null を送る。
+    it("未入力の終了時刻は null で送る", async () => {
       const user = userEvent.setup();
       const { onSubmit } = renderForm();
 
       await user.type(screen.getByLabelText(/タイトル/), "朝練");
-      await user.type(screen.getByLabelText("カスタム通知文"), "頑張れ");
       await save(user);
 
-      expect(submittedInput(onSubmit).notification_message).toBe("頑張れ");
+      expect(submittedInput(onSubmit).end_time).toBeNull();
     });
 
-    // 自主練スケジュールは無料でも無制限に作れるため、件数上限の訴求を出してはいけない。
-    it("無料プランでも件数上限の訴求は出さない", () => {
-      renderForm();
+    it("終了時刻が開始時刻以前ならエラーにして送信しない", async () => {
+      const user = userEvent.setup();
+      const { onSubmit } = renderForm();
 
-      const ctas = screen.getAllByRole("button", { name: /Pro プランを見る/ });
-      expect(ctas).toHaveLength(1);
-      expect(ctas[0]).toHaveAccessibleName(/通知メッセージをカスタマイズ/);
+      await user.type(screen.getByLabelText(/タイトル/), "朝練");
+      fireEvent.change(screen.getByLabelText("終了時刻"), {
+        target: { value: "06:00" },
+      });
+      await save(user);
+
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(
+        screen.getByText("終了時刻は開始時刻より後にしてください"),
+      ).toBeInTheDocument();
     });
   });
 

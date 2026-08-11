@@ -32,6 +32,8 @@ export interface Plan {
   event_type: ScheduleEventType;
   /** "06:00"。終日（時刻未設定）は null。 */
   scheduled_time: string | null;
+  /** "12:30"。未設定は null。 */
+  end_time: string | null;
   recurring: boolean;
   menu_set_id: number | null;
   game_result_id: number | null;
@@ -53,6 +55,10 @@ export interface CalendarEntry {
   /** back の display_title（未設定時はメニューセット名）。どちらも無ければ null。 */
   title: string | null;
   schedule_id: number;
+  /** "06:00"。終日（時刻未設定）は null。 */
+  scheduled_time: string | null;
+  /** "12:30"。未設定は null。 */
+  end_time: string | null;
 }
 
 export interface CalendarResponse {

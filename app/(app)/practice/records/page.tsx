@@ -1,12 +1,20 @@
 import type { RecordsTab } from "./_components/RecordsTabBar";
+import ChevronRightIcon from "@heroicons/react/24/outline/ChevronRightIcon";
+import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import Header from "@app/components/header/Header";
+import HeaderBackTo from "@app/components/header/HeaderBackTo";
 import NoteListComponent from "@app/components/note/NoteListComponent";
+import {
+  REFLECTION_TEMPLATES_LINK_LABEL,
+  REFLECTION_TEMPLATES_PATH,
+} from "@app/constants/note";
 import { getBaseballNotes } from "@app/services/v2/baseballNoteService";
 import { getNoteTags } from "@app/services/v2/noteTagService";
 import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
 import { getPracticeSessions } from "@app/services/v2/practiceSessionService";
+import { RECORD_NOTE_LABEL } from "./_components/practiceRecordsCopy";
 import PracticeRecordsSection from "./_components/PracticeRecordsSection";
 import RecordsTabBar from "./_components/RecordsTabBar";
 
@@ -45,10 +53,10 @@ export default async function PracticeRecordsPage({
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-      <Header />
+      <HeaderBackTo href="/dashboard" label="ホームに戻る" />
       <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
         <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-          <div className="pt-12 px-4 lg:px-6">
+          <div className="pt-[40px] px-4 lg:px-6">
             <RecordsTabBar active={activeTab} />
             <div className="my-6">
               {sessionsResult && menusResult ? (
@@ -58,10 +66,33 @@ export default async function PracticeRecordsPage({
                   notesResult={notesResult}
                 />
               ) : (
-                <NoteListComponent
-                  result={notesResult}
-                  tagsResult={tagsResult ?? { status: "error" }}
-                />
+                <>
+                  <div className="flex justify-end">
+                    <Link
+                      href={REFLECTION_TEMPLATES_PATH}
+                      className="flex items-center gap-1.5 text-sm font-semibold text-[#d08000]"
+                    >
+                      {REFLECTION_TEMPLATES_LINK_LABEL}
+                      <ChevronRightIcon
+                        className="h-3.5 w-3.5 shrink-0"
+                        aria-hidden
+                      />
+                    </Link>
+                  </div>
+                  <Link
+                    href="/note/new"
+                    className="mt-3 flex items-center justify-center gap-1.5 rounded-[10px] bg-[#d08000] py-3.5 text-sm font-bold text-white"
+                  >
+                    <PlusIcon className="h-5 w-5 shrink-0" aria-hidden />
+                    {RECORD_NOTE_LABEL}
+                  </Link>
+                  <div className="mt-4">
+                    <NoteListComponent
+                      result={notesResult}
+                      tagsResult={tagsResult ?? { status: "error" }}
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>

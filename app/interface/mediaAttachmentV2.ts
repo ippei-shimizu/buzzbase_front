@@ -57,8 +57,13 @@ export interface StagedMediaAsset {
   contentType: string;
   /** 動画の場合のみ生成したサムネイル。生成に失敗した場合は null。 */
   thumbnail: Blob | null;
-  /** プレビュー表示用の object URL。解放漏れを防ぐため破棄時に revokeObjectURL する。 */
+  /** 一覧のサムネイル表示用 object URL。解放漏れを防ぐため破棄時に revokeObjectURL する。 */
   previewUrl: string | null;
+  /**
+   * 再生用の object URL（動画のみ）。
+   * previewUrl は動画だとサムネイル画像を指すため、video 要素にはこちらを渡す。
+   */
+  playbackUrl: string | null;
   durationSeconds?: number;
   width?: number;
   height?: number;

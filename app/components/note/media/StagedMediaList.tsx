@@ -31,7 +31,8 @@ export default function StagedMediaList({
     ? {
         key: `${viewing.localId}-${viewing.memo}`,
         mediaType: viewing.mediaType,
-        url: viewing.previewUrl,
+        // 動画は再生用 URL を渡す。previewUrl はサムネイル画像なので video 要素では再生できない。
+        url: viewing.playbackUrl ?? viewing.previewUrl,
         memo: viewing.memo,
       }
     : null;

@@ -11,6 +11,8 @@ export const MANAGE_MENUS_LABEL = "練習メニューを管理";
 
 export const RECORD_PRACTICE_LABEL = "練習を記録";
 
+export const RECORD_NOTE_LABEL = "野球ノートを記録";
+
 export const MENU_SUMMARY_LABEL = "メニュー別の積み上げを見る";
 
 export const SEARCH_LABEL = "練習記録を検索";
@@ -50,8 +52,6 @@ export const DETAIL_LOAD_ERROR =
   "練習記録を読み込めませんでした。時間を置いて再度お試しください。";
 
 export const DETAIL_FORBIDDEN = "この練習記録を表示する権限がありません。";
-
-export const BACK_TO_LIST_LABEL = "練習記録の一覧へ戻る";
 
 export const EDIT_LABEL = "編集する";
 

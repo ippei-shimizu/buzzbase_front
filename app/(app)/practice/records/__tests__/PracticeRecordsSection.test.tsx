@@ -31,6 +31,7 @@ function buildSession(
     id: 1,
     logged_on: "2026-07-14",
     memo: null,
+    practice_type: "self_practice" as const,
     improvement_theme_ids: [],
     practice_logs: [],
     condition: null,
