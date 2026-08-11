@@ -516,6 +516,45 @@ describe("PracticeRecordContent", () => {
     });
   });
 
+  describe("練習の種別", () => {
+    it("既定は自主練習として保存する", async () => {
+      const user = userEvent.setup();
+      renderContent();
+
+      await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+      await user.click(
+        screen.getByRole("button", { name: "練習記録のみ保存" }),
+      );
+
+      await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+      expect(savedInput().practice_type).toBe("self_practice");
+    });
+
+    it("チーム練習を選ぶとその種別で保存する", async () => {
+      const user = userEvent.setup();
+      renderContent();
+
+      await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+      await user.click(screen.getByRole("button", { name: "チーム練習" }));
+      await user.click(
+        screen.getByRole("button", { name: "練習記録のみ保存" }),
+      );
+
+      await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+      expect(savedInput().practice_type).toBe("team_practice");
+    });
+
+    it("既存の記録を開いたら保存済みの種別を初期値にする", () => {
+      renderContent({
+        initialSession: buildSession({ practice_type: "team_practice" }),
+      });
+
+      expect(
+        screen.getByRole("button", { name: "チーム練習" }),
+      ).toHaveAttribute("aria-pressed", "true");
+    });
+  });
+
   describe("取り組む課題の紐付け", () => {
     it("選んだ課題を紐付けて保存する", async () => {
       const user = userEvent.setup();

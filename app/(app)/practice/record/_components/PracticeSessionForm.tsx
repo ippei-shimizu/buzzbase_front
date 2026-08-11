@@ -4,6 +4,7 @@ import type { ImprovementTheme } from "@app/types/improvementTheme";
 import type {
   PracticeMenu,
   PracticeSession,
+  PracticeType,
   PresetMenu,
 } from "@app/types/practice";
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
@@ -37,6 +38,8 @@ import {
   CONDITION_PRO_BADGE,
   CONDITION_SECTION_TITLE,
   MENU_SECTION_TITLE,
+  PRACTICE_TYPE_LABELS,
+  PRACTICE_TYPE_SECTION_TITLE,
   NO_ITEMS_ERROR,
   SAVE_ONLY_LABEL,
   SAVE_SUCCESS_MESSAGE,
@@ -104,6 +107,9 @@ export default function PracticeSessionForm({
   const [condition, setCondition] = useState(() =>
     buildInitialCondition(session),
   );
+  const [practiceType, setPracticeType] = useState<PracticeType>(
+    () => session?.practice_type ?? "self_practice",
+  );
   const [errors, setErrors] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -154,6 +160,7 @@ export default function PracticeSessionForm({
     const result = await upsertPracticeSession({
       logged_on: date,
       items,
+      practice_type: practiceType,
       improvement_theme_ids: themeIds,
       // 送らない場合はキーごと落とす。back は condition が有ると Pro 判定に入る。
       ...(conditionPayload === null ? {} : { condition: conditionPayload }),
@@ -189,6 +196,31 @@ export default function PracticeSessionForm({
 
   return (
     <div>
+      <h2 className="mt-8 text-sm font-bold text-white">
+        {PRACTICE_TYPE_SECTION_TITLE}
+      </h2>
+      <div
+        role="group"
+        aria-label={PRACTICE_TYPE_SECTION_TITLE}
+        className="mt-3 flex overflow-hidden rounded-lg border-1 border-zinc-600"
+      >
+        {PRACTICE_TYPE_LABELS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={practiceType === option.value}
+            onClick={() => setPracticeType(option.value)}
+            className={`flex-1 py-2.5 text-sm font-bold transition-colors ${
+              practiceType === option.value
+                ? "bg-[#d08000] text-white"
+                : "bg-transparent text-zinc-400 hover:text-white"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
       <div className="mt-8 flex items-center justify-between gap-3">
         <h2 className="text-sm font-bold text-white">{MENU_SECTION_TITLE}</h2>
         <Link
