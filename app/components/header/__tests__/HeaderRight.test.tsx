@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import HeaderRight from "../HeaderRight";
 
 jest.mock("@app/components/auth/HeaderLoginAndSignUp", () => ({
@@ -45,7 +46,7 @@ describe("HeaderRight のメニュー", () => {
       "設定",
     ]);
     expect(items[0]).toHaveAttribute("href", "/practice/records");
-    expect(items[1]).toHaveAttribute("href", "/note");
+    expect(items[1]).toHaveAttribute("href", NOTE_LIST_PATH);
     expect(items[2]).toHaveAttribute("href", "/seasons");
     expect(items[3]).toHaveAttribute("href", "/settings");
   });

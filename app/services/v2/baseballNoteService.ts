@@ -66,6 +66,7 @@ function extractErrors(body: unknown, fallback: string): string[] {
 /** ノート一覧の再検証。作成・更新・削除の後に呼ぶ。 */
 async function revalidateNotes(id?: number): Promise<void> {
   revalidatePath("/note");
+  revalidatePath("/practice/records");
   if (id) revalidatePath(`/note/${id}`);
 }
 

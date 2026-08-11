@@ -19,6 +19,7 @@ const BASE_PATH = "/api/v2/media_attachments";
 /** 添付の増減・メモ更新はノート詳細と一覧の両方に出るため、まとめて再検証する。 */
 async function revalidateNotes(noteId?: number): Promise<void> {
   revalidatePath("/note");
+  revalidatePath("/practice/records");
   if (noteId) revalidatePath(`/note/${noteId}`);
 }
 

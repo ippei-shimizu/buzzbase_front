@@ -16,6 +16,7 @@ import { NoteIcon } from "@app/components/icon/NoteIcon";
 import { SettingsIcon } from "@app/components/icon/SettingsIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function HeaderRight() {
@@ -58,7 +59,7 @@ export default function HeaderRight() {
                 <DropdownItem
                   key="note"
                   as={Link}
-                  href="/note"
+                  href={NOTE_LIST_PATH}
                   startContent={
                     <NoteIcon fill="currentColor" width="18" height="18" />
                   }
