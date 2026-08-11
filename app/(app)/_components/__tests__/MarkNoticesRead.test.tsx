@@ -118,7 +118,10 @@ describe("MarkNoticesRead", () => {
     await waitFor(() => {
       expect(screen.queryByText("3")).not.toBeInTheDocument();
     });
-    expect(getMock).toHaveBeenCalledWith("/api/v1/notifications/count");
+    expect(getMock).toHaveBeenCalledWith(
+      "/api/v1/notifications/count",
+      expect.objectContaining({ timeout: expect.any(Number) }),
+    );
     expect(getMock).toHaveBeenCalledTimes(2);
   });
 
@@ -163,7 +166,10 @@ describe("MarkNoticesRead", () => {
     });
 
     expect(await screen.findByText("既読")).toBeInTheDocument();
-    expect(getMock).toHaveBeenCalledWith(NOTIFICATION_LIST_KEY);
+    expect(getMock).toHaveBeenCalledWith(
+      NOTIFICATION_LIST_KEY,
+      expect.objectContaining({ timeout: expect.any(Number) }),
+    );
     expect(listRequestCount).toBe(2);
   });
 
