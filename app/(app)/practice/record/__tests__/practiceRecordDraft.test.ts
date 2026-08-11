@@ -50,6 +50,7 @@ function buildSession(logs: PracticeLog[]): PracticeSession {
     id: 10,
     logged_on: "2026-08-01",
     memo: null,
+    practice_type: "self_practice" as const,
     improvement_theme_ids: [],
     practice_logs: logs,
     condition: null,

@@ -28,9 +28,12 @@ export type GoalKind = "numeric" | "qualitative" | "manual";
 /** 自動集計できる指標。back の Goal::METRIC_KEYS と完全一致させる。 */
 export type GoalMetricKey =
   | "practice_days"
+  | "self_practice_days"
+  /** 新規作成不可。確定済みの既存目標を表示するために残す。 */
   | "total_swing_count"
   | "game_count"
   | "menu_practice_days"
+  | "menu_practice_amount"
   | "batting_average"
   | "on_base_percentage"
   | "slugging_percentage"
@@ -68,6 +71,8 @@ export interface Goal {
   comparison_type: GoalComparison;
   practice_menu_id: number | null;
   practice_menu_name: string | null;
+  /** メニュー回数の単位はメニューごとに変わるため、指標固定の単位では表せない。 */
+  practice_menu_unit_label: string | null;
   custom_metric_label: string | null;
   custom_unit: string | null;
   manual_current_value: DecimalValue;

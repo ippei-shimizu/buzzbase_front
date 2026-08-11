@@ -32,6 +32,7 @@ function buildGoal(overrides: Partial<Goal> = {}): Goal {
     comparison_type: "greater_than",
     practice_menu_id: null,
     practice_menu_name: null,
+    practice_menu_unit_label: null,
     custom_metric_label: null,
     custom_unit: null,
     manual_current_value: 0,

@@ -52,6 +52,8 @@ const entry = (overrides: Partial<CalendarEntry> = {}): CalendarEntry => ({
   event_type: "self_practice",
   title: "朝練",
   schedule_id: 1,
+  scheduled_time: null,
+  end_time: null,
   ...overrides,
 });
 

@@ -1,5 +1,5 @@
 import type { PracticeLog } from "@app/types/practice";
-import type { Schedule } from "@app/types/schedule";
+import type { ScheduleMenu, Schedule } from "@app/types/schedule";
 import {
   buildDoneLogIds,
   buildPracticeRecordHref,
@@ -31,6 +31,7 @@ function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
     days_of_week: "1,3,5",
     planned_on: null,
     scheduled_time: "06:00",
+    end_time: null,
     event_type: "self_practice",
     recurring: true,
     menu_set_id: null,
@@ -99,16 +100,18 @@ describe("buildDoneLogIds", () => {
 
 describe("doneMenusAsPresets", () => {
   it("済のメニューだけを目標量つきで返す", () => {
-    const menus = [
+    const menus: ScheduleMenu[] = [
       {
         practice_menu_id: 1,
         name: "素振り",
+        unit: "count",
         unit_label: "本",
         target_value: 200,
       },
       {
         practice_menu_id: 2,
         name: "ランニング",
+        unit: "count",
         unit_label: "km",
         target_value: 5,
       },

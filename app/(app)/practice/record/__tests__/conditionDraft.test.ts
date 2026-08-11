@@ -26,6 +26,7 @@ function buildSession(condition: ConditionLog | null): PracticeSession {
     id: 1,
     logged_on: "2026-08-03",
     memo: null,
+    practice_type: "self_practice" as const,
     improvement_theme_ids: [],
     practice_logs: [],
     condition,

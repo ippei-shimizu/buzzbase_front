@@ -4,6 +4,8 @@
  * キー名は back の JSON をそのまま使う（snake_case のまま扱い、変換しない）。
  */
 
+import type { PracticeUnit } from "@app/types/practice";
+
 /** 予定の種別。back の Schedule::EVENT_TYPES と完全一致させる。 */
 export type ScheduleEventType = "self_practice" | "practice" | "game" | "other";
 
@@ -15,6 +17,8 @@ export type ScheduleEventType = "self_practice" | "practice" | "game" | "other";
 export interface ScheduleMenu {
   practice_menu_id: number;
   name: string | null;
+  /** 入力ウィジェットの出し分けに使う。メニューが削除されている場合は null。 */
+  unit: PracticeUnit | null;
   unit_label: string | null;
   /** back は float カラムのため文字列化されず number で返る。 */
   target_value: number | null;
@@ -30,6 +34,8 @@ export interface Schedule {
   planned_on: string | null;
   /** "06:00"。時刻未設定（終日）は null。 */
   scheduled_time: string | null;
+  /** "12:30"。開始時刻とセットでのみ設定でき、開始より後であること。 */
+  end_time: string | null;
   event_type: ScheduleEventType;
   /** days_of_week を持つ（毎週繰り返し）か。 */
   recurring: boolean;
@@ -58,6 +64,11 @@ export interface ScheduleInput {
   days_of_week?: string | null;
   planned_on?: string | null;
   scheduled_time?: string | null;
+  /**
+   * 終了時刻をクリアするときは省略ではなく null を送る。
+   * back は assign_attributes のため、省略すると既存値が残る。
+   */
+  end_time?: string | null;
   event_type?: ScheduleEventType;
   menu_set_id?: number | null;
   note?: string | null;

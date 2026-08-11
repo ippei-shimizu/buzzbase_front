@@ -11,6 +11,7 @@ function buildMenu(overrides: Partial<PlanMenu> = {}): PlanMenu {
   return {
     practice_menu_id: 1,
     name: "素振り",
+    unit: "count",
     unit_label: "本",
     target_value: 200,
     sort_order: 0,
@@ -25,6 +26,7 @@ function buildPlan(overrides: Partial<Plan> = {}): Plan {
     title: "朝練",
     event_type: "self_practice",
     scheduled_time: "06:00",
+    end_time: null,
     recurring: true,
     menu_set_id: null,
     game_result_id: null,

@@ -66,6 +66,7 @@ function buildSchedule(overrides: Partial<Schedule> = {}): Schedule {
     days_of_week: null,
     planned_on: "2026-08-10",
     scheduled_time: "06:00",
+    end_time: null,
     event_type: "self_practice",
     recurring: false,
     menu_set_id: null,
@@ -209,6 +210,7 @@ describe("ScheduleForm", () => {
         {
           practice_menu_id: 1,
           name: "素振り",
+          unit: "count",
           unit_label: "本",
           target_value: 200,
         },
@@ -253,6 +255,7 @@ describe("ScheduleForm", () => {
             {
               practice_menu_id: 1,
               name: "素振り",
+              unit: "count",
               unit_label: "本",
               target_value: 200,
             },

@@ -97,6 +97,14 @@ export const GOAL_METRICS: readonly GoalMetric[] = [
     comparison: "greater_than",
   },
   {
+    key: "self_practice_days",
+    label: "自主練習日数",
+    unit: "日",
+    comparison: "greater_than",
+  },
+  // 新規作成では選べない（GOAL_METRIC_CATEGORIES から除外済み）。
+  // 確定済みの既存目標をラベル付きで表示するために残す。
+  {
     key: "total_swing_count",
     label: "素振り本数",
     unit: "本",
@@ -112,6 +120,13 @@ export const GOAL_METRICS: readonly GoalMetric[] = [
     key: "menu_practice_days",
     label: "メニュー継続日数",
     unit: "日",
+    comparison: "greater_than",
+  },
+  // 単位は対象メニューの unit_label を使うため、指標側では持たない。
+  {
+    key: "menu_practice_amount",
+    label: "メニュー回数",
+    unit: "",
     comparison: "greater_than",
   },
   {
@@ -194,9 +209,10 @@ export const GOAL_METRIC_CATEGORIES: ReadonlyArray<{
     label: "練習・試合",
     keys: [
       "practice_days",
-      "total_swing_count",
+      "self_practice_days",
       "game_count",
       "menu_practice_days",
+      "menu_practice_amount",
     ],
   },
   {
@@ -221,15 +237,23 @@ export const GOAL_METRIC_CATEGORIES: ReadonlyArray<{
   },
 ];
 
-/** 継続日数を数える対象メニューの指定が必須になる指標。back の validates と一致させる。 */
-export const MENU_METRIC_KEY: GoalMetricKey = "menu_practice_days";
+/** 対象メニューの指定が必須になる指標。back の MENU_REQUIRED_METRIC_KEYS と一致させる。 */
+export const MENU_METRIC_KEYS: readonly GoalMetricKey[] = [
+  "menu_practice_days",
+  "menu_practice_amount",
+];
+
+export const isMenuMetricKey = (key: GoalMetricKey | null): boolean =>
+  key !== null && MENU_METRIC_KEYS.includes(key);
 
 /** 数値目標タイトルのプレースホルダー例（指標別）。 */
 const GOAL_METRIC_EXAMPLES: Partial<Record<GoalMetricKey, string>> = {
   practice_days: "例: 今月20日練習する",
+  self_practice_days: "例: 今月15日自主練する",
   total_swing_count: "例: 今月2000本素振り",
   game_count: "例: 今シーズン15試合出場",
   menu_practice_days: "例: このメニューを20日継続",
+  menu_practice_amount: "例: このメニューを合計2000こなす",
   batting_average: "例: 打率.320を目指す",
   on_base_percentage: "例: 出塁率.400を目指す",
   slugging_percentage: "例: 長打率.500を目指す",

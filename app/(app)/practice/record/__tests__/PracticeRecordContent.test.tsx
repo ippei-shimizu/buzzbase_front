@@ -105,6 +105,7 @@ function buildSession(
     id: 10,
     logged_on: YESTERDAY,
     memo: null,
+    practice_type: "self_practice" as const,
     improvement_theme_ids: [],
     practice_logs: [],
     condition: null,
