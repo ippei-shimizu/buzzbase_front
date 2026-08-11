@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getBaseballNote } from "@app/services/v2/baseballNoteService";
 import { getGameResultOption } from "@app/services/v2/gameResultLinkService";
 import { getImprovementThemes } from "@app/services/v2/improvementThemeService";
+import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
+import { getPracticeSession } from "@app/services/v2/practiceSessionService";
 import NoteDetail from "./_components/NoteDetail";
 
 /**
@@ -55,15 +57,22 @@ export default async function NoteDetailPage(props: {
   }
 
   // 紐付け先はノートを取得しないと分からないため、ここだけ直列になる。
-  const linkedGameResults = await fetchLinkedGameResults(
-    result.data.game_result_ids,
-  );
+  const practiceSessionId = result.data.practice_session_id;
+  const [linkedGameResults, sessionResult, menusResult] = await Promise.all([
+    fetchLinkedGameResults(result.data.game_result_ids),
+    practiceSessionId === null ? null : getPracticeSession(practiceSessionId),
+    practiceSessionId === null ? null : getPracticeMenus(),
+  ]);
 
   return (
     <NoteDetail
       note={result.data}
       themesResult={themesResult}
       linkedGameResults={linkedGameResults}
+      practiceSession={
+        sessionResult?.status === "ok" ? sessionResult.data : null
+      }
+      practiceMenus={menusResult?.status === "ok" ? menusResult.data : []}
     />
   );
 }
