@@ -2,9 +2,6 @@
 
 import type { BaseballNoteV2 } from "@app/interface/baseballNoteV2";
 import type { PracticeMenu, PracticeSession } from "@app/types/practice";
-import ArrowLeftIcon from "@heroicons/react/24/outline/ArrowLeftIcon";
-import PencilSquareIcon from "@heroicons/react/24/outline/PencilSquareIcon";
-import TrashIcon from "@heroicons/react/24/outline/TrashIcon";
 import {
   Button,
   Modal,
@@ -13,11 +10,11 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SAMPLE_CONDITION } from "@app/(app)/practice/record/_components/conditionSample";
+import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
 import NoteListItem from "@app/components/note/NoteListItem";
 import ConditionCard from "@app/components/practice/ConditionCard";
 import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
@@ -29,7 +26,6 @@ import {
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import { deletePracticeSession } from "@app/services/v2/practiceSessionService";
 import {
-  BACK_TO_LIST_LABEL,
   DELETE_CANCEL_LABEL,
   DELETE_CONFIRM_DESCRIPTION,
   DELETE_CONFIRM_LABEL,
@@ -88,33 +84,16 @@ export default function PracticeSessionDetail({
 
   return (
     <div>
-      <Link
-        href="/practice/records"
-        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-zinc-400"
-      >
-        <ArrowLeftIcon className="h-4 w-4 shrink-0" aria-hidden />
-        {BACK_TO_LIST_LABEL}
-      </Link>
+      <HeaderDetailActions
+        backHref="/practice/records"
+        editHref={`/practice/record?date=${session.logged_on}`}
+        editLabel={EDIT_LABEL}
+        deleteLabel={DELETE_LABEL}
+        onDeleteClick={() => setIsConfirmOpen(true)}
+        isDeleting={isDeleting}
+      />
 
-      <h2 className="mt-3 text-2xl font-bold text-white">{practiceDate}</h2>
-
-      <div className="mt-4 flex gap-2">
-        <Link
-          href={`/practice/record?date=${session.logged_on}`}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-zinc-600 py-2.5 text-[13px] font-bold text-white"
-        >
-          <PencilSquareIcon className="h-4 w-4 shrink-0" aria-hidden />
-          {EDIT_LABEL}
-        </Link>
-        <button
-          type="button"
-          onClick={() => setIsConfirmOpen(true)}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-danger/60 py-2.5 text-[13px] font-bold text-danger"
-        >
-          <TrashIcon className="h-4 w-4 shrink-0" aria-hidden />
-          {DELETE_LABEL}
-        </button>
-      </div>
+      <h2 className="text-2xl font-bold text-white">{practiceDate}</h2>
 
       <h3 className="mt-8 text-sm font-bold text-white">
         {DETAIL_MENU_SECTION_TITLE}
