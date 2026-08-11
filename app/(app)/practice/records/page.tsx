@@ -1,4 +1,5 @@
 import type { RecordsTab } from "./_components/RecordsTabBar";
+import ChevronRightIcon from "@heroicons/react/24/outline/ChevronRightIcon";
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -69,9 +70,13 @@ export default async function PracticeRecordsPage({
                   <div className="flex justify-end">
                     <Link
                       href={REFLECTION_TEMPLATES_PATH}
-                      className="text-sm font-semibold text-[#d08000]"
+                      className="flex items-center gap-1.5 text-sm font-semibold text-[#d08000]"
                     >
                       {REFLECTION_TEMPLATES_LINK_LABEL}
+                      <ChevronRightIcon
+                        className="h-3.5 w-3.5 shrink-0"
+                        aria-hidden
+                      />
                     </Link>
                   </div>
                   <Link
