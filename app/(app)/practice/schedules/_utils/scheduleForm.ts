@@ -31,14 +31,11 @@ export interface ScheduleFormValues {
   /** practice_menu_id → 目標量の入力文字列。キーの存在が「選択中」を意味する。 */
   menuAmounts: Record<number, string>;
   notificationEnabled: boolean;
-  notificationMessage: string;
   /** 自由記述のメモ。 */
   note: string;
 }
 
 export interface BuildScheduleInputOptions {
-  /** Pro（custom_notification_messages）を持つか。無い場合は送っても back に捨てられる。 */
-  canCustomizeMessage: boolean;
   /** 練習ログ記録済みで編集ロックされたメニュー。入力値に関わらず元の内容を維持する。 */
   lockedMenus: ScheduleMenu[];
 }
@@ -99,10 +96,9 @@ export function buildScheduleMenuItems(
  */
 export function buildScheduleInput(
   values: ScheduleFormValues,
-  { canCustomizeMessage, lockedMenus }: BuildScheduleInputOptions,
+  { lockedMenus }: BuildScheduleInputOptions,
 ): ScheduleInput {
   const usingSet = usesMenuSet(values);
-  const message = values.notificationMessage.trim();
 
   return {
     title: values.title.trim() || null,
@@ -121,7 +117,8 @@ export function buildScheduleInput(
     note: values.note.trim() || null,
     menu_set_id: usingSet ? values.menuSetId : null,
     notification_enabled: values.notificationEnabled,
-    notification_message: canCustomizeMessage && message ? message : null,
+    // 通知文は web から編集できない。キーごと送らず、back の既存値をそのまま残す
+    // （Pro 判定が未確定のまま送ると、アプリ側で設定した文言を消してしまう）。
     // セット指定時は個別紐付けを空にして、表示元（menu_set）と実データを一致させる。
     menus: usingSet
       ? []

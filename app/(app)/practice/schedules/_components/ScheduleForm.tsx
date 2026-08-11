@@ -16,7 +16,6 @@ import {
   SCHEDULE_TITLE_MAX_LENGTH,
   WEEK_DAYS,
 } from "@app/constants/schedule";
-import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import { menuNamesText } from "../../_utils/menuSetDisplay";
 import {
   type ScheduleMenuSource,
@@ -111,9 +110,6 @@ export default function ScheduleForm({
   onSubmit,
   onCancel,
 }: ScheduleFormProps) {
-  const { hasEntitlement } = useEntitlement();
-  const canCustomizeMessage = hasEntitlement("custom_notification_messages");
-
   // 記録済みメニューは「済」判定の整合が壊れるため、選択解除も目標量の変更もさせない。
   const lockedIds = new Set(schedule?.logged_practice_menu_ids ?? []);
   const lockedMenus = (schedule?.menus ?? []).filter((menu) =>
@@ -151,7 +147,6 @@ export default function ScheduleForm({
   const [note, setNote] = useState(schedule?.note ?? "");
   // 通知は端末（アプリ版）のローカル通知でのみ動くため、web では既存値をそのまま引き継ぐ。
   const notificationEnabled = schedule?.notification_enabled ?? true;
-  const notificationMessage = schedule?.notification_message ?? "";
   const [errors, setErrors] = useState<string[]>([]);
 
   const usingSet = menuSource === "set" && menuSetId !== null;
@@ -198,10 +193,9 @@ export default function ScheduleForm({
         menuSetId,
         menuAmounts,
         notificationEnabled,
-        notificationMessage,
         note,
       },
-      { canCustomizeMessage, lockedMenus },
+      { lockedMenus },
     );
 
     const validationErrors = validateScheduleInput(input);
