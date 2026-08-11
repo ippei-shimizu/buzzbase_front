@@ -270,35 +270,31 @@ describe("ScheduleForm", () => {
     });
   });
 
-  describe("カスタム通知文の Pro ゲート", () => {
-    it("無料プランでは入力欄を出さず訴求カードを見せる", () => {
+  // web には通知の配信基盤が無いため、Pro 有無に関わらず通知文の設定自体を置かない。
+  describe("カスタム通知文", () => {
+    it("無料プランでは入力欄も訴求カードも出さない", () => {
       renderForm();
 
       expect(screen.queryByLabelText("カスタム通知文")).not.toBeInTheDocument();
       expect(
-        screen.getByText("通知メッセージをカスタマイズ"),
-      ).toBeInTheDocument();
+        screen.queryByText("通知メッセージをカスタマイズ"),
+      ).not.toBeInTheDocument();
     });
 
-    it("Pro なら入力した文言を送信する", async () => {
+    it("Pro でも入力欄を出さない", () => {
       mockEntitlement(true);
-      const user = userEvent.setup();
-      const { onSubmit } = renderForm();
+      renderForm();
 
-      await user.type(screen.getByLabelText(/タイトル/), "朝練");
-      await user.type(screen.getByLabelText("カスタム通知文"), "頑張れ");
-      await save(user);
-
-      expect(submittedInput(onSubmit).notification_message).toBe("頑張れ");
+      expect(screen.queryByLabelText("カスタム通知文")).not.toBeInTheDocument();
     });
 
     // 自主練スケジュールは無料でも無制限に作れるため、件数上限の訴求を出してはいけない。
-    it("無料プランでも件数上限の訴求は出さない", () => {
+    it("無料プランでも Pro 訴求は出さない", () => {
       renderForm();
 
-      const ctas = screen.getAllByRole("button", { name: /Pro プランを見る/ });
-      expect(ctas).toHaveLength(1);
-      expect(ctas[0]).toHaveAccessibleName(/通知メッセージをカスタマイズ/);
+      expect(
+        screen.queryByRole("button", { name: /Pro プランを見る/ }),
+      ).not.toBeInTheDocument();
     });
   });
 

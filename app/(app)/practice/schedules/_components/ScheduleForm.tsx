@@ -10,7 +10,6 @@ import type {
 import LockClosedIcon from "@heroicons/react/24/solid/LockClosedIcon";
 import { Button, Input } from "@heroui/react";
 import { useState } from "react";
-import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { parseDecimal } from "@app/constants/practice";
 import {
   EVENT_TYPES,
@@ -36,8 +35,6 @@ import {
   MENU_SETS_EMPTY,
   MENU_SOURCE_INDIVIDUAL_LABEL,
   MENU_SOURCE_SET_LABEL,
-  NOTIFICATION_MESSAGE_LABEL,
-  NOTIFICATION_MESSAGE_PLACEHOLDER,
   RECURRENCE_LABEL,
   RECURRENCE_SINGLE_LABEL,
   RECURRENCE_WEEKLY_LABEL,
@@ -109,7 +106,7 @@ export default function ScheduleForm({
   onSubmit,
   onCancel,
 }: ScheduleFormProps) {
-  const { hasEntitlement, isLoading: isEntitlementLoading } = useEntitlement();
+  const { hasEntitlement } = useEntitlement();
   const canCustomizeMessage = hasEntitlement("custom_notification_messages");
 
   // 記録済みメニューは「済」判定の整合が壊れるため、選択解除も目標量の変更もさせない。
@@ -145,11 +142,9 @@ export default function ScheduleForm({
   const [menuAmounts, setMenuAmounts] = useState<Record<number, string>>(() =>
     initialMenuAmounts(schedule, lockedIds),
   );
-  // オン・オフはアプリ側でのみ変更させるため、web では既存値をそのまま引き継ぐ。
+  // 通知は端末（アプリ版）のローカル通知でのみ動くため、web では既存値をそのまま引き継ぐ。
   const notificationEnabled = schedule?.notification_enabled ?? true;
-  const [notificationMessage, setNotificationMessage] = useState(
-    schedule?.notification_message ?? "",
-  );
+  const notificationMessage = schedule?.notification_message ?? "";
   const [errors, setErrors] = useState<string[]>([]);
 
   const usingSet = menuSource === "set" && menuSetId !== null;
@@ -481,20 +476,6 @@ export default function ScheduleForm({
           </div>
         )}
       </div>
-
-      {isEntitlementLoading ? null : canCustomizeMessage ? (
-        <Input
-          type="text"
-          variant="bordered"
-          label={NOTIFICATION_MESSAGE_LABEL}
-          labelPlacement="outside"
-          placeholder={NOTIFICATION_MESSAGE_PLACEHOLDER}
-          value={notificationMessage}
-          onChange={(event) => setNotificationMessage(event.target.value)}
-        />
-      ) : (
-        <ProUpsellCard feature="custom_notification_messages" />
-      )}
 
       {messages.length > 0 ? (
         <ul role="alert" className="space-y-1 text-sm text-danger">

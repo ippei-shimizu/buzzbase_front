@@ -39,18 +39,6 @@ export const LOCKED_MENU_BADGE = "変更不可";
 export const LOCKED_MENU_SOURCE_NOTICE =
   "「済」のメニューがあるため、メニューセットへの切り替えはできません。";
 
-export const NOTIFICATION_LABEL = "リマインド通知";
-
-/**
- * Web にはプッシュ通知の配信基盤が無く、この設定は端末（アプリ版）のローカル通知にだけ効く。
- * 「設定したのに通知が来ない」と誤解させないため、保存先と配信先が違うことを明示する。
- */
-export const NOTIFICATION_WEB_NOTICE =
-  "通知は iOS / Android アプリ版でのみ届きます。ブラウザには通知されません（設定はアプリと共通です）。";
-
-export const NOTIFICATION_MESSAGE_LABEL = "カスタム通知文";
-export const NOTIFICATION_MESSAGE_PLACEHOLDER = "おはよう！今日も素振りしよう";
-
 export const SAVE_LABEL = "登録する";
 export const UPDATE_LABEL = "更新する";
 export const CANCEL_LABEL = "キャンセル";
