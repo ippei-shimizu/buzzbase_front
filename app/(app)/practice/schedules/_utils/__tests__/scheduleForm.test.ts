@@ -20,13 +20,13 @@ function buildValues(
     days: [],
     plannedOn: "2026-08-10",
     scheduledTime: "06:00",
-  endTime: "",
+    endTime: "",
     menuSource: "individual",
     menuSetId: null,
     menuAmounts: {},
     notificationEnabled: true,
     notificationMessage: "",
-  note: "",
+    note: "",
     ...overrides,
   };
 }
