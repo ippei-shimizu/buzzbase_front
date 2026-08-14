@@ -42,7 +42,13 @@ export default function DangerZone() {
         アカウント削除
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="sm" backdrop="blur">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        placement="center"
+        size="sm"
+        backdrop="blur"
+      >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
             <h3 className="text-xl font-semibold text-center">
