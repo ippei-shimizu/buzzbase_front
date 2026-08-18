@@ -186,6 +186,9 @@ export default function GameRecord() {
       );
       if (userTeam) {
         setMyTeam(userTeam.name);
+        // 編集時は既存試合の my_team_id が先に入りうるので、未確定のときだけ
+        // プロフィールの所属チームで補う。
+        setMyTeamId((prev) => prev ?? Number(userTeam.id));
       }
       setPositionData(positionDataList);
       setTournamentData(getTournamentList);
@@ -351,13 +354,24 @@ export default function GameRecord() {
     setMatchType(event.target.value);
   };
 
-  // 自チーム名設定。入力名が既存チームと完全一致すれば id を確定し、
-  // そうでなければ未確定(null)に戻して保存時に新規作成させる。
-  const handleMyTeamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+  // 自チーム名の入力。入力名が候補と完全一致すれば id を確定し、そうでなければ
+  // 未確定(null)に戻して保存時に新規作成させる。
+  const handleMyTeamInputChange = (value: string) => {
     setMyTeam(value);
     const matched = teamsData.find((team) => team.name === value);
     setMyTeamId(matched ? Number(matched.id) : null);
+  };
+  // 候補の選択。allowsCustomValue では打ち替え時に null が飛びうるため、null は
+  // 無視して入力中の文字列を消さない（id の解除は onInputChange 側が担う）。
+  const handleMyTeamSelectionChange = (teamKey: React.Key | null) => {
+    if (teamKey == null) return;
+    const selectedTeam = teamsData.find(
+      (team) => String(team.id) === String(teamKey),
+    );
+    if (selectedTeam) {
+      setMyTeamId(Number(selectedTeam.id));
+      setMyTeam(selectedTeam.name);
+    }
   };
 
   // 相手チーム設定
@@ -862,19 +876,27 @@ export default function GameRecord() {
                   onSelectionChange={handleSeasonSelectionChange}
                 />
                 <Divider className="my-4" />
-                <Input
+                <Autocomplete
                   isRequired
-                  type="text"
-                  size="sm"
-                  variant="bordered"
+                  allowsCustomValue
                   label="自チーム"
-                  labelPlacement="outside-left"
+                  variant="bordered"
                   placeholder="自分のチーム名を入力"
-                  className="flex justify-between items-center [&>div>div>div>input]:py-2"
+                  labelPlacement="outside-left"
+                  className="[&>div]:justify-between"
+                  size="sm"
                   color={isMyTeamValid ? "default" : "danger"}
-                  value={myTeam}
-                  onChange={handleMyTeamChange}
-                />
+                  inputValue={myTeam}
+                  selectedKey={myTeamId ? myTeamId.toString() : null}
+                  onInputChange={handleMyTeamInputChange}
+                  onSelectionChange={handleMyTeamSelectionChange}
+                >
+                  {teamsData.map((data) => (
+                    <AutocompleteItem key={data.id} textValue={data.name}>
+                      {data.name}
+                    </AutocompleteItem>
+                  ))}
+                </Autocomplete>
                 <Divider className="my-4" />
                 <Autocomplete
                   isRequired
