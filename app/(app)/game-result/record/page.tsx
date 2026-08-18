@@ -98,7 +98,8 @@ export default function GameRecord() {
   const [userData, setUserData] = useState<userData | null>(null);
   const [existingGameDate, setExistingGameDate] = useState<string>("");
   const [myTeam, setMyTeam] = useState("");
-  const [existingMyTeam, setExistingMyTeam] = useState("");
+  // 自チームの id。既存チームが確定しているときだけ入り、手入力中は null。
+  const [myTeamId, setMyTeamId] = useState<number | null>(null);
   const [teamsData, setTeamsData] = useState<Team[]>([]);
   const [positionData, setPositionData] = useState<Position[]>([]);
   const [tournamentData, setTournamentData] = useState<TournamentData[]>([]);
@@ -220,7 +221,7 @@ export default function GameRecord() {
         setExistingGameDate(formattedDate);
         setMatchType(existingMatchResult.match_type);
         setTournament(existingMatchResult.tournament_id);
-        setExistingMyTeam(existingMatchResult.my_team_id);
+        setMyTeamId(existingMatchResult.my_team_id);
         setMyTeamScore(existingMatchResult.my_team_score);
         setOpponentTeamScore(existingMatchResult.opponent_team_score);
         setExistingMatchBattingOrder(existingMatchResult.batting_order);
@@ -314,15 +315,18 @@ export default function GameRecord() {
     }
   }, [userData, positionData]);
 
-  // チーム名検索(編集時)
+  // 編集時は my_team_id だけ先に確定し、チーム一覧の到着タイミングは不定なので
+  // 一覧が揃ってから id を表示名へ解決する。
   useEffect(() => {
-    if (existingMyTeam) {
-      const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
+    if (myTeamId) {
+      const foundTeam = teamsData.find(
+        (team) => String(team.id) === String(myTeamId),
+      );
       if (foundTeam) {
         setMyTeam(foundTeam.name);
       }
     }
-  }, [existingMyTeam, teamsData]);
+  }, [myTeamId, teamsData]);
 
   // 今日の日付
   const [gameDate, setGameDate] = useState(() => {
@@ -347,10 +351,13 @@ export default function GameRecord() {
     setMatchType(event.target.value);
   };
 
-  // 自チーム名設定
+  // 自チーム名設定。入力名が既存チームと完全一致すれば id を確定し、
+  // そうでなければ未確定(null)に戻して保存時に新規作成させる。
   const handleMyTeamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setExistingMyTeam(event.target.value);
-    setMyTeam(event.target.value);
+    const value = event.target.value;
+    setMyTeam(value);
+    const matched = teamsData.find((team) => team.name === value);
+    setMyTeamId(matched ? Number(matched.id) : null);
   };
 
   // 相手チーム設定
@@ -541,9 +548,11 @@ export default function GameRecord() {
           ]);
         }
       }
+      // 自チーム保存。既存チームが確定済み（myTeamId あり）なら新規作成せず id を
+      // そのまま使い、手入力で新しいチーム名を入れた場合のみ作成する。
+      let resolvedMyTeamId = myTeamId;
       const trimmedMyTeam = myTeam.trim();
-      let myTeamId = teamsData.find((team) => team.name === trimmedMyTeam)?.id;
-      if (!myTeamId) {
+      if (!resolvedMyTeamId && trimmedMyTeam !== "") {
         const newTeam = await createOrUpdateTeam({
           team: {
             name: trimmedMyTeam,
@@ -551,7 +560,12 @@ export default function GameRecord() {
             prefecture_id: undefined,
           },
         });
-        myTeamId = newTeam.data.id;
+        resolvedMyTeamId = Number(newTeam.data.id);
+      }
+      // 球場と違い自チームは必須項目なので、id を確定できなければ保存を中断する。
+      if (!resolvedMyTeamId) {
+        setErrorsWithTimeout(["自チームの登録に失敗しました。"]);
+        return;
       }
 
       // 大会保存
@@ -615,9 +629,7 @@ export default function GameRecord() {
           user_id: Number(userId),
           date_and_time: existingGameDate ? existingGameDate : gameDate,
           match_type: matchType,
-          my_team_id: Number(existingMyTeam)
-            ? Number(existingMyTeam)
-            : Number(myTeamId),
+          my_team_id: resolvedMyTeamId,
           opponent_team_id: existingOpponentTeam
             ? existingOpponentTeam
             : Number(opponentTeamId),
