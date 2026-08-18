@@ -358,8 +358,19 @@ export default function GameRecord() {
   // 未確定(null)に戻して保存時に新規作成させる。
   const handleMyTeamInputChange = (value: string) => {
     setMyTeam(value);
-    const matched = teamsData.find((team) => team.name === value);
-    setMyTeamId(matched ? Number(matched.id) : null);
+    setMyTeamId((prev) => {
+      // 候補選択の直後は同じテキストで onInputChange が続けて発火する。名前だけで
+      // 引き直すと同名チームがあるとき先頭の id にすり替わるため、確定済み id の
+      // 名前と一致する間はその id を維持する。
+      const confirmed = teamsData.find(
+        (team) => String(team.id) === String(prev),
+      );
+      if (confirmed && confirmed.name === value) {
+        return prev;
+      }
+      const matched = teamsData.find((team) => team.name === value);
+      return matched ? Number(matched.id) : null;
+    });
   };
   // 候補の選択。allowsCustomValue では打ち替え時に null が飛びうるため、null は
   // 無視して入力中の文字列を消さない（id の解除は onInputChange 側が担う）。
