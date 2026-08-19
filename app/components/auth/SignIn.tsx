@@ -17,6 +17,10 @@ import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
 import { trackUserLoggedIn } from "@app/utils/analytics";
 import { identifyUser } from "@app/utils/posthog";
+import {
+  isRateLimitError,
+  rateLimitErrorMessage,
+} from "@app/utils/rateLimitError";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -70,7 +74,9 @@ export default function SignIn() {
         navigateAfterAuth("/register-username");
       }
     } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.data?.errors) {
+      if (isRateLimitError(error)) {
+        setErrorsWithTimeout([rateLimitErrorMessage(error)]);
+      } else if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorMessages = error.response.data.errors;
         const isUnconfirmedError =
           error.response.status === 401 &&
