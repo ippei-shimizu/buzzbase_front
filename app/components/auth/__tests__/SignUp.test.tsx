@@ -67,6 +67,8 @@ describe("SignUp", () => {
 
     await submitSignUp();
 
-    expect(await screen.findByText("Password is too short")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Password is too short"),
+    ).toBeInTheDocument();
   });
 });

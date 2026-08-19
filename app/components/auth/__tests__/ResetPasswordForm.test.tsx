@@ -69,6 +69,8 @@ describe("ResetPasswordForm", () => {
 
     await submitReset();
 
-    expect(await screen.findByText("Password is too short")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Password is too short"),
+    ).toBeInTheDocument();
   });
 });
