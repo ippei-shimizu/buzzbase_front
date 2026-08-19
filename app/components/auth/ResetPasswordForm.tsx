@@ -72,7 +72,7 @@ export default function ResetPasswordForm({ authHeaders }: Props) {
       // back は PUT /api/v1/auth/password をスロットル対象にしていないため現状は到達しないが、
       // 他の認証画面と実装を揃え、対象化された際の取りこぼしを防ぐために置いている。
       if (isRateLimitError(error)) {
-        setErrorsWithTimeout([rateLimitErrorMessage(error)]);
+        setErrors([rateLimitErrorMessage(error)]);
         return;
       }
       // PUT /api/v1/auth/password のバリデーションエラーは devise_token_auth の

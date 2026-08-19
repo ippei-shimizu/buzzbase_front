@@ -75,7 +75,7 @@ export default function SignIn() {
       }
     } catch (error: unknown) {
       if (isRateLimitError(error)) {
-        setErrorsWithTimeout([rateLimitErrorMessage(error)]);
+        setErrors([rateLimitErrorMessage(error)]);
       } else if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorMessages = error.response.data.errors;
         const isUnconfirmedError =

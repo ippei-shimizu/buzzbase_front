@@ -60,7 +60,7 @@ export default function ResendConfirmationModal({
       setEmail("");
     } catch (error: unknown) {
       if (isRateLimitError(error)) {
-        setErrorsWithTimeout([rateLimitErrorMessage(error)]);
+        setErrors([rateLimitErrorMessage(error)]);
       } else if (error instanceof AxiosError && error.response?.data?.errors) {
         setErrorsWithTimeout(error.response.data.errors);
       } else {

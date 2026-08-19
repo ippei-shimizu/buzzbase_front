@@ -62,7 +62,7 @@ export default function SignUp() {
       router.push("/registration-confirmation");
     } catch (error: unknown) {
       if (isRateLimitError(error)) {
-        setErrorsWithTimeout([rateLimitErrorMessage(error)]);
+        setErrors([rateLimitErrorMessage(error)]);
       } else if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorData = error.response.data.errors;
         const isEmailTakenError =
