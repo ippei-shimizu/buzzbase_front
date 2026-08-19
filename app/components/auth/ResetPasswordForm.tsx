@@ -69,6 +69,8 @@ export default function ResetPasswordForm({ authHeaders }: Props) {
       setIsCompleted(true);
       setTimeout(() => router.push("/signin"), 3000);
     } catch (error) {
+      // back は PUT /api/v1/auth/password をスロットル対象にしていないため現状は到達しないが、
+      // 他の認証画面と実装を揃え、対象化された際の取りこぼしを防ぐために置いている。
       if (isRateLimitError(error)) {
         setErrorsWithTimeout([rateLimitErrorMessage(error)]);
         return;
