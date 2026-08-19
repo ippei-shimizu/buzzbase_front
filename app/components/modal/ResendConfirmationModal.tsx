@@ -13,6 +13,10 @@ import { useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import { resendConfirmation } from "@app/services/authService";
+import {
+  isRateLimitError,
+  rateLimitErrorMessage,
+} from "@app/utils/rateLimitError";
 
 export default function ResendConfirmationModal({
   isOpen,
@@ -55,7 +59,9 @@ export default function ResendConfirmationModal({
       onClose();
       setEmail("");
     } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.data?.errors) {
+      if (isRateLimitError(error)) {
+        setErrors([rateLimitErrorMessage(error)]);
+      } else if (error instanceof AxiosError && error.response?.data?.errors) {
         setErrorsWithTimeout(error.response.data.errors);
       } else {
         setErrorsWithTimeout([

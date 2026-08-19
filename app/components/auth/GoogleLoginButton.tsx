@@ -12,6 +12,10 @@ import { googleSignIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
 import { trackSignUpCompleted, trackUserLoggedIn } from "@app/utils/analytics";
 import { identifyUser } from "@app/utils/posthog";
+import {
+  isRateLimitError,
+  rateLimitErrorMessage,
+} from "@app/utils/rateLimitError";
 
 interface GoogleLoginButtonProps {
   mode?: "signin" | "signup";
@@ -66,8 +70,12 @@ export default function GoogleLoginButton({
         }
         setIsLoggedIn(true);
       }
-    } catch {
-      setErrors(["Googleログインに失敗しました"]);
+    } catch (error: unknown) {
+      setErrors([
+        isRateLimitError(error)
+          ? rateLimitErrorMessage(error)
+          : "Googleログインに失敗しました",
+      ]);
     } finally {
       setIsLoading(false);
     }
