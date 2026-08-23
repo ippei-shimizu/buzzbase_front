@@ -17,6 +17,8 @@ import {
   type AnalysisInitialData,
   type BattingTrendGranularity,
   type CountSituations,
+  type PitchCourseData,
+  type PitchCoursePitchTypeData,
   type PitcherFaceoffData,
   type PitchTypeData,
   getAdditionalStats,
@@ -26,6 +28,8 @@ import {
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getPitchCoursePitchTypes,
+  getPitchCourses,
   getPitcherAttributeSummary,
   getPitcherFaceoffs,
   getPitchTypes,
@@ -39,6 +43,7 @@ import { ContactQualityCard } from "./ContactQualityCard";
 import { CountSituationCards } from "./CountSituationCards";
 import { HeadlineStatsCard } from "./HeadlineStatsCard";
 import { HitDirectionTable } from "./HitDirectionTable";
+import { PitchCourseCard } from "./PitchCourseCard";
 import { PitcherAttributeSummary } from "./PitcherAttributeSummary";
 import { PitcherFaceoffList } from "./PitcherFaceoffList";
 import { PitchTypeCard } from "./PitchTypeCard";
@@ -48,6 +53,7 @@ import { ProSectionPlaceholder } from "./ProSectionPlaceholder";
 import {
   SAMPLE_COUNT_SITUATIONS,
   SAMPLE_HIT_DIRECTIONS,
+  SAMPLE_PITCH_COURSES,
   SAMPLE_PITCH_TYPES,
   SAMPLE_PITCHER_FACEOFFS,
 } from "./proStatsSampleData";
@@ -59,6 +65,7 @@ import { TimingCard } from "./TimingCard";
 export interface ProAnalysisData {
   countSituations: CountSituations | null;
   pitchTypes: PitchTypeData | null;
+  pitchCourses: PitchCourseData | null;
   pitcherFaceoffs: PitcherFaceoffData | null;
 }
 
@@ -121,6 +128,7 @@ export function AnalysisContainer({
   const canViewHitDirectionDetail = canView("hit_direction_average");
   const canViewCountSituations = canView("count_situation_average");
   const canViewPitchTypes = canView("pitch_type_average");
+  const canViewPitchCourses = canView("pitch_course_average");
   const canViewPitcherFaceoffs = canView("pitcher_faceoff_average");
 
   const countSituations = useProGatedResource({
@@ -139,6 +147,14 @@ export function AnalysisContainer({
     fetcher: getPitchTypes,
     unwrap,
   });
+  const pitchCourses = useProGatedResource({
+    feature: "pitch_course_average",
+    canView: canViewPitchCourses,
+    initialData: initialProData.pitchCourses,
+    criteria: filters,
+    fetcher: getPitchCourses,
+    unwrap,
+  });
   const pitcherFaceoffs = useProGatedResource({
     feature: "pitcher_faceoff_average",
     canView: canViewPitcherFaceoffs,
@@ -147,6 +163,14 @@ export function AnalysisContainer({
     fetcher: getPitcherFaceoffs,
     unwrap,
   });
+
+  // 球種×コースのクロス集計は大きいため、カード側が「球種別」タブを開いたときに
+  // だけこのローダ経由で取得する（現在のフィルタを閉じ込めて渡す）。
+  const loadPitchTypeCross =
+    async (): Promise<PitchCoursePitchTypeData | null> => {
+      const result = await getPitchCoursePitchTypes(filters);
+      return unwrap("pitch_course_average", result);
+    };
 
   // 初回は SSR の initialData を使うため再取得しない（フィルタ変更時のみ取得）。
   const didInitRef = useRef(false);
@@ -315,6 +339,18 @@ export function AnalysisContainer({
               rows={SAMPLE_PITCH_TYPES.rows}
               totalTargetPa={SAMPLE_PITCH_TYPES.total_target_pa}
             />
+          </ProSampleSection>
+        )}
+        {pitchCourses ? (
+          <PitchCourseCard
+            data={pitchCourses}
+            loadPitchTypeCross={loadPitchTypeCross}
+          />
+        ) : canViewPitchCourses ? (
+          <ProSectionPlaceholder label="コース別の打率" />
+        ) : (
+          <ProSampleSection feature="pitch_course_average">
+            <PitchCourseCard data={SAMPLE_PITCH_COURSES} />
           </ProSampleSection>
         )}
         {pitcherFaceoffs ? (

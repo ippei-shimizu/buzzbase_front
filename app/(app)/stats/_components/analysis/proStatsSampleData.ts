@@ -1,12 +1,20 @@
 import type {
   CountSituations,
   HitDirection,
+  PitchCourseData,
+  PitchCourseZone,
   PitcherFaceoff,
   PitcherFaceoffData,
   PitchTypeData,
   PitchTypeRow,
 } from "../../analysisActions";
 import { DIRECTION_LABELS } from "@app/constants/groundCanvas";
+import {
+  PITCH_COURSES,
+  isStrikeZoneCourse,
+  pitchCourseCol,
+  pitchCourseRow,
+} from "@app/constants/pitchCourse";
 
 /**
  * 無料ユーザーに見せる Pro 限定ブロックのサンプルデータ。
@@ -316,3 +324,70 @@ export const SAMPLE_HIT_DIRECTIONS: HitDirection[] = HIT_DIRECTION_SEEDS.map(
     };
   },
 );
+
+// コース別サンプル。真ん中〜内寄りが得意、外角低めが苦手という分かりやすい傾向を作る。
+// [course, at_bats, hits] のみ持ち、残りは幾何から導出する。
+const SAMPLE_PITCH_COURSE_SEEDS: ReadonlyArray<[number, number, number]> = [
+  [7, 6, 2],
+  [8, 8, 3],
+  [9, 5, 1],
+  [12, 10, 4],
+  [13, 14, 6],
+  [14, 8, 2],
+  [17, 9, 3],
+  [18, 12, 4],
+  [19, 7, 1],
+  [2, 3, 1],
+  [10, 2, 0],
+  [16, 4, 1],
+  [22, 2, 0],
+  [24, 1, 0],
+];
+
+const SAMPLE_PITCH_COURSE_ZONES: PitchCourseZone[] = PITCH_COURSES.map(
+  (course) => {
+    const seed = SAMPLE_PITCH_COURSE_SEEDS.find(([c]) => c === course);
+    const atBats = seed?.[1] ?? 0;
+    const hits = seed?.[2] ?? 0;
+    return {
+      course,
+      row: pitchCourseRow(course),
+      col: pitchCourseCol(course),
+      is_strike_zone: isStrikeZoneCourse(course),
+      plate_appearances: atBats,
+      at_bats: atBats,
+      hits,
+      batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
+      is_reliable: atBats >= 3,
+    };
+  },
+);
+
+const sumZones = (zones: PitchCourseZone[]) => ({
+  plate_appearances: zones.reduce((sum, z) => sum + z.plate_appearances, 0),
+  at_bats: zones.reduce((sum, z) => sum + z.at_bats, 0),
+  hits: zones.reduce((sum, z) => sum + z.hits, 0),
+});
+
+const sampleStrike = sumZones(
+  SAMPLE_PITCH_COURSE_ZONES.filter((z) => z.is_strike_zone),
+);
+const sampleBall = sumZones(
+  SAMPLE_PITCH_COURSE_ZONES.filter((z) => !z.is_strike_zone),
+);
+
+export const SAMPLE_PITCH_COURSES: PitchCourseData = {
+  zones: SAMPLE_PITCH_COURSE_ZONES,
+  strike_zone: {
+    ...sampleStrike,
+    batting_average: Number(
+      (sampleStrike.hits / sampleStrike.at_bats).toFixed(3),
+    ),
+  },
+  ball_zone: {
+    ...sampleBall,
+    batting_average: Number((sampleBall.hits / sampleBall.at_bats).toFixed(3)),
+  },
+  total_target_pa: sampleStrike.plate_appearances + sampleBall.plate_appearances,
+  min_at_bats: 3,
+};

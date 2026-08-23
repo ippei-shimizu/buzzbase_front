@@ -7,6 +7,8 @@ import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
 import {
   EMPTY_COUNT_SITUATIONS,
+  EMPTY_PITCH_COURSE_PITCH_TYPES,
+  EMPTY_PITCH_COURSES,
   EMPTY_PITCH_TYPES,
   EMPTY_PITCHER_FACEOFFS,
 } from "./analysisFallbacks";
@@ -176,6 +178,48 @@ export interface PitchTypeRow {
 export interface PitchTypeData {
   rows: PitchTypeRow[];
   total_target_pa: number;
+}
+
+// GET /api/v2/stats/pitch_courses の 1 セル分（zones は必ず 25 要素で返る）。
+export interface PitchCourseZone {
+  course: number;
+  row: number;
+  col: number;
+  is_strike_zone: boolean;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+  /** 打数が min_at_bats 以上か。false は参考値（半透明表示）。 */
+  is_reliable: boolean;
+}
+
+export interface PitchCourseZoneSummary {
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+}
+
+export interface PitchCourseData {
+  zones: PitchCourseZone[];
+  strike_zone: PitchCourseZoneSummary;
+  ball_zone: PitchCourseZoneSummary;
+  total_target_pa: number;
+  min_at_bats: number;
+}
+
+export interface PitchCoursePitchTypeRow {
+  id: number;
+  label: string;
+  plate_appearances: number;
+  zones: PitchCourseZone[];
+}
+
+export interface PitchCoursePitchTypeData {
+  rows: PitchCoursePitchTypeRow[];
+  total_target_pa: number;
+  min_at_bats: number;
 }
 
 export interface PitcherFaceoff {
@@ -442,6 +486,33 @@ export async function getPitchTypes(
     filters,
     "getPitchTypes",
     EMPTY_PITCH_TYPES,
+  );
+}
+
+/** pitch_course_average の entitlement が必要。403 は pro_required として返す。 */
+export async function getPitchCourses(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitchCourseData>> {
+  return fetchProGatedAnalysis<PitchCourseData>(
+    "pitch_courses",
+    filters,
+    "getPitchCourses",
+    EMPTY_PITCH_COURSES,
+  );
+}
+
+/**
+ * 球種×コースのクロス集計（pitch_course_average の entitlement が必要）。
+ * 最大 250 セルと大きいため、「球種別」タブを開いたときにだけ呼び出す。
+ */
+export async function getPitchCoursePitchTypes(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitchCoursePitchTypeData>> {
+  return fetchProGatedAnalysis<PitchCoursePitchTypeData>(
+    "pitch_course_pitch_types",
+    filters,
+    "getPitchCoursePitchTypes",
+    EMPTY_PITCH_COURSE_PITCH_TYPES,
   );
 }
 

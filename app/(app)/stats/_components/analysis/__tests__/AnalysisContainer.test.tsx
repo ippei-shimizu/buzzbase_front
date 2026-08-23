@@ -51,6 +51,8 @@ jest.mock("../../../analysisActions", () => ({
   getBattingTrend: jest.fn(),
   getCountSituations: jest.fn(),
   getPitchTypes: jest.fn(),
+  getPitchCourses: jest.fn(),
+  getPitchCoursePitchTypes: jest.fn(),
   getPitcherFaceoffs: jest.fn(),
 }));
 
@@ -75,6 +77,7 @@ import {
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getPitchCourses,
   getPitcherAttributeSummary,
   getPitcherFaceoffs,
   getPitchTypes,
@@ -84,6 +87,7 @@ import {
   type AnalysisInitialData,
 } from "../../../analysisActions";
 import { AnalysisContainer, type ProAnalysisData } from "../AnalysisContainer";
+import { SAMPLE_PITCH_COURSES } from "../proStatsSampleData";
 
 const mockGetProStatus = getProStatus as jest.MockedFunction<
   typeof getProStatus
@@ -96,6 +100,9 @@ const mockGetPitchTypes = getPitchTypes as jest.MockedFunction<
 >;
 const mockGetPitcherFaceoffs = getPitcherFaceoffs as jest.MockedFunction<
   typeof getPitcherFaceoffs
+>;
+const mockGetPitchCourses = getPitchCourses as jest.MockedFunction<
+  typeof getPitchCourses
 >;
 
 function setAuthCookies() {
@@ -232,12 +239,37 @@ const initialData: AnalysisInitialData = {
 const NO_PRO_DATA: ProAnalysisData = {
   countSituations: null,
   pitchTypes: null,
+  pitchCourses: null,
   pitcherFaceoffs: null,
+};
+
+// 実データのコース別。値は他カードの assert（".333" の一意性など）と衝突しないよう .444 に寄せる。
+const REAL_PITCH_COURSES = {
+  zones: Array.from({ length: 25 }, (_, index) => {
+    const course = index + 1;
+    const isCenter = course === 13;
+    return {
+      course,
+      row: Math.floor((course - 1) / 5) + 1,
+      col: ((course - 1) % 5) + 1,
+      is_strike_zone: [7, 8, 9, 12, 13, 14, 17, 18, 19].includes(course),
+      plate_appearances: isCenter ? 9 : 0,
+      at_bats: isCenter ? 9 : 0,
+      hits: isCenter ? 4 : 0,
+      batting_average: isCenter ? 0.444 : 0,
+      is_reliable: isCenter,
+    };
+  }),
+  strike_zone: { plate_appearances: 9, at_bats: 9, hits: 4, batting_average: 0.444 },
+  ball_zone: { plate_appearances: 0, at_bats: 0, hits: 0, batting_average: 0 },
+  total_target_pa: 9,
+  min_at_bats: 3,
 };
 
 const SSR_PRO_DATA: ProAnalysisData = {
   countSituations: REAL_COUNT_SITUATIONS,
   pitchTypes: REAL_PITCH_TYPES,
+  pitchCourses: REAL_PITCH_COURSES,
   pitcherFaceoffs: REAL_PITCHER_FACEOFFS,
 };
 
@@ -245,6 +277,7 @@ const ALL_PRO_FEATURES: readonly ProFeature[] = [
   "hit_direction_average",
   "count_situation_average",
   "pitch_type_average",
+  "pitch_course_average",
   "pitcher_faceoff_average",
 ];
 
@@ -252,6 +285,7 @@ const CTA_NAMES = {
   hitDirection: "Pro プランを見る（方向別の打率）",
   countSituation: "Pro プランを見る（カウント別の打率）",
   pitchType: "Pro プランを見る（球種別の打率）",
+  pitchCourse: "Pro プランを見る（コース別の打率）",
   pitcherFaceoff: "Pro プランを見る（対戦投手別）",
 };
 
@@ -353,6 +387,10 @@ describe("AnalysisContainer の Pro 出し分け", () => {
       status: "ok",
       data: REAL_PITCHER_FACEOFFS,
     });
+    mockGetPitchCourses.mockResolvedValue({
+      status: "ok",
+      data: SAMPLE_PITCH_COURSES,
+    });
   });
 
   describe("Pro 加入者", () => {
@@ -380,6 +418,7 @@ describe("AnalysisContainer の Pro 出し分け", () => {
 
       expect(mockGetCountSituations).not.toHaveBeenCalled();
       expect(mockGetPitchTypes).not.toHaveBeenCalled();
+      expect(mockGetPitchCourses).not.toHaveBeenCalled();
       expect(mockGetPitcherFaceoffs).not.toHaveBeenCalled();
     });
 
@@ -499,17 +538,17 @@ describe("AnalysisContainer の Pro 出し分け", () => {
       expect(screen.queryByText("20打数 8安打")).not.toBeInTheDocument();
     });
 
-    it("方向別を含む4ブロックすべてでサンプルであることを明示する", async () => {
+    it("方向別を含む5ブロックすべてでサンプルであることを明示する", async () => {
       await renderContainer();
 
       expect(
         await screen.findAllByText(
           "サンプルデータ（実際の記録ではありません）",
         ),
-      ).toHaveLength(4);
+      ).toHaveLength(5);
     });
 
-    it("4つの CTA をスクリーンリーダーで読み分けられる", async () => {
+    it("5つの CTA をスクリーンリーダーで読み分けられる", async () => {
       await renderContainer();
 
       const ctaNames = Object.values(CTA_NAMES);
@@ -712,6 +751,10 @@ describe("打撃推移のシーズン粒度", () => {
     mockGetPitcherFaceoffs.mockResolvedValue({
       status: "ok",
       data: REAL_PITCHER_FACEOFFS,
+    });
+    mockGetPitchCourses.mockResolvedValue({
+      status: "ok",
+      data: SAMPLE_PITCH_COURSES,
     });
   });
 
