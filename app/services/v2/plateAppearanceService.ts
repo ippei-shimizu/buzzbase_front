@@ -39,6 +39,31 @@ export async function getPlateAppearancesByGame(
 }
 
 /**
+ * 打席を1件取得する（GET /api/v2/plate_appearances/:id）。
+ * 公開アカウントであれば他ユーザーの打席も取得できる（by_game と同じポリシー）。
+ * 非公開(403)・不存在(404)・失敗時は null。
+ */
+export async function getPlateAppearanceV2(
+  id: number,
+): Promise<PlateAppearanceV2 | null> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return null;
+
+    const response = await fetch(
+      `${RAILS_API_URL}/api/v2/plate_appearances/${id}`,
+      { headers, cache: "no-store" },
+    );
+    if (!response.ok) return null;
+
+    return (await response.json()) as PlateAppearanceV2;
+  } catch (error) {
+    captureServerActionError(error, { action: "getPlateAppearanceV2" });
+    return null;
+  }
+}
+
+/**
  * 打席を1件作成する（POST /api/v2/plate_appearances）。
  * batting_result / is_new_format はサーバー側で付与される。
  */
