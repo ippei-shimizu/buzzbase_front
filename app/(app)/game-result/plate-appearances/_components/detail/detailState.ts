@@ -11,6 +11,7 @@ export interface DetailState {
   contactQualityId: number | null;
   timingId: number | null;
   pitchTypeId: number | null;
+  pitchCourse: number | null;
   selfAnalysisMemo: string | null;
   pitcherId: number | null;
   appearanceSituationId: number | null;
@@ -30,6 +31,7 @@ export const hasDetailInput = (detail: DetailState): boolean =>
   detail.contactQualityId !== null ||
   detail.timingId !== null ||
   detail.pitchTypeId !== null ||
+  detail.pitchCourse !== null ||
   detail.pitcherId !== null ||
   detail.appearanceSituationId !== null ||
   (detail.selfAnalysisMemo !== null && detail.selfAnalysisMemo !== "");
@@ -44,6 +46,7 @@ export const EMPTY_DETAIL: DetailState = {
   contactQualityId: null,
   timingId: null,
   pitchTypeId: null,
+  pitchCourse: null,
   selfAnalysisMemo: null,
   pitcherId: null,
   appearanceSituationId: null,

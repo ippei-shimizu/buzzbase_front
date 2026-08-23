@@ -28,6 +28,7 @@ import {
 } from "./DetailFields";
 import { DetailValueBanner } from "./DetailValueBanner";
 import { MasterChipSelector } from "./MasterChipSelector";
+import { PitchCourseSelector } from "./PitchCourseSelector";
 import { PitcherSelector } from "./PitcherSelector";
 
 interface DetailDataFormProps {
@@ -44,6 +45,7 @@ const SECTION_DESCRIPTIONS = {
   inning: "この打席が何回（イニング）目に発生したか",
   contactQuality: "ボールがバットのどこに当たった感触か",
   timing: "ピッチャーの球に対するスイングのタイミング",
+  pitchCourse: "打席結果が決まった最後の1球のコース（捕手目線）",
   pitchType: "打席結果が決まった最後の1球の球種",
   selfAnalysisMemo: "打席を振り返って、自分の良かった点・課題を書き残す",
   appearanceSituation: "投手の登板タイミング（試合終盤の対戦成績の分析に使う）",
@@ -149,6 +151,11 @@ export function DetailDataForm({
           value={detail.timingId}
           onChange={(id) => setDetail({ timingId: id })}
           description={SECTION_DESCRIPTIONS.timing}
+        />
+        <PitchCourseSelector
+          value={detail.pitchCourse}
+          onChange={(course) => setDetail({ pitchCourse: course })}
+          description={SECTION_DESCRIPTIONS.pitchCourse}
         />
         <MasterChipSelector
           label="球種"
