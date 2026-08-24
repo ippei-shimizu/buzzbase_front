@@ -260,7 +260,12 @@ const REAL_PITCH_COURSES = {
       is_reliable: isCenter,
     };
   }),
-  strike_zone: { plate_appearances: 9, at_bats: 9, hits: 4, batting_average: 0.444 },
+  strike_zone: {
+    plate_appearances: 9,
+    at_bats: 9,
+    hits: 4,
+    batting_average: 0.444,
+  },
   ball_zone: { plate_appearances: 0, at_bats: 0, hits: 0, batting_average: 0 },
   total_target_pa: 9,
   min_at_bats: 3,

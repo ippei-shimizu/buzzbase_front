@@ -4,7 +4,9 @@ import { BSOBoard } from "../BSOBoard";
 describe("BSOBoard", () => {
   it("入力モードではドットタップで値を通知する", () => {
     const onChange = jest.fn();
-    render(<BSOBoard balls={null} strikes={null} outs={null} onChange={onChange} />);
+    render(
+      <BSOBoard balls={null} strikes={null} outs={null} onChange={onChange} />,
+    );
     fireEvent.click(screen.getByRole("button", { name: "ボール 2" }));
     expect(onChange).toHaveBeenCalledWith("balls", 2);
   });

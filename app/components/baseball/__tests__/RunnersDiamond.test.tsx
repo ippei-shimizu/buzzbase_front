@@ -4,7 +4,9 @@ import { RunnersDiamond } from "../RunnersDiamond";
 describe("RunnersDiamond", () => {
   it("null では全塁 OFF + キャプション「未入力」", () => {
     render(<RunnersDiamond value={null} onChange={jest.fn()} />);
-    expect(screen.getByRole("group", { name: "ランナー状況" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "ランナー状況" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "一塁" })).toHaveAttribute(
       "aria-pressed",
       "false",

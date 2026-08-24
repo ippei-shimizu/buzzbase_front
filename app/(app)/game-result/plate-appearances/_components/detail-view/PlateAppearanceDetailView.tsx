@@ -106,10 +106,16 @@ export function PlateAppearanceDetailView({
             />
           ) : null}
           {pa.out_type !== null ? (
-            <DetailRow label="アウト種別" value={OUT_TYPE_LABELS[pa.out_type]} />
+            <DetailRow
+              label="アウト種別"
+              value={OUT_TYPE_LABELS[pa.out_type]}
+            />
           ) : null}
           {pa.hit_type !== null ? (
-            <DetailRow label="ヒット種別" value={HIT_TYPE_LABELS[pa.hit_type]} />
+            <DetailRow
+              label="ヒット種別"
+              value={HIT_TYPE_LABELS[pa.hit_type]}
+            />
           ) : null}
         </DetailSection>
       )}
@@ -152,7 +158,10 @@ export function PlateAppearanceDetailView({
                 : "いいえ"
           }
         />
-        <DetailRow label="登板状況" value={pa.appearance_situation?.name ?? null} />
+        <DetailRow
+          label="登板状況"
+          value={pa.appearance_situation?.name ?? null}
+        />
       </DetailSection>
 
       <DetailSection title="記録">

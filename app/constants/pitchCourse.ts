@@ -20,7 +20,8 @@ export const pitchCourseRow = (course: number): number =>
   Math.floor((course - 1) / 5) + 1;
 
 /** コース番号 (1〜25) → 列 (1〜5)。捕手目線で左から数える。 */
-export const pitchCourseCol = (course: number): number => ((course - 1) % 5) + 1;
+export const pitchCourseCol = (course: number): number =>
+  ((course - 1) % 5) + 1;
 
 export const isStrikeZoneCourse = (course: number): boolean =>
   STRIKE_ZONE_SET.has(course);

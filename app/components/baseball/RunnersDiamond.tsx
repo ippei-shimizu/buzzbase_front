@@ -123,7 +123,10 @@ export function RunnersDiamond({ value, onChange }: RunnersDiamondProps) {
     return (
       <div role="img" aria-label={`ランナー状況: ${caption}`}>
         <div aria-hidden="true">{diamond}</div>
-        <p aria-hidden="true" className="mt-1 text-center text-xs text-zinc-400">
+        <p
+          aria-hidden="true"
+          className="mt-1 text-center text-xs text-zinc-400"
+        >
           {caption}
         </p>
       </div>

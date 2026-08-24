@@ -10,7 +10,10 @@ describe("runnersStateToBases / basesToRunnersState", () => {
     state: RunnersState;
     bases: { first: boolean; second: boolean; third: boolean };
   }> = [
-    { state: "no_runner", bases: { first: false, second: false, third: false } },
+    {
+      state: "no_runner",
+      bases: { first: false, second: false, third: false },
+    },
     { state: "first", bases: { first: true, second: false, third: false } },
     { state: "second", bases: { first: false, second: true, third: false } },
     { state: "third", bases: { first: false, second: false, third: true } },
@@ -18,12 +21,18 @@ describe("runnersStateToBases / basesToRunnersState", () => {
       state: "first_second",
       bases: { first: true, second: true, third: false },
     },
-    { state: "first_third", bases: { first: true, second: false, third: true } },
+    {
+      state: "first_third",
+      bases: { first: true, second: false, third: true },
+    },
     {
       state: "second_third",
       bases: { first: false, second: true, third: true },
     },
-    { state: "bases_loaded", bases: { first: true, second: true, third: true } },
+    {
+      state: "bases_loaded",
+      bases: { first: true, second: true, third: true },
+    },
   ];
 
   it.each(CASES)("$state は塁フラグと相互変換できる", ({ state, bases }) => {

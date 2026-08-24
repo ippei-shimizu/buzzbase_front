@@ -14,7 +14,8 @@ export function DetailRow({
   children?: React.ReactNode;
 }) {
   const isUnrecorded =
-    children === undefined && (value === null || value === undefined || value === "");
+    children === undefined &&
+    (value === null || value === undefined || value === "");
   return (
     <div className="flex items-start justify-between gap-x-4 py-1.5">
       <p className="shrink-0 text-sm text-zinc-400">{label}</p>

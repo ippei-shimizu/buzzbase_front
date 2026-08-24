@@ -388,6 +388,7 @@ export const SAMPLE_PITCH_COURSES: PitchCourseData = {
     ...sampleBall,
     batting_average: Number((sampleBall.hits / sampleBall.at_bats).toFixed(3)),
   },
-  total_target_pa: sampleStrike.plate_appearances + sampleBall.plate_appearances,
+  total_target_pa:
+    sampleStrike.plate_appearances + sampleBall.plate_appearances,
   min_at_bats: 3,
 };

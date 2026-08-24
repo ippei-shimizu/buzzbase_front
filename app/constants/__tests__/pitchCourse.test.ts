@@ -64,17 +64,27 @@ describe("pitchCourse", () => {
     });
 
     it("右打ちは三塁側が内角になる", () => {
-      expect(pitchCourseLabel(12, "right")).toBe("真ん中・内角寄り（ストライク）");
-      expect(pitchCourseLabel(14, "right")).toBe("真ん中・外角寄り（ストライク）");
+      expect(pitchCourseLabel(12, "right")).toBe(
+        "真ん中・内角寄り（ストライク）",
+      );
+      expect(pitchCourseLabel(14, "right")).toBe(
+        "真ん中・外角寄り（ストライク）",
+      );
     });
 
     it("左打ちは一塁側が内角になる", () => {
-      expect(pitchCourseLabel(12, "left")).toBe("真ん中・外角寄り（ストライク）");
-      expect(pitchCourseLabel(14, "left")).toBe("真ん中・内角寄り（ストライク）");
+      expect(pitchCourseLabel(12, "left")).toBe(
+        "真ん中・外角寄り（ストライク）",
+      );
+      expect(pitchCourseLabel(14, "left")).toBe(
+        "真ん中・内角寄り（ストライク）",
+      );
     });
 
     it("両打ちは位置ベースの表記に倒す", () => {
-      expect(pitchCourseLabel(12, "both")).toBe("真ん中・三塁側寄り（ストライク）");
+      expect(pitchCourseLabel(12, "both")).toBe(
+        "真ん中・三塁側寄り（ストライク）",
+      );
     });
   });
 });

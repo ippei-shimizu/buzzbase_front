@@ -29,7 +29,10 @@ const strikeZoneBorderClass = (course: number): string => {
  * 投球コースの 5x5 グリッド（捕手目線）。入力セレクタと分析ヒートマップで
  * 同じ幾何（外周ボールゾーンは内側より細い 0.62fr）を共有する。
  */
-export function PitchCourseGrid({ renderCell, className }: PitchCourseGridProps) {
+export function PitchCourseGrid({
+  renderCell,
+  className,
+}: PitchCourseGridProps) {
   return (
     <div
       className={`grid gap-px ${className ?? ""}`}
