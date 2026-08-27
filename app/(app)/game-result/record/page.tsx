@@ -51,6 +51,7 @@ import {
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
 import { createStadium, searchStadiums } from "@app/services/v2/stadiumService";
+import { upsertById } from "@app/utils/upsertById";
 import PatternSelector from "./_components/PatternSelector";
 import ScoreStepper from "./_components/ScoreStepper";
 
@@ -555,23 +556,25 @@ export default function GameRecord() {
 
       // 大会保存
       let tournamentId = tournament;
+      const trimmedTournamentName = inputTournamentName.trim();
       const existingTournament = tournamentData.find(
-        (t) => t.name === inputTournamentName,
+        (t) => t.name === trimmedTournamentName,
       );
       if (existingTournament) {
         const updatedTournament = await updateTournament(
           existingTournament.id,
-          inputTournamentName,
+          trimmedTournamentName,
         );
         if (updatedTournament) {
           tournamentId = updatedTournament.id;
         }
-      } else if (inputTournamentName) {
+      } else if (trimmedTournamentName) {
         const newTournament = await createTournament({
-          name: inputTournamentName,
+          name: trimmedTournamentName,
         });
         if (newTournament) {
-          setTournamentData([...tournamentData, newTournament]);
+          // back は同名の大会があれば既存を返すため、id が重複しないよう置き換える。
+          setTournamentData((prev) => upsertById(prev, newTournament));
           tournamentId = newTournament.id;
         }
       }
@@ -588,7 +591,8 @@ export default function GameRecord() {
         } else {
           const newSeason = await createSeason(trimmedSeasonName);
           if (newSeason) {
-            setSeasonsData([...seasonsData, newSeason]);
+            // back は同名シーズンがあれば既存を返すため、id が重複しないよう置き換える。
+            setSeasonsData((prev) => upsertById(prev, newSeason));
             seasonId = newSeason.id;
           }
         }
