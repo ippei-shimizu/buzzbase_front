@@ -8,7 +8,10 @@ const STORAGE_KEY = "smart_app_banner_dismissed_at";
 const RESHOW_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7日
 
 function setCssVar(value: string) {
-  document.documentElement.style.setProperty("--smart-banner-height", value);
+  document.documentElement.style.setProperty(
+    "--smart-app-banner-height",
+    value,
+  );
 }
 
 export default function SmartAppBanner() {

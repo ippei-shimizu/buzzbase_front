@@ -1,11 +1,10 @@
-"use client";
-import { Spinner } from "@heroui/react";
+import { AnalysisSkeleton } from "./AnalysisSkeleton";
 
-/** 分析セクションのストリーミング中に出すインラインローディング。 */
+/**
+ * 分析セクションのストリーミング中に出すインラインローディング。
+ * `stats/loading.tsx` と同じ `AnalysisSkeleton` を使い、
+ * 遷移直後のスケルトンからそのまま連続して見えるようにする。
+ */
 export function AnalysisLoading() {
-  return (
-    <div className="flex justify-center py-16">
-      <Spinner color="primary" labelColor="primary" label="Loading" />
-    </div>
-  );
+  return <AnalysisSkeleton />;
 }

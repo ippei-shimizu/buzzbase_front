@@ -20,18 +20,20 @@ export const getTournaments = async () => {
 };
 
 /**
- * ユーザーが記録した大会のみを返す（フィルタ候補用）。
- * userId 省略時は current_user、指定時はそのユーザーの大会。取得失敗時は空配列。
+ * 対象ユーザーの試合に紐づく大会だけを取得する（絞り込みチップの候補用）。
+ * 全大会を返す `getTournaments` と違い、選んでも0件になる大会が候補に出ない。
+ *
+ * @param userId 対象ユーザー（省略時はログインユーザー）
  */
 export const getUserTournaments = async (
   userId?: number,
 ): Promise<TournamentData[]> => {
   try {
-    const url = userId
-      ? `/api/v1/tournaments/user_tournaments?user_id=${userId}`
-      : "/api/v1/tournaments/user_tournaments";
-    const response = await axiosInstance.get(url);
-    return response.data as TournamentData[];
+    const query = userId ? `?user_id=${userId}` : "";
+    const response = await axiosInstance.get(
+      `/api/v1/tournaments/user_tournaments${query}`,
+    );
+    return response.data;
   } catch {
     return [];
   }

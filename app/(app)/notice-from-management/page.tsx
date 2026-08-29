@@ -1,9 +1,9 @@
 import { type Metadata } from "next";
+import MarkNoticesRead from "@app/(app)/_components/MarkNoticesRead";
 import NoticeItems from "@app/(app)/notice-from-management/notice-item";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
 import Header from "@app/components/header/Header";
-import MarkNoticesRead from "./_components/MarkNoticesRead";
 import { getPublishedNotices } from "./actions";
 
 export const metadata: Metadata = {

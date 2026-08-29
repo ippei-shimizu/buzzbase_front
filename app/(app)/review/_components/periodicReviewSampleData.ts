@@ -1,0 +1,125 @@
+import type { PeriodicReview } from "@app/types/periodicReview";
+
+/**
+ * 無料ユーザーに見せるサンプルレポート。
+ * ダミー UI ではなく実カードへ流し込み、加入後に何が届くのかを実レイアウトのまま伝える。
+ * 毎週届く機能だと分かるよう 3 週分並べる。値は実在の記録ではない架空の選手のもの。
+ *
+ * id は実データと取り違えないよう負の値にする（既読化の対象にもしない）。
+ */
+export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
+  {
+    id: -1,
+    period_type: "weekly",
+    period_start: "2026-07-06",
+    period_end: "2026-07-12",
+    read: true,
+    summary: {
+      period_type: "weekly",
+      practice_days: 5,
+      total_swings: 1200,
+      active_days: 5,
+      streak_current: 12,
+      batting: {
+        batting_average: 0.312,
+        on_base_percentage: 0.388,
+        slugging_percentage: 0.451,
+        ops: 0.839,
+        previous_batting_average: 0.286,
+        delta: 0.026,
+      },
+      pitching: {
+        innings_pitched: 7,
+        era: 2.57,
+        whip: 1.14,
+        k_per_9: 9,
+      },
+      theme_breakdown: [{ id: -1, title: "肩の開き", practice_count: 4 }],
+      condition: { sleep_hours_avg: 7.2, fatigue_level_avg: 2.4 },
+      insight: {
+        key: "sample-1",
+        id: null,
+        title: "素振りと打率の関係",
+        body: "素振りを週1500本以上やった週は、打率が.045高い傾向があります。",
+        metric: "batting_average",
+        dimension: "total_swings",
+        direction: "positive",
+        strength: "strong",
+        sample_weeks: 8,
+        sufficient: true,
+      },
+    },
+  },
+  {
+    id: -2,
+    period_type: "weekly",
+    period_start: "2026-06-29",
+    period_end: "2026-07-05",
+    read: true,
+    summary: {
+      period_type: "weekly",
+      practice_days: 4,
+      total_swings: 900,
+      active_days: 4,
+      streak_current: 20,
+      batting: {
+        batting_average: 0.286,
+        on_base_percentage: 0.351,
+        slugging_percentage: 0.401,
+        ops: 0.752,
+        previous_batting_average: 0.298,
+        delta: -0.012,
+      },
+      theme_breakdown: [{ id: -2, title: "体重移動", practice_count: 3 }],
+      condition: { sleep_hours_avg: 6.8, fatigue_level_avg: 2.8 },
+      insight: {
+        key: "sample-2",
+        id: null,
+        title: "睡眠時間と調子の関係",
+        body: "睡眠が7時間を下回った週は、疲労度の自己評価が高くなる傾向があります。",
+        metric: "fatigue_level_avg",
+        dimension: "sleep_hours_avg",
+        direction: "negative",
+        strength: "moderate",
+        sample_weeks: 6,
+        sufficient: true,
+      },
+    },
+  },
+  {
+    id: -3,
+    period_type: "weekly",
+    period_start: "2026-06-22",
+    period_end: "2026-06-28",
+    read: true,
+    summary: {
+      period_type: "weekly",
+      practice_days: 6,
+      total_swings: 1500,
+      active_days: 6,
+      streak_current: 18,
+      batting: {
+        batting_average: 0.333,
+        on_base_percentage: 0.402,
+        slugging_percentage: 0.478,
+        ops: 0.88,
+        previous_batting_average: 0.312,
+        delta: 0.021,
+      },
+      theme_breakdown: [{ id: -3, title: "外角対応", practice_count: 5 }],
+      condition: { sleep_hours_avg: 7.5, fatigue_level_avg: 2.1 },
+      insight: {
+        key: "sample-3",
+        id: null,
+        title: "練習日数と打率の関係",
+        body: "週6日以上練習した週は、翌週の打率が上がる傾向があります。",
+        metric: "batting_average",
+        dimension: "practice_days",
+        direction: "positive",
+        strength: "strong",
+        sample_weeks: 10,
+        sufficient: true,
+      },
+    },
+  },
+];

@@ -1,149 +1,37 @@
-"use client";
-import { Input } from "@heroui/react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { type SetStateAction, useMemo, useState } from "react";
-import ErrorMessages from "@app/components/auth/ErrorMessages";
-import HeaderNote from "@app/components/header/HeaderNote";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import { createBaseballNote } from "@app/services/baseballNoteService";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getImprovementThemes } from "@app/services/v2/improvementThemeService";
+import { getNoteTags } from "@app/services/v2/noteTagService";
+import { getReflectionTemplates } from "@app/services/v2/reflectionTemplateService";
+import NoteCreateForm from "./_components/NoteCreateForm";
 
-const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
-  ),
-});
+/** 課題詳細からの導線（`?improvement_theme_id=`）を紐付け済みの課題として受け取る。 */
+function initialThemeIds(value: string | string[] | undefined): number[] {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const id = Number(raw);
+  return Number.isInteger(id) && id > 0 ? [id] : [];
+}
 
-export default function NoteNew() {
-  const router = useRouter();
-  useRequireAuth();
-
-  const [title, setTitle] = useState("");
-  const [memo, setMemo] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [memoDate, _setMemoDate] = useState(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, "0");
-    const day = today.getDate().toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  });
-  const [date, setDate] = useState(memoDate);
-  const initialValues = useMemo(
-    () => ({
-      date: memoDate,
-      title: "",
-      memo: "",
-    }),
-    [memoDate],
-  );
-
-  const hasChanges =
-    date !== initialValues.date ||
-    title !== initialValues.title ||
-    memo !== initialValues.memo;
-
-  // バリデーション
-  const setErrorsWithTimeout = (newErrors: React.SetStateAction<string[]>) => {
-    setErrors(newErrors);
-    setTimeout(() => {
-      setErrors([]);
-    }, 2000);
-  };
-
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = [];
-
-    if (!date && !memoDate) {
-      isValid = false;
-      newErrors.push("日付が未設定です。");
-    }
-
-    if (!title && !memo) {
-      isValid = false;
-      newErrors.push("タイトルとメモ内容のどちらかを入力してください。");
-    }
-
-    if (!isValid) {
-      setErrorsWithTimeout(newErrors);
-    }
-
-    return isValid;
-  };
-
-  const handleDateChange = async (e: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setDate(e.target.value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm() || isSubmitting) {
-      return;
-    }
-    setIsSubmitting(true);
-    const effectiveDate = date || memoDate;
-    try {
-      const noteData = { date: effectiveDate, title, memo };
-      await createBaseballNote(noteData);
-      router.push("/note");
-    } catch {
-      setIsSubmitting(false);
-    }
-  };
+export default async function NoteNew(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const cookieStore = await cookies();
+  if (!cookieStore.get("access-token")) {
+    redirect("/signup?auth_required=true");
+  }
+  const searchParams = await props.searchParams;
+  // 互いに依存しない取得なので並列で待つ。
+  const [templatesResult, tagsResult, themesResult] = await Promise.all([
+    getReflectionTemplates(),
+    getNoteTags(),
+    getImprovementThemes(),
+  ]);
   return (
-    <>
-      <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-        <HeaderNote
-          onNoteSave={() =>
-            handleSubmit({ preventDefault: () => {} } as React.FormEvent)
-          }
-          isSubmitting={isSubmitting}
-          hasChanges={hasChanges}
-        />
-        {isSubmitting && <LoadingSpinner />}
-        <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
-          <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-            <ErrorMessages errors={errors} />
-            <div className="pt-14 px-4 lg:px-6 lg:pb-14">
-              <form>
-                <div>
-                  <div>
-                    <Input
-                      isRequired
-                      type="date"
-                      size="sm"
-                      variant="underlined"
-                      className="w-28 [&>div&>div]:p-0"
-                      value={date ? date : memoDate}
-                      onChange={handleDateChange}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="text"
-                      size="lg"
-                      variant="underlined"
-                      className="w-full [&>div]:pt-0.5 [&>div]:h-12 font-bold"
-                      placeholder="タイトル"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
-                  </div>
-                  <div className="mt-10 w-full h-full">
-                    <NoteEditor memo={memo} setMemo={setMemo} />
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </main>
-      </div>
-    </>
+    <NoteCreateForm
+      templatesResult={templatesResult}
+      tagsResult={tagsResult}
+      themesResult={themesResult}
+      initialThemeIds={initialThemeIds(searchParams.improvement_theme_id)}
+    />
   );
 }

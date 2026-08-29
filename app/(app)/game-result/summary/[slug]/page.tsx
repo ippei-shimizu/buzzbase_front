@@ -48,6 +48,7 @@ import {
   HIT_RESULT_COLOR,
   SACRIFICE_RESULT_COLOR,
 } from "@app/utils/battingResultColor";
+import { saveGameResultId } from "@app/utils/gameRecordStorage";
 import { PlateAppearanceSummaryCard } from "../_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
@@ -128,6 +129,7 @@ export default function ResultsSummary() {
     // 既存MatchResultの上書き判定をするため、単に閲覧しただけでここを書き換えると
     // 進行中の別の記録セッションを巻き込んでしまう。書き込みは編集を選択した
     // handleResultComplete内でのみ行う）。
+    if (!Number.isInteger(id) || id <= 0) return;
     fetchCurrentResultData(id);
   }, [pathname, id]);
 
@@ -245,7 +247,7 @@ export default function ResultsSummary() {
     // 既存試合の編集として試合情報入力画面へ入ることを記録する。
     // record/page.tsxはgameResultIdを送信対象の試合として信頼するため、ここで
     // 明示的に「今表示している（＝自分の所有と確認済みの）試合」のidをセットする。
-    localStorage.setItem("gameResultId", JSON.stringify(id));
+    saveGameResultId(id);
     localStorage.setItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY, "true");
     router.push("/game-result/record");
   };

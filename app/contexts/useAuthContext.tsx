@@ -2,6 +2,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { API_REQUEST_TIMEOUT_MS } from "@app/constants/http";
 
 const AuthContext = createContext<{
   isLoggedIn: boolean | undefined;
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               client: client,
               uid: uid,
             },
+            timeout: API_REQUEST_TIMEOUT_MS,
           });
           setIsLoggedIn(true);
         } catch {

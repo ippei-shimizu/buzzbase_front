@@ -28,10 +28,15 @@ import {
 } from "@app/services/userService";
 import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
 import {
+  trackGameRecordCompleted,
+  trackGameRecordStepViewed,
+} from "@app/utils/analytics";
+import {
   getBattingResultColor,
   HIT_RESULT_COLOR,
   SACRIFICE_RESULT_COLOR,
 } from "@app/utils/battingResultColor";
+import { clearGameRecordStorage } from "@app/utils/gameRecordStorage";
 import { PlateAppearanceSummaryCard } from "./_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
@@ -101,6 +106,10 @@ export default function ResultsSummary() {
     setMatchResult(updateMatchResults);
     setIsDetailDataFetched(true);
   };
+
+  useEffect(() => {
+    trackGameRecordStepViewed("summary");
+  }, []);
 
   useEffect(() => {
     // ローカルストレージからid取得
@@ -213,7 +222,13 @@ export default function ResultsSummary() {
 
   const _handleShare = () => {};
   const handleResultComplete = () => {
-    localStorage.removeItem("gameResultId");
+    const match = matchResult[0];
+    trackGameRecordCompleted({
+      match_type: match?.match_type ?? null,
+      appearance_type: match?.appearance_type ?? "starter",
+      has_pitching: pitchingResult.length > 0,
+    });
+    clearGameRecordStorage();
     router.push("/game-result/lists");
   };
 

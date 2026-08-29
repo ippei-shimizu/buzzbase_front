@@ -1,4 +1,5 @@
 "use client";
+import type { FilterValues } from "@app/components/filter/filterTypes";
 import {
   Button,
   Dropdown,
@@ -10,13 +11,14 @@ import {
 } from "@heroui/react";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState, use } from "react";
+import React, { useEffect, useState, use } from "react";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import { adSlots } from "@app/components/ad/adConfig";
 import AdInFeed from "@app/components/ad/AdInFeed";
-import FilterChip from "@app/components/filter/FilterChip";
-import FilterChipGroup from "@app/components/filter/FilterChipGroup";
-import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
+import FilterBar from "@app/components/filter/FilterBar";
+import { MATCH_TYPE_OPTIONS } from "@app/components/filter/matchTypeOptions";
+import { monthOptionsFromRecorded } from "@app/components/filter/monthOptions";
+import { yearOptionsFrom } from "@app/components/filter/yearOptions";
 import HeaderBackLink from "@app/components/header/HeaderBackLink";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
@@ -24,7 +26,6 @@ import GroupBattingRankingTable from "@app/components/table/GroupBattingRankingT
 import GroupPitchingRankingTable from "@app/components/table/GroupPitchingRankingTable";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroupDetail } from "@app/services/groupService";
-import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
 
 type GroupDetailProps = {
   params: Promise<{
@@ -87,14 +88,10 @@ type GroupsDetailData = {
   };
   id: number;
   available_years: number[];
-  available_months?: string[];
+  /** 記録のある年月（"YYYY-MM" の新しい順）。 */
+  available_months: string[];
+  available_tournaments: { id: number; name: string }[];
 };
-
-const MATCH_TYPE_OPTIONS = [
-  { key: "全て", label: "全て" },
-  { key: "regular", label: "公式戦" },
-  { key: "open", label: "オープン戦" },
-];
 
 type AcceptedUsers = {
   id: number;
@@ -199,31 +196,26 @@ export default function GroupDetail(props: GroupDetailProps) {
   const [pitchingAggregate, setPitchingAggregate] =
     useState<PitchingAggregate[]>();
   const [pitchingStats, setPitchingStats] = useState<PitchingStats[]>();
-  const [selectedYear, setSelectedYear] = useState("通算");
-  const [selectedMatchType, setSelectedMatchType] = useState("全て");
-  const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
-  const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
+  // シーズンはグループ横断で意味を持たないため、絞り込みからは外す。
+  const [filters, setFilters] = useState<Omit<FilterValues, "seasonId">>({});
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [availableTournaments, setAvailableTournaments] = useState<
+    { id: number; name: string }[]
+  >([]);
   const router = useRouter();
   useRequireAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const year = selectedYear === "通算" ? undefined : selectedYear;
-        const matchType =
-          selectedMatchType === "全て" ? undefined : selectedMatchType;
-        const responseGroupDetail = await getGroupDetail(
-          params.slug,
-          year,
-          matchType,
-          startMonth,
-          endMonth,
-        );
+        const responseGroupDetail = await getGroupDetail(params.slug, filters);
         setGroupData(responseGroupDetail);
         setAvailableYears(responseGroupDetail.available_years ?? []);
         setAvailableMonths(responseGroupDetail.available_months ?? []);
+        setAvailableTournaments(
+          responseGroupDetail.available_tournaments ?? [],
+        );
 
         if (responseGroupDetail) {
           const battingStatsWithUsersData =
@@ -309,41 +301,9 @@ export default function GroupDetail(props: GroupDetailProps) {
     };
 
     fetchData();
-  }, [
-    selectedYear,
-    selectedMatchType,
-    startMonth,
-    endMonth,
-    params.slug,
-    router,
-  ]);
+  }, [filters, params.slug, router]);
 
-  const monthOptions = useMemo(
-    () => monthOptionsFromRecorded(availableMonths),
-    [availableMonths],
-  );
-
-  // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）
-  const handleYearChange = (value: string) => {
-    setSelectedYear(value);
-    if (value !== "通算") {
-      setStartMonth(undefined);
-      setEndMonth(undefined);
-    }
-  };
-  // 期間を設定したら年度を通算へ戻す（両端クリア時は年度を据え置く）
-  const handlePeriodChange = (range: {
-    startMonth?: string;
-    endMonth?: string;
-  }) => {
-    setStartMonth(range.startMonth);
-    setEndMonth(range.endMonth);
-    if (range.startMonth || range.endMonth) {
-      setSelectedYear("通算");
-    }
-  };
-
-  const hideRankChange = Boolean(startMonth || endMonth);
+  const hideRankChange = Boolean(filters.startMonth || filters.endMonth);
 
   if (!groupData) {
     return <LoadingSpinner />;
@@ -399,34 +359,19 @@ export default function GroupDetail(props: GroupDetailProps) {
                 個人成績ランキング
               </h2>
               <div className="mt-3">
-                <FilterChipGroup wrap>
-                  <FilterChip
-                    label="年度"
-                    value={selectedYear}
-                    defaultValue="通算"
-                    options={[
-                      { key: "通算", label: "通算" },
-                      ...availableYears.map((y) => ({
-                        key: String(y),
-                        label: `${y}年`,
-                      })),
-                    ]}
-                    onChange={handleYearChange}
-                  />
-                  <FilterChip
-                    label="種別"
-                    value={selectedMatchType}
-                    defaultValue="全て"
-                    options={MATCH_TYPE_OPTIONS}
-                    onChange={setSelectedMatchType}
-                  />
-                  <PeriodRangeFilter
-                    startMonth={startMonth}
-                    endMonth={endMonth}
-                    monthOptions={monthOptions}
-                    onChange={handlePeriodChange}
-                  />
-                </FilterChipGroup>
+                <FilterBar
+                  values={filters}
+                  onChange={setFilters}
+                  options={{
+                    years: yearOptionsFrom(availableYears),
+                    months: monthOptionsFromRecorded(availableMonths),
+                    matchTypes: MATCH_TYPE_OPTIONS,
+                    tournaments: availableTournaments.map((tournament) => ({
+                      key: String(tournament.id),
+                      label: tournament.name,
+                    })),
+                  }}
+                />
               </div>
               <div>
                 <Tabs
