@@ -11,7 +11,13 @@ import {
 } from "@app/constants/gameRecord";
 import { createGameResult } from "@app/services/gameResultsService";
 
-export default function RecordGameButton() {
+interface RecordGameButtonProps {
+  label?: string;
+}
+
+export default function RecordGameButton({
+  label = "試合を記録する",
+}: RecordGameButtonProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -43,7 +49,7 @@ export default function RecordGameButton() {
         isDisabled={isSubmitting}
         className="font-bold text-base"
       >
-        試合を記録する
+        {label}
       </Button>
     </>
   );

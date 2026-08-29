@@ -40,6 +40,7 @@ import {
   updateTeam,
 } from "@app/services/teamsService";
 import { getUserData, updateProfile } from "@app/services/userService";
+import { trackProfileUpdated } from "@app/utils/analytics";
 
 type Position = {
   userId: string;
@@ -296,6 +297,7 @@ export default function ProfileEdit() {
     setErrors([]);
     try {
       await updateProfile(formData);
+      trackProfileUpdated();
       setSave(true);
       // ポジション保存
       await updateUserPositions({

@@ -3,13 +3,23 @@ import type { Notifications } from "@app/interface";
 import { Divider, Spinner } from "@heroui/react";
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
+import { toast } from "sonner";
 import NotificationFollowed from "@app/components/notification/NotificationFollowed";
 import NotificationFollowRequest from "@app/components/notification/NotificationFollowRequest";
 import NotificationGroup from "@app/components/notification/NotificationGroup";
 import NotificationManagementNotice from "@app/components/notification/NotificationManagementNotice";
+import NotificationRow from "@app/components/notification/NotificationRow";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { useNotifications } from "@app/hooks/notification/getNotifications";
-import { readNotification } from "@app/services/notificationsService";
+import {
+  deleteNotification,
+  readNotification,
+} from "@app/services/notificationsService";
+
+const withoutNotification = (
+  current: Notifications[] | undefined,
+  id: number,
+) => (current ?? []).filter((notice) => notice.id !== id);
 
 export default function NotificationItem() {
   const { notifications, isError, isLoading, mutate } = useNotifications();
@@ -53,17 +63,38 @@ export default function NotificationItem() {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      // 楽観的に行を消し、削除が失敗したら rollbackOnError で元の一覧に戻す
+      await mutate(
+        async (current: Notifications[] | undefined) => {
+          await deleteNotification(id);
+          return withoutNotification(current, id);
+        },
+        {
+          optimisticData: (current: Notifications[] | undefined) =>
+            withoutNotification(current, id),
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: true,
+        },
+      );
+    } catch (error) {
+      Sentry.captureException(error, {
+        tags: { source: "notification-item", action: "delete" },
+      });
+      toast.error("通知の削除に失敗しました");
+    }
+  };
+
   const renderNotification = (notice: Notifications) => {
     if (notice.event_type === "management_notice") {
       return (
         <NotificationManagementNotice notice={notice} onRead={() => mutate()} />
       );
     }
-    if (
-      notice.event_type === "group_invitation" &&
-      notice.group_invitation === "pending"
-    ) {
-      return <NotificationGroup notice={notice} />;
+    if (notice.event_type === "group_invitation") {
+      return <NotificationGroup notice={notice} onChanged={() => mutate()} />;
     }
     if (notice.event_type === "follow_request") {
       return <NotificationFollowRequest notice={notice} />;
@@ -86,7 +117,9 @@ export default function NotificationItem() {
             if (!content) return null;
             return (
               <div key={notice.id}>
-                {content}
+                <NotificationRow notice={notice} onDelete={handleDelete}>
+                  {content}
+                </NotificationRow>
                 <Divider className="mt-3" />
               </div>
             );

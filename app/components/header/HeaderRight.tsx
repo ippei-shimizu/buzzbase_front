@@ -9,12 +9,14 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import HeaderLoginAndSignUp from "@app/components/auth/HeaderLoginAndSignUp";
+import { BallIcon } from "@app/components/icon/BallIcon";
 import { CalendarIcon } from "@app/components/icon/CalendarIcon";
-import { MailIcon } from "@app/components/icon/MailIcon";
 import { MenuIcon } from "@app/components/icon/MenuIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
+import { SettingsIcon } from "@app/components/icon/SettingsIcon";
 import NotificationBadge from "@app/components/notification/NotificationBadge";
 import UserSearch from "@app/components/user/UserSearch";
+import { NOTE_LIST_PATH } from "@app/constants/note";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function HeaderRight() {
@@ -45,9 +47,19 @@ export default function HeaderRight() {
               </DropdownTrigger>
               <DropdownMenu aria-label="Header menu">
                 <DropdownItem
+                  key="practice-records"
+                  as={Link}
+                  href="/practice/records"
+                  startContent={
+                    <BallIcon fill="currentColor" width="18" height="18" />
+                  }
+                >
+                  練習記録
+                </DropdownItem>
+                <DropdownItem
                   key="note"
                   as={Link}
-                  href="/note"
+                  href={NOTE_LIST_PATH}
                   startContent={
                     <NoteIcon fill="currentColor" width="18" height="18" />
                   }
@@ -65,14 +77,14 @@ export default function HeaderRight() {
                   シーズン管理
                 </DropdownItem>
                 <DropdownItem
-                  key="contact"
+                  key="settings"
                   as={Link}
-                  href="/contact"
+                  href="/settings"
                   startContent={
-                    <MailIcon fill="currentColor" width="18" height="18" />
+                    <SettingsIcon fill="currentColor" width="18" height="18" />
                   }
                 >
-                  ご意見・改善案
+                  設定
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>

@@ -1,9 +1,16 @@
+// 日時表示のテストを実行環境のタイムゾーンに依存させないため、サービスの主要ユーザーの
+// タイムゾーンに固定する（worker はこの env を引き継いで起動する）
+process.env.TZ = "Asia/Tokyo";
+
 // 環境変数を先に設定（next.config.jsで必要）
 process.env.NEXT_PUBLIC_IMAGE_PROTOCOL = "http";
 process.env.NEXT_PUBLIC_IMAGE_HOSTNAME = "localhost";
 process.env.NEXT_PUBLIC_IMAGE_PORT = "3000";
 process.env.NEXT_PUBLIC_IMAGE_PATHNAME = "/**";
 process.env.NEXT_PUBLIC_BACKEND_URL = "http://localhost:3000";
+// Server Action を経由するコンポーネント（ProStatusProvider 等）を描画するテストは
+// app/constants/api.ts を読み込む。未設定だとモジュール評価時に throw する
+process.env.RAILS_API_URL = "http://localhost:3000";
 
 const nextJest = require("next/jest");
 

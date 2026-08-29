@@ -16,6 +16,24 @@ export interface DetailState {
   appearanceSituationId: number | null;
 }
 
+/**
+ * 任意項目である打席詳細が 1 つでも入力されているか。
+ * 詳細入力の利用率を計測するために使う（メモは空文字を未入力として扱う）。
+ */
+export const hasDetailInput = (detail: DetailState): boolean =>
+  detail.finalBalls !== null ||
+  detail.finalStrikes !== null ||
+  detail.finalOuts !== null ||
+  detail.firstPitchSwing !== null ||
+  detail.runnersState !== null ||
+  detail.inning !== null ||
+  detail.contactQualityId !== null ||
+  detail.timingId !== null ||
+  detail.pitchTypeId !== null ||
+  detail.pitcherId !== null ||
+  detail.appearanceSituationId !== null ||
+  (detail.selfAnalysisMemo !== null && detail.selfAnalysisMemo !== "");
+
 export const EMPTY_DETAIL: DetailState = {
   finalBalls: null,
   finalStrikes: null,
