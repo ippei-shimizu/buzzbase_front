@@ -22,6 +22,7 @@ import {
   updatePitchingResult,
 } from "@app/services/pitchingResultsService";
 import { getCurrentUserId } from "@app/services/userService";
+import { trackGameRecordStepViewed } from "@app/utils/analytics";
 
 const winOrLoss = [
   { id: -1, value: "-" },
@@ -129,6 +130,10 @@ export default function PitchingRecord() {
       console.error("Error fetching existing pitting result:", error);
     }
   };
+
+  useEffect(() => {
+    trackGameRecordStepViewed(3);
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

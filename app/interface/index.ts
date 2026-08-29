@@ -384,8 +384,9 @@ export interface Notifications {
   actor_name: string;
   event_type: string;
   event_id: number;
-  read_at: Date;
-  created_at: Date;
+  // API は ISO8601 文字列で返す。未読は null
+  read_at: string | null;
+  created_at: string;
   actor_icon: {
     url: string;
   };
@@ -432,6 +433,15 @@ export interface userData {
   is_private: boolean;
   followers_count: number | null;
   following_count: number | null;
+  incoming_follow_request_id: number | null;
+}
+
+export interface FollowRequestBannerProps {
+  followRequestId: number;
+  actorName: string;
+  onHandled: () => void;
+  onFailed: () => void;
+  setErrorsWithTimeout: (errors: string[]) => void;
 }
 
 export interface HeaderNoteSaveProps {
@@ -440,22 +450,9 @@ export interface HeaderNoteSaveProps {
   hasChanges: boolean;
 }
 
-export interface createNoteProps {
-  date: string;
-  title: string;
-  memo: string;
-}
-
 export interface NoteEditorProps {
   memo: string;
   setMemo: (memo: string) => void;
-}
-
-export interface getNoteProps {
-  id: number;
-  title: string;
-  date: string;
-  memo: string[];
 }
 
 export interface ResendConfirmationModalProps {

@@ -1,223 +1,85 @@
 "use client";
 
-import type { SeasonData } from "@app/interface";
+import type { FilterValues } from "@app/components/filter/filterTypes";
+import type {
+  BattingStats,
+  PitchingStats,
+  StatsFetchResult,
+} from "@app/interface/dashboardStats";
+import type { UserStatsFilterOptions } from "@app/services/v2/dashboardStatsService";
 import { Skeleton } from "@heroui/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import FilterChip from "@app/components/filter/FilterChip";
-import FilterChipGroup from "@app/components/filter/FilterChipGroup";
-import PeriodRangeFilter from "@app/components/filter/PeriodRangeFilter";
+import { useEffect, useState } from "react";
+import FilterBar from "@app/components/filter/FilterBar";
+import { LockIcon } from "@app/components/icon/LockIcon";
 import BattingAverageTable from "@app/components/table/BattingAverageTable";
 import PitchingRecordTable from "@app/components/table/PitchingRecordTable";
-import { usePersonalBattingAverage } from "@app/hooks/batting/getPersonalBattingAverage";
-import { usePersonalBattingStatus } from "@app/hooks/batting/getPersonalBattingStatus";
-import { usePersonalPitchingResult } from "@app/hooks/pitching/getPersonalPitchingResult";
-import { usePersonalPitchingResultStats } from "@app/hooks/pitching/getPersonalPitchingResultStats";
 import {
-  getAvailableMonths,
-  getMatchResultsUserId,
-} from "@app/services/matchResultsService";
-import { getSeasons } from "@app/services/seasonsService";
-import { getUserTournaments } from "@app/services/tournamentsService";
-import { monthOptionsFromRecorded } from "@app/utils/buildMonthOptions";
-import { formatRate, formatEra } from "@app/utils/formatStats";
+  getDashboardBattingStats,
+  getDashboardPitchingStats,
+  getUserStatsFilterOptions,
+} from "@app/services/v2/dashboardStatsService";
+import { formatEra, formatRate } from "@app/utils/formatStats";
 
-type UserId = {
+interface IndividualResultsListProps {
   userId: number;
+}
+
+const EMPTY_FILTER_OPTIONS: UserStatsFilterOptions = {
+  years: [],
+  matchTypes: [],
+  seasons: [],
 };
 
-type AvailableYear = number | string;
-type AvailableMatchType = string;
+/**
+ * マイページ成績タブ。v2 ダッシュボード成績 API から打撃・投手成績を取得して表示する。
+ *
+ * マイページは Client Component ツリー（認証コンテキスト + タブ切替）配下にあり
+ * Server Component から初期データを渡せないため、Server Actions を effect から呼ぶ。
+ */
+export default function IndividualResultsList({
+  userId,
+}: IndividualResultsListProps) {
+  const [filters, setFilters] = useState<FilterValues>({});
+  const [filterOptions, setFilterOptions] =
+    useState<UserStatsFilterOptions>(EMPTY_FILTER_OPTIONS);
+  const [batting, setBatting] = useState<StatsFetchResult<BattingStats> | null>(
+    null,
+  );
+  const [pitching, setPitching] =
+    useState<StatsFetchResult<PitchingStats> | null>(null);
 
-export default function IndividualResultsList(props: UserId) {
-  const { userId } = props;
-  const [selectedYear, setSelectedYear] = useState("通算");
-  const [yearOptions, setYearOptions] = useState<
-    { key: string; label: string }[]
-  >([{ key: "通算", label: "通算" }]);
-  const [selectedMatchType, setSelectedMatchType] = useState("全て");
-  const [matchTypeOptions, setMatchTypeOptions] = useState<
-    { key: string; label: string }[]
-  >([{ key: "全て", label: "全て" }]);
-  const [selectedSeason, setSelectedSeason] = useState("全て");
-  const [seasonsData, setSeasonsData] = useState<SeasonData[]>([]);
-  const [seasonOptions, setSeasonOptions] = useState<
-    { key: string; label: string }[]
-  >([{ key: "全て", label: "全て" }]);
-  const [selectedTournament, setSelectedTournament] = useState("全て");
-  const [tournamentOptions, setTournamentOptions] = useState<
-    { key: string; label: string }[]
-  >([{ key: "全て", label: "全て" }]);
-  const [startMonth, setStartMonth] = useState<string | undefined>(undefined);
-  const [endMonth, setEndMonth] = useState<string | undefined>(undefined);
-  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
-
-  // シーズンデータ取得
   useEffect(() => {
-    const fetchSeasons = async () => {
-      try {
-        const seasonsList = await getSeasons(userId);
-        setSeasonsData(seasonsList);
-        const opts = [
-          { key: "全て", label: "全て" },
-          ...seasonsList.map((s: SeasonData) => ({
-            key: s.name,
-            label: s.name,
-          })),
-        ];
-        setSeasonOptions(opts);
-      } catch (error) {
-        console.error("Failed to fetch seasons:", error);
-      }
+    let active = true;
+    void getUserStatsFilterOptions(userId).then((options) => {
+      if (active) setFilterOptions(options);
+    });
+    return () => {
+      active = false;
     };
-    fetchSeasons();
   }, [userId]);
 
-  // 年度・試合タイプ一覧取得
   useEffect(() => {
-    const fetchMeta = async () => {
-      try {
-        // 試合一覧と記録月は互いに独立なので並列取得して初回のフィルタ確定を早める。
-        const [matchResultData, months] = await Promise.all([
-          getMatchResultsUserId(userId),
-          getAvailableMonths(userId),
-        ]);
-        // 年度抽出
-        const yearArray: AvailableYear[] = matchResultData.map(
-          (result: { date_and_time: string }) =>
-            new Date(result.date_and_time).getFullYear(),
-        );
-        const uniqueYears = Array.from(new Set(yearArray));
-        const yOpts = [
-          { key: "通算", label: "通算" },
-          ...uniqueYears.map((y) => ({ key: String(y), label: String(y) })),
-        ];
-        setYearOptions(yOpts);
-        // 試合タイプ抽出（keyにAPI値、labelに日本語）
-        const matchTypeData: AvailableMatchType[] = matchResultData.map(
-          (type: { match_type: string }) => type.match_type,
-        );
-        const uniqueMatchTypes = Array.from(new Set(matchTypeData));
-        const matchTypeLabels: Record<string, string> = {
-          regular: "公式戦",
-          open: "オープン戦",
-        };
-        const mtOpts = [
-          { key: "全て", label: "全て" },
-          ...uniqueMatchTypes.map((t) => ({
-            key: t,
-            label: matchTypeLabels[t] ?? t,
-          })),
-        ];
-        setMatchTypeOptions(mtOpts);
-        // 期間フィルタは記録のある年月だけを候補にする
-        setAvailableMonths(months);
-      } catch (error) {
-        console.error("Failed to fetch meta:", error);
-      }
+    let active = true;
+    // 絞り込みを変えた直後に古い成績を残さないよう、取得中は未確定状態に戻す。
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBatting(null);
+    setPitching(null);
+    // 打撃と投手は互いに独立しているため並列で取得する。
+    void Promise.all([
+      getDashboardBattingStats(userId, filters),
+      getDashboardPitchingStats(userId, filters),
+    ]).then(([battingResult, pitchingResult]) => {
+      if (!active) return;
+      setBatting(battingResult);
+      setPitching(pitchingResult);
+    });
+    return () => {
+      active = false;
     };
-    fetchMeta();
-  }, [userId]);
+  }, [userId, filters]);
 
-  // 大会候補は記録した大会のみ・他ユーザーページのため userId 指定で取得する。
-  useEffect(() => {
-    const fetchTournaments = async () => {
-      const list = await getUserTournaments(userId);
-      // 大会名は年ごとに重複しうるため id をキーにする（name だと衝突・取りこぼし）。
-      setTournamentOptions([
-        { key: "全て", label: "全て" },
-        ...list.map((tournament) => ({
-          key: String(tournament.id),
-          label: tournament.name,
-        })),
-      ]);
-    };
-    fetchTournaments();
-  }, [userId]);
-
-  const seasonId = useMemo(() => {
-    return selectedSeason !== "全て"
-      ? seasonsData.find((s) => s.name === selectedSeason)?.id
-      : undefined;
-  }, [selectedSeason, seasonsData]);
-
-  const tournamentId = useMemo(() => {
-    return selectedTournament !== "全て"
-      ? Number(selectedTournament)
-      : undefined;
-  }, [selectedTournament]);
-
-  const monthOptions = useMemo(
-    () => monthOptionsFromRecorded(availableMonths),
-    [availableMonths],
-  );
-
-  // 年度と期間は排他: 実年を選んだら期間をクリアする（通算選択時は据え置き）
-  const handleYearChange = (value: string) => {
-    setSelectedYear(value);
-    if (value !== "通算") {
-      setStartMonth(undefined);
-      setEndMonth(undefined);
-    }
-  };
-  // 期間を設定したら年度を通算へ戻す（両端クリア時は年度を据え置く）
-  const handlePeriodChange = (range: {
-    startMonth?: string;
-    endMonth?: string;
-  }) => {
-    setStartMonth(range.startMonth);
-    setEndMonth(range.endMonth);
-    if (range.startMonth || range.endMonth) {
-      setSelectedYear("通算");
-    }
-  };
-
-  // API送信用の値
-  const yearParam = selectedYear !== "通算" ? selectedYear : undefined;
-  const matchTypeParam =
-    selectedMatchType !== "全て" ? selectedMatchType : undefined;
-
-  const { personalBattingAverages, isLoadingBA } = usePersonalBattingAverage(
-    userId,
-    seasonId,
-    yearParam,
-    matchTypeParam,
-    startMonth,
-    endMonth,
-    tournamentId,
-  );
-  const { personalBattingStatus, isLoadingBS } = usePersonalBattingStatus(
-    userId,
-    seasonId,
-    yearParam,
-    matchTypeParam,
-    startMonth,
-    endMonth,
-    tournamentId,
-  );
-  const { personalPitchingResults, isLoadingPR } = usePersonalPitchingResult(
-    userId,
-    seasonId,
-    yearParam,
-    matchTypeParam,
-    startMonth,
-    endMonth,
-    tournamentId,
-  );
-  const { personalPitchingStatus, isLoadingPS } =
-    usePersonalPitchingResultStats(
-      userId,
-      seasonId,
-      yearParam,
-      matchTypeParam,
-      startMonth,
-      endMonth,
-      tournamentId,
-    );
-
-  const isLoading = isLoadingBA || isLoadingBS || isLoadingPR || isLoadingPS;
-
-  if (isLoading) {
+  if (!batting || !pitching) {
     return (
       <div className="my-6">
         <Skeleton className="rounded-lg">
@@ -227,117 +89,130 @@ export default function IndividualResultsList(props: UserId) {
     );
   }
 
-  return (
-    <>
+  const isForbidden =
+    batting.status === "forbidden" || pitching.status === "forbidden";
+
+  if (isForbidden) {
+    return (
       <div className="bg-bg_sub p-4 rounded-xl lg:p-6">
-        <div className="mb-5 overflow-hidden">
-          <FilterChipGroup wrap>
-            <FilterChip
-              label="年度"
-              value={selectedYear}
-              defaultValue="通算"
-              options={yearOptions}
-              onChange={handleYearChange}
-            />
-            <FilterChip
-              label="種別"
-              value={selectedMatchType}
-              defaultValue="全て"
-              options={matchTypeOptions}
-              onChange={setSelectedMatchType}
-            />
-            <FilterChip
-              label="シーズン"
-              value={selectedSeason}
-              defaultValue="全て"
-              options={seasonOptions}
-              onChange={setSelectedSeason}
-            />
-            {tournamentOptions.length > 1 && (
-              <FilterChip
-                label="大会"
-                value={selectedTournament}
-                defaultValue="全て"
-                options={tournamentOptions}
-                onChange={setSelectedTournament}
-              />
-            )}
-            <PeriodRangeFilter
-              startMonth={startMonth}
-              endMonth={endMonth}
-              monthOptions={monthOptions}
-              onChange={handlePeriodChange}
-            />
-          </FilterChipGroup>
+        <div className="flex flex-col items-center gap-y-3 py-10">
+          <LockIcon fill="#a1a1aa" width="40" height="40" />
+          <p className="text-sm text-zinc-400 text-center">
+            このアカウントは非公開です
+          </p>
         </div>
-        <h2 className="text-sm text-zinc-400">打撃成績</h2>
-        {personalBattingAverages?.[0] &&
-          personalBattingStatus &&
-          (() => {
-            const ba = personalBattingAverages[0];
-            return (
-              <div className="mb-2 py-2">
-                <p>
-                  <span className="text-sm text-zinc-200">打率</span>
-                  <span
-                    className="text-xl font-bold ml-1"
-                    style={{ color: "#d08000" }}
-                  >
-                    {formatRate(personalBattingStatus.batting_average)}
-                  </span>
-                  <span className="text-sm text-zinc-200 ml-3">
-                    {ba.number_of_matches}試合
-                  </span>
-                </p>
-                <p className="text-sm text-zinc-300 mt-0.5">
-                  {ba.times_at_bat}打席 {ba.at_bats}打数{" "}
-                  {personalBattingStatus.total_hits}安打 / {ba.runs_batted_in}
-                  打点 {ba.home_run}本塁打
-                </p>
-              </div>
-            );
-          })()}
-        <BattingAverageTable
-          personalBattingAverages={personalBattingAverages}
-          personalBattingStatus={personalBattingStatus}
-        />
-        <h2 className="text-sm text-zinc-400 mt-8">投手成績</h2>
-        {personalPitchingResults?.[0] &&
-          personalPitchingStatus &&
-          (() => {
-            const pr = personalPitchingResults[0];
-            return (
-              <div className="mb-2 py-2">
-                <p>
-                  <span className="text-sm text-zinc-200">防御率</span>
-                  <span
-                    className="text-xl font-bold ml-1"
-                    style={{ color: "#338EF7" }}
-                  >
-                    {formatEra(personalPitchingStatus.era)}
-                  </span>
-                  <span className="text-sm text-zinc-200 ml-3">
-                    {pr.number_of_appearances}登板
-                  </span>
-                </p>
-                <p className="text-sm text-zinc-300 mt-0.5">
-                  {pr.innings_pitched}回 {pr.win}勝{pr.loss}敗 / {pr.strikeouts}
-                  奪三振
-                </p>
-              </div>
-            );
-          })()}
-        <PitchingRecordTable
-          personalPitchingResults={personalPitchingResults}
-          personalPitchingStatus={personalPitchingStatus}
-        />
-        <Link
-          href="/calculation-of-grades"
-          className="text-xs font-normal border-b mt-4 ml-auto mr-0 block w-fit"
-        >
-          成績の算出方法について
-        </Link>
       </div>
-    </>
+    );
+  }
+
+  const hasError = batting.status === "error" || pitching.status === "error";
+  const battingStats = batting.status === "ok" ? batting.data : null;
+  const pitchingStats = pitching.status === "ok" ? pitching.data : null;
+  const battingAggregate = battingStats?.aggregate ?? null;
+  const battingCalculated = battingStats?.calculated ?? null;
+  const pitchingAggregate = pitchingStats?.aggregate ?? null;
+  const pitchingCalculated = pitchingStats?.calculated ?? null;
+  const hasBatting = Boolean(battingAggregate || battingCalculated);
+  const hasPitching = Boolean(pitchingAggregate || pitchingCalculated);
+
+  return (
+    <div className="bg-bg_sub p-4 rounded-xl lg:p-6">
+      <div className="mb-5 overflow-hidden">
+        <FilterBar
+          values={filters}
+          onChange={setFilters}
+          options={{
+            years: filterOptions.years,
+            matchTypes: filterOptions.matchTypes,
+            seasons: filterOptions.seasons,
+          }}
+        />
+      </div>
+
+      {hasError ? (
+        <p className="py-10 text-sm text-zinc-400 text-center">
+          成績の取得に失敗しました。時間をおいて再度お試しください。
+        </p>
+      ) : hasBatting || hasPitching ? (
+        <>
+          {hasBatting ? (
+            <section>
+              <h2 className="text-sm text-zinc-400">打撃成績</h2>
+              {battingAggregate && battingCalculated ? (
+                <div className="mb-2 py-2">
+                  <p>
+                    <span className="text-sm text-zinc-200">打率</span>
+                    <span
+                      className="text-xl font-bold ml-1"
+                      style={{ color: "#d08000" }}
+                    >
+                      {formatRate(battingCalculated.batting_average)}
+                    </span>
+                    <span className="text-sm text-zinc-200 ml-3">
+                      {battingAggregate.number_of_matches}試合
+                    </span>
+                  </p>
+                  <p className="text-sm text-zinc-300 mt-0.5">
+                    {battingAggregate.times_at_bat}打席{" "}
+                    {battingAggregate.at_bats}打数 {battingAggregate.hit}安打 /{" "}
+                    {battingAggregate.runs_batted_in}打点{" "}
+                    {battingAggregate.home_run}本塁打
+                  </p>
+                </div>
+              ) : null}
+              <BattingAverageTable
+                aggregate={battingAggregate}
+                calculated={battingCalculated}
+              />
+            </section>
+          ) : null}
+
+          {hasPitching ? (
+            <section className={hasBatting ? "mt-8" : undefined}>
+              <h2 className="text-sm text-zinc-400">投手成績</h2>
+              {pitchingAggregate && pitchingCalculated ? (
+                <div className="mb-2 py-2">
+                  <p>
+                    <span className="text-sm text-zinc-200">防御率</span>
+                    <span
+                      className="text-xl font-bold ml-1"
+                      style={{ color: "#338EF7" }}
+                    >
+                      {formatEra(pitchingCalculated.era)}
+                    </span>
+                    <span className="text-sm text-zinc-200 ml-3">
+                      {pitchingAggregate.number_of_appearances}登板
+                    </span>
+                  </p>
+                  <p className="text-sm text-zinc-300 mt-0.5">
+                    {pitchingAggregate.win}勝 {pitchingAggregate.loss}敗 /{" "}
+                    {pitchingAggregate.innings_pitched}回{" "}
+                    {pitchingAggregate.strikeouts}奪三振
+                  </p>
+                </div>
+              ) : null}
+              <PitchingRecordTable
+                aggregate={pitchingAggregate}
+                calculated={pitchingCalculated}
+              />
+            </section>
+          ) : null}
+        </>
+      ) : (
+        <div className="flex flex-col items-center gap-y-2 py-10">
+          <p className="text-sm text-zinc-300">成績データがありません</p>
+          <p className="text-xs text-zinc-400 text-center">
+            試合結果を記録すると、ここに成績が表示されます
+          </p>
+        </div>
+      )}
+
+      <Link
+        href="/calculation-of-grades"
+        className="text-xs font-normal border-b mt-4 ml-auto mr-0 block w-fit"
+      >
+        成績の算出方法について
+      </Link>
+    </div>
   );
 }

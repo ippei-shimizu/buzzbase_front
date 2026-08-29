@@ -1,177 +1,78 @@
-"use client";
-import { Input, Skeleton } from "@heroui/react";
-import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, use } from "react";
-import { mutate } from "swr";
-import ErrorMessages from "@app/components/auth/ErrorMessages";
-import HeaderNote from "@app/components/header/HeaderNote";
-import NoteMenu from "@app/components/note/NoteMenu";
-import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import useRequireAuth from "@app/hooks/auth/useRequireAuth";
-import showBaseballNote from "@app/hooks/note/showBaseballNote";
-import { updateBaseballNote } from "@app/services/baseballNoteService";
+import type { GameResultLinkOption } from "@app/types/gameResultLink";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getBaseballNote } from "@app/services/v2/baseballNoteService";
+import { getGameResultOption } from "@app/services/v2/gameResultLinkService";
+import { getImprovementThemes } from "@app/services/v2/improvementThemeService";
+import { getPracticeMenus } from "@app/services/v2/practiceMenuService";
+import { getPracticeSession } from "@app/services/v2/practiceSessionService";
+import NoteDetail from "./_components/NoteDetail";
 
-const NoteEditor = dynamic(() => import("@app/components/note/NoteEditor"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full min-h-[400px] bg-zinc-800 rounded-lg animate-pulse" />
-  ),
-});
+/**
+ * 紐付け済みの試合記録を表示用に取得する。
+ * 取得できなかった分は落とすだけにして、ノート本体の表示は止めない
+ * （紐付け自体は `game_result_ids` に残っており、表示側で ID のまま扱える）。
+ */
+async function fetchLinkedGameResults(
+  ids: number[],
+): Promise<GameResultLinkOption[]> {
+  const results = await Promise.all(ids.map((id) => getGameResultOption(id)));
+  return results.flatMap((result) =>
+    result.status === "ok" ? [result.data] : [],
+  );
+}
 
-export default function NoteDetail(props: {
+function NoteLoadError({ message }: { message: string }) {
+  return (
+    <div className="buzz-dark flex justify-center items-center w-full min-h-screen bg-main">
+      <p className="text-sm text-zinc-400 text-center">{message}</p>
+    </div>
+  );
+}
+
+export default async function NoteDetailPage(props: {
   params: Promise<{ slulg: string }>;
 }) {
-  const params = use(props.params);
-  const noteId = Number(params.slulg);
-  const [date, setDate] = useState("");
-  const [title, setTitle] = useState("");
-  const [memo, setMemo] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const router = useRouter();
-  useRequireAuth();
-  const { note, isLoading, isError } = showBaseballNote(noteId);
-
-  const initialValues = useMemo(
-    () => ({
-      date: note?.date ?? "",
-      title: note?.title ?? "",
-      memo: note?.memo ?? "",
-    }),
-    [note],
-  );
-
-  useEffect(() => {
-    if (note) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDate(note.date);
-      setTitle(note.title);
-      setMemo(note.memo);
-    }
-  }, [note]);
-
-  if (isError) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-sm text-zinc-400 text-center">
-          野球ノートの読み込みに失敗しました。
-        </p>
-      </div>
-    );
+  const { slulg } = await props.params;
+  const cookieStore = await cookies();
+  if (!cookieStore.get("access-token")) {
+    redirect("/signup?auth_required=true");
   }
 
-  const hasChanges =
-    date !== initialValues.date ||
-    title !== initialValues.title ||
-    memo !== initialValues.memo;
+  const noteId = Number(slulg);
+  if (!Number.isInteger(noteId) || noteId <= 0) {
+    return <NoteLoadError message="野球ノートが見つかりません。" />;
+  }
 
-  const setErrorsWithTimeout = (newErrors: React.SetStateAction<string[]>) => {
-    setErrors(newErrors);
-    setTimeout(() => {
-      setErrors([]);
-    }, 2000);
-  };
+  // 互いに依存しない取得なので並列で待つ。
+  const [result, themesResult] = await Promise.all([
+    getBaseballNote(noteId),
+    getImprovementThemes(),
+  ]);
+  if (result.status === "forbidden") {
+    return <NoteLoadError message="このノートを表示する権限がありません。" />;
+  }
+  if (result.status === "error") {
+    return <NoteLoadError message="野球ノートの読み込みに失敗しました。" />;
+  }
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDate(e.target.value);
-  };
+  // 紐付け先はノートを取得しないと分からないため、ここだけ直列になる。
+  const practiceSessionId = result.data.practice_session_id;
+  const [linkedGameResults, sessionResult, menusResult] = await Promise.all([
+    fetchLinkedGameResults(result.data.game_result_ids),
+    practiceSessionId === null ? null : getPracticeSession(practiceSessionId),
+    practiceSessionId === null ? null : getPracticeMenus(),
+  ]);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  };
-
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    if (!hasChanges) {
-      router.push("/note");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await updateBaseballNote(noteId, { date, title, memo });
-      mutate(`/api/v1/baseball_notes/${noteId}`);
-      router.push("/note");
-    } catch {
-      setErrorsWithTimeout(["更新中にエラーが発生しました"]);
-      setIsSubmitting(false);
-    }
-  };
   return (
-    <>
-      <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
-        <HeaderNote
-          onNoteSave={() => handleSubmit({ preventDefault: () => {} })}
-          isSubmitting={isSubmitting}
-          hasChanges={hasChanges}
-        />
-        {isSubmitting && <LoadingSpinner />}
-        <main className="h-full w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
-          <div className="pb-32 relative lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
-            <ErrorMessages errors={errors} />
-            <div className="pt-14 px-4 lg:px-6 lg:pb-14">
-              <form>
-                <div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      {isLoading ? (
-                        <>
-                          <Skeleton className="w-28 rounded-lg mt-4">
-                            <div className="h-8 w-28 rounded-lg bg-default-200"></div>
-                          </Skeleton>
-                        </>
-                      ) : (
-                        <>
-                          <Input
-                            isRequired
-                            type="date"
-                            size="sm"
-                            variant="underlined"
-                            className="w-28 [&>div&>div]:p-0"
-                            value={date}
-                            onChange={handleDateChange}
-                          />
-                        </>
-                      )}
-                    </div>
-                    <NoteMenu noteId={noteId} />
-                  </div>
-                  <div>
-                    {isLoading ? (
-                      <>
-                        <Skeleton className="w-full rounded-lg mt-5">
-                          <div className="h-8 w-full rounded-lg bg-default-200 mt-2"></div>
-                        </Skeleton>
-                      </>
-                    ) : (
-                      <>
-                        <Input
-                          type="text"
-                          size="lg"
-                          variant="underlined"
-                          className="w-full [&>div]:pt-0.5 [&>div]:h-12 font-bold"
-                          placeholder="タイトル"
-                          value={title}
-                          onChange={handleTitleChange}
-                        />
-                      </>
-                    )}
-                  </div>
-                  <div className="mt-10 w-full h-full">
-                    {isLoading ? (
-                      <Skeleton className="w-full rounded-lg h-full min-h-[620px]">
-                        <div className="h-full w-full rounded-lg bg-default-200"></div>
-                      </Skeleton>
-                    ) : (
-                      <NoteEditor memo={note.memo} setMemo={setMemo} />
-                    )}
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </main>
-      </div>
-    </>
+    <NoteDetail
+      note={result.data}
+      themesResult={themesResult}
+      linkedGameResults={linkedGameResults}
+      practiceSession={
+        sessionResult?.status === "ok" ? sessionResult.data : null
+      }
+      practiceMenus={menusResult?.status === "ok" ? menusResult.data : []}
+    />
   );
 }

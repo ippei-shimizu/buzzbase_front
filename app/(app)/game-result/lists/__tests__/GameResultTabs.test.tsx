@@ -39,6 +39,24 @@ describe("GameResultTabs", () => {
     expect(screen.getByText("試合結果を記録する")).toBeInTheDocument();
   });
 
+  it("シーズン管理画面への導線が表示される", () => {
+    render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
+
+    const link = screen.getByRole("link", { name: /シーズンを管理/ });
+    expect(link).toHaveAttribute("href", "/seasons");
+  });
+
+  it("一覧タブに切り替えてもシーズン管理への導線は残る", async () => {
+    const user = userEvent.setup();
+    render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
+
+    await user.click(screen.getByText("一覧"));
+
+    expect(
+      screen.getByRole("link", { name: /シーズンを管理/ }),
+    ).toHaveAttribute("href", "/seasons");
+  });
+
   it("初期表示はサマリータブ", () => {
     render(<GameResultTabs userId={1} adSlot="slot" adLayoutKey="key" />);
 

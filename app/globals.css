@@ -2,15 +2,34 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+/* 上部固定要素の重なりを避けるための不変条件。
+   S = スマートアプリバナーの高さ、P = Pro バナーの高さ とすると、
+   全ページで次の関係が成り立っていなければならない。
+
+     SmartAppBanner   : top 0     / 高さ S
+     ProStatusBanners : top S     / 高さ P
+     固定ヘッダー     : top S + P
+     body             : padding-top S + P
+
+   各バナーは自身の実測高さを下の変数へ書き込み、非表示時は 0px に戻す。
+   固定ヘッダーと body が同じ合計値（--top-banner-offset）を参照することで、
+   片方だけがずれて本文やヘッダーがバナーの下に潜る状態を作らない。
+   この対応関係は CSS の合成結果でしか成立せず、Jest では検証できない。 */
 html {
-  --smart-banner-height: 0px;
+  /* 画面上部に固定表示するバナーが、自身の実測高さを書き込む */
+  --smart-app-banner-height: 0px;
+  --pro-banner-height: 0px;
+  /* 固定ヘッダーの top と本文の padding-top が参照する、上部固定バナーの合計高さ */
+  --top-banner-offset: calc(
+    var(--smart-app-banner-height) + var(--pro-banner-height)
+  );
   background-color: #2e2e2e !important;
 }
 
 body {
   font-weight: 400;
   color: #f4f4f4;
-  padding-top: var(--smart-banner-height, 0px);
+  padding-top: var(--top-banner-offset, 0px);
   --mantine-color-text: #f4f4f4;
   --mantine-color-body: #f4f4f4;
 }
@@ -47,7 +66,53 @@ label {
   border-bottom: 2px solid #52525b;
 }
 
+/* HeroUI bordered variant の線幅復元（ダークテーマ）
+   underlined と同じく border-medium が Tailwind v4 で解決されず線幅が 0 になる。 */
+.buzz-dark [data-slot="input-wrapper"][class*="border-medium"],
+.buzz-dark [data-slot="trigger"][class*="border-medium"] {
+  border-width: 2px;
+}
+
+/* 既定色 default-200 は背景 #2E2E2E とほぼ同色で見えないため引き上げる。
+   呼び出し側が色を指定した場合は border-default-200 ごと差し替わるので、ここには入らない。 */
+.buzz-dark [data-slot="input-wrapper"][class*="border-default-200"],
+.buzz-dark [data-slot="trigger"][class*="border-default-200"] {
+  border-color: #52525b;
+}
+
+/* 上の指定でフォーカス時の色変化まで潰れるため、フォーカス表示を明示的に戻す */
+.buzz-dark
+  .group[data-focus="true"]
+  [data-slot="input-wrapper"][class*="border-default-200"],
+.buzz-dark
+  .group[data-focus="true"]
+  [data-slot="trigger"][class*="border-default-200"] {
+  border-color: #d08000;
+}
+
 /* flex-col min-h-screen コンテナ内のコンテンツが画面いっぱいに伸びるように */
 .flex.flex-col.min-h-screen > .bg-main {
   flex-grow: 1;
+}
+
+/* 素振りカウンター完了画面の達成演出。
+   Tailwind v4 の @theme で --animate-* を定義すると animate-swing-pop が使える。
+   prefers-reduced-motion 環境では motion-safe: 修飾子側で外れる。 */
+@theme {
+  --animate-swing-pop: swing-pop 520ms cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+@keyframes swing-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
