@@ -3,11 +3,13 @@
 import type { FetchResult } from "@app/services/v2/requests";
 import type { PeriodicReview } from "@app/types/periodicReview";
 import { useEffect, useRef } from "react";
+import MonthPaginator from "@app/components/filter/MonthPaginator";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { useMonthPager } from "@app/hooks/records/useMonthPager";
 import { markPeriodicReviewRead } from "@app/services/v2/periodicReviewService";
-import { unreadReviewIds } from "../_utils/periodicReviewFormat";
+import { reviewDate, unreadReviewIds } from "../_utils/periodicReviewFormat";
 import PeriodicReviewCard from "./PeriodicReviewCard";
 import {
   LOAD_ERROR_MESSAGE,
@@ -45,6 +47,12 @@ export default function PeriodicReviewList({
 }: PeriodicReviewListProps) {
   const { hasEntitlement, isLoading } = useEntitlement();
   const canViewReviews = hasEntitlement(FEATURE);
+  // 全期間を縦に並べると期間が増えるほど目的のレポートに辿り着けないため、
+  // 野球ノート一覧と同じくレポートがある月だけを1ページずつ送る。
+  const pager = useMonthPager(
+    result.status === "ok" ? result.data : [],
+    reviewDate,
+  );
   // 既読化を送った id。再レンダリングのたびに PATCH を打ち直さないための記録で、
   // 成否は問わない（失敗しても再送しない代わりに、一覧の閲覧は一切妨げない）。
   const requestedIdsRef = useRef<Set<number>>(new Set());
@@ -98,7 +106,16 @@ export default function PeriodicReviewList({
 
   return (
     <div className="flex flex-col gap-4">
-      {result.data.map((review) => (
+      {pager.month ? (
+        <MonthPaginator
+          month={pager.month}
+          count={pager.items.length}
+          index={pager.index}
+          total={pager.months.length}
+          onChange={pager.goTo}
+        />
+      ) : null}
+      {pager.items.map((review) => (
         <PeriodicReviewCard key={review.id} review={review} />
       ))}
     </div>

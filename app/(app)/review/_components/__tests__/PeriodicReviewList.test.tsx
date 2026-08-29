@@ -26,6 +26,7 @@ jest.mock("@app/services/v2/periodicReviewService", () => ({
 import type { FetchResult } from "@app/services/v2/requests";
 import type { PeriodicReview } from "@app/types/periodicReview";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { markPeriodicReviewRead } from "@app/services/v2/periodicReviewService";
 import PeriodicReviewList from "../PeriodicReviewList";
 
@@ -79,7 +80,7 @@ describe("PeriodicReviewList", () => {
         screen.getAllByRole("button", { name: new RegExp(UPSELL_CTA) }).length,
       ).toBeGreaterThan(0);
       // サンプルは3週分。実データと取り違えないよう未生成の案内は出さない。
-      expect(screen.getAllByText("今週の振り返り")).toHaveLength(3);
+      expect(screen.getAllByText(/の振り返り$/)).toHaveLength(3);
       expect(screen.queryByText(NOT_GENERATED)).not.toBeInTheDocument();
     });
 
@@ -128,6 +129,59 @@ describe("PeriodicReviewList", () => {
 
     expect(screen.getByText("99日")).toBeInTheDocument();
     expect(screen.queryByText(SAMPLE_LABEL)).not.toBeInTheDocument();
+  });
+
+  describe("月別ページャ", () => {
+    it("最新月のレポートだけを表示し、月見出しに件数を出す", () => {
+      render(
+        <PeriodicReviewList
+          result={okResult([
+            buildReview({
+              id: 1,
+              period_start: "2026-07-13",
+              period_end: "2026-07-19",
+            }),
+            buildReview({
+              id: 2,
+              period_start: "2026-06-01",
+              period_end: "2026-06-30",
+              period_type: "monthly",
+            }),
+          ])}
+        />,
+      );
+
+      expect(screen.getByText("2026年7月（1件）")).toBeInTheDocument();
+      expect(screen.getByText("7月 第2週の振り返り")).toBeInTheDocument();
+      expect(screen.queryByText("2026年6月の振り返り")).not.toBeInTheDocument();
+    });
+
+    it("前の月へ送ると過去のレポートを表示する", async () => {
+      const user = userEvent.setup();
+      render(
+        <PeriodicReviewList
+          result={okResult([
+            buildReview({
+              id: 1,
+              period_start: "2026-07-13",
+              period_end: "2026-07-19",
+            }),
+            buildReview({
+              id: 2,
+              period_start: "2026-06-01",
+              period_end: "2026-06-30",
+              period_type: "monthly",
+            }),
+          ])}
+        />,
+      );
+
+      await user.click(screen.getByRole("button", { name: "前の月" }));
+
+      expect(screen.getByText("2026年6月（1件）")).toBeInTheDocument();
+      expect(screen.getByText("2026年6月の振り返り")).toBeInTheDocument();
+      expect(screen.queryByText("7月 第2週の振り返り")).not.toBeInTheDocument();
+    });
   });
 
   it("取得失敗は 0 件と区別してエラー文言を出す", () => {

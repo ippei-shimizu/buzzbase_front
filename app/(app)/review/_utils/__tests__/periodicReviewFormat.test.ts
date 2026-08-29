@@ -4,6 +4,7 @@ import {
   formatDelta,
   formatFixed,
   formatRatio,
+  periodicReviewTitle,
   unreadReviewIds,
 } from "../periodicReviewFormat";
 
@@ -64,6 +65,47 @@ describe("formatCount", () => {
 
   it("欠損は単位を付けず - を返す", () => {
     expect(formatCount(undefined, "日")).toBe("-");
+  });
+});
+
+describe("periodicReviewTitle", () => {
+  it("週次は開始日が属する月の何週目かを見出しにする", () => {
+    expect(
+      periodicReviewTitle({
+        period_type: "weekly",
+        period_start: "2026-07-06",
+      }),
+    ).toBe("7月 第1週の振り返り");
+    expect(
+      periodicReviewTitle({
+        period_type: "weekly",
+        period_start: "2026-07-13",
+      }),
+    ).toBe("7月 第2週の振り返り");
+    expect(
+      periodicReviewTitle({
+        period_type: "weekly",
+        period_start: "2026-07-29",
+      }),
+    ).toBe("7月 第5週の振り返り");
+  });
+
+  it("月をまたぐ週は開始日（月曜）の月に帰属させる", () => {
+    expect(
+      periodicReviewTitle({
+        period_type: "weekly",
+        period_start: "2026-06-29",
+      }),
+    ).toBe("6月 第5週の振り返り");
+  });
+
+  it("月次は年月を見出しにする", () => {
+    expect(
+      periodicReviewTitle({
+        period_type: "monthly",
+        period_start: "2026-07-01",
+      }),
+    ).toBe("2026年7月の振り返り");
   });
 });
 
