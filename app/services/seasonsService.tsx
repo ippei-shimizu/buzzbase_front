@@ -24,7 +24,7 @@ export const createSeason = async (name: string) => {
 
 export const updateSeason = async (id: number, name: string) => {
   try {
-    const response = await axiosInstance.put(`/api/v1/seasons/${id}`, {
+    const response = await axiosInstance.patch(`/api/v1/seasons/${id}`, {
       season: { name },
     });
     return response.data as SeasonData;

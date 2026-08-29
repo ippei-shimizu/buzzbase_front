@@ -51,9 +51,11 @@ import {
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
 import { createStadium, searchStadiums } from "@app/services/v2/stadiumService";
+import { trackGameRecordStepViewed } from "@app/utils/analytics";
 import { upsertById } from "@app/utils/upsertById";
 import PatternSelector from "./_components/PatternSelector";
 import ScoreStepper from "./_components/ScoreStepper";
+import SeasonField from "./_components/SeasonField";
 
 // 打順の選択肢。代打・代走・途中出場・未出場のケースで「なし」を選べるよう先頭に追加。
 // 「なし」は id=""（空文字）として、state（matchBattingOrder）と Select の selectedKeys を一致させる。
@@ -97,7 +99,8 @@ export default function GameRecord() {
   const [userData, setUserData] = useState<userData | null>(null);
   const [existingGameDate, setExistingGameDate] = useState<string>("");
   const [myTeam, setMyTeam] = useState("");
-  const [existingMyTeam, setExistingMyTeam] = useState("");
+  // 自チームの id。既存チームが確定しているときだけ入り、手入力中は null。
+  const [myTeamId, setMyTeamId] = useState<number | null>(null);
   const [teamsData, setTeamsData] = useState<Team[]>([]);
   const [positionData, setPositionData] = useState<Position[]>([]);
   const [tournamentData, setTournamentData] = useState<TournamentData[]>([]);
@@ -116,6 +119,8 @@ export default function GameRecord() {
   const [stadiumData, setStadiumData] = useState<Stadium[]>([]);
   // 既存試合の編集中かどうか（編集時はパターン選択を出さず単一ボタンにする）。
   const [isEditMode, setIsEditMode] = useState(false);
+  // 対象試合の match_result が既に保存済みかどうか（中断ダイアログの文言に使う）。
+  const [isMatchResultSaved, setIsMatchResultSaved] = useState(false);
   const [matchBattingOrder, setMatchBattingOrder] = useState("");
   const [existingMatchBattingOrder, setExistingMatchBattingOrder] =
     useState("");
@@ -148,6 +153,9 @@ export default function GameRecord() {
   const pathname = usePathname();
   const router = useRouter();
   useRequireAuth();
+  useEffect(() => {
+    trackGameRecordStepViewed(1);
+  }, []);
   // 球場サジェスト検索のデバウンスタイマーと、最新リクエスト判定用のシーケンス番号。
   const stadiumSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stadiumRequestId = useRef(0);
@@ -179,6 +187,9 @@ export default function GameRecord() {
       );
       if (userTeam) {
         setMyTeam(userTeam.name);
+        // 編集時は既存試合の my_team_id が先に入りうるので、未確定のときだけ
+        // プロフィールの所属チームで補う。
+        setMyTeamId((prev) => prev ?? Number(userTeam.id));
       }
       setPositionData(positionDataList);
       setTournamentData(getTournamentList);
@@ -214,7 +225,7 @@ export default function GameRecord() {
         setExistingGameDate(formattedDate);
         setMatchType(existingMatchResult.match_type);
         setTournament(existingMatchResult.tournament_id);
-        setExistingMyTeam(existingMatchResult.my_team_id);
+        setMyTeamId(existingMatchResult.my_team_id);
         setMyTeamScore(existingMatchResult.my_team_score);
         setOpponentTeamScore(existingMatchResult.opponent_team_score);
         setExistingMatchBattingOrder(existingMatchResult.batting_order);
@@ -270,6 +281,7 @@ export default function GameRecord() {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
       // 既存試合がなければ（＝新規記録フロー）直近試合のデフォルトを適用する。
       fetchExistingMatchResult(JSON.parse(savedGameResultId)).then((found) => {
+        setIsMatchResultSaved(found);
         if (!found && !isEdit) applyFormDefaults();
       });
     } else if (pathname === "/game-result/record") {
@@ -292,13 +304,6 @@ export default function GameRecord() {
       createNew();
       applyFormDefaults();
     }
-    if (
-      !(pathname === "/game-result/battings") &&
-      !(pathname === "/game-result/record") &&
-      savedGameResultId
-    ) {
-      localStorage.removeItem("gameResultId");
-    }
   }, [pathname]);
 
   useEffect(() => {
@@ -314,15 +319,18 @@ export default function GameRecord() {
     }
   }, [userData, positionData]);
 
-  // チーム名検索(編集時)
+  // 編集時は my_team_id だけ先に確定し、チーム一覧の到着タイミングは不定なので
+  // 一覧が揃ってから id を表示名へ解決する。
   useEffect(() => {
-    if (existingMyTeam) {
-      const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
+    if (myTeamId) {
+      const foundTeam = teamsData.find(
+        (team) => String(team.id) === String(myTeamId),
+      );
       if (foundTeam) {
         setMyTeam(foundTeam.name);
       }
     }
-  }, [existingMyTeam, teamsData]);
+  }, [myTeamId, teamsData]);
 
   // 今日の日付
   const [gameDate, setGameDate] = useState(() => {
@@ -347,10 +355,35 @@ export default function GameRecord() {
     setMatchType(event.target.value);
   };
 
-  // 自チーム名設定
-  const handleMyTeamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setExistingMyTeam(event.target.value);
-    setMyTeam(event.target.value);
+  // 自チーム名の入力。入力名が候補と完全一致すれば id を確定し、そうでなければ
+  // 未確定(null)に戻して保存時に新規作成させる。
+  const handleMyTeamInputChange = (value: string) => {
+    setMyTeam(value);
+    setMyTeamId((prev) => {
+      // 候補選択の直後は同じテキストで onInputChange が続けて発火する。名前だけで
+      // 引き直すと同名チームがあるとき先頭の id にすり替わるため、確定済み id の
+      // 名前と一致する間はその id を維持する。
+      const confirmed = teamsData.find(
+        (team) => String(team.id) === String(prev),
+      );
+      if (confirmed && confirmed.name === value) {
+        return prev;
+      }
+      const matched = teamsData.find((team) => team.name === value);
+      return matched ? Number(matched.id) : null;
+    });
+  };
+  // 候補の選択。allowsCustomValue では打ち替え時に null が飛びうるため、null は
+  // 無視して入力中の文字列を消さない（id の解除は onInputChange 側が担う）。
+  const handleMyTeamSelectionChange = (teamKey: React.Key | null) => {
+    if (teamKey == null) return;
+    const selectedTeam = teamsData.find(
+      (team) => String(team.id) === String(teamKey),
+    );
+    if (selectedTeam) {
+      setMyTeamId(Number(selectedTeam.id));
+      setMyTeam(selectedTeam.name);
+    }
   };
 
   // 相手チーム設定
@@ -541,9 +574,11 @@ export default function GameRecord() {
           ]);
         }
       }
+      // 自チーム保存。既存チームが確定済み（myTeamId あり）なら新規作成せず id を
+      // そのまま使い、手入力で新しいチーム名を入れた場合のみ作成する。
+      let resolvedMyTeamId = myTeamId;
       const trimmedMyTeam = myTeam.trim();
-      let myTeamId = teamsData.find((team) => team.name === trimmedMyTeam)?.id;
-      if (!myTeamId) {
+      if (!resolvedMyTeamId && trimmedMyTeam !== "") {
         const newTeam = await createOrUpdateTeam({
           team: {
             name: trimmedMyTeam,
@@ -551,7 +586,12 @@ export default function GameRecord() {
             prefecture_id: undefined,
           },
         });
-        myTeamId = newTeam.data.id;
+        resolvedMyTeamId = Number(newTeam.data.id);
+      }
+      // 球場と違い自チームは必須項目なので、id を確定できなければ保存を中断する。
+      if (!resolvedMyTeamId) {
+        setErrorsWithTimeout(["自チームの登録に失敗しました。"]);
+        return;
       }
 
       // 大会保存
@@ -618,9 +658,7 @@ export default function GameRecord() {
           user_id: Number(userId),
           date_and_time: existingGameDate ? existingGameDate : gameDate,
           match_type: matchType,
-          my_team_id: Number(existingMyTeam)
-            ? Number(existingMyTeam)
-            : Number(myTeamId),
+          my_team_id: resolvedMyTeamId,
           opponent_team_id: existingOpponentTeam
             ? existingOpponentTeam
             : Number(opponentTeamId),
@@ -699,7 +737,7 @@ export default function GameRecord() {
 
   return (
     <>
-      <HeaderResult />
+      <HeaderResult isMatchResultSaved={isMatchResultSaved} />
       {isSubmitting && <LoadingSpinner />}
       <main className="h-full">
         <div className="pb-40 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
@@ -846,40 +884,34 @@ export default function GameRecord() {
                   ))}
                 </Autocomplete>
                 <Divider className="my-4" />
-                <Autocomplete
-                  allowsCustomValue
-                  label="シーズン"
-                  variant="bordered"
-                  placeholder="シーズン名を入力"
-                  labelPlacement="outside-left"
-                  className="[&>div]:justify-between [&>div&>label]:whitespace-nowrap"
-                  size="md"
+                <SeasonField
+                  seasons={seasonsData}
+                  selectedSeason={selectedSeason}
                   onInputChange={handleSeasonInputChange}
                   onSelectionChange={handleSeasonSelectionChange}
-                  selectedKey={
-                    selectedSeason !== null ? selectedSeason.toString() : null
-                  }
+                />
+                <Divider className="my-4" />
+                <Autocomplete
+                  isRequired
+                  allowsCustomValue
+                  label="自チーム"
+                  variant="bordered"
+                  placeholder="自分のチーム名を入力"
+                  labelPlacement="outside-left"
+                  className="[&>div]:justify-between"
+                  size="sm"
+                  color={isMyTeamValid ? "default" : "danger"}
+                  inputValue={myTeam}
+                  selectedKey={myTeamId ? myTeamId.toString() : null}
+                  onInputChange={handleMyTeamInputChange}
+                  onSelectionChange={handleMyTeamSelectionChange}
                 >
-                  {seasonsData.map((data) => (
-                    <AutocompleteItem key={data.id}>
+                  {teamsData.map((data) => (
+                    <AutocompleteItem key={data.id} textValue={data.name}>
                       {data.name}
                     </AutocompleteItem>
                   ))}
                 </Autocomplete>
-                <Divider className="my-4" />
-                <Input
-                  isRequired
-                  type="text"
-                  size="sm"
-                  variant="bordered"
-                  label="自チーム"
-                  labelPlacement="outside-left"
-                  placeholder="自分のチーム名を入力"
-                  className="flex justify-between items-center [&>div>div>div>input]:py-2"
-                  color={isMyTeamValid ? "default" : "danger"}
-                  value={myTeam}
-                  onChange={handleMyTeamChange}
-                />
                 <Divider className="my-4" />
                 <Autocomplete
                   isRequired

@@ -3,6 +3,15 @@ export const ADSENSE_CLIENT_ID = "ca-pub-2173577862865148";
 export const isAdsenseEnabled =
   process.env.NEXT_PUBLIC_ADSENSE_ENABLED === "true";
 
+/**
+ * AdSense 本体スクリプトを読み込んでよい環境か。
+ *
+ * 広告枠と同じ条件に加えて本番のみに絞る。枠が 1 つも出ない環境
+ * （NEXT_PUBLIC_ADSENSE_ENABLED 未設定の preview / stg）でスクリプトだけ読み込まれるのを防ぐ。
+ */
+export const isAdsenseScriptEnabled =
+  isAdsenseEnabled && process.env.NODE_ENV === "production";
+
 export const adSlots = {
   /** 計算ツールページ CTAバナー下 ディスプレイ広告 */
   toolsDisplay: "6569468966",

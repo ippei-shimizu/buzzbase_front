@@ -1,19 +1,13 @@
 "use client";
-import { Button } from "@heroui/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { BackIcon } from "@app/components/icon/BackIcon";
 
-interface HeaderNoteSaveProps {
-  onNoteSave: () => void;
-  isSubmitting: boolean;
+interface HeaderNoteProps {
   hasChanges: boolean;
 }
 
-export default function HeaderNote({
-  onNoteSave,
-  isSubmitting,
-  hasChanges,
-}: HeaderNoteSaveProps) {
+/** 保存ボタンはフォーム最下部にあるため、ヘッダーには戻るボタンのみ置く。 */
+export default function HeaderNote({ hasChanges }: HeaderNoteProps) {
   const handleBackClick = () => {
     if (
       hasChanges &&
@@ -23,26 +17,13 @@ export default function HeaderNote({
     }
     window.history.back();
   };
-  useEffect(() => {
-    localStorage.removeItem("gameResultId");
-  }, []);
   return (
     <>
-      <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--smart-banner-height,0px)] w-full bg-main z-50">
-        <div className="flex items-center justify-between h-full max-w-[692px] mx-auto lg:m-[0_auto_0_28%]">
+      <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--top-banner-offset,0px)] w-full bg-main z-50">
+        <div className="flex items-center h-full max-w-[692px] mx-auto lg:m-[0_auto_0_28%]">
           <button onClick={handleBackClick}>
             <BackIcon width="24" height="24" fill="" stroke="white" />
           </button>
-          <Button
-            onPress={onNoteSave}
-            color="primary"
-            variant="solid"
-            size="sm"
-            radius="full"
-            isDisabled={isSubmitting}
-          >
-            保存
-          </Button>
         </div>
       </header>
     </>

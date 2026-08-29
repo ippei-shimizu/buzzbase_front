@@ -1,0 +1,400 @@
+const mockGet = jest.fn();
+const mockCookieStore = { get: mockGet };
+
+jest.mock("next/headers", () => ({
+  cookies: jest.fn(() => Promise.resolve(mockCookieStore)),
+}));
+
+jest.mock("../../../constants/api", () => ({
+  RAILS_API_URL: "http://back:3000",
+}));
+
+jest.mock("../../../../lib/sentry-helpers", () => ({
+  captureServerActionError: jest.fn(),
+}));
+
+const mockGetFeatureFlags = jest.fn();
+jest.mock("../../../featureFlags/actions", () => ({
+  getFeatureFlags: (keys: string[]) => mockGetFeatureFlags(keys),
+}));
+
+import {
+  getProStatus,
+  getProStatusResult,
+  startProCheckout,
+  syncProStatus,
+} from "../actions";
+
+function setupAuthCookies() {
+  mockGet.mockImplementation((key: string) => {
+    const values: Record<string, { value: string }> = {
+      "access-token": { value: "test-access-token" },
+      client: { value: "test-client" },
+      uid: { value: "test-uid" },
+    };
+    return values[key];
+  });
+}
+
+describe("getProStatus", () => {
+  const consoleErrorSpy = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("401 のときはログを出さずに null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+    });
+
+    await expect(getProStatus()).resolves.toBeNull();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("401 以外のエラーはログに残して null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+    });
+
+    await expect(getProStatus()).resolves.toBeNull();
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it("タイムアウト用の AbortSignal を渡す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ subscription: {}, entitlements: [] }),
+    });
+
+    await getProStatus();
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
+describe("getProStatusResult", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("未認証 cookie のときは fetch せずに unauthorized を返す", async () => {
+    mockGet.mockReturnValue(undefined);
+
+    await expect(getProStatusResult()).resolves.toEqual({
+      status: "unauthorized",
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("401 は通信障害と区別して unauthorized を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+    });
+
+    await expect(getProStatusResult()).resolves.toEqual({
+      status: "unauthorized",
+    });
+  });
+
+  it("5xx は error を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+    });
+
+    await expect(getProStatusResult()).resolves.toEqual({ status: "error" });
+  });
+
+  it("fetch が throw したら error を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
+
+    await expect(getProStatusResult()).resolves.toEqual({ status: "error" });
+  });
+
+  it("成功時は取得した Pro 状態を ok として返す", async () => {
+    setupAuthCookies();
+    const proStatus = { subscription: { status: "active" }, entitlements: [] };
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => proStatus,
+    });
+
+    await expect(getProStatusResult()).resolves.toEqual({
+      status: "ok",
+      proStatus,
+    });
+  });
+});
+
+describe("startProCheckout", () => {
+  const originalAppUrl = process.env.APP_URL;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+    process.env.APP_URL = "http://localhost:8100";
+    mockGetFeatureFlags.mockResolvedValue({ pro_features: true });
+  });
+
+  afterAll(() => {
+    process.env.APP_URL = originalAppUrl;
+  });
+
+  it("認証済み + 正常な plan で checkout_url を返し、success_url/cancel_url はサーバー側 APP_URL から構築される", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        checkout_url: "https://checkout.stripe.com/sess_x",
+      }),
+    });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({
+      ok: true,
+      checkoutUrl: "https://checkout.stripe.com/sess_x",
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://back:3000/api/v1/pro/checkout",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          plan: "monthly",
+          success_url:
+            "http://localhost:8100/pro/success?session_id={CHECKOUT_SESSION_ID}",
+          cancel_url: "http://localhost:8100/pro/cancel",
+        }),
+      }),
+    );
+  });
+
+  it("未認証 cookie のとき unauthorized を返す（fetch しない）", async () => {
+    mockGet.mockReturnValue(undefined);
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "unauthorized" });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("pro_features が無効なら Stripe を呼ばずに feature_disabled を返す", async () => {
+    setupAuthCookies();
+    mockGetFeatureFlags.mockResolvedValue({ pro_features: false });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "feature_disabled" });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("flag が判定できないときも Stripe を呼ばない", async () => {
+    // getFeatureFlags は取得失敗を false に倒すため、ここでも決済は開始されない。
+    setupAuthCookies();
+    mockGetFeatureFlags.mockResolvedValue({ pro_features: false });
+
+    const result = await startProCheckout({ plan: "yearly" });
+
+    expect(result).toEqual({ ok: false, error: "feature_disabled" });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("未認証のときは flag を引かずに unauthorized を返す", async () => {
+    // 「ログインが必要」を「販売停止中」と取り違えないよう、認証チェックを先に通す。
+    mockGet.mockReturnValue(undefined);
+    mockGetFeatureFlags.mockResolvedValue({ pro_features: false });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "unauthorized" });
+    expect(mockGetFeatureFlags).not.toHaveBeenCalled();
+  });
+
+  it("401 のとき unauthorized を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({}),
+    });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "unauthorized" });
+  });
+
+  it("409 のとき already_subscribed を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 409,
+      json: async () => ({ error: "already_subscribed" }),
+    });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "already_subscribed" });
+  });
+
+  it("422 invalid_plan のとき invalid_plan を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 422,
+      json: async () => ({ error: "invalid_plan" }),
+    });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "invalid_plan" });
+  });
+
+  it("502 stripe_api_error のとき stripe_api_error を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      json: async () => ({ error: "stripe_api_error" }),
+    });
+
+    const result = await startProCheckout({ plan: "monthly" });
+
+    expect(result).toEqual({ ok: false, error: "stripe_api_error" });
+  });
+
+  it("fetch が throw したら unknown error を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
+
+    const result = await startProCheckout({ plan: "yearly" });
+
+    expect(result).toEqual({ ok: false, error: "unknown" });
+  });
+
+  it("APP_URL が未設定なら http://localhost:8100 をデフォルトとして使う", async () => {
+    delete process.env.APP_URL;
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        checkout_url: "https://checkout.stripe.com/sess_y",
+      }),
+    });
+
+    await startProCheckout({ plan: "yearly" });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://back:3000/api/v1/pro/checkout",
+      expect.objectContaining({
+        body: expect.stringContaining("http://localhost:8100/pro/success"),
+      }),
+    );
+  });
+});
+
+describe("syncProStatus", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.fetch = jest.fn();
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("未認証 cookie のときは fetch せずに null を返す", async () => {
+    mockGet.mockReturnValue(undefined);
+
+    await expect(syncProStatus()).resolves.toBeNull();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("同期後の Pro 状態を返す", async () => {
+    setupAuthCookies();
+    const proStatus = {
+      subscription: { status: "active", pro_active: true },
+      entitlements: ["no_ads"],
+    };
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => proStatus,
+    });
+
+    await expect(syncProStatus()).resolves.toEqual(proStatus);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://back:3000/api/v1/pro/sync",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("失敗したら null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+    });
+
+    await expect(syncProStatus()).resolves.toBeNull();
+  });
+
+  it("fetch が throw したら null を返す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("network"));
+
+    await expect(syncProStatus()).resolves.toBeNull();
+  });
+
+  // back が RevenueCat REST を同期的に叩くため、上限が無いと再同期ボタンが永久に戻らない。
+  it("タイムアウト用の AbortSignal を渡す", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ subscription: {}, entitlements: [] }),
+    });
+
+    await syncProStatus();
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+});

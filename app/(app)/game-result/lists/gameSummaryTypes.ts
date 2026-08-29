@@ -1,3 +1,5 @@
+import type { FilterValues } from "@app/components/filter/filterTypes";
+
 // 試合結果サマリー（GET /api/v2/stats/game_summary）の型。
 // server（gameSummaryActions.ts）/ client（各 Presentational）双方から import するため、
 // next/headers 等のサーバー専用 API は持たせない。mobile types/stats.ts と同一構造。
@@ -54,15 +56,7 @@ export interface GameSummary {
 }
 
 /** サマリーの絞り込み条件。自分の試合一覧画面なので user_id は扱わない（current_user にフォールバック）。 */
-export interface GameSummaryFilters {
-  year?: string;
-  /** "regular" / "open"（空文字は未絞り込み）。 */
-  matchType?: string;
-  seasonId?: string;
-  tournamentId?: string;
-  startMonth?: string;
-  endMonth?: string;
-}
+export type GameSummaryFilters = FilterValues;
 
 /**
  * Server Action の戻り値。403（非公開アカウント）と未認証・その他失敗を

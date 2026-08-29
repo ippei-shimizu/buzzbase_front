@@ -8,6 +8,10 @@ import PasswordConfirmInput from "@app/components/auth/PasswordConfirmInput";
 import PasswordInput from "@app/components/auth/PasswordInput";
 import SubmitButton from "@app/components/button/SendButton";
 import { resetPassword } from "@app/services/authService";
+import {
+  isRateLimitError,
+  rateLimitErrorMessage,
+} from "@app/utils/rateLimitError";
 
 interface Props {
   authHeaders: ResetPasswordAuthHeaders;
@@ -65,6 +69,12 @@ export default function ResetPasswordForm({ authHeaders }: Props) {
       setIsCompleted(true);
       setTimeout(() => router.push("/signin"), 3000);
     } catch (error) {
+      // back は PUT /api/v1/auth/password をスロットル対象にしていないため現状は到達しないが、
+      // 他の認証画面と実装を揃え、対象化された際の取りこぼしを防ぐために置いている。
+      if (isRateLimitError(error)) {
+        setErrors([rateLimitErrorMessage(error)]);
+        return;
+      }
       // PUT /api/v1/auth/password のバリデーションエラーは devise_token_auth の
       // resource_errors ヘルパーにより { フィールド名: [...], full_messages: [...] }
       // というハッシュ形式で返るため、full_messages を優先的に取り出す
