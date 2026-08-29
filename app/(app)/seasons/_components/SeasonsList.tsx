@@ -22,6 +22,7 @@ import {
   deleteSeason,
   updateSeason,
 } from "@app/services/seasonsService";
+import { upsertById } from "@app/utils/upsertById";
 
 type SeasonsListProps = {
   initialSeasons: SeasonData[];
@@ -41,7 +42,8 @@ export default function SeasonsList({ initialSeasons }: SeasonsListProps) {
     setIsSubmitting(true);
     try {
       const newSeason = await createSeason(newSeasonName.trim());
-      setSeasons([newSeason, ...seasons]);
+      // back は同名シーズンがあれば既存を返すため、無条件に追加すると同じ行が二重に並ぶ。
+      setSeasons((prev) => upsertById(prev, newSeason));
       setNewSeasonName("");
     } catch (error) {
       console.error("Failed to create season:", error);
