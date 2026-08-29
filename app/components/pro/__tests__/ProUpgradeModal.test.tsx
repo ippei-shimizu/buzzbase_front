@@ -164,6 +164,35 @@ describe("ProUpgradeModal", () => {
     expect(screen.getByText("¥480")).toBeInTheDocument();
   });
 
+  it("defaultPlan 未指定なら月額プランが初期選択され、先頭に表示される", () => {
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
+
+    expect(screen.getByRole("radio", { name: /月額プラン/ })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    expect(screen.getByRole("radio", { name: /年額プラン/ })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+
+    const radios = screen.getAllByRole("radio");
+    expect(radios[0]).toHaveTextContent("月額プラン");
+  });
+
+  it("defaultPlan を指定して開いた場合はそのプランが初期選択される", () => {
+    render(<ProUpgradeModal isOpen onClose={jest.fn()} defaultPlan="yearly" />);
+
+    expect(screen.getByRole("radio", { name: /年額プラン/ })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    expect(screen.getByRole("radio", { name: /月額プラン/ })).toHaveAttribute(
+      "aria-checked",
+      "false",
+    );
+  });
+
   it("CTA ボタンが配置されている", () => {
     // CTA クリック → startProCheckout 呼び出しの実挙動は HeroUI の dynamic import との
     // 兼ね合いで Jest 環境では検証しづらい。actions.test.ts 側で startProCheckout を網羅。

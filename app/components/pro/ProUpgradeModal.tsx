@@ -51,8 +51,9 @@ const CHECKOUT_UNRELEASED_MESSAGE =
 const TRIAL_NOTICE =
   "7 日間の無料トライアル期間中に解約すれば料金はかかりません。";
 
-// 年額を先に置いて既定の推奨プランとして読ませる。
-const PLAN_ORDER: ProPlan[] = ["yearly", "monthly"];
+// 初期選択の月額を先頭に置き、選択中のプランが最上部に来るようにする。
+// 年額の割安訴求は初期選択とは独立にバッジ・注記で行う。
+const PLAN_ORDER: ProPlan[] = ["monthly", "yearly"];
 
 // グループ見出しのアイコン。mobile 版（Ionicons）の見た目に合わせて選定。
 const GROUP_ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
@@ -84,7 +85,7 @@ interface ProUpgradeModalProps {
    * コンテキスト訴求を出す。未指定なら汎用文言。
    */
   trigger?: ProFeature;
-  /** 初期選択させたい料金プラン。未指定なら年額。 */
+  /** 初期選択させたい料金プラン。未指定なら月額。 */
   defaultPlan?: ProPlan;
 }
 
@@ -103,7 +104,7 @@ export default function ProUpgradeModal({
   const isMobile = useMediaQuery("(max-width: 640px)", false);
   // defaultPlan は「初回マウント時の初期値」としてのみ扱う。呼び出し元（Provider）が open ごとに
   // key を変えて remount するため、再 open のたびに defaultPlan が再評価される。
-  const [plan, setPlan] = useState<ProPlan>(defaultPlan ?? "yearly");
+  const [plan, setPlan] = useState<ProPlan>(defaultPlan ?? "monthly");
   const [isPending, startTransition] = useTransition();
   const [isRedirecting, setIsRedirecting] = useState(false);
   // このモーダルは全ページに常設されているため、開くまでは flag を引かない。
