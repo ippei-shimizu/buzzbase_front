@@ -10,10 +10,10 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import Header from "@app/components/header/Header";
 import { BallIcon } from "@app/components/icon/BallIcon";
+import { BatIcon } from "@app/components/icon/BatIcon";
 import { CrownIcon } from "@app/components/icon/CrownIcon";
 import { GloveIcon } from "@app/components/icon/GloveIcon";
 import { LockIcon } from "@app/components/icon/LockIcon";
-import { RecordIcon } from "@app/components/icon/RecordIcon";
 import StatsShareComponent from "@app/components/share/StatsShareComponent";
 import AvatarComponent from "@app/components/user/AvatarComponent";
 import IndividualResultsList from "@app/components/user/IndividualResultsList";
@@ -173,7 +173,7 @@ export default function MyPage() {
                   {(userData.user.throw_hand || userData.user.batting_side) && (
                     <ul className="flex items-center gap-x-2 mt-1.5 relative -left-0.5">
                       <li>
-                        <RecordIcon width="18" height="18" fill="#F4F4F4d0" />
+                        <BatIcon width="18" height="18" fill="#F4F4F4d0" />
                       </li>
                       <li>
                         <p className="text-sm text-zinc-400">
