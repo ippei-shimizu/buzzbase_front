@@ -101,14 +101,17 @@ function ZoneHeatmap({
   );
 }
 
-const NOTES = (
-  <div className="mt-3 flex flex-col gap-y-0.5">
-    <p className="text-[11px] text-[#71717A]">
-      打数が3未満のコースは参考値です
-    </p>
-    <p className="text-[11px] text-[#71717A]">捕手目線で表示しています</p>
-  </div>
-);
+/** ヒートマップ下の注記。参考値の閾値は back が返す min_at_bats に合わせる。 */
+function Notes({ minAtBats }: { minAtBats: number }) {
+  return (
+    <div className="mt-3 flex flex-col gap-y-0.5">
+      <p className="text-[11px] text-[#71717A]">
+        打数が{minAtBats}未満のコースは参考値です
+      </p>
+      <p className="text-[11px] text-[#71717A]">捕手目線で表示しています</p>
+    </div>
+  );
+}
 
 /**
  * コース別の打率カード（Pro）。コース別 / 球種別の2タブ構成で、
@@ -230,7 +233,7 @@ export function PitchCourseCard({
               </p>
             </div>
           </div>
-          {NOTES}
+          <Notes minAtBats={data.min_at_bats} />
         </div>
       ) : (
         <div className="mt-4">
@@ -272,7 +275,7 @@ export function PitchCourseCard({
                   />
                 </div>
               ) : null}
-              {NOTES}
+              <Notes minAtBats={cross.min_at_bats} />
             </>
           )}
         </div>
