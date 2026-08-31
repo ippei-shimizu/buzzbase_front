@@ -39,7 +39,8 @@ export function UnrecordedBadgeOverlay({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative">
+    // バッジが BSO の丸やダイヤモンドに重ならないよう、未記録のときだけ上に場所を空ける。
+    <div className={`relative${isUnrecorded ? " pt-6" : ""}`}>
       {children}
       {isUnrecorded ? (
         <span className="absolute right-0 top-0 rounded bg-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300">
