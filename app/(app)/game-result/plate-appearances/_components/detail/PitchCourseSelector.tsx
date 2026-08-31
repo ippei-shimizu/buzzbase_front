@@ -1,16 +1,17 @@
 "use client";
-import { useRef } from "react";
-import { PitchCourseGrid } from "@app/components/baseball/PitchCourseGrid";
+import { PitchCourseTapField } from "@app/components/baseball/PitchCourseTapField";
 import {
-  pitchCourseCol,
   pitchCourseLabel,
-  pitchCourseRow,
+  type PitchCoursePoint,
 } from "@app/constants/pitchCourse";
 import { FieldLabel } from "./DetailFields";
 
 interface PitchCourseSelectorProps {
   value: number | null;
-  onChange: (value: number | null) => void;
+  location: PitchCoursePoint | null;
+  onChange: (
+    value: { course: number; location: PitchCoursePoint } | null,
+  ) => void;
   description?: string;
 }
 
@@ -26,42 +27,16 @@ const HOME_PLATE = (
 );
 
 /**
- * 投球コース（捕手目線 5x5）の入力セレクタ。
- * 選択済みセルの再タップ、または「クリア」で解除できる。
- * 矢印キーで roving tabindex のフォーカス移動に対応する。
+ * 投球コース（捕手目線）の入力セレクタ。
+ * コース図の任意の位置をタップして指定し、そこから導出した 5x5 のコースを
+ * マスのハイライトとテキストで示す。「クリア」で未選択に戻せる。
  */
 export function PitchCourseSelector({
   value,
+  location,
   onChange,
   description,
 }: PitchCourseSelectorProps) {
-  const gridRef = useRef<HTMLDivElement>(null);
-
-  const focusCourse = (course: number) => {
-    gridRef.current
-      ?.querySelector<HTMLButtonElement>(`[data-course="${course}"]`)
-      ?.focus();
-  };
-
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
-    course: number,
-  ) => {
-    const row = pitchCourseRow(course);
-    const col = pitchCourseCol(course);
-    let next: number | null = null;
-    if (event.key === "ArrowUp") next = row > 1 ? course - 5 : null;
-    else if (event.key === "ArrowDown") next = row < 5 ? course + 5 : null;
-    else if (event.key === "ArrowLeft") next = col > 1 ? course - 1 : null;
-    else if (event.key === "ArrowRight") next = col < 5 ? course + 1 : null;
-    else return;
-    event.preventDefault();
-    if (next !== null) focusCourse(next);
-  };
-
-  // 未選択時は中央（13）を tab の入口にする。
-  const tabStopCourse = value ?? 13;
-
   return (
     <div className="flex flex-col gap-y-2">
       <FieldLabel label="コース" description={description} />
@@ -76,36 +51,13 @@ export function PitchCourseSelector({
           <span>低め</span>
         </div>
         <div className="w-full max-w-[300px]">
-          <div
-            ref={gridRef}
-            role="radiogroup"
-            aria-label="コース"
-            className="h-[300px]"
-          >
-            <PitchCourseGrid
-              className="h-full"
-              renderCell={(course, isStrikeZone) => {
-                const isSelected = value === course;
-                return (
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    aria-label={pitchCourseLabel(course)}
-                    data-course={course}
-                    tabIndex={course === tabStopCourse ? 0 : -1}
-                    className={`h-full w-full rounded-[2px] transition-colors ${
-                      isSelected
-                        ? "bg-[#d08000]"
-                        : isStrikeZone
-                          ? "bg-[#454545]"
-                          : "bg-[#2a2a2a]"
-                    }`}
-                    onClick={() => onChange(isSelected ? null : course)}
-                    onKeyDown={(event) => handleKeyDown(event, course)}
-                  />
-                );
-              }}
+          <div className="h-[300px]">
+            <PitchCourseTapField
+              course={value}
+              location={location}
+              onSelect={({ x, y, course }) =>
+                onChange({ course, location: { x, y } })
+              }
             />
           </div>
           <div
@@ -119,18 +71,28 @@ export function PitchCourseSelector({
           <div className="flex justify-center pt-1">{HOME_PLATE}</div>
         </div>
       </div>
-      <p aria-live="polite" className="text-xs text-zinc-300">
-        {value !== null ? pitchCourseLabel(value) : "未選択"}
-      </p>
-      {value !== null ? (
-        <button
-          type="button"
-          className="self-start text-xs text-zinc-400 underline"
-          onClick={() => onChange(null)}
-        >
-          クリア
-        </button>
-      ) : null}
+      <div className="relative flex min-h-8 items-center justify-center">
+        <p aria-live="polite">
+          <span
+            className={`inline-flex items-center rounded-full px-3.5 py-1 text-sm font-bold ${
+              value === null
+                ? "bg-[#3A3A3A] text-zinc-400"
+                : "bg-[#d08000] text-white"
+            }`}
+          >
+            {value !== null ? pitchCourseLabel(value) : "未選択"}
+          </span>
+        </p>
+        {value !== null ? (
+          <button
+            type="button"
+            className="absolute right-0 px-1 py-1 text-xs text-zinc-400 underline"
+            onClick={() => onChange(null)}
+          >
+            クリア
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

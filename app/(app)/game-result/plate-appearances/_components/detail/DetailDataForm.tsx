@@ -154,7 +154,13 @@ export function DetailDataForm({
         />
         <PitchCourseSelector
           value={detail.pitchCourse}
-          onChange={(course) => setDetail({ pitchCourse: course })}
+          location={detail.pitchCourseLocation}
+          onChange={(selected) =>
+            setDetail({
+              pitchCourse: selected?.course ?? null,
+              pitchCourseLocation: selected?.location ?? null,
+            })
+          }
           description={SECTION_DESCRIPTIONS.pitchCourse}
         />
         <MasterChipSelector

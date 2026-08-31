@@ -1,10 +1,15 @@
 "use client";
 import {
   PITCH_COURSES,
+  PITCH_COURSE_TRACK_FRACTIONS,
   isStrikeZoneCourse,
   pitchCourseCol,
   pitchCourseRow,
 } from "@app/constants/pitchCourse";
+
+const TRACK_TEMPLATE = PITCH_COURSE_TRACK_FRACTIONS.map(
+  (fraction) => `${fraction}fr`,
+).join(" ");
 
 interface PitchCourseGridProps {
   /** 各セルの中身（ボタンや色付き div）。セル枠・ストライクゾーン枠線はグリッド側が描く。 */
@@ -26,8 +31,8 @@ const strikeZoneBorderClass = (course: number): string => {
 };
 
 /**
- * 投球コースの 5x5 グリッド（捕手目線）。入力セレクタと分析ヒートマップで
- * 同じ幾何（外周ボールゾーンは内側より細い 0.62fr）を共有する。
+ * 投球コースの 5x5 グリッド（捕手目線）。入力フィールドと分析ヒートマップで
+ * PITCH_COURSE_TRACK_FRACTIONS の幾何を共有する。
  */
 export function PitchCourseGrid({
   renderCell,
@@ -37,8 +42,8 @@ export function PitchCourseGrid({
     <div
       className={`grid gap-px ${className ?? ""}`}
       style={{
-        gridTemplateColumns: "0.62fr 1fr 1fr 1fr 0.62fr",
-        gridTemplateRows: "0.62fr 1fr 1fr 1fr 0.62fr",
+        gridTemplateColumns: TRACK_TEMPLATE,
+        gridTemplateRows: TRACK_TEMPLATE,
       }}
     >
       {PITCH_COURSES.map((course) => (

@@ -1,3 +1,4 @@
+import type { PitchCoursePoint } from "@app/constants/pitchCourse";
 import type { RunnersState } from "@app/interface/plateAppearanceV2";
 
 // 打席詳細データ（すべて任意入力）。ウィザードが保持し PA ペイロードへ流す。
@@ -12,6 +13,8 @@ export interface DetailState {
   timingId: number | null;
   pitchTypeId: number | null;
   pitchCourse: number | null;
+  // コース図のタップ位置。pitchCourse の導出元で、コースだけが記録された既存データでは null。
+  pitchCourseLocation: PitchCoursePoint | null;
   selfAnalysisMemo: string | null;
   pitcherId: number | null;
   appearanceSituationId: number | null;
@@ -47,6 +50,7 @@ export const EMPTY_DETAIL: DetailState = {
   timingId: null,
   pitchTypeId: null,
   pitchCourse: null,
+  pitchCourseLocation: null,
   selfAnalysisMemo: null,
   pitcherId: null,
   appearanceSituationId: null,
