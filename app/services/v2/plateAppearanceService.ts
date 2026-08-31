@@ -39,27 +39,39 @@ export async function getPlateAppearancesByGame(
 }
 
 /**
+ * 打席詳細の取得結果。403（他ユーザーかつ相互フォローでない）は
+ * 不存在と区別して案内文を出し分けるため、専用の status で返す。
+ */
+export type PlateAppearanceDetailResult =
+  | { status: "ok"; plateAppearance: PlateAppearanceV2 }
+  | { status: "forbidden" }
+  | { status: "unavailable" };
+
+/**
  * 打席を1件取得する（GET /api/v2/plate_appearances/:id）。
- * 公開アカウントであれば他ユーザーの打席も取得できる（by_game と同じポリシー）。
- * 非公開(403)・不存在(404)・失敗時は null。
+ * 他ユーザーの打席は相互フォローの場合のみ取得できる。
  */
 export async function getPlateAppearanceV2(
   id: number,
-): Promise<PlateAppearanceV2 | null> {
+): Promise<PlateAppearanceDetailResult> {
   try {
     const headers = await getAuthHeaders();
-    if (!headers) return null;
+    if (!headers) return { status: "unavailable" };
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/plate_appearances/${id}`,
       { headers, cache: "no-store" },
     );
-    if (!response.ok) return null;
+    if (response.status === 403) return { status: "forbidden" };
+    if (!response.ok) return { status: "unavailable" };
 
-    return (await response.json()) as PlateAppearanceV2;
+    return {
+      status: "ok",
+      plateAppearance: (await response.json()) as PlateAppearanceV2,
+    };
   } catch (error) {
     captureServerActionError(error, { action: "getPlateAppearanceV2" });
-    return null;
+    return { status: "unavailable" };
   }
 }
 
