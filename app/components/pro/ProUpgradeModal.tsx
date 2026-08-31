@@ -40,13 +40,7 @@ import {
   filterFeatureGroups,
 } from "@app/components/pro/proFeatureCatalog";
 import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
-import { useFeatureFlag } from "@app/hooks/featureFlags/useFeatureFlag";
 import { useProStatus } from "@app/hooks/pro/useProStatus";
-
-// pro_features は初回リリース前の状態で無効になっている。「停止」「再開」と書くと
-// 一度公開して取り下げたように読めるため、未公開であることをそのまま伝える。
-const CHECKOUT_UNRELEASED_MESSAGE =
-  "Proプランは近日公開予定です。もうしばらくお待ちください。";
 
 const TRIAL_NOTICE =
   "7 日間の無料トライアル期間中に解約すれば料金はかかりません。";
@@ -106,8 +100,6 @@ export default function ProUpgradeModal({
   const [plan, setPlan] = useState<ProPlan>(defaultPlan ?? "yearly");
   const [isPending, startTransition] = useTransition();
   const [isRedirecting, setIsRedirecting] = useState(false);
-  // このモーダルは全ページに常設されているため、開くまでは flag を引かない。
-  const proFeatures = useFeatureFlag("pro_features", { skip: !isOpen });
   // back の trial_days_calculator と同じ判定（has_used_trial）。既に使い切ったユーザーに
   // 「7日間無料」と誤案内しないため、CTA まわりの文言はここで出し分ける。
   // 判定確定前（isLoading）は DEFAULT_PRO_STATUS（has_used_trial: false）にフォールバックし
@@ -132,7 +124,6 @@ export default function ProUpgradeModal({
 
       const messages: Record<typeof result.error, string> = {
         unauthorized: "ログインしてからお試しください",
-        feature_disabled: CHECKOUT_UNRELEASED_MESSAGE,
         already_subscribed: "すでに Pro に加入済みです",
         invalid_plan: "プランの指定が不正です",
         stripe_api_error:
@@ -144,9 +135,6 @@ export default function ProUpgradeModal({
   };
 
   const ctaBusy = isPending || isRedirecting;
-  // 「判定不能」で CTA を隠すと、cookie が届かないだけのユーザーに未公開だと誤って告知する。
-  // 実際の決済は startProCheckout 側で改めて flag を検証しているので、ここは確定時のみ畳む。
-  const isCheckoutUnreleased = proFeatures === "disabled";
 
   return (
     <Modal
@@ -347,37 +335,26 @@ export default function ProUpgradeModal({
         </ModalBody>
 
         <ModalFooter className="flex-col gap-2">
-          {isCheckoutUnreleased ? (
-            <p
-              role="status"
-              className="w-full rounded-medium bg-sub px-3 py-3 text-center text-sm text-gray-200"
-            >
-              {CHECKOUT_UNRELEASED_MESSAGE}
+          {isTrialEligible ? (
+            <p className="text-center text-xs text-gray-400">
+              7 日間の無料トライアル期間中に解約すれば料金はかかりません
             </p>
-          ) : (
-            <>
-              {isTrialEligible ? (
-                <p className="text-center text-xs text-gray-400">
-                  7 日間の無料トライアル期間中に解約すれば料金はかかりません
-                </p>
-              ) : null}
-              <Button
-                color="primary"
-                onPress={handleCheckout}
-                isDisabled={ctaBusy}
-                isLoading={ctaBusy}
-                fullWidth
-                className="font-bold"
-                data-testid="pro-upgrade-cta"
-              >
-                {isProStatusLoading
-                  ? "PROを始める"
-                  : isTrialEligible
-                    ? "7日間無料で試す"
-                    : "Proに加入する"}
-              </Button>
-            </>
-          )}
+          ) : null}
+          <Button
+            color="primary"
+            onPress={handleCheckout}
+            isDisabled={ctaBusy}
+            isLoading={ctaBusy}
+            fullWidth
+            className="font-bold"
+            data-testid="pro-upgrade-cta"
+          >
+            {isProStatusLoading
+              ? "PROを始める"
+              : isTrialEligible
+                ? "7日間無料で試す"
+                : "Proに加入する"}
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
