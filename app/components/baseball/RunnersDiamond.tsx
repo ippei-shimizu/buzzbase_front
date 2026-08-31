@@ -119,15 +119,17 @@ export function RunnersDiamond({ value, onChange }: RunnersDiamondProps) {
     </div>
   );
 
+  // 選択結果はダイヤモンドの塗りだけだと読み取りづらいため、色付きのチップで明示する。
+  const captionChipClass = `inline-flex items-center rounded-full px-3.5 py-1 text-sm font-bold ${
+    value === null ? "bg-[#3A3A3A] text-zinc-400" : "bg-[#d08000] text-white"
+  }`;
+
   if (!isInteractive) {
     return (
       <div role="img" aria-label={`ランナー状況: ${caption}`}>
         <div aria-hidden="true">{diamond}</div>
-        <p
-          aria-hidden="true"
-          className="mt-1 text-center text-xs text-zinc-400"
-        >
-          {caption}
+        <p aria-hidden="true" className="mt-2 text-center">
+          <span className={captionChipClass}>{caption}</span>
         </p>
       </div>
     );
@@ -136,18 +138,20 @@ export function RunnersDiamond({ value, onChange }: RunnersDiamondProps) {
   return (
     <div role="group" aria-label="ランナー状況">
       {diamond}
-      <p aria-live="polite" className="mt-1 text-center text-xs text-zinc-400">
-        {caption}
-      </p>
-      {value !== null ? (
-        <button
-          type="button"
-          className="mx-auto mt-1 block text-xs text-zinc-400 underline"
-          onClick={() => onChange?.(null)}
-        >
-          未入力に戻す
-        </button>
-      ) : null}
+      <div className="relative mt-2 flex min-h-8 items-center justify-center">
+        <p aria-live="polite">
+          <span className={captionChipClass}>{caption}</span>
+        </p>
+        {value !== null ? (
+          <button
+            type="button"
+            className="absolute right-0 px-1 py-1 text-xs text-zinc-400 underline"
+            onClick={() => onChange?.(null)}
+          >
+            未入力に戻す
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
