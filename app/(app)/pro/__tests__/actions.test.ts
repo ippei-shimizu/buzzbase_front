@@ -13,7 +13,6 @@ jest.mock("../../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
-
 import {
   getProStatus,
   getProStatusResult,
