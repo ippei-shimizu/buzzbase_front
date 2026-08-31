@@ -8,13 +8,13 @@ import {
   DIRECTION_LABELS,
   LEGACY_POSITION_TO_DIRECTION,
 } from "@app/constants/groundCanvas";
-import { pitchCourseLabel } from "@app/constants/pitchCourse";
 import { PLATE_RESULT_IDS } from "@app/constants/plateResults";
 import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
 import { getBattingResultColor } from "@app/utils/battingResultColor";
 import { DetailRow, UnrecordedBadgeOverlay } from "./DetailRow";
 import { DetailSection } from "./DetailSection";
 import { HitLocationView } from "./HitLocationView";
+import { PitchCourseView } from "./PitchCourseView";
 
 interface PlateAppearanceDetailViewProps {
   plateAppearance: PlateAppearanceV2;
@@ -175,14 +175,13 @@ export function PlateAppearanceDetailView({
         <DetailRow label="打球の質" value={pa.contact_quality?.name ?? null} />
         <DetailRow label="タイミング" value={pa.timing?.name ?? null} />
         <DetailRow label="球種" value={pa.pitch_type?.name ?? null} />
-        <DetailRow
-          label="コース"
-          value={
-            pa.pitch_course !== null && pa.pitch_course !== undefined
-              ? pitchCourseLabel(pa.pitch_course)
-              : null
-          }
-        />
+        <DetailRow label="コース">
+          <PitchCourseView
+            course={pa.pitch_course ?? null}
+            pitchCourseX={pa.pitch_course_x}
+            pitchCourseY={pa.pitch_course_y}
+          />
+        </DetailRow>
         <DetailRow
           label="投手"
           value={

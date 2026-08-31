@@ -76,6 +76,9 @@ describe("PlateAppearanceDetailView", () => {
       screen.getByRole("img", { name: "ランナー状況: 一・二塁" }),
     ).toBeInTheDocument();
     expect(screen.getByText("真ん中（ストライク）")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "コース図: 真ん中（ストライク）" }),
+    ).toBeInTheDocument();
     // 打点 0 は未記録ではなく 0 のまま表示する
     const rbiRow = screen.getByText("打点").closest("div");
     expect(rbiRow).toHaveTextContent("0");

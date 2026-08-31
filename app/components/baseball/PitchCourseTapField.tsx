@@ -12,7 +12,8 @@ interface PitchCourseTapFieldProps {
   course: number | null;
   /** タップ位置の正規化座標。座標を持たない既存レコードでは null。 */
   location: PitchCoursePoint | null;
-  onSelect: (args: { x: number; y: number; course: number }) => void;
+  /** 未指定なら表示専用モード（打席詳細の読み取り専用プロット）。 */
+  onSelect?: (args: { x: number; y: number; course: number }) => void;
 }
 
 const clampNormalized = (value: number): number =>
@@ -32,7 +33,11 @@ export function PitchCourseTapField({
   const marker =
     location ?? (course !== null ? pitchCourseCenter(course) : null);
 
+  const isInteractive = onSelect !== undefined;
+  const courseLabel = course !== null ? pitchCourseLabel(course) : "未選択";
+
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!onSelect) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const x = clampNormalized((event.clientX - rect.left) / rect.width);
     const y = clampNormalized((event.clientY - rect.top) / rect.height);
@@ -41,11 +46,15 @@ export function PitchCourseTapField({
 
   return (
     <div
-      role="button"
-      aria-label={`コース図（タップで投球コースを選択）現在: ${
-        course !== null ? pitchCourseLabel(course) : "未選択"
+      role={isInteractive ? "button" : "img"}
+      aria-label={
+        isInteractive
+          ? `コース図（タップで投球コースを選択）現在: ${courseLabel}`
+          : `コース図: ${courseLabel}`
+      }
+      className={`relative h-full w-full touch-none select-none ${
+        isInteractive ? "cursor-crosshair" : ""
       }`}
-      className="relative h-full w-full cursor-crosshair touch-none select-none"
       onClick={handleClick}
     >
       <PitchCourseGrid
