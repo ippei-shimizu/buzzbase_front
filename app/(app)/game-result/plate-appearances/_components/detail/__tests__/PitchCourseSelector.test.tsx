@@ -26,7 +26,58 @@ const tapField = (clientX: number, clientY: number) => {
   });
 };
 
+const pressKey = (key: string) => {
+  fireEvent.keyDown(screen.getByRole("button", { name: /コース図/ }), { key });
+};
+
 describe("PitchCourseSelector", () => {
+  it("未選択のまま矢印キーを押すと真ん中から1マス動いたコースを選ぶ", () => {
+    const onChange = jest.fn();
+    render(
+      <PitchCourseSelector value={null} location={null} onChange={onChange} />,
+    );
+
+    pressKey("ArrowUp");
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ course: 8 }),
+    );
+  });
+
+  it("矢印キーでは選択中のコースから上下左右に移動できる", () => {
+    const onChange = jest.fn();
+    render(
+      <PitchCourseSelector
+        value={13}
+        location={{ x: 0.5, y: 0.5 }}
+        onChange={onChange}
+      />,
+    );
+
+    pressKey("ArrowRight");
+    pressKey("ArrowDown");
+
+    const courses = onChange.mock.calls.map(([selected]) => selected.course);
+    expect(courses).toEqual([14, 18]);
+  });
+
+  it("端のコースで外へ向かう矢印キーを押しても範囲外にならない", () => {
+    const onChange = jest.fn();
+    render(
+      <PitchCourseSelector
+        value={1}
+        location={{ x: 0.05, y: 0.05 }}
+        onChange={onChange}
+      />,
+    );
+
+    pressKey("ArrowUp");
+    pressKey("ArrowLeft");
+
+    const courses = onChange.mock.calls.map(([selected]) => selected.course);
+    expect(courses).toEqual([1, 1]);
+  });
+
   it("コース図の中央タップで真ん中のコースとタップ座標を返す", () => {
     const onChange = jest.fn();
     render(

@@ -3,7 +3,9 @@ import { PitchCourseGrid } from "@app/components/baseball/PitchCourseGrid";
 import {
   detectPitchCourse,
   pitchCourseCenter,
+  pitchCourseCol,
   pitchCourseLabel,
+  pitchCourseRow,
   type PitchCoursePoint,
 } from "@app/constants/pitchCourse";
 
@@ -18,6 +20,19 @@ interface PitchCourseTapFieldProps {
 
 const clampNormalized = (value: number): number =>
   Math.max(0, Math.min(1, value));
+
+const clampTrack = (value: number): number => Math.max(1, Math.min(5, value));
+
+// 矢印キー1回あたりの移動量（行, 列）。
+const KEY_MOVES: Record<string, [number, number]> = {
+  ArrowUp: [-1, 0],
+  ArrowDown: [1, 0],
+  ArrowLeft: [0, -1],
+  ArrowRight: [0, 1],
+};
+
+// キーボード操作の起点。未選択のまま矢印キーを押したときは真ん中から動かす。
+const KEYBOARD_START_COURSE = 13;
 
 /**
  * 投球コースをコース図の自由な位置へのタップで指定するフィールド。
@@ -44,18 +59,47 @@ export function PitchCourseTapField({
     onSelect({ x, y, course: detectPitchCourse({ x, y }) });
   };
 
+  // キーボードでは連続座標を指せないため、マスの中心を選んだものとして扱う。
+  const selectByCell = (deltaRow: number, deltaCol: number) => {
+    if (!onSelect) return;
+    const current = course ?? KEYBOARD_START_COURSE;
+    const row = clampTrack(pitchCourseRow(current) + deltaRow);
+    const col = clampTrack(pitchCourseCol(current) + deltaCol);
+    const nextCourse = (row - 1) * 5 + col;
+    const center = pitchCourseCenter(nextCourse);
+    onSelect({ x: center.x, y: center.y, course: nextCourse });
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!onSelect) return;
+    const move = KEY_MOVES[event.key];
+    if (move) {
+      event.preventDefault();
+      selectByCell(move[0], move[1]);
+      return;
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectByCell(0, 0);
+    }
+  };
+
   return (
     <div
       role={isInteractive ? "button" : "img"}
+      tabIndex={isInteractive ? 0 : undefined}
       aria-label={
         isInteractive
-          ? `コース図（タップで投球コースを選択）現在: ${courseLabel}`
+          ? `コース図（タップまたは矢印キーで投球コースを選択）現在: ${courseLabel}`
           : `コース図: ${courseLabel}`
       }
       className={`relative h-full w-full touch-none select-none ${
-        isInteractive ? "cursor-crosshair" : ""
+        isInteractive
+          ? "cursor-crosshair focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d08000]"
+          : ""
       }`}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       <PitchCourseGrid
         className="absolute inset-0 h-full"
