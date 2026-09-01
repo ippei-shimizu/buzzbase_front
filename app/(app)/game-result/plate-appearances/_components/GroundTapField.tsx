@@ -20,7 +20,8 @@ import {
 
 interface GroundTapFieldProps {
   hitLocation: Point | null;
-  onSelect: (args: {
+  /** 未指定なら表示専用（打席詳細画面での読み取り専用プロット）。 */
+  onSelect?: (args: {
     x: number;
     y: number;
     directionId: number | null;
@@ -61,7 +62,9 @@ const clampNormalized = (value: number): number =>
  * detectClosestDirection で最寄りの打球方向 id を導出して親へ通知する。
  */
 export function GroundTapField({ hitLocation, onSelect }: GroundTapFieldProps) {
+  const isInteractive = onSelect !== undefined;
   const handleClick = (event: React.MouseEvent<SVGSVGElement>) => {
+    if (!onSelect) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const x = clampNormalized((event.clientX - rect.left) / rect.width);
     const y = clampNormalized((event.clientY - rect.top) / rect.height);
@@ -77,12 +80,18 @@ export function GroundTapField({ hitLocation, onSelect }: GroundTapFieldProps) {
   return (
     <div className="flex justify-center">
       <svg
-        role="button"
-        aria-label="グラウンド（クリックで打球方向を選択）"
+        role={isInteractive ? "button" : "img"}
+        aria-label={
+          isInteractive
+            ? "グラウンド（クリックで打球方向を選択）"
+            : "グラウンド（打球位置の表示）"
+        }
         width={GROUND_CANVAS_WIDTH}
         height={GROUND_CANVAS_HEIGHT}
         viewBox={`0 0 ${GROUND_CANVAS_WIDTH} ${GROUND_CANVAS_HEIGHT}`}
-        className="max-w-full h-auto cursor-pointer touch-none select-none"
+        className={`max-w-full h-auto touch-none select-none ${
+          isInteractive ? "cursor-pointer" : ""
+        }`}
         onClick={handleClick}
       >
         <path
