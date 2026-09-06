@@ -121,6 +121,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
   count_situation_average: { free: "✕", pro: "○", availability: "web_and_app" },
   pitch_type_average: { free: "✕", pro: "○", availability: "web_and_app" },
   pitcher_faceoff_average: { free: "✕", pro: "○", availability: "web_and_app" },
+  pitch_course_average: { free: "✕", pro: "○", availability: "web_and_app" },
 };
 
 export interface FeatureGroup {
@@ -140,6 +141,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
       "hit_direction_average",
       "count_situation_average",
       "pitch_type_average",
+      "pitch_course_average",
       "pitcher_faceoff_average",
       "season_transition_graph",
       "practice_menu_trend_detail",

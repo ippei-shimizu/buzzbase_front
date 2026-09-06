@@ -18,6 +18,7 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import axios from "axios";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
@@ -397,13 +398,25 @@ export default function ResultsSummary() {
                           <li
                             key={`${plate.batter_box_number ?? "na"}-${index}`}
                           >
-                            <p
-                              className={`font-bold ${getBattingResultClassName(
-                                plate.batting_result,
-                              )}`}
-                            >
-                              {plate.batting_result}
-                            </p>
+                            {/* v1 フォールバック配列は id を持たないためリンク化しない。 */}
+                            {"id" in plate ? (
+                              <Link
+                                href={`/game-result/plate-appearances/${plate.id}`}
+                                className={`font-bold underline underline-offset-2 ${getBattingResultClassName(
+                                  plate.batting_result,
+                                )}`}
+                              >
+                                {plate.batting_result}
+                              </Link>
+                            ) : (
+                              <p
+                                className={`font-bold ${getBattingResultClassName(
+                                  plate.batting_result,
+                                )}`}
+                              >
+                                {plate.batting_result}
+                              </p>
+                            )}
                           </li>
                         ))}
                       </ul>

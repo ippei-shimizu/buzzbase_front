@@ -5,6 +5,7 @@ import { DEFAULT_PRO_STATUS } from "@app/types/pro";
 import {
   getCountSituations,
   getInitialAnalysisData,
+  getPitchCourses,
   getPitcherFaceoffs,
   getPitchTypes,
 } from "../../analysisActions";
@@ -56,15 +57,17 @@ async function resolveProAnalysis(
     ...SEASON_TREND_FEATURES,
   ]);
 
-  const [counts, pitches, faceoffs] = await Promise.all([
+  const [counts, pitches, courses, faceoffs] = await Promise.all([
     isEntitled("count_situation_average") ? getCountSituations() : null,
     isEntitled("pitch_type_average") ? getPitchTypes() : null,
+    isEntitled("pitch_course_average") ? getPitchCourses() : null,
     isEntitled("pitcher_faceoff_average") ? getPitcherFaceoffs() : null,
   ]);
 
   const data: ProAnalysisData = {
     countSituations: null,
     pitchTypes: null,
+    pitchCourses: null,
     pitcherFaceoffs: null,
   };
   if (counts?.status === "ok") {
@@ -74,6 +77,10 @@ async function resolveProAnalysis(
   if (pitches?.status === "ok") {
     data.pitchTypes = pitches.data;
     grantedFeatures.push("pitch_type_average");
+  }
+  if (courses?.status === "ok") {
+    data.pitchCourses = courses.data;
+    grantedFeatures.push("pitch_course_average");
   }
   if (faceoffs?.status === "ok") {
     data.pitcherFaceoffs = faceoffs.data;

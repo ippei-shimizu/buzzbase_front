@@ -1,4 +1,5 @@
 "use client";
+import type { ThrowHand } from "@app/interface/pitcher";
 import { Spinner, Tab, Tabs } from "@heroui/react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -9,6 +10,7 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import Header from "@app/components/header/Header";
 import { BallIcon } from "@app/components/icon/BallIcon";
+import { BatIcon } from "@app/components/icon/BatIcon";
 import { CrownIcon } from "@app/components/icon/CrownIcon";
 import { GloveIcon } from "@app/components/icon/GloveIcon";
 import { LockIcon } from "@app/components/icon/LockIcon";
@@ -16,6 +18,11 @@ import StatsShareComponent from "@app/components/share/StatsShareComponent";
 import AvatarComponent from "@app/components/user/AvatarComponent";
 import IndividualResultsList from "@app/components/user/IndividualResultsList";
 import MatchResultList from "@app/components/user/MatchResultList";
+import {
+  BATTING_SIDE_LABELS,
+  type BattingSide,
+} from "@app/constants/handedness";
+import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import getMyTeams from "@app/hooks/team/getTeams";
 import getUserAwards from "@app/hooks/user/getUserAwards";
@@ -162,6 +169,31 @@ export default function MyPage() {
                     </>
                   ) : (
                     ""
+                  )}
+                  {(userData.user.throw_hand || userData.user.batting_side) && (
+                    <ul className="flex items-center gap-x-2 mt-1.5 relative -left-0.5">
+                      <li>
+                        <BatIcon width="18" height="18" fill="#F4F4F4d0" />
+                      </li>
+                      <li>
+                        <p className="text-sm text-zinc-400">
+                          {[
+                            userData.user.throw_hand
+                              ? THROW_HAND_FULL_LABELS[
+                                  userData.user.throw_hand as ThrowHand
+                                ]
+                              : null,
+                            userData.user.batting_side
+                              ? BATTING_SIDE_LABELS[
+                                  userData.user.batting_side as BattingSide
+                                ]
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" / ")}
+                        </p>
+                      </li>
+                    </ul>
                   )}
                   {teamData && teamData.name && (
                     <>

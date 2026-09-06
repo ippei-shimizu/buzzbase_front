@@ -1,5 +1,6 @@
 "use client";
 import type { AwardData, UserAwards } from "@app/interface";
+import type { ThrowHand } from "@app/interface/pitcher";
 import type { SharedSelection } from "@heroui/system";
 import {
   Autocomplete,
@@ -21,6 +22,13 @@ import HeaderSave from "@app/components/header/HeaderSave";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import SaveSpinner from "@app/components/spinner/SavingSpinner";
 import UserIdInput from "@app/components/user/UserIdInput";
+import {
+  BATTING_SIDES,
+  BATTING_SIDE_LABELS,
+  THROW_HANDS,
+  type BattingSide,
+} from "@app/constants/handedness";
+import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   createAward,
@@ -111,6 +119,8 @@ export default function ProfileEdit() {
   const [deletedAwards, setDeletedAwards] = useState<number[]>([]);
   const [awards, setAwards] = useState<UserAwards[]>([]);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [throwHand, setThrowHand] = useState<ThrowHand | null>(null);
+  const [battingSide, setBattingSide] = useState<BattingSide | null>(null);
 
   const router = useRouter();
   const isLoggedIn = useRequireAuth();
@@ -132,6 +142,8 @@ export default function ProfileEdit() {
       });
 
       setIsPrivate(data.is_private || false);
+      setThrowHand(data.throw_hand ?? null);
+      setBattingSide(data.batting_side ?? null);
 
       // ポジション一覧取得
       const positionsData = await getPositions();
@@ -263,6 +275,9 @@ export default function ProfileEdit() {
     formData.append("user[introduction]", profile.introduction);
     formData.append("user[user_id]", profile.user_id.toString());
     formData.append("user[is_private]", isPrivate.toString());
+    // 未選択に戻したときは空文字を送り、サーバー側で nil に正規化される。
+    formData.append("user[throw_hand]", throwHand ?? "");
+    formData.append("user[batting_side]", battingSide ?? "");
     const file = fileInputRef.current?.files?.[0];
     if (profile.image && profile.image.startsWith("blob:") && file) {
       formData.append("user[image]", file);
@@ -601,6 +616,57 @@ export default function ProfileEdit() {
                     </SelectItem>
                   ))}
                 </Select>
+                {/* 利き腕・打席 */}
+                <div className="flex flex-col gap-y-2 mt-6">
+                  <p className="text-sm font-medium">利き腕（投）</p>
+                  <div className="flex gap-x-2">
+                    {THROW_HANDS.map((hand) => {
+                      const isSelected = throwHand === hand;
+                      return (
+                        <Button
+                          key={hand}
+                          size="sm"
+                          radius="sm"
+                          variant={isSelected ? "solid" : "bordered"}
+                          className={
+                            isSelected
+                              ? "border-2 border-[#d08000] bg-[#d08000] text-white"
+                              : "border-2 border-[#d08000] bg-transparent text-[#d08000]"
+                          }
+                          onPress={() => setThrowHand(isSelected ? null : hand)}
+                        >
+                          {THROW_HAND_FULL_LABELS[hand]}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-y-2 mt-4">
+                  <p className="text-sm font-medium">打席</p>
+                  <div className="flex gap-x-2">
+                    {BATTING_SIDES.map((side) => {
+                      const isSelected = battingSide === side;
+                      return (
+                        <Button
+                          key={side}
+                          size="sm"
+                          radius="sm"
+                          variant={isSelected ? "solid" : "bordered"}
+                          className={
+                            isSelected
+                              ? "border-2 border-[#d08000] bg-[#d08000] text-white"
+                              : "border-2 border-[#d08000] bg-transparent text-[#d08000]"
+                          }
+                          onPress={() =>
+                            setBattingSide(isSelected ? null : side)
+                          }
+                        >
+                          {BATTING_SIDE_LABELS[side]}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
                 {/* チーム */}
                 <p className="text-lg font-bold mt-8">チーム設定</p>
                 <Autocomplete

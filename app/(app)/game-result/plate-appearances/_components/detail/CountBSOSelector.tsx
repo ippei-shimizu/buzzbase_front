@@ -1,4 +1,5 @@
 "use client";
+import { BSOBoard, type BSOKey } from "@app/components/baseball/BSOBoard";
 
 export type DetailCountKey = "finalBalls" | "finalStrikes" | "finalOuts";
 
@@ -10,20 +11,15 @@ interface CountBSOSelectorProps {
   description?: string;
 }
 
-const ROWS: {
-  key: DetailCountKey;
-  label: string;
-  max: number;
-  color: string;
-}[] = [
-  { key: "finalBalls", label: "ボール", max: 3, color: "#22c55e" },
-  { key: "finalStrikes", label: "ストライク", max: 2, color: "#eab308" },
-  { key: "finalOuts", label: "アウト", max: 2, color: "#ef4444" },
-];
+const DETAIL_KEY_BY_BSO: Record<BSOKey, DetailCountKey> = {
+  balls: "finalBalls",
+  strikes: "finalStrikes",
+  outs: "finalOuts",
+};
 
 /**
  * 最終カウントを球場カウントボード風のドット UI で入力する。
- * ドット i をタップで値を i+1 に、点灯済みの最後のドット再タップで 1 段下げる。
+ * 描画は共通の BSOBoard に委譲し、DetailState 向けのキー変換だけを担う。
  */
 export function CountBSOSelector({
   balls,
@@ -32,12 +28,6 @@ export function CountBSOSelector({
   onChange,
   description,
 }: CountBSOSelectorProps) {
-  const values: Record<DetailCountKey, number | null> = {
-    finalBalls: balls,
-    finalStrikes: strikes,
-    finalOuts: outs,
-  };
-
   return (
     <div className="flex flex-col gap-y-2 rounded-lg bg-[#1f1f1f] p-3">
       <div>
@@ -46,38 +36,12 @@ export function CountBSOSelector({
           <p className="text-xs text-zinc-400">{description}</p>
         ) : null}
       </div>
-      <div className="flex flex-col gap-y-2">
-        {ROWS.map((row) => {
-          const current = values[row.key] ?? 0;
-          return (
-            <div key={row.key} className="flex items-center gap-x-4">
-              <span className="text-xs text-zinc-300 w-24">{row.label}</span>
-              {/* ラベルの直後にドットを左揃え。本数が違っても各行の先頭ドットが縦に揃う。 */}
-              <div className="flex gap-x-2 w-24 justify-start">
-                {Array.from({ length: row.max }).map((_, index) => {
-                  const lit = index < current;
-                  const isLastLit = index === current - 1;
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      aria-label={`${row.label} ${index + 1}`}
-                      className="h-6 w-6 rounded-full border-2"
-                      style={{
-                        borderColor: row.color,
-                        backgroundColor: lit ? row.color : "transparent",
-                      }}
-                      onClick={() =>
-                        onChange(row.key, isLastLit ? index : index + 1)
-                      }
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <BSOBoard
+        balls={balls}
+        strikes={strikes}
+        outs={outs}
+        onChange={(key, value) => onChange(DETAIL_KEY_BY_BSO[key], value)}
+      />
     </div>
   );
 }
