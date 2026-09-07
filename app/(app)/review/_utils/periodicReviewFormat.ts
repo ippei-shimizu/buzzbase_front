@@ -1,4 +1,7 @@
-import type { PeriodicReview } from "@app/types/periodicReview";
+import type {
+  PeriodicReview,
+  PeriodicReviewType,
+} from "@app/types/periodicReview";
 import type { DecimalValue } from "@app/types/practice";
 import { parseDecimal } from "@app/constants/practice";
 
@@ -24,6 +27,16 @@ export function formatDelta(
   return `${parsed >= 0 ? "+" : ""}${formatRatio(parsed)}`;
 }
 
+/**
+ * 前期間比の文字色。上がったか下がったかを数字を読む前に判別できるよう符号で塗り分ける。
+ * 増減なし（±0）は良し悪しが無いため通常色のままにする。
+ */
+export function deltaToneClass(value: DecimalValue | null | undefined): string {
+  const parsed = parseDecimal(value);
+  if (parsed === null || parsed === 0) return "text-zinc-400";
+  return parsed > 0 ? "text-green-400" : "text-red-400";
+}
+
 /** 防御率・WHIP などの小数指標。桁数を指定する。値が無ければ「-」。 */
 export function formatFixed(
   value: DecimalValue | null | undefined,
@@ -47,6 +60,29 @@ export function formatCount(
 /** 「2026/07/06」形式。back は "2026-07-06" を返す。 */
 export function formatPeriodDate(value: string): string {
   return value.replaceAll("-", "/");
+}
+
+/**
+ * カード見出し。週次は period_start が属する月内の何週目か（「7月 第2週の振り返り」）、
+ * 月次は月表記（「2026年7月の振り返り」）にする。
+ * 月をまたぐ週は開始日（月曜）の月に帰属させる。第N週は開始日の日付から
+ * 7日刻み（1〜7日=第1週、8〜14日=第2週…）で決める。
+ */
+export function periodicReviewTitle(review: {
+  period_type: PeriodicReviewType;
+  period_start: string;
+}): string {
+  const [year, month, day] = review.period_start.split("-").map(Number);
+  if (review.period_type === "monthly") {
+    return `${year}年${month}月の振り返り`;
+  }
+  const weekOfMonth = Math.floor((day - 1) / 7) + 1;
+  return `${month}月 第${weekOfMonth}週の振り返り`;
+}
+
+/** 月ページャ用に period_start の日付（YYYY-MM-DD）を返す。 */
+export function reviewDate(review: { period_start: string }): string {
+  return review.period_start;
 }
 
 /** 未読レポートの id 一覧。既読化の対象を決めるのに使う。 */
