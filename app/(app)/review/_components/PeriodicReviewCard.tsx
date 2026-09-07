@@ -78,8 +78,10 @@ function goalValueLabel(goal: PeriodicReviewGoal): string {
   if (goal.kind === "manual") {
     const current = formatCount(goal.current_value);
     const target = formatCount(goal.target_value);
-    const label = goal.custom_metric_label ?? "";
-    return `${label} ${current} / ${target}`;
+    const label = goal.custom_metric_label
+      ? `${goal.custom_metric_label} `
+      : "";
+    return `${label}${current} / ${target}`;
   }
   const key = (goal.metric_key ?? null) as GoalMetricKey | null;
   const current =

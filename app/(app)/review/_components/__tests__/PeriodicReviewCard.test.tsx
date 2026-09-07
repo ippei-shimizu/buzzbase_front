@@ -395,6 +395,33 @@ describe("PeriodicReviewCard", () => {
     expect(screen.getByText("達成")).toBeInTheDocument();
   });
 
+  it("ラベルの無い manual 目標は先頭に余分な空白を出さない", () => {
+    render(
+      <PeriodicReviewCard
+        review={buildReview({
+          summary: {
+            goals: [
+              {
+                id: 1,
+                title: "自主練の回数",
+                kind: "manual",
+                metric_key: null,
+                custom_metric_label: null,
+                current_value: 12,
+                target_value: 20,
+                progress_percent: 60,
+                achieved: false,
+                deadline: "2026-07-31",
+              },
+            ],
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("12 / 20（60%）")).toBeInTheDocument();
+  });
+
   it("目標値が欠けている numeric 目標は目標値を - で表示する", () => {
     render(
       <PeriodicReviewCard
