@@ -61,6 +61,8 @@ export default function PeriodicReviewList({
   const requestedIdsRef = useRef<Set<number>>(new Set());
 
   // 一覧を開いた時点で未読をまとめて既読にする（未読バッジの解消）。
+  // 対象は表示中の月ではなく全件。過去月にも未読が残ると、そこまで送らない限り
+  // バッジが消えなくなるため。
   // 既読化の失敗は握りつぶす。既読が付かなくてもレポートは読めるべきで、
   // ここでエラーを投げると一覧ごと落ちてしまうため。
   useEffect(() => {
