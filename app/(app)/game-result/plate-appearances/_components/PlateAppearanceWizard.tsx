@@ -57,6 +57,11 @@ const detailFromPlateAppearance = (pa: PlateAppearanceV2): DetailState => ({
   contactQualityId: pa.contact_quality?.id ?? null,
   timingId: pa.timing?.id ?? null,
   pitchTypeId: pa.pitch_type?.id ?? null,
+  pitchCourse: pa.pitch_course ?? null,
+  pitchCourseLocation:
+    pa.pitch_course_x != null && pa.pitch_course_y != null
+      ? { x: Number(pa.pitch_course_x), y: Number(pa.pitch_course_y) }
+      : null,
   selfAnalysisMemo: pa.self_analysis_memo,
   pitcherId: pa.pitcher?.id ?? null,
   appearanceSituationId: pa.appearance_situation?.id ?? null,
@@ -226,6 +231,13 @@ export function PlateAppearanceWizard({
       contact_quality_id: detail.contactQualityId,
       timing_id: detail.timingId,
       pitch_type_id: detail.pitchTypeId,
+      pitch_course: detail.pitchCourse,
+      pitch_course_x: detail.pitchCourseLocation
+        ? roundHitLocation(detail.pitchCourseLocation.x)
+        : null,
+      pitch_course_y: detail.pitchCourseLocation
+        ? roundHitLocation(detail.pitchCourseLocation.y)
+        : null,
       self_analysis_memo: detail.selfAnalysisMemo,
       pitcher_id: detail.pitcherId,
       appearance_situation_id: detail.appearanceSituationId,

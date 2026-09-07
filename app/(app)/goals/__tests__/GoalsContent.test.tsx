@@ -52,6 +52,20 @@ const mockUnachieve = unachieveGoal as jest.MockedFunction<
   typeof unachieveGoal
 >;
 
+// 月次目標の対象期間は「実行日の当月」から決まるため、期待値も実行時に組み立てる。
+// 固定日付を書くと月が変わった時点で必ず落ちる（jest は TZ=Asia/Tokyo 固定）。
+const currentMonthRange = (() => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const yearMonth = `${year}-${pad(month + 1)}`;
+  return {
+    start: `${yearMonth}-01`,
+    end: `${yearMonth}-${pad(new Date(year, month + 1, 0).getDate())}`,
+  };
+})();
+
 function buildGoal(overrides: Partial<Goal> = {}): Goal {
   return {
     id: 1,
@@ -696,8 +710,8 @@ describe("GoalsContent", () => {
         period_type: "monthly",
         season_id: null,
         tournament_id: null,
-        month_start: "2026-08-01",
-        deadline: "2026-08-31",
+        month_start: currentMonthRange.start,
+        deadline: currentMonthRange.end,
         metric_key: "practice_days",
         target_value: 20,
         comparison_type: "greater_than",

@@ -10,13 +10,6 @@ jest.mock("sonner", () => ({
   toast: { error: jest.fn(), info: jest.fn(), success: jest.fn() },
 }));
 
-// flag の解決そのものは useFeatureFlag のテストで担保する。ここでは判定ごとの描画だけを見る。
-const mockUseFeatureFlag = jest.fn();
-jest.mock("@app/hooks/featureFlags/useFeatureFlag", () => ({
-  useFeatureFlag: (key: string, options?: { skip?: boolean }) =>
-    mockUseFeatureFlag(key, options),
-}));
-
 const mockUseProStatus = jest.fn();
 jest.mock("@app/hooks/pro/useProStatus", () => ({
   useProStatus: () => mockUseProStatus(),
@@ -27,13 +20,9 @@ import { APP_ONLY_LABEL } from "@app/components/pro/proFeatureCatalog";
 import { DEFAULT_PRO_STATUS } from "@app/types/pro";
 import ProUpgradeModal from "../ProUpgradeModal";
 
-const UNRELEASED_MESSAGE =
-  "Proプランは近日公開予定です。もうしばらくお待ちください。";
-
 describe("ProUpgradeModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFeatureFlag.mockReturnValue("enabled");
     mockUseProStatus.mockReturnValue({
       proStatus: DEFAULT_PRO_STATUS,
       isPro: false,
@@ -176,39 +165,5 @@ describe("ProUpgradeModal", () => {
     render(<ProUpgradeModal isOpen onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: "閉じる" }));
     expect(onClose).toHaveBeenCalled();
-  });
-
-  it("pro_features が無効なら CTA を出さず未公開であることを伝える", () => {
-    mockUseFeatureFlag.mockReturnValue("disabled");
-
-    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
-
-    expect(screen.queryByTestId("pro-upgrade-cta")).not.toBeInTheDocument();
-    expect(screen.getByText(UNRELEASED_MESSAGE)).toBeInTheDocument();
-  });
-
-  it("判定不能のときは未公開と告知せず CTA を残す", () => {
-    mockUseFeatureFlag.mockReturnValue("indeterminate");
-
-    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
-
-    expect(screen.getByTestId("pro-upgrade-cta")).toBeInTheDocument();
-    expect(screen.queryByText(UNRELEASED_MESSAGE)).not.toBeInTheDocument();
-  });
-
-  it("閉じている間は flag を評価しない", () => {
-    render(<ProUpgradeModal isOpen={false} onClose={jest.fn()} />);
-
-    expect(mockUseFeatureFlag).toHaveBeenCalledWith("pro_features", {
-      skip: true,
-    });
-  });
-
-  it("開いている間は flag を評価する", () => {
-    render(<ProUpgradeModal isOpen onClose={jest.fn()} />);
-
-    expect(mockUseFeatureFlag).toHaveBeenCalledWith("pro_features", {
-      skip: false,
-    });
   });
 });

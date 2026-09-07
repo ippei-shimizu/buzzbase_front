@@ -13,11 +13,6 @@ jest.mock("../../../../lib/sentry-helpers", () => ({
   captureServerActionError: jest.fn(),
 }));
 
-const mockGetFeatureFlags = jest.fn();
-jest.mock("../../../featureFlags/actions", () => ({
-  getFeatureFlags: (keys: string[]) => mockGetFeatureFlags(keys),
-}));
-
 import {
   getProStatus,
   getProStatusResult,
@@ -163,7 +158,6 @@ describe("startProCheckout", () => {
     jest.clearAllMocks();
     global.fetch = jest.fn();
     process.env.APP_URL = "http://localhost:8100";
-    mockGetFeatureFlags.mockResolvedValue({ pro_features: true });
   });
 
   afterAll(() => {
@@ -207,38 +201,6 @@ describe("startProCheckout", () => {
 
     expect(result).toEqual({ ok: false, error: "unauthorized" });
     expect(global.fetch).not.toHaveBeenCalled();
-  });
-
-  it("pro_features が無効なら Stripe を呼ばずに feature_disabled を返す", async () => {
-    setupAuthCookies();
-    mockGetFeatureFlags.mockResolvedValue({ pro_features: false });
-
-    const result = await startProCheckout({ plan: "monthly" });
-
-    expect(result).toEqual({ ok: false, error: "feature_disabled" });
-    expect(global.fetch).not.toHaveBeenCalled();
-  });
-
-  it("flag が判定できないときも Stripe を呼ばない", async () => {
-    // getFeatureFlags は取得失敗を false に倒すため、ここでも決済は開始されない。
-    setupAuthCookies();
-    mockGetFeatureFlags.mockResolvedValue({ pro_features: false });
-
-    const result = await startProCheckout({ plan: "yearly" });
-
-    expect(result).toEqual({ ok: false, error: "feature_disabled" });
-    expect(global.fetch).not.toHaveBeenCalled();
-  });
-
-  it("未認証のときは flag を引かずに unauthorized を返す", async () => {
-    // 「ログインが必要」を「販売停止中」と取り違えないよう、認証チェックを先に通す。
-    mockGet.mockReturnValue(undefined);
-    mockGetFeatureFlags.mockResolvedValue({ pro_features: false });
-
-    const result = await startProCheckout({ plan: "monthly" });
-
-    expect(result).toEqual({ ok: false, error: "unauthorized" });
-    expect(mockGetFeatureFlags).not.toHaveBeenCalled();
   });
 
   it("401 のとき unauthorized を返す", async () => {

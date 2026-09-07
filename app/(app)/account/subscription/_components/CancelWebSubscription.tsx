@@ -6,7 +6,6 @@ import {
   cancelWebSubscription,
   type CancelWebSubscriptionError,
 } from "../actions";
-import CancellationSurveyModal from "./CancellationSurveyModal";
 
 const ERROR_MESSAGES: Record<CancelWebSubscriptionError, string> = {
   unauthorized:
@@ -22,15 +21,8 @@ const ERROR_MESSAGES: Record<CancelWebSubscriptionError, string> = {
  * Web（Stripe）加入者がこの画面から解約するためのボタンと確認ダイアログ。
  * back は cancel_at_period_end で受け付けるため、解約後も次回更新日までは Pro 機能を使える。
  * その旨を確認時と完了時の両方で明示する。
- *
- * @param surveyEnabled 解約理由アンケートを出すか。back の Flipper :cancellation_survey が
- *   有効と確定したときだけ true にする（無効・判定不能なら完了ダイアログのみを出す）。
  */
-export default function CancelWebSubscription({
-  surveyEnabled = false,
-}: {
-  surveyEnabled?: boolean;
-}) {
+export default function CancelWebSubscription() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isDone, setIsDone] = useState(false);
@@ -62,9 +54,6 @@ export default function CancelWebSubscription({
     });
   };
 
-  // アンケートは解約が受理されたあとの任意回答。フラグが有効なときだけ完了ダイアログの代わりに出す。
-  const showSurvey = isOpen && isDone && surveyEnabled;
-
   return (
     <>
       <button
@@ -75,9 +64,7 @@ export default function CancelWebSubscription({
         この画面で解約する
       </button>
 
-      {showSurvey ? <CancellationSurveyModal onClose={closeDialog} /> : null}
-
-      {isOpen && !showSurvey ? (
+      {isOpen ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6"
           onKeyDown={(event) => {

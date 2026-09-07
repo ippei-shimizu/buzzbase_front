@@ -56,6 +56,7 @@ const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "hit_direction_average",
   "count_situation_average",
   "pitch_type_average",
+  "pitch_course_average",
   "pitcher_faceoff_average",
   "unlimited_media_uploads",
   "unlimited_menu_sets",

@@ -4,13 +4,7 @@ import ProPlanSettingsItem from "./ProPlanSettingsItem";
 import SettingsItem from "./SettingsItem";
 import SettingsSection from "./SettingsSection";
 
-interface AccountSectionProps {
-  proFeaturesEnabled: boolean;
-}
-
-export default function AccountSection({
-  proFeaturesEnabled,
-}: AccountSectionProps) {
+export default function AccountSection() {
   return (
     <SettingsSection title="アカウント">
       <SettingsItem
@@ -19,17 +13,13 @@ export default function AccountSection({
         title="プロフィール編集"
         description="公開設定・名前・チーム・ポジションなどを変更"
       />
-      {proFeaturesEnabled ? (
-        <>
-          <ProPlanSettingsItem />
-          <SettingsItem
-            href="/account/subscription"
-            icon={<CrownIcon fill="#d08000" width="20" height="20" />}
-            title="サブスクリプション管理"
-            description="Proプランの加入状態・解約方法を確認"
-          />
-        </>
-      ) : null}
+      <ProPlanSettingsItem />
+      <SettingsItem
+        href="/account/subscription"
+        icon={<CrownIcon fill="#d08000" width="20" height="20" />}
+        title="サブスクリプション管理"
+        description="Proプランの加入状態・解約方法を確認"
+      />
     </SettingsSection>
   );
 }
