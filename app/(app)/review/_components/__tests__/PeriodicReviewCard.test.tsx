@@ -394,6 +394,32 @@ describe("PeriodicReviewCard", () => {
     expect(screen.getByText("達成")).toBeInTheDocument();
   });
 
+  it("目標値が欠けている numeric 目標は目標値を - で表示する", () => {
+    render(
+      <PeriodicReviewCard
+        review={buildReview({
+          summary: {
+            goals: [
+              {
+                id: 1,
+                title: "打率.300を超える",
+                kind: "numeric",
+                metric_key: "batting_average",
+                current_value: 0.312,
+                target_value: null,
+                progress_percent: null,
+                achieved: false,
+                deadline: "2026-07-31",
+              },
+            ],
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("打率 .312 / -")).toBeInTheDocument();
+  });
+
   it("課題別内訳とインサイトは summary にあるときだけ表示する", () => {
     const { rerender } = render(<PeriodicReviewCard review={buildReview()} />);
     expect(screen.queryByText("課題")).not.toBeInTheDocument();

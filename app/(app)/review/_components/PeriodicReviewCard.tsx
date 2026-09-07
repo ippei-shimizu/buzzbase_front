@@ -86,7 +86,10 @@ function goalValueLabel(goal: PeriodicReviewGoal): string {
     goal.current_value == null
       ? MISSING_VALUE
       : formatMetricValue(key, goal.current_value);
-  const target = formatMetricValue(key, goal.target_value);
+  const target =
+    goal.target_value == null
+      ? MISSING_VALUE
+      : formatMetricValue(key, goal.target_value);
   return `${metricLabel(key)} ${current} / ${target}`;
 }
 
