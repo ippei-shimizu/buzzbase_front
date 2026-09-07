@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCachedProStatusResult } from "@app/(app)/pro/proStatus";
 import Header from "@app/components/header/Header";
-import { getCachedFeatureFlagDecision } from "@app/featureFlags/cachedFeatureFlags";
 import SubscriptionLoadError from "./_components/SubscriptionLoadError";
 import SubscriptionOverview from "./_components/SubscriptionOverview";
 
@@ -24,18 +23,7 @@ export default async function AccountSubscriptionPage() {
 
   // 認証済みで取得できないのは API 障害かトークン失効。無料状態にフォールバックすると
   // 課金中のユーザーに未加入と誤表示するため、失敗理由ごとの導線を出す。
-  // アンケートの導線は「有効と確定した」ときだけ出す（判定不能で出すと back に 404 で弾かれる）。
-  const [result, surveyDecision, proFeaturesDecision] = await Promise.all([
-    getCachedProStatusResult(),
-    getCachedFeatureFlagDecision("cancellation_survey"),
-    getCachedFeatureFlagDecision("pro_features"),
-  ]);
-
-  // 設定画面からの導線は隠れるが URL 直打ちでは到達できてしまうため、ここでも閉じる。
-  // 判定不能では閉じない（cookie が届かないだけの課金中ユーザーを締め出さない）。
-  if (proFeaturesDecision === "disabled") {
-    redirect("/");
-  }
+  const result = await getCachedProStatusResult();
 
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
@@ -50,7 +38,6 @@ export default async function AccountSubscriptionPage() {
               {result.status === "ok" ? (
                 <SubscriptionOverview
                   subscription={result.proStatus.subscription}
-                  surveyEnabled={surveyDecision === "enabled"}
                 />
               ) : (
                 <SubscriptionLoadError reason={result.status} />

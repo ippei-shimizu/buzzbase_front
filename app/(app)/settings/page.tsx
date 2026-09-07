@@ -5,7 +5,6 @@ import Header from "@app/components/header/Header";
 import { MailIcon } from "@app/components/icon/MailIcon";
 import { NoteIcon } from "@app/components/icon/NoteIcon";
 import { StatsIcon } from "@app/components/icon/StatsIcon";
-import { getCachedFeatureFlagDecision } from "@app/featureFlags/cachedFeatureFlags";
 import AccountSection from "./_components/AccountSection";
 import DangerZone from "./_components/DangerZone";
 import SettingsItem from "./_components/SettingsItem";
@@ -26,9 +25,6 @@ export default async function SettingsPage() {
     redirect("/signup?auth_required=true");
   }
 
-  const proFeaturesDecision =
-    await getCachedFeatureFlagDecision("pro_features");
-
   return (
     <div className="buzz-dark flex flex-col w-full min-h-screen bg-main">
       <Header />
@@ -37,9 +33,7 @@ export default async function SettingsPage() {
           <div className="pt-20 px-4 lg:px-6">
             <h1 className="text-2xl font-bold text-white">設定</h1>
             <div className="mt-6 flex flex-col gap-6">
-              <AccountSection
-                proFeaturesEnabled={proFeaturesDecision === "enabled"}
-              />
+              <AccountSection />
               <SettingsSection title="ヘルプ">
                 <SettingsItem
                   href="/calculation-of-grades"
