@@ -4,6 +4,8 @@ import type { PeriodicReview } from "@app/types/periodicReview";
  * 無料ユーザーに見せるサンプルレポート。
  * ダミー UI ではなく実カードへ流し込み、加入後に何が届くのかを実レイアウトのまま伝える。
  * 毎週届く機能だと分かるよう 3 週分並べる。値は実在の記録ではない架空の選手のもの。
+ * 実データと同じ月別ページャに載せるため、3 週とも同じ月に収める（月をまたぐと
+ * 初期表示が 1 件になり「毎週届く」ことが伝わらない）。
  *
  * id は実データと取り違えないよう負の値にする（既読化の対象にもしない）。
  */
@@ -11,8 +13,8 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
   {
     id: -1,
     period_type: "weekly",
-    period_start: "2026-07-06",
-    period_end: "2026-07-12",
+    period_start: "2026-07-20",
+    period_end: "2026-07-26",
     read: true,
     summary: {
       period_type: "weekly",
@@ -110,8 +112,8 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
   {
     id: -2,
     period_type: "weekly",
-    period_start: "2026-06-29",
-    period_end: "2026-07-05",
+    period_start: "2026-07-13",
+    period_end: "2026-07-19",
     read: true,
     summary: {
       period_type: "weekly",
@@ -170,8 +172,8 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
   {
     id: -3,
     period_type: "weekly",
-    period_start: "2026-06-22",
-    period_end: "2026-06-28",
+    period_start: "2026-07-06",
+    period_end: "2026-07-12",
     read: true,
     summary: {
       period_type: "weekly",

@@ -84,6 +84,17 @@ describe("PeriodicReviewList", () => {
       expect(screen.queryByText(NOT_GENERATED)).not.toBeInTheDocument();
     });
 
+    it("サンプルも実データと同じ月別ページャに載せる", () => {
+      mockHasEntitlement.mockReturnValue(false);
+
+      render(<PeriodicReviewList result={okResult([])} />);
+
+      // サンプルは同じ月の3週分なので、1ページに3件並び前後の月へは送れない。
+      expect(screen.getByText("2026年7月（3件）")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "前の月" })).toBeDisabled();
+      expect(screen.getByRole("button", { name: "次の月" })).toBeDisabled();
+    });
+
     it("Pro ユーザーで 0 件なら未生成の案内を出し、訴求もサンプルも出さない", () => {
       mockHasEntitlement.mockReturnValue(true);
 
