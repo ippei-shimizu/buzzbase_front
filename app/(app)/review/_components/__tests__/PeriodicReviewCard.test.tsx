@@ -139,10 +139,10 @@ describe("PeriodicReviewCard", () => {
     expect(valueOf("素振り")).toBe("1,200");
     expect(valueOf("打率")).toBe(".312");
     expect(valueOf("防御率")).toBe("2.57");
-    expect(screen.getByText("打率 前期間比 +.026")).toBeInTheDocument();
+    expect(screen.getByText("+.026")).toBeInTheDocument();
   });
 
-  it("前期間比は上がった週を + 、下がった週を - で表示する", () => {
+  it("前期間比は上がった週を + 、下がった週を - で表示し、符号で色を変える", () => {
     const { rerender } = render(
       <PeriodicReviewCard
         review={buildReview({
@@ -150,7 +150,7 @@ describe("PeriodicReviewCard", () => {
         })}
       />,
     );
-    expect(screen.getByText("打率 前期間比 +.026")).toBeInTheDocument();
+    expect(screen.getByText("+.026")).toHaveClass("text-green-400");
 
     rerender(
       <PeriodicReviewCard
@@ -159,7 +159,17 @@ describe("PeriodicReviewCard", () => {
         })}
       />,
     );
-    expect(screen.getByText("打率 前期間比 -.012")).toBeInTheDocument();
+    expect(screen.getByText("-.012")).toHaveClass("text-red-400");
+
+    // 増減なしは良し悪しが無いため色を付けない。
+    rerender(
+      <PeriodicReviewCard
+        review={buildReview({
+          summary: { batting: { batting_average: 0.274, delta: 0 } },
+        })}
+      />,
+    );
+    expect(screen.getByText("+.000")).toHaveClass("text-zinc-400");
   });
 
   it("前期間比が無いレポートでは前期間比の行を出さない", () => {

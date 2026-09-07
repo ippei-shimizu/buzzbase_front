@@ -8,6 +8,7 @@ import { formatMetricValue, metricLabel } from "@app/constants/goal";
 import { parseDecimal } from "@app/constants/practice";
 import {
   MISSING_VALUE,
+  deltaToneClass,
   formatCount,
   formatDelta,
   formatFixed,
@@ -169,7 +170,14 @@ export default function PeriodicReviewCard({
             <Metric label="三振" value={formatCount(batting.strikeouts)} />
           </div>
           {delta ? (
-            <p className="mt-2 text-xs text-zinc-400">打率 前期間比 {delta}</p>
+            <p className="mt-2 text-xs text-zinc-400">
+              打率 前期間比{" "}
+              <span
+                className={`font-bold ${deltaToneClass(batting?.delta ?? null)}`}
+              >
+                {delta}
+              </span>
+            </p>
           ) : null}
         </>
       ) : null}

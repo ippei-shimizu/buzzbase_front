@@ -27,6 +27,16 @@ export function formatDelta(
   return `${parsed >= 0 ? "+" : ""}${formatRatio(parsed)}`;
 }
 
+/**
+ * 前期間比の文字色。上がったか下がったかを数字を読む前に判別できるよう符号で塗り分ける。
+ * 増減なし（±0）は良し悪しが無いため通常色のままにする。
+ */
+export function deltaToneClass(value: DecimalValue | null | undefined): string {
+  const parsed = parseDecimal(value);
+  if (parsed === null || parsed === 0) return "text-zinc-400";
+  return parsed > 0 ? "text-green-400" : "text-red-400";
+}
+
 /** 防御率・WHIP などの小数指標。桁数を指定する。値が無ければ「-」。 */
 export function formatFixed(
   value: DecimalValue | null | undefined,
