@@ -413,6 +413,7 @@ describe("PeriodicReviewCard", () => {
     );
 
     expect(screen.getByText("肩の開き（4回）")).toBeInTheDocument();
+    expect(screen.getByText("素振りと打率の関係")).toBeInTheDocument();
     expect(
       screen.getByText("素振りが多い週は打率が高い傾向があります。"),
     ).toBeInTheDocument();

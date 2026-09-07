@@ -3,6 +3,7 @@ import type {
   PeriodicReview,
   PeriodicReviewGoal,
 } from "@app/types/periodicReview";
+import LightBulbIcon from "@heroicons/react/24/solid/LightBulbIcon";
 import { formatMetricValue, metricLabel } from "@app/constants/goal";
 import { parseDecimal } from "@app/constants/practice";
 import {
@@ -296,7 +297,21 @@ export default function PeriodicReviewCard({
       {summary.insight ? (
         <>
           <SectionLabel>インサイト</SectionLabel>
-          <p className="text-sm leading-5 text-white">{summary.insight.body}</p>
+          {/* レポートの中で最も行動につながる情報のため、他のセクションより一段強く見せる。 */}
+          <div className="flex items-start gap-x-3 rounded-[10px] border-2 border-[#d08000] bg-[#3a3024] p-4">
+            <LightBulbIcon
+              className="h-6 w-6 shrink-0 text-[#d08000]"
+              aria-hidden
+            />
+            <div className="min-w-0">
+              <h5 className="text-base font-bold text-[#d08000]">
+                {summary.insight.title}
+              </h5>
+              <p className="mt-1.5 text-[15px] leading-6 text-white">
+                {summary.insight.body}
+              </p>
+            </div>
+          </div>
         </>
       ) : null}
     </article>
