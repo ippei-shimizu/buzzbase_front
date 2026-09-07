@@ -274,6 +274,7 @@ describe("PeriodicReviewCard", () => {
       />,
     );
 
+    expect(valueOf("投球回")).toBe("9.0");
     expect(valueOf("登板")).toBe("2");
     expect(valueOf("奪三振")).toBe("8");
     expect(valueOf("与四球")).toBe("3");

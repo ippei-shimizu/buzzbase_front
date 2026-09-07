@@ -189,6 +189,10 @@ export default function PeriodicReviewCard({
         <>
           <SectionLabel>投手</SectionLabel>
           <div className="flex flex-wrap gap-2">
+            <Metric
+              label="投球回"
+              value={formatFixed(pitching?.innings_pitched, 1)}
+            />
             <Metric label="防御率" value={formatFixed(pitching?.era, 2)} />
             <Metric label="WHIP" value={formatFixed(pitching?.whip, 2)} />
             <Metric label="K/9" value={formatFixed(pitching?.k_per_9, 1)} />
