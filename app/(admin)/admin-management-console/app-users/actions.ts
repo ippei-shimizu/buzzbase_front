@@ -25,6 +25,7 @@ export async function getAppUsers(
   const searchParams = new URLSearchParams();
   if (params.page) searchParams.set("page", params.page);
   if (params.per_page) searchParams.set("per_page", params.per_page);
+  if (params.id) searchParams.set("id", params.id);
   if (params.search) searchParams.set("search", params.search);
   if (params.sort_by) searchParams.set("sort_by", params.sort_by);
   if (params.sort_order) searchParams.set("sort_order", params.sort_order);

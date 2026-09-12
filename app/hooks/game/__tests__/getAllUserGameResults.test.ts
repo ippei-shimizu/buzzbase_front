@@ -63,7 +63,10 @@ describe("useAllUserGameResults", () => {
 
     expect(result.current.allUserGameResults).toEqual(mockData);
     expect(result.current.isError).toBeUndefined();
-    expect(axiosInstance.get).toHaveBeenCalledWith("/api/v2/game_results/all");
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      "/api/v2/game_results/all",
+      expect.objectContaining({ timeout: expect.any(Number) }),
+    );
   });
 
   it("試合結果が空の場合、空配列を返す", async () => {

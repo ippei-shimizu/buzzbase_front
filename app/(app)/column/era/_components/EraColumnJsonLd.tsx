@@ -11,9 +11,10 @@ export default function EraColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "防御率（ERA）とは？計算方法・目安値・良い数値の基準を解説",
+    headline:
+      "防御率（ERA・ぼうぎょりつ）とは？計算方法・目安値・良い数値の基準を解説",
     description:
-      "防御率（ERA）の意味・計算式・評価基準を解説。NPB・高校野球の目安値を一覧表で掲載。",
+      "防御率（ERA）の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、先発・中継ぎ別の基準も掲載。",
     url: "https://buzzbase.jp/column/era",
     publisher: {
       "@type": "Organization",
@@ -69,12 +70,12 @@ export default function EraColumnJsonLd({ faq }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }}
       />
-      {faqPage && (
+      {faqPage ? (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPage) }}
         />
-      )}
+      ) : null}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbList) }}

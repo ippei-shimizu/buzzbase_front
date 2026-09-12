@@ -51,14 +51,15 @@ export default function RootLayout({
       <meta name="application-name" content="BUZZ BASE" />
       <meta name="apple-itunes-app" content="app-id=6761011816" />
       <meta name="google-adsense-account" content="ca-pub-2173577862865148" />
-      {isProduction && (
-        <Script
-          async
-          strategy="afterInteractive"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2173577862865148"
-          crossOrigin="anonymous"
-        />
-      )}
+      {/* AdSense 本体スクリプトは Pro 判定が要るため (app)/layout.tsx の AdsenseScript が読み込む。
+          読み込み開始がハイドレーション後になる分を、接続だけ先に張って埋める */}
+      {/* AdSense 本体は crossOrigin="anonymous" で取得されるため、CORS 無しで張った接続は再利用されない */}
+      <link
+        rel="preconnect"
+        href="https://pagead2.googlesyndication.com"
+        crossOrigin="anonymous"
+      />
+      <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
       {isProduction && gaId && (
         <>
           <Script

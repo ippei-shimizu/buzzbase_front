@@ -7,11 +7,12 @@ import useCurrentUserImageId from "@app/hooks/user/useCurrentUserImageId";
 import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
 
 export default function HeaderUserMenu() {
-  const { isLoggedIn } = useAuthContext();
+  const { isLoggedIn, loading: isLoadingAuth } = useAuthContext();
   const pathName = usePathname();
-  const { currentUserData, isLoadingCurrentUserData } = useCurrentUserImageId();
+  const { currentUserData, isLoadingCurrentUserData } =
+    useCurrentUserImageId(isLoggedIn);
 
-  const isLoading = isLoadingCurrentUserData;
+  const isLoading = isLoadingAuth || isLoadingCurrentUserData;
 
   if (isLoading) {
     return (

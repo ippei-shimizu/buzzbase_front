@@ -9,6 +9,7 @@ import HeaderResult from "@app/components/header/HeaderResult";
 import { DeleteIcon } from "@app/components/icon/DeleteIcon";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { RECORD_PATTERN_STORAGE_KEY } from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   checkExistingBattingAverage,
@@ -24,6 +25,16 @@ import {
   updatePlateAppearance,
 } from "@app/services/plateAppearanceService";
 import { getCurrentUserId } from "@app/services/userService";
+
+// 記録パターンに応じた打撃入力後の遷移先。打撃のみ(batting)は投手入力を
+// スキップしてまとめへ、それ以外（both / pitching / 既定）は投手入力へ進む。
+const resolveBattingNextPath = (): string => {
+  const raw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
+  const pattern = raw ? JSON.parse(raw) : "both";
+  return pattern === "batting"
+    ? "/game-result/summary/"
+    : "/game-result/pitching/";
+};
 
 const battingResultsPositions = [
   { id: 0, direction: "-" },
@@ -144,6 +155,7 @@ const useBattingStatistics = (battingBoxes: BattingBox[]) => {
 
 export default function BattingRecord() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isBattingOnly, setIsBattingOnly] = useState(false);
   const [runsBattedIn, setRunsBattedIn] = useState(0);
   const [existingRunsBattedIn, setExistingRunsBattedIn] = useState(0);
   const [run, setRun] = useState(0);
@@ -279,6 +291,12 @@ export default function BattingRecord() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
+    // 記録パターンが「打撃のみ」かどうか（投手入力をスキップしてまとめへ進む）。
+    const recordPatternRaw = localStorage.getItem(RECORD_PATTERN_STORAGE_KEY);
+
+    setIsBattingOnly(
+      (recordPatternRaw ? JSON.parse(recordPatternRaw) : "both") === "batting",
+    );
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
@@ -458,7 +476,7 @@ export default function BattingRecord() {
       cs === 0;
 
     if (isBattingEmpty) {
-      router.push(`/game-result/pitching/`);
+      router.push(resolveBattingNextPath());
       return;
     }
 
@@ -553,7 +571,7 @@ export default function BattingRecord() {
           );
         }
       }
-      router.push(`/game-result/pitching/`);
+      router.push(resolveBattingNextPath());
     } catch {}
   };
   return (
@@ -762,7 +780,7 @@ export default function BattingRecord() {
                   endContent={<NextArrowIcon stroke="#F4F4F4" />}
                   isDisabled={isSubmitting}
                 >
-                  投手結果
+                  {isBattingOnly ? "試合結果まとめ" : "投手結果"}
                 </Button>
               </div>
             </form>
