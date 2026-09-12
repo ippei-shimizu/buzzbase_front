@@ -1,4 +1,5 @@
 "use client";
+import type { ThrowHand } from "@app/interface/pitcher";
 import { Spinner, Tab, Tabs } from "@heroui/react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -9,6 +10,7 @@ import ErrorMessages from "@app/components/auth/ErrorMessages";
 import FollowButton from "@app/components/button/FollowButton";
 import Header from "@app/components/header/Header";
 import { BallIcon } from "@app/components/icon/BallIcon";
+import { BatIcon } from "@app/components/icon/BatIcon";
 import { CrownIcon } from "@app/components/icon/CrownIcon";
 import { GloveIcon } from "@app/components/icon/GloveIcon";
 import { LockIcon } from "@app/components/icon/LockIcon";
@@ -16,11 +18,17 @@ import StatsShareComponent from "@app/components/share/StatsShareComponent";
 import AvatarComponent from "@app/components/user/AvatarComponent";
 import IndividualResultsList from "@app/components/user/IndividualResultsList";
 import MatchResultList from "@app/components/user/MatchResultList";
+import {
+  BATTING_SIDE_LABELS,
+  type BattingSide,
+} from "@app/constants/handedness";
+import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import getMyTeams from "@app/hooks/team/getTeams";
 import getUserAwards from "@app/hooks/user/getUserAwards";
 import getUserIdData from "@app/hooks/user/getUserIdData";
 import useCurrentUserId from "@app/hooks/user/useCurrentUserId";
+import FollowRequestBanner from "./_components/FollowRequestBanner";
 
 type Position = {
   id: string;
@@ -30,8 +38,12 @@ type Position = {
 export default function MyPage() {
   const { isLoggedIn, loading: authLoading } = useAuthContext();
   const [errors, setErrors] = useState<string[]>([]);
+  const [handledFollowRequestId, setHandledFollowRequestId] = useState<
+    number | null
+  >(null);
 
-  const { userData, isLoadingUsers, isErrorUser } = getUserIdData();
+  const { userData, isLoadingUsers, isErrorUser, mutateUserData } =
+    getUserIdData();
   const { teamData, isLoadingTeams: _isLoadingTeams } = getMyTeams();
   const { userAwards, isLoadingAwards: _isLoadingAwards } = getUserAwards();
   const { currentUserId, isLoadingCurrentUserId: _isLoadingCurrentUserId } =
@@ -72,6 +84,10 @@ export default function MyPage() {
   }
 
   const isCurrentUserPage = currentUserId?.id === userData?.user.id;
+  // 承認・拒否の直後は再検証で incoming_follow_request_id が null になるため、
+  // 処理した ID を保持して完了表示が一瞬で消えないようにする
+  const followRequestId =
+    userData.incoming_follow_request_id ?? handledFollowRequestId;
   const isPrivateAndNotApproved =
     userData?.is_private &&
     !isCurrentUserPage &&
@@ -92,6 +108,22 @@ export default function MyPage() {
         <main className="h-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
           <div className="pt-20 pb-20 bg-main lg:pt-14 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:pb-0 lg:mb-14">
             <div className="px-4 lg:p-6">
+              {!isCurrentUserPage && followRequestId ? (
+                <FollowRequestBanner
+                  // リクエストが送り直されて ID が変わったら完了表示を初期化する
+                  key={followRequestId}
+                  followRequestId={followRequestId}
+                  actorName={userData.user.name || "このユーザー"}
+                  onHandled={() => {
+                    setHandledFollowRequestId(followRequestId);
+                    mutateUserData();
+                  }}
+                  onFailed={() => {
+                    mutateUserData();
+                  }}
+                  setErrorsWithTimeout={setErrorsWithTimeout}
+                />
+              ) : null}
               <AvatarComponent userData={userData} />
               {!isPrivateAndNotApproved && (
                 <>
@@ -137,6 +169,31 @@ export default function MyPage() {
                     </>
                   ) : (
                     ""
+                  )}
+                  {(userData.user.throw_hand || userData.user.batting_side) && (
+                    <ul className="flex items-center gap-x-2 mt-1.5 relative -left-0.5">
+                      <li>
+                        <BatIcon width="18" height="18" fill="#F4F4F4d0" />
+                      </li>
+                      <li>
+                        <p className="text-sm text-zinc-400">
+                          {[
+                            userData.user.throw_hand
+                              ? THROW_HAND_FULL_LABELS[
+                                  userData.user.throw_hand as ThrowHand
+                                ]
+                              : null,
+                            userData.user.batting_side
+                              ? BATTING_SIDE_LABELS[
+                                  userData.user.batting_side as BattingSide
+                                ]
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" / ")}
+                        </p>
+                      </li>
+                    </ul>
                   )}
                   {teamData && teamData.name && (
                     <>

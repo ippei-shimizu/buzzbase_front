@@ -26,10 +26,11 @@ type BattingStats = {
 type Props = {
   battingAverage: BattingAverage[] | undefined;
   battingStats: BattingStats[] | undefined;
+  hideRankChange?: boolean;
 };
 
 export default function GroupBattingRankingTable(props: Props) {
-  const { battingAverage, battingStats } = props;
+  const { battingAverage, battingStats, hideRankChange } = props;
 
   const sortedBattingAverage = useMemo(
     () =>
@@ -140,6 +141,7 @@ export default function GroupBattingRankingTable(props: Props) {
           data={section.data}
           renderValue={section.renderValue}
           isFirst={index === 0}
+          hideRankChange={hideRankChange}
         />
       ))}
       {battingAvgSections.map((section) => (
@@ -149,6 +151,7 @@ export default function GroupBattingRankingTable(props: Props) {
           id={section.id}
           data={section.data}
           renderValue={section.renderValue}
+          hideRankChange={hideRankChange}
         />
       ))}
     </>

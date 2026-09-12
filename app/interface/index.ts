@@ -10,6 +10,20 @@ export interface SignInData {
   password: string;
 }
 
+export interface ResetPasswordData {
+  password: string;
+  passwordConfirmation: string;
+}
+
+// パスワード再設定メールのリンクから受け取るワンタイムトークン。
+// ログイン中セッションのCookieと混同しないよう、PUT /api/v1/auth/passwordの
+// リクエストヘッダーへ明示的に渡す。
+export interface ResetPasswordAuthHeaders {
+  accessToken: string;
+  client: string;
+  uid: string;
+}
+
 export interface EmailInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -370,8 +384,9 @@ export interface Notifications {
   actor_name: string;
   event_type: string;
   event_id: number;
-  read_at: Date;
-  created_at: Date;
+  // API は ISO8601 文字列で返す。未読は null
+  read_at: string | null;
+  created_at: string;
   actor_icon: {
     url: string;
   };
@@ -418,6 +433,15 @@ export interface userData {
   is_private: boolean;
   followers_count: number | null;
   following_count: number | null;
+  incoming_follow_request_id: number | null;
+}
+
+export interface FollowRequestBannerProps {
+  followRequestId: number;
+  actorName: string;
+  onHandled: () => void;
+  onFailed: () => void;
+  setErrorsWithTimeout: (errors: string[]) => void;
 }
 
 export interface HeaderNoteSaveProps {
@@ -426,22 +450,9 @@ export interface HeaderNoteSaveProps {
   hasChanges: boolean;
 }
 
-export interface createNoteProps {
-  date: string;
-  title: string;
-  memo: string;
-}
-
 export interface NoteEditorProps {
   memo: string;
   setMemo: (memo: string) => void;
-}
-
-export interface getNoteProps {
-  id: number;
-  title: string;
-  date: string;
-  memo: string[];
 }
 
 export interface ResendConfirmationModalProps {
@@ -450,4 +461,28 @@ export interface ResendConfirmationModalProps {
   email?: string;
   onResendSuccess: () => void;
   showEmailInput: boolean;
+}
+
+export interface InviteLinkResponse {
+  code: string;
+  group_name: string;
+  group_id: number;
+}
+
+export interface InviteLinkInfo {
+  group: {
+    id: number;
+    name: string;
+    icon: string | null;
+    member_count: number;
+  };
+  inviter: {
+    name: string;
+    image: { url: string | null };
+  };
+}
+
+export interface AcceptInviteLinkResponse {
+  success: boolean;
+  group_id: number;
 }

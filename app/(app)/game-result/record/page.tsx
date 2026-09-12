@@ -5,6 +5,8 @@ import type {
   SeasonData,
   TournamentData,
 } from "@app/interface";
+import type { RecordPattern } from "@app/interface/gameRecord";
+import type { Stadium } from "@app/interface/stadium";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -18,12 +20,16 @@ import {
   Textarea,
 } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
-import { type SetStateAction, useEffect, useState } from "react";
+import { type SetStateAction, useEffect, useRef, useState } from "react";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderResult from "@app/components/header/HeaderResult";
 import { NextArrowIcon } from "@app/components/icon/NextArrowIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import { APPEARANCE_TYPE_OPTIONS } from "@app/constants/appearanceType";
+import {
+  GAME_RECORD_EDIT_MODE_STORAGE_KEY,
+  RECORD_PATTERN_STORAGE_KEY,
+} from "@app/constants/gameRecord";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import {
   createGameResult,
@@ -44,6 +50,12 @@ import {
   updateTournament,
 } from "@app/services/tournamentsService";
 import { getCurrentUserId, getUserData } from "@app/services/userService";
+import { createStadium, searchStadiums } from "@app/services/v2/stadiumService";
+import { trackGameRecordStepViewed } from "@app/utils/analytics";
+import { upsertById } from "@app/utils/upsertById";
+import PatternSelector from "./_components/PatternSelector";
+import ScoreStepper from "./_components/ScoreStepper";
+import SeasonField from "./_components/SeasonField";
 
 // 打順の選択肢。代打・代走・途中出場・未出場のケースで「なし」を選べるよう先頭に追加。
 // 「なし」は id=""（空文字）として、state（matchBattingOrder）と Select の selectedKeys を一致させる。
@@ -87,7 +99,8 @@ export default function GameRecord() {
   const [userData, setUserData] = useState<userData | null>(null);
   const [existingGameDate, setExistingGameDate] = useState<string>("");
   const [myTeam, setMyTeam] = useState("");
-  const [existingMyTeam, setExistingMyTeam] = useState("");
+  // 自チームの id。既存チームが確定しているときだけ入り、手入力中は null。
+  const [myTeamId, setMyTeamId] = useState<number | null>(null);
   const [teamsData, setTeamsData] = useState<Team[]>([]);
   const [positionData, setPositionData] = useState<Position[]>([]);
   const [tournamentData, setTournamentData] = useState<TournamentData[]>([]);
@@ -98,10 +111,16 @@ export default function GameRecord() {
   const [existingOpponentTeam, setExistingOpponentTeam] = useState<
     number | undefined
   >(undefined);
-  const [myTeamScore, setMyTeamScore] = useState<number | null>(null);
-  const [opponentTeamScore, setOpponentTeamScore] = useState<number | null>(
-    null,
-  );
+  // 点数は完封 0-0 を許容するため初期値 0。手入力で空にしたときは null（未入力）。
+  const [myTeamScore, setMyTeamScore] = useState<number | null>(0);
+  const [opponentTeamScore, setOpponentTeamScore] = useState<number | null>(0);
+  const [stadiumName, setStadiumName] = useState("");
+  const [stadiumId, setStadiumId] = useState<number | null>(null);
+  const [stadiumData, setStadiumData] = useState<Stadium[]>([]);
+  // 既存試合の編集中かどうか（編集時はパターン選択を出さず単一ボタンにする）。
+  const [isEditMode, setIsEditMode] = useState(false);
+  // 対象試合の match_result が既に保存済みかどうか（中断ダイアログの文言に使う）。
+  const [isMatchResultSaved, setIsMatchResultSaved] = useState(false);
   const [matchBattingOrder, setMatchBattingOrder] = useState("");
   const [existingMatchBattingOrder, setExistingMatchBattingOrder] =
     useState("");
@@ -125,7 +144,6 @@ export default function GameRecord() {
   const [isMyTeamScoreValid, setIsMyTeamScoreValid] = useState(true);
   const [isOpponentTeamScoreValid, setIsOpponentTeamScoreValid] =
     useState(true);
-  const [isBattingOrderValid, setIsBattingOrderValid] = useState(true);
   const [isDefensivePositionValid, setIsDefensivePositionValid] =
     useState(true);
   const [errors, setErrors] = useState<string[]>([]);
@@ -135,34 +153,57 @@ export default function GameRecord() {
   const pathname = usePathname();
   const router = useRouter();
   useRequireAuth();
+  useEffect(() => {
+    trackGameRecordStepViewed(1);
+  }, []);
+  // 球場サジェスト検索のデバウンスタイマーと、最新リクエスト判定用のシーケンス番号。
+  const stadiumSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stadiumRequestId = useRef(0);
 
   const fetchData = async () => {
     try {
-      const currentUserData = await getUserData();
+      // 互いに独立した取得なので並列化して初期表示を速くする。
+      const [
+        currentUserData,
+        getTeamsList,
+        getTournamentList,
+        getSeasonsList,
+        positionDataList,
+        stadiumsResponse,
+      ] = await Promise.all([
+        getUserData(),
+        getTeams(),
+        getTournaments(),
+        getSeasons(),
+        getPositions(),
+        searchStadiums({}),
+      ]);
       setUserData(currentUserData);
-      const userTeamId = currentUserData.team_id;
-      const getTeamsList = await getTeams();
-      const getTournamentList = await getTournaments();
-      const getSeasonsList = await getSeasons();
       setTeamsData(getTeamsList);
       setSeasonsData(getSeasonsList);
       // マイチーム名取得
       const userTeam = getTeamsList.find(
-        (team: { id: string }) => team.id === userTeamId,
+        (team: { id: string }) => team.id === currentUserData.team_id,
       );
       if (userTeam) {
         setMyTeam(userTeam.name);
+        // 編集時は既存試合の my_team_id が先に入りうるので、未確定のときだけ
+        // プロフィールの所属チームで補う。
+        setMyTeamId((prev) => prev ?? Number(userTeam.id));
       }
-      const positionDataList = await getPositions();
       setPositionData(positionDataList);
       setTournamentData(getTournamentList);
+      setStadiumData(stadiumsResponse.data);
     } catch (error) {
       throw error;
     }
   };
 
-  // 既に同じgame_result_idが存在する場合
-  const fetchExistingMatchResult = async (gameResultId: number) => {
+  // 既に同じ game_result_id の試合記録が存在すれば各フィールドへ反映し、
+  // 見つかったかどうかを boolean で返す（新規記録時のデフォルト適用判定に使う）。
+  const fetchExistingMatchResult = async (
+    gameResultId: number,
+  ): Promise<boolean> => {
     try {
       const currentUserId = await getCurrentUserId();
       const existingMatchResult = await checkExistingMatchResults(
@@ -170,6 +211,13 @@ export default function GameRecord() {
         currentUserId,
       );
       if (existingMatchResult) {
+        // stadium_id と、back が解決済みで返す stadium_name を復元する。
+        if (existingMatchResult.stadium_id) {
+          setStadiumId(existingMatchResult.stadium_id);
+          if (existingMatchResult.stadium_name) {
+            setStadiumName(existingMatchResult.stadium_name);
+          }
+        }
         const date = new Date(existingMatchResult.date_and_time);
         const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
           .toString()
@@ -177,7 +225,7 @@ export default function GameRecord() {
         setExistingGameDate(formattedDate);
         setMatchType(existingMatchResult.match_type);
         setTournament(existingMatchResult.tournament_id);
-        setExistingMyTeam(existingMatchResult.my_team_id);
+        setMyTeamId(existingMatchResult.my_team_id);
         setMyTeamScore(existingMatchResult.my_team_score);
         setOpponentTeamScore(existingMatchResult.opponent_team_score);
         setExistingMatchBattingOrder(existingMatchResult.batting_order);
@@ -197,20 +245,49 @@ export default function GameRecord() {
         // ランタイムガードは不要。inning_format と同様にそのまま反映する。
         setAppearanceType(existingMatchResult.appearance_type);
       }
+      return Boolean(existingMatchResult);
     } catch (error) {
       console.error("Error fetching existing match result:", error);
+      return false;
+    }
+  };
+
+  // 新規記録時のフォーム初期値（直近試合の inning_format / 打順）を適用する。
+  const applyFormDefaults = async () => {
+    try {
+      const defaults = await getMatchResultFormDefaults();
+      if (defaults?.inning_format === 7 || defaults?.inning_format === 9) {
+        setInningFormat(defaults.inning_format);
+      }
+      if (defaults?.batting_order) {
+        setMatchBattingOrder(defaults.batting_order);
+        setExistingMatchBattingOrder(defaults.batting_order);
+      }
+    } catch (error) {
+      console.error("フォーム初期値の取得に失敗しました", error);
     }
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
+    // 既存試合の編集として入ったときだけ編集モード。新規記録フロー（保存して
+    // 戻った場合を含む）はパターン選択を出すため false のままにする。
+    const isEdit =
+      localStorage.getItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY) === "true";
+    setIsEditMode(isEdit);
     // ローカルストレージからid取得
     const savedGameResultId = localStorage.getItem("gameResultId");
     if (savedGameResultId) {
       setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchExistingMatchResult(JSON.parse(savedGameResultId));
+      // 既存試合がなければ（＝新規記録フロー）直近試合のデフォルトを適用する。
+      fetchExistingMatchResult(JSON.parse(savedGameResultId)).then((found) => {
+        setIsMatchResultSaved(found);
+        if (!found && !isEdit) applyFormDefaults();
+      });
     } else if (pathname === "/game-result/record") {
+      // gameResultId がない＝新規記録なので、編集フラグは確実に解除しておく。
+      localStorage.removeItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY);
+      setIsEditMode(false);
       // gameResultId がない場合は自動作成
       const createNew = async () => {
         try {
@@ -225,25 +302,7 @@ export default function GameRecord() {
         }
       };
       createNew();
-      // 新規作成時は直近試合のイニング制を初期値として読み込む（履歴なしは 9）
-      const loadInningFormatDefault = async () => {
-        try {
-          const defaults = await getMatchResultFormDefaults();
-          if (defaults?.inning_format === 7 || defaults?.inning_format === 9) {
-            setInningFormat(defaults.inning_format);
-          }
-        } catch (error) {
-          console.error("フォーム初期値の取得に失敗しました", error);
-        }
-      };
-      loadInningFormatDefault();
-    }
-    if (
-      !(pathname === "/game-result/battings") &&
-      !(pathname === "/game-result/record") &&
-      savedGameResultId
-    ) {
-      localStorage.removeItem("gameResultId");
+      applyFormDefaults();
     }
   }, [pathname]);
 
@@ -255,22 +314,23 @@ export default function GameRecord() {
         (position) => position.id === userPositionFirstId,
       );
       if (userPosition) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyPosition(userPosition.id.toString());
       }
     }
   }, [userData, positionData]);
 
-  // チーム名検索(編集時)
+  // 編集時は my_team_id だけ先に確定し、チーム一覧の到着タイミングは不定なので
+  // 一覧が揃ってから id を表示名へ解決する。
   useEffect(() => {
-    if (existingMyTeam) {
-      const foundTeam = teamsData.find((team) => team.id === existingMyTeam);
+    if (myTeamId) {
+      const foundTeam = teamsData.find(
+        (team) => String(team.id) === String(myTeamId),
+      );
       if (foundTeam) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMyTeam(foundTeam.name);
       }
     }
-  }, [existingMyTeam, teamsData]);
+  }, [myTeamId, teamsData]);
 
   // 今日の日付
   const [gameDate, setGameDate] = useState(() => {
@@ -295,16 +355,53 @@ export default function GameRecord() {
     setMatchType(event.target.value);
   };
 
-  // 自チーム名設定
-  const handleMyTeamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setExistingMyTeam(event.target.value);
-    setMyTeam(event.target.value);
+  // 自チーム名の入力。入力名が候補と完全一致すれば id を確定し、そうでなければ
+  // 未確定(null)に戻して保存時に新規作成させる。
+  const handleMyTeamInputChange = (value: string) => {
+    setMyTeam(value);
+    setMyTeamId((prev) => {
+      // 候補選択の直後は同じテキストで onInputChange が続けて発火する。名前だけで
+      // 引き直すと同名チームがあるとき先頭の id にすり替わるため、確定済み id の
+      // 名前と一致する間はその id を維持する。
+      const confirmed = teamsData.find(
+        (team) => String(team.id) === String(prev),
+      );
+      if (confirmed && confirmed.name === value) {
+        return prev;
+      }
+      const matched = teamsData.find((team) => team.name === value);
+      return matched ? Number(matched.id) : null;
+    });
+  };
+  // 候補の選択。allowsCustomValue では打ち替え時に null が飛びうるため、null は
+  // 無視して入力中の文字列を消さない（id の解除は onInputChange 側が担う）。
+  const handleMyTeamSelectionChange = (teamKey: React.Key | null) => {
+    if (teamKey == null) return;
+    const selectedTeam = teamsData.find(
+      (team) => String(team.id) === String(teamKey),
+    );
+    if (selectedTeam) {
+      setMyTeamId(Number(selectedTeam.id));
+      setMyTeam(selectedTeam.name);
+    }
   };
 
   // 相手チーム設定
-  const handleOpponentTeamChange = (teamName: React.Key | null) => {
-    setExistingOpponentTeam(Number(teamName));
-    setOpponentTeam(teamName as string);
+  const handleOpponentTeamChange = (teamKey: React.Key | null) => {
+    if (teamKey === null) {
+      // クリア時は id と名前の両方を空にして、選択済みチーム名が残らないようにする。
+      setExistingOpponentTeam(undefined);
+      setOpponentTeam("");
+      return;
+    }
+    // teamKey は選択された既存チームの id。id 文字列をそのまま opponentTeam に
+    // 入れると保存時に名前として createOrUpdateTeam へ渡り不正なチームが作られるため、
+    // id を保持しつつ表示名はチーム一覧から解決する。
+    setExistingOpponentTeam(Number(teamKey));
+    const selectedTeam = teamsData.find(
+      (team) => String(team.id) === String(teamKey),
+    );
+    setOpponentTeam(selectedTeam?.name ?? "");
   };
 
   const handleTournamentInputChange = (value: string) => {
@@ -321,16 +418,33 @@ export default function GameRecord() {
     setSelectedSeason(value as number | null);
   };
 
-  // 自分チーム得点
-  const handleMyScoreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMyTeamScore(Number(event.target.value));
+  // 球場の入力。入力名が候補と完全一致すれば id を確定、そうでなければ未確定(null)に
+  // 戻す。あわせてサーバー検索で候補を更新する。
+  const handleStadiumInputChange = (value: string) => {
+    setStadiumName(value);
+    const matched = stadiumData.find((stadium) => stadium.name === value);
+    setStadiumId(matched ? matched.id : null);
+    // デバウンス + 最新リクエスト勝ちで、高速入力時の過剰リクエストとレースを防ぐ。
+    if (stadiumSearchTimer.current) clearTimeout(stadiumSearchTimer.current);
+    stadiumSearchTimer.current = setTimeout(() => {
+      const requestId = stadiumRequestId.current + 1;
+      stadiumRequestId.current = requestId;
+      searchStadiums(value ? { q: value } : {}).then((response) => {
+        if (requestId === stadiumRequestId.current) {
+          setStadiumData(response.data);
+        }
+      });
+    }, 250);
   };
-
-  // 相手チーム得点
-  const handleOpponentScoreChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setOpponentTeamScore(Number(event.target.value));
+  const handleStadiumSelectionChange = (key: React.Key | null) => {
+    if (key == null) return;
+    const found = stadiumData.find(
+      (stadium) => String(stadium.id) === String(key),
+    );
+    if (found) {
+      setStadiumId(found.id);
+      setStadiumName(found.name);
+    }
   };
 
   // 打順。「なし」は id=""（空文字）なのでそのまま state に保存する。
@@ -373,7 +487,7 @@ export default function GameRecord() {
       setIsMatchDate(true);
     }
 
-    if (!myTeam) {
+    if (!myTeam.trim()) {
       setIsMyTeamValid(false);
       isValid = false;
       newErrors.push("自チーム名が未入力です。");
@@ -381,7 +495,9 @@ export default function GameRecord() {
       setIsMyTeamValid(true);
     }
 
-    if (!opponentTeam) {
+    // 既存試合の編集時は opponentTeam（名前）が空でも existingOpponentTeam（id）で
+    // 相手チームが確定しているため、どちらかがあれば入力済みとみなす。
+    if (!opponentTeam.trim() && !existingOpponentTeam) {
       setIsOpponentTeamValid(false);
       isValid = false;
       newErrors.push("相手チーム名が未入力です。");
@@ -405,18 +521,11 @@ export default function GameRecord() {
       setIsOpponentTeamScoreValid(true);
     }
 
-    // 先発／途中出場の場合のみ打順／守備位置を必須とする。
+    // 先発／途中出場の場合のみ守備位置を必須とする。
+    // 打順は DH 制で投手として出場する場合「なし」を許容するため任意。
     // 代打／代走／未出場は入力任意（出場区分切替時に自動で空文字がセットされる）。
     const lineupRequired =
       appearanceType === "starter" || appearanceType === "substitute";
-
-    if (lineupRequired && !matchBattingOrder && !existingMatchBattingOrder) {
-      setIsBattingOrderValid(false);
-      isValid = false;
-      newErrors.push("打順が未入力です。");
-    } else {
-      setIsBattingOrderValid(true);
-    }
 
     if (
       lineupRequired &&
@@ -438,8 +547,9 @@ export default function GameRecord() {
     return isValid;
   };
 
-  // フォームデータ送信
-  const handleSubmit = async () => {
+  // フォームデータ送信。pattern は新規記録時のパターン選択で渡される
+  // （編集 / 未出場の単一ボタン経由では undefined）。
+  const handleSubmit = async (pattern?: RecordPattern) => {
     if (!validateForm() || isSubmitting) {
       return;
     }
@@ -447,73 +557,100 @@ export default function GameRecord() {
     setErrors([]);
     try {
       const userId = userData?.id;
-      let myTeamId = teamsData.find((team) => team.name === myTeam)?.id;
-      if (!myTeamId) {
+
+      // 球場の解決: 入力名があり id 未確定なら新規作成して id を確定させる。
+      // 作成に失敗しても保存はブロックせず、球場なし（null）で続行する。
+      let resolvedStadiumId = stadiumId;
+      const trimmedStadiumName = stadiumName.trim();
+      if (trimmedStadiumName && !resolvedStadiumId) {
+        const createdStadium = await createStadium({
+          name: trimmedStadiumName,
+        });
+        if (createdStadium.ok) {
+          resolvedStadiumId = createdStadium.data.id;
+        } else {
+          setErrorsWithTimeout([
+            "球場の登録に失敗しました。球場なしで保存します。",
+          ]);
+        }
+      }
+      // 自チーム保存。既存チームが確定済み（myTeamId あり）なら新規作成せず id を
+      // そのまま使い、手入力で新しいチーム名を入れた場合のみ作成する。
+      let resolvedMyTeamId = myTeamId;
+      const trimmedMyTeam = myTeam.trim();
+      if (!resolvedMyTeamId && trimmedMyTeam !== "") {
         const newTeam = await createOrUpdateTeam({
           team: {
-            name: myTeam,
+            name: trimmedMyTeam,
             category_id: undefined,
             prefecture_id: undefined,
           },
         });
-        myTeamId = newTeam.data.id;
+        resolvedMyTeamId = Number(newTeam.data.id);
+      }
+      // 球場と違い自チームは必須項目なので、id を確定できなければ保存を中断する。
+      if (!resolvedMyTeamId) {
+        setErrorsWithTimeout(["自チームの登録に失敗しました。"]);
+        return;
       }
 
       // 大会保存
       let tournamentId = tournament;
+      const trimmedTournamentName = inputTournamentName.trim();
       const existingTournament = tournamentData.find(
-        (t) => t.name === inputTournamentName,
+        (t) => t.name === trimmedTournamentName,
       );
       if (existingTournament) {
         const updatedTournament = await updateTournament(
           existingTournament.id,
-          inputTournamentName,
+          trimmedTournamentName,
         );
         if (updatedTournament) {
           tournamentId = updatedTournament.id;
         }
-      } else if (inputTournamentName) {
+      } else if (trimmedTournamentName) {
         const newTournament = await createTournament({
-          name: inputTournamentName,
+          name: trimmedTournamentName,
         });
         if (newTournament) {
-          setTournamentData([...tournamentData, newTournament]);
+          // back は同名の大会があれば既存を返すため、id が重複しないよう置き換える。
+          setTournamentData((prev) => upsertById(prev, newTournament));
           tournamentId = newTournament.id;
         }
       }
 
       // シーズン保存
       let seasonId = selectedSeason;
-      if (inputSeasonName && !selectedSeason) {
+      const trimmedSeasonName = inputSeasonName.trim();
+      if (trimmedSeasonName && !selectedSeason) {
         const existingSeason = seasonsData.find(
-          (s) => s.name === inputSeasonName,
+          (s) => s.name === trimmedSeasonName,
         );
         if (existingSeason) {
           seasonId = existingSeason.id;
         } else {
-          const newSeason = await createSeason(inputSeasonName);
+          const newSeason = await createSeason(trimmedSeasonName);
           if (newSeason) {
-            setSeasonsData([...seasonsData, newSeason]);
+            // back は同名シーズンがあれば既存を返すため、id が重複しないよう置き換える。
+            setSeasonsData((prev) => upsertById(prev, newSeason));
             seasonId = newSeason.id;
           }
         }
       }
 
-      // 相手チーム保存
-      let opponentTeamId;
-      if (typeof opponentTeam === "string") {
+      // 相手チーム保存。既存チームを選択済み（existingOpponentTeam あり）の場合は
+      // 新規作成せず id をそのまま使い、手入力で新しいチーム名を入れた場合のみ作成する。
+      let opponentTeamId = existingOpponentTeam;
+      const trimmedOpponentTeam = opponentTeam.trim();
+      if (!opponentTeamId && trimmedOpponentTeam !== "") {
         const newTeamResponse = await createOrUpdateTeam({
           team: {
-            name: opponentTeam,
+            name: trimmedOpponentTeam,
             category_id: undefined,
             prefecture_id: undefined,
           },
         });
         opponentTeamId = newTeamResponse.data.id;
-      } else {
-        opponentTeamId = teamsData.find(
-          (team) => team.name === opponentTeam,
-        )?.id;
       }
       const matchResultData = {
         match_result: {
@@ -521,9 +658,7 @@ export default function GameRecord() {
           user_id: Number(userId),
           date_and_time: existingGameDate ? existingGameDate : gameDate,
           match_type: matchType,
-          my_team_id: Number(existingMyTeam)
-            ? Number(existingMyTeam)
-            : Number(myTeamId),
+          my_team_id: resolvedMyTeamId,
           opponent_team_id: existingOpponentTeam
             ? existingOpponentTeam
             : Number(opponentTeamId),
@@ -536,6 +671,7 @@ export default function GameRecord() {
             ? existingDefensivePosition
             : myPosition,
           tournament_id: tournamentId,
+          stadium_id: resolvedStadiumId,
           memo: matchMemo,
           inning_format: inningFormat,
           appearance_type: appearanceType,
@@ -574,20 +710,34 @@ export default function GameRecord() {
           );
         }
       }
-      // 未出場の場合は打撃・投手成績の入力をスキップして試合結果まとめへ。
+      // 記録パターンを次画面へ引き継ぐ（編集 / 未出場の単一ボタンは both 相当）。
+      const effectivePattern: RecordPattern = pattern ?? "both";
+      localStorage.setItem(
+        RECORD_PATTERN_STORAGE_KEY,
+        JSON.stringify(effectivePattern),
+      );
+      // 未出場はまとめへ、投手のみは投手入力へ、新規の打撃/両方と編集モードは
+      // 新仕様の v2 打席リストへ（旧仕様試合も保存時に新仕様カラムが埋まる）。
       const nextPath =
         appearanceType === "no_play"
           ? `/game-result/summary/`
-          : `/game-result/batting/`;
+          : pattern === "pitching"
+            ? `/game-result/pitching/`
+            : `/game-result/plate-appearances/`;
       router.push(nextPath);
     } catch (error) {
-      throw error;
+      console.error("試合結果の保存に失敗しました", error);
+      setErrorsWithTimeout([
+        "保存に失敗しました。時間をおいて再度お試しください。",
+      ]);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
-      <HeaderResult />
+      <HeaderResult isMatchResultSaved={isMatchResultSaved} />
       {isSubmitting && <LoadingSpinner />}
       <main className="h-full">
         <div className="pb-40 relative w-full max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
@@ -695,6 +845,26 @@ export default function GameRecord() {
                 <Divider className="my-4" />
                 <Autocomplete
                   allowsCustomValue
+                  label="球場"
+                  variant="bordered"
+                  placeholder="球場名を入力"
+                  labelPlacement="outside-left"
+                  className="[&>div]:justify-between [&>div&>label]:whitespace-nowrap"
+                  size="md"
+                  inputValue={stadiumName}
+                  onInputChange={handleStadiumInputChange}
+                  onSelectionChange={handleStadiumSelectionChange}
+                  selectedKey={stadiumId ? stadiumId.toString() : null}
+                >
+                  {stadiumData.map((stadium) => (
+                    <AutocompleteItem key={stadium.id} textValue={stadium.name}>
+                      {stadium.name}
+                    </AutocompleteItem>
+                  ))}
+                </Autocomplete>
+                <Divider className="my-4" />
+                <Autocomplete
+                  allowsCustomValue
                   label="大会名"
                   variant="bordered"
                   placeholder="大会名を入力"
@@ -704,7 +874,7 @@ export default function GameRecord() {
                   onInputChange={handleTournamentInputChange}
                   onSelectionChange={handleTournamentSelectionChange}
                   selectedKey={
-                    tournament !== undefined ? tournament?.toString() : null
+                    tournament !== null ? tournament.toString() : null
                   }
                 >
                   {tournamentData.map((data) => (
@@ -714,42 +884,34 @@ export default function GameRecord() {
                   ))}
                 </Autocomplete>
                 <Divider className="my-4" />
-                <Autocomplete
-                  allowsCustomValue
-                  label="シーズン"
-                  variant="bordered"
-                  placeholder="シーズン名を入力"
-                  labelPlacement="outside-left"
-                  className="[&>div]:justify-between [&>div&>label]:whitespace-nowrap"
-                  size="md"
+                <SeasonField
+                  seasons={seasonsData}
+                  selectedSeason={selectedSeason}
                   onInputChange={handleSeasonInputChange}
                   onSelectionChange={handleSeasonSelectionChange}
-                  selectedKey={
-                    selectedSeason !== undefined
-                      ? selectedSeason?.toString()
-                      : null
-                  }
+                />
+                <Divider className="my-4" />
+                <Autocomplete
+                  isRequired
+                  allowsCustomValue
+                  label="自チーム"
+                  variant="bordered"
+                  placeholder="自分のチーム名を入力"
+                  labelPlacement="outside-left"
+                  className="[&>div]:justify-between"
+                  size="sm"
+                  color={isMyTeamValid ? "default" : "danger"}
+                  inputValue={myTeam}
+                  selectedKey={myTeamId ? myTeamId.toString() : null}
+                  onInputChange={handleMyTeamInputChange}
+                  onSelectionChange={handleMyTeamSelectionChange}
                 >
-                  {seasonsData.map((data) => (
-                    <AutocompleteItem key={data.id}>
+                  {teamsData.map((data) => (
+                    <AutocompleteItem key={data.id} textValue={data.name}>
                       {data.name}
                     </AutocompleteItem>
                   ))}
                 </Autocomplete>
-                <Divider className="my-4" />
-                <Input
-                  isRequired
-                  type="text"
-                  size="sm"
-                  variant="bordered"
-                  label="自チーム"
-                  labelPlacement="outside-left"
-                  placeholder="自分のチーム名を入力"
-                  className="flex justify-between items-center [&>div>div>div>input]:py-2"
-                  color={isMyTeamValid ? "default" : "danger"}
-                  value={myTeam}
-                  onChange={handleMyTeamChange}
-                />
                 <Divider className="my-4" />
                 <Autocomplete
                   isRequired
@@ -787,49 +949,30 @@ export default function GameRecord() {
                     点数<span className="text-red-500 pl-1">*</span>
                   </p>
                   <div className="flex gap-x-2 items-center">
-                    <Input
-                      isRequired
-                      type="number"
-                      size="md"
-                      variant="bordered"
-                      labelPlacement="outside"
+                    <ScoreStepper
+                      value={myTeamScore}
+                      onChange={setMyTeamScore}
+                      ariaLabel="自チームの点数"
                       placeholder="自分"
-                      className="flex justify-between items-center w-20"
-                      defaultValue={myTeamScore?.toString()}
-                      value={myTeamScore?.toString()}
-                      color={isMyTeamScoreValid ? "default" : "danger"}
-                      min={0}
-                      onChange={handleMyScoreChange}
+                      isValid={isMyTeamScoreValid}
                     />
                     <span>対</span>
-                    <Input
-                      isRequired
-                      type="number"
-                      size="md"
-                      variant="bordered"
+                    <ScoreStepper
+                      value={opponentTeamScore}
+                      onChange={setOpponentTeamScore}
+                      ariaLabel="相手チームの点数"
                       placeholder="相手"
-                      labelPlacement="outside"
-                      className="flex justify-between items-center w-20"
-                      defaultValue={opponentTeamScore?.toString()}
-                      value={opponentTeamScore?.toString()}
-                      color={isOpponentTeamScoreValid ? "default" : "danger"}
-                      min={0}
-                      onChange={handleOpponentScoreChange}
+                      isValid={isOpponentTeamScoreValid}
                     />
                   </div>
                 </div>
                 <Divider className="my-4" />
                 <Select
-                  isRequired={
-                    appearanceType === "starter" ||
-                    appearanceType === "substitute"
-                  }
                   variant="faded"
                   label="打順"
                   labelPlacement="outside-left"
                   size="md"
                   fullWidth={false}
-                  color={isBattingOrderValid ? "default" : "danger"}
                   className="grid justify-between items-center grid-cols-[auto_96px]"
                   onChange={handleBattingOrderChange}
                   selectedKeys={
@@ -892,18 +1035,27 @@ export default function GameRecord() {
                 />
               </div>
               <div className="mt-8">
-                <Button
-                  color="primary"
-                  size="md"
-                  type="button"
-                  radius="sm"
-                  className="ml-auto mr-0 px-6 font-bold text-base flex items-center"
-                  onPress={() => handleSubmit()}
-                  endContent={<NextArrowIcon stroke="#F4F4F4" />}
-                  isDisabled={isSubmitting}
-                >
-                  {appearanceType === "no_play" ? "試合結果まとめ" : "打撃結果"}
-                </Button>
+                {appearanceType === "no_play" || isEditMode ? (
+                  <Button
+                    color="primary"
+                    size="md"
+                    type="button"
+                    radius="sm"
+                    className="ml-auto mr-0 px-6 font-bold text-base flex items-center"
+                    onPress={() => handleSubmit()}
+                    endContent={<NextArrowIcon stroke="#F4F4F4" />}
+                    isDisabled={isSubmitting}
+                  >
+                    {appearanceType === "no_play"
+                      ? "試合結果まとめ"
+                      : "打撃結果"}
+                  </Button>
+                ) : (
+                  <PatternSelector
+                    onSelect={(pattern) => handleSubmit(pattern)}
+                    disabled={isSubmitting}
+                  />
+                )}
               </div>
             </form>
           </div>

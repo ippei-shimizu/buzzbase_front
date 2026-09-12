@@ -25,10 +25,11 @@ type PitchingStats = {
 type Props = {
   pitchingAggregate: PitchingAggregate[] | undefined;
   pitchingStats: PitchingStats[] | undefined;
+  hideRankChange?: boolean;
 };
 
 export default function GroupPitchingRankingTable(props: Props) {
-  const { pitchingAggregate, pitchingStats } = props;
+  const { pitchingAggregate, pitchingStats, hideRankChange } = props;
 
   const sortedPitchingEra = useMemo(
     () => pitchingStats?.slice().sort((a, b) => a.era - b.era) || [],
@@ -136,6 +137,7 @@ export default function GroupPitchingRankingTable(props: Props) {
           data={section.data}
           renderValue={section.renderValue}
           isFirst={index === 0}
+          hideRankChange={hideRankChange}
         />
       ))}
       {pitchingAggregateSections.map((section) => (
@@ -145,6 +147,7 @@ export default function GroupPitchingRankingTable(props: Props) {
           id={section.id}
           data={section.data}
           renderValue={section.renderValue}
+          hideRankChange={hideRankChange}
         />
       ))}
     </>

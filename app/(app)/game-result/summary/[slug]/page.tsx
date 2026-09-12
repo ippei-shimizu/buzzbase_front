@@ -5,6 +5,7 @@ import type {
   PitchingResult,
   PlateAppearanceSummary,
 } from "@app/interface";
+import type { PlateAppearanceV2 } from "@app/interface/plateAppearanceV2";
 import {
   Button,
   Chip,
@@ -17,6 +18,7 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import axios from "axios";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { adSlots } from "@app/components/ad/adConfig";
@@ -27,6 +29,7 @@ import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
 import SummaryResultHeader from "@app/components/header/SummaryHeader";
 import ResultShareComponent from "@app/components/share/ResultShareComponent";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import { GAME_RECORD_EDIT_MODE_STORAGE_KEY } from "@app/constants/gameRecord";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { getUserBattingAverage } from "@app/services/battingAveragesService";
 import { deleteGameResult } from "@app/services/gameResultsService";
@@ -40,6 +43,14 @@ import {
   getCurrentUserId,
   getCurrentUsersUserId,
 } from "@app/services/userService";
+import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
+import {
+  getBattingResultColor,
+  HIT_RESULT_COLOR,
+  SACRIFICE_RESULT_COLOR,
+} from "@app/utils/battingResultColor";
+import { saveGameResultId } from "@app/utils/gameRecordStorage";
+import { PlateAppearanceSummaryCard } from "../_components/PlateAppearanceSummaryCard";
 
 type MatchResultDisplay = MatchResult & {
   id: number;
@@ -72,16 +83,16 @@ export default function ResultsSummary() {
   const [plateAppearance, setPlateAppearance] = useState<
     PlateAppearanceSummary[]
   >([]);
+  const [plateAppearancesV2, setPlateAppearancesV2] = useState<
+    PlateAppearanceV2[]
+  >([]);
   const [battingAverage, setBattingAverage] = useState<BattingAverage[]>([]);
   const [pitchingResult, setPitchingResult] = useState<PitchingResult[]>([]);
   const [isDetailDataFetched, setIsDetailDataFetched] = useState(false);
   const [currentUsersUserId, setCurrentUsersUserId] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [memo, setMemo] = useState();
+  const [memo, setMemo] = useState<string | null>();
   const [currentUserPage, setCurrentUserPage] = useState(false);
-  const [localStorageGameResultId, setLocalStorageGameResultId] = useState<
-    number | null
-  >(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -114,15 +125,13 @@ export default function ResultsSummary() {
   };
 
   useEffect(() => {
-    // ローカルストレージからid取得
-    const savedGameResultId = localStorage.getItem("gameResultId");
-    if (savedGameResultId) {
-      setLocalStorageGameResultId(JSON.parse(savedGameResultId));
-      fetchCurrentResultData(JSON.parse(savedGameResultId));
-    }
-    if (!savedGameResultId) {
-      localStorage.setItem("gameResultId", JSON.stringify(id));
-    }
+    // 表示対象の特定は常にURLのidを正とする。localStorageは書き込まない
+    // （record/page.tsxは記録中の下書きIDとしてlocalStorageを信頼して送信時に
+    // 既存MatchResultの上書き判定をするため、単に閲覧しただけでここを書き換えると
+    // 進行中の別の記録セッションを巻き込んでしまう。書き込みは編集を選択した
+    // handleResultComplete内でのみ行う）。
+    if (!Number.isInteger(id) || id <= 0) return;
+    fetchCurrentResultData(id);
   }, [pathname, id]);
 
   useEffect(() => {
@@ -134,21 +143,24 @@ export default function ResultsSummary() {
   }, [matchResult, isDetailDataFetched, currentUserId]);
 
   // 試合データ取得
-  const fetchCurrentResultData = async (localStorageGameResultId: number) => {
+  const fetchCurrentResultData = async (gameResultId: number) => {
     try {
-      const matchResultData = await getUserMatchResult(
-        localStorageGameResultId,
-      );
-      const battingAverageData = await getUserBattingAverage(
-        localStorageGameResultId,
-      );
-      const pitchingResultData = await getUserPitchingResult(
-        localStorageGameResultId,
-      );
-      const plateAppearanceData = await getUserPlateAppearance(
-        localStorageGameResultId,
-      );
-      const currentUserIdData = await getCurrentUserId();
+      const [
+        matchResultData,
+        battingAverageData,
+        pitchingResultData,
+        plateAppearanceData,
+        plateAppearancesV2Data,
+        currentUserIdData,
+      ] = await Promise.all([
+        getUserMatchResult(gameResultId),
+        getUserBattingAverage(gameResultId),
+        getUserPitchingResult(gameResultId),
+        getUserPlateAppearance(gameResultId),
+        getPlateAppearancesByGame(gameResultId),
+        getCurrentUserId(),
+      ]);
+      setPlateAppearancesV2(plateAppearancesV2Data);
       if (matchResultData && matchResultData.length > 0) {
         setMemo(matchResultData[0].memo);
       }
@@ -202,63 +214,19 @@ export default function ResultsSummary() {
 
   // 打席
   const getBattingResultClassName = (battingResult: string) => {
-    const hits = [
-      "投安",
-      "捕安",
-      "一安",
-      "二安",
-      "三安",
-      "遊安",
-      "左安",
-      "中安",
-      "右安",
-      "投二",
-      "捕二",
-      "一二",
-      "二二",
-      "三二",
-      "遊二",
-      "左二",
-      "中二",
-      "右二",
-      "投三",
-      "捕三",
-      "一三",
-      "二三",
-      "三三",
-      "遊三",
-      "左三",
-      "中三",
-      "右三",
-      "投本",
-      "捕本",
-      "一本",
-      "二本",
-      "三本",
-      "遊本",
-      "左本",
-      "中本",
-      "右本",
-    ];
-    const walks = [
-      "四球",
-      "死球",
-      "投犠",
-      "捕犠",
-      "一犠",
-      "二犠",
-      "三犠",
-      "遊犠",
-      "打妨",
-    ];
-
-    if (hits.includes(battingResult)) {
+    // 安打系(右中/左中/線など全方向)は赤、犠打・犠飛は共通の部分一致判定で青にする。
+    const resultColor = getBattingResultColor(battingResult);
+    if (resultColor === HIT_RESULT_COLOR) {
       return "text-red-500";
-    } else if (walks.includes(battingResult)) {
-      return "text-blue-400";
-    } else {
-      return "";
     }
+    if (resultColor === SACRIFICE_RESULT_COLOR) {
+      return "text-blue-400";
+    }
+    // 四球・死球・打妨は安打でも犠打でもないが青で表示する。
+    if (["四球", "死球", "打妨"].some((walk) => battingResult.includes(walk))) {
+      return "text-blue-400";
+    }
+    return "";
   };
 
   // 投球数
@@ -277,6 +245,11 @@ export default function ResultsSummary() {
   };
 
   const handleResultComplete = () => {
+    // 既存試合の編集として試合情報入力画面へ入ることを記録する。
+    // record/page.tsxはgameResultIdを送信対象の試合として信頼するため、ここで
+    // 明示的に「今表示している（＝自分の所有と確認済みの）試合」のidをセットする。
+    saveGameResultId(id);
+    localStorage.setItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY, "true");
     router.push("/game-result/record");
   };
 
@@ -418,9 +391,24 @@ export default function ResultsSummary() {
                     <div key={batting.id}>
                       <p className="text-xs text-zinc-400">打撃</p>
                       <ul className="flex flex-wrap gap-2 mt-2">
-                        {plateAppearance ? (
-                          plateAppearance.map((plate) => (
-                            <li key={plate.batter_box_number}>
+                        {(plateAppearancesV2.length > 0
+                          ? plateAppearancesV2
+                          : (plateAppearance ?? [])
+                        ).map((plate, index) => (
+                          <li
+                            key={`${plate.batter_box_number ?? "na"}-${index}`}
+                          >
+                            {/* v1 フォールバック配列は id を持たないためリンク化しない。 */}
+                            {"id" in plate ? (
+                              <Link
+                                href={`/game-result/plate-appearances/${plate.id}`}
+                                className={`font-bold underline underline-offset-2 ${getBattingResultClassName(
+                                  plate.batting_result,
+                                )}`}
+                              >
+                                {plate.batting_result}
+                              </Link>
+                            ) : (
                               <p
                                 className={`font-bold ${getBattingResultClassName(
                                   plate.batting_result,
@@ -428,11 +416,9 @@ export default function ResultsSummary() {
                               >
                                 {plate.batting_result}
                               </p>
-                            </li>
-                          ))
-                        ) : (
-                          <></>
-                        )}
+                            )}
+                          </li>
+                        ))}
                       </ul>
                       <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1">
                         <div className="flex items-center">
@@ -476,6 +462,22 @@ export default function ResultsSummary() {
                   </>
                 )}
               </div>
+              {plateAppearancesV2.length > 0 && (
+                <>
+                  <Divider className="my-4" />
+                  <div>
+                    <p className="text-xs text-zinc-400 mb-2">打席詳細</p>
+                    <div className="flex flex-col gap-y-2">
+                      {plateAppearancesV2.map((plate) => (
+                        <PlateAppearanceSummaryCard
+                          key={plate.id}
+                          plateAppearance={plate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
               <Divider className="my-4" />
               {/* 投手成績 */}
               <div>
@@ -629,9 +631,7 @@ export default function ResultsSummary() {
                         <Button
                           color="danger"
                           radius="sm"
-                          onPress={() =>
-                            handleDeleteGameResult(localStorageGameResultId)
-                          }
+                          onPress={() => handleDeleteGameResult(id)}
                         >
                           削除する
                         </Button>

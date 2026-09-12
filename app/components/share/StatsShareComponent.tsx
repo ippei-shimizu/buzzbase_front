@@ -12,6 +12,8 @@ import {
 import Image from "next/image";
 import React, { useCallback } from "react";
 import { XIcon } from "@app/components/icon/XIcon";
+import { SITE_URL } from "@app/constants/app";
+import { trackEvent } from "@app/lib/analytics";
 
 type Position = {
   id: string;
@@ -40,7 +42,7 @@ export default function StatsShareComponent({
 }: StatsShareComponentProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const shareUrl = `https://buzzbase.jp/mypage/${userId}`;
+  const shareUrl = `${SITE_URL}/mypage/${userId}`;
   const cardImageUrl = `/api/og/stats-card?userId=${userId}`;
 
   const buildShareText = () => {
@@ -72,6 +74,7 @@ export default function StatsShareComponent({
 
   const handleShareMobile = () => {
     if (navigator.share) {
+      trackEvent("share", { method: "navigator", content_type: "stats_card" });
       navigator
         .share({
           title: `${userName}さんの成績カード`,
@@ -80,11 +83,21 @@ export default function StatsShareComponent({
         })
         .catch((error) => console.error("Error sharing", error));
     } else {
+      // モーダル内 X/LINE/画像 DL のクリックで個別に share イベントが送られるため、ここでは発火しない
       onOpen();
     }
   };
 
+  const handleTwitterShare = () => {
+    trackEvent("share", { method: "twitter", content_type: "stats_card" });
+  };
+
+  const handleLineShare = () => {
+    trackEvent("share", { method: "line", content_type: "stats_card" });
+  };
+
   const handleDownloadImage = useCallback(async () => {
+    trackEvent("share", { method: "download", content_type: "stats_card" });
     try {
       const res = await fetch(cardImageUrl);
       const blob = await res.blob();
@@ -144,6 +157,7 @@ export default function StatsShareComponent({
                 href={twitterShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onPress={handleTwitterShare}
                 className="bg-transparent"
                 radius="sm"
                 isIconOnly
@@ -154,6 +168,7 @@ export default function StatsShareComponent({
                 href={lineShareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onPress={handleLineShare}
                 className="bg-transparent"
                 radius="sm"
                 isIconOnly

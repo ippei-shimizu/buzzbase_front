@@ -1,19 +1,16 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React from "react";
 import HeaderRight from "@app/components/header/HeaderRight";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function HeaderTop() {
   const { isLoggedIn } = useAuthContext();
-  useEffect(() => {
-    localStorage.removeItem("gameResultId");
-  }, []);
 
   return (
     <>
-      <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--smart-banner-height,0px)] w-full bg-main z-50 lg:pl-[22%]">
+      <header className="py-2 px-3 border-b border-b-zinc-500 fixed top-[var(--top-banner-offset,0px)] w-full bg-main z-50 lg:pl-[22%]">
         <div className="flex items-center justify-between h-full relative lg:max-w-[1108px] mx-auto lg:mr-auto lg:ml-[14px]">
           <Link href={isLoggedIn ? "/dashboard" : "/"}>
             <Image
