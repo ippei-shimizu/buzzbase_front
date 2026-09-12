@@ -26,6 +26,31 @@ const faqItems = [
     answer:
       "必ずしもそうとは限りません。失点にはエラーによる得点が含まれますが、防御率の計算に使う自責点にはエラーによる得点は含まれません。守備が安定しているチームでは失点と自責点の差が小さく、守備にミスが多いチームでは差が大きくなります。",
   },
+  {
+    question: "「6 回 1 失点」「7 回 3 失点」はどう評価される？",
+    answer:
+      "6 回 1 失点は QS（クオリティスタート：6回以上 3 自責点以下）の中でも上位の出来。7 回 3 失点も QS のラインギリギリですが、ローテーション維持としては十分な内容です。9 イニング換算するとそれぞれ防御率 1.50 / 3.86 になります。",
+  },
+  {
+    question: "失点率と防御率の差は何点くらいが普通？",
+    answer:
+      "一般的には失点率は防御率より 0.3〜0.5 程度高くなります。差が 1.0 を超えるシーズンは、その投手がエラーの被害を受けやすい状況にあるか、チームの守備力に課題があると見られます。",
+  },
+  {
+    question: "失点率とエラーの関係は？",
+    answer:
+      "失点率はエラー由来の得点も含むので、チームのエラー数が多いほど失点率は上がりやすくなります。守備が安定したチームでは投手の防御率と失点率の差が小さく、安定しないチームでは差が大きくなります。",
+  },
+  {
+    question: "リリーフ（中継ぎ・抑え）の失点はどう見る？",
+    answer:
+      "短いイニングを投げるリリーフ投手の場合、1 失点でも失点率（9 イニング換算）が高く出やすい点に注意が必要です。中継ぎ・抑えは登板回数 × 1 試合あたりの失点も併せて評価します。",
+  },
+  {
+    question: "自責点になる条件は？",
+    answer:
+      "自責点になるかどうかは、得点に至るプロセスに「エラーや守備妨害があったか」で決まります。走者がエラーなしで進塁し得点した場合は自責点、エラーで進塁・出塁した走者が得点した場合は失点だが自責点にはなりません。判定は公式記録員が行います。",
+  },
 ];
 
 export default function RunsColumnPage() {
@@ -325,6 +350,45 @@ export default function RunsColumnPage() {
             <p className="text-xs text-zinc-400 mt-1">
               自責点と投球回から防御率を自動計算
             </p>
+          </Link>
+        </div>
+      </section>
+
+      {/* 関連コラム */}
+      <section className="mt-10">
+        <h2 className="text-xl font-bold mb-4">関連コラム</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/column/runs-criteria"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">失点率（RA）の目安</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              レベル別目安と防御率との使い分け
+            </p>
+          </Link>
+          <Link
+            href="/column/era-criteria"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">防御率の目安・基準</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              1.00 / 2.00 / 3.00 / 4.00 の意味
+            </p>
+          </Link>
+          <Link
+            href="/column/era-vs-runs"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">防御率と失点率の違い</p>
+            <p className="text-xs text-zinc-400 mt-1">指標の使い分け方</p>
+          </Link>
+          <Link
+            href="/column/era-ranking-npb"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">NPB 防御率ランキング</p>
+            <p className="text-xs text-zinc-400 mt-1">歴代上位の日本人名投手</p>
           </Link>
         </div>
       </section>

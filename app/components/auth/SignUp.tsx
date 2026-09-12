@@ -12,7 +12,12 @@ import SubmitButton from "@app/components/button/SendButton";
 import ResendConfirmationModal from "@app/components/modal/ResendConfirmationModal";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
+import { trackEvent } from "@app/lib/analytics";
 import { signUp } from "@app/services/authService";
+import {
+  isRateLimitError,
+  rateLimitErrorMessage,
+} from "@app/utils/rateLimitError";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -53,9 +58,12 @@ export default function SignUp() {
         passwordConfirmation,
         confirm_success_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
       });
+      trackEvent("sign_up_started", { method: "email" });
       router.push("/registration-confirmation");
     } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.data?.errors) {
+      if (isRateLimitError(error)) {
+        setErrors([rateLimitErrorMessage(error)]);
+      } else if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorData = error.response.data.errors;
         const isEmailTakenError =
           error.response.status === 422 &&

@@ -10,6 +10,7 @@ import { PlusIcon } from "@app/components/icon/PlusIcon";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroups } from "@app/services/groupService";
 import { getCurrentUserId } from "@app/services/userService";
+import GroupJoinTooltip from "./_components/GroupJoinTooltip";
 
 export default function Group() {
   const [groups, setGroups] = useState<GroupsData[]>([]);
@@ -57,7 +58,7 @@ export default function Group() {
               <p className="text-sm text-zinc-400 mt-2">
                 グループ機能は、フォローしているユーザーを招待して成績をランキング形式で共有することができます。
               </p>
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-4 gap-x-3 flex-wrap">
                 <Link href="/groups/new">
                   <Button
                     color="primary"
@@ -71,7 +72,18 @@ export default function Group() {
                     グループ作成
                   </Button>
                 </Link>
+                <Link href="/groups/join">
+                  <Button
+                    color="default"
+                    variant="bordered"
+                    radius="full"
+                    className="font-medium"
+                  >
+                    招待コードで参加
+                  </Button>
+                </Link>
               </div>
+              <GroupJoinTooltip />
               <Divider className="mt-8" />
               <div className="mt-7">
                 <h2 className="text-2xl font-bold">グループ</h2>

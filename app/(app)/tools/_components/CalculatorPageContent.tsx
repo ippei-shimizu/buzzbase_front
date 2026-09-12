@@ -57,6 +57,7 @@ export default function CalculatorPageContent({
           definition.cta?.body ??
           "BUZZ BASEアプリなら毎試合の成績を記録するだけで全29指標を自動算出。友達とランキングで競い合えます。完全無料。"
         }
+        sourceTool={definition.slug}
       />
 
       <AdBanner slot={adSlots.toolsDisplay} />
@@ -94,6 +95,7 @@ export default function CalculatorPageContent({
       <CtaBanner
         heading="チームの成績をアプリでまとめて管理"
         body="BUZZ BASEアプリなら試合ごとの成績入力で打率・防御率・OPSなど全指標を自動算出。チーム内ランキングでモチベーションもアップ。"
+        sourceTool={definition.slug}
       />
 
       <RelatedTools slugs={definition.relatedSlugs} />

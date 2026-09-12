@@ -4,7 +4,11 @@ import { UserIcon } from "@app/components/icon/UserIcon";
 export default function HeaderLoginAndSignUp() {
   return (
     <>
-      <Link href="/signin" className="text-sm text-white font-medium">
+      <Link
+        href="/signin"
+        prefetch={false}
+        className="text-sm text-white font-medium"
+      >
         ログイン
       </Link>
       <Link

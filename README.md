@@ -136,12 +136,14 @@ yarn dev    # http://localhost:4100
 
 ## 環境変数
 
-| 変数名                         | 説明                        | 開発環境デフォルト             |
-| ------------------------------ | --------------------------- | ------------------------------ |
-| `RAILS_API_URL`                | バックエンドAPI URL         | `http://back:3000`（Docker内） |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth クライアントID | —                              |
-| `SENTRY_DSN`                   | Sentry DSN                  | —                              |
-| `ADSENSE_ENABLED`              | AdSense有効化               | `false`                        |
+| 変数名                         | 説明                                                     | 開発環境デフォルト             |
+| ------------------------------ | -------------------------------------------------------- | ------------------------------ |
+| `RAILS_API_URL`                | バックエンドAPI URL                                      | `http://back:3000`（Docker内） |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth クライアントID                              | —                              |
+| `SENTRY_DSN`                   | Sentry DSN                                               | —                              |
+| `ADSENSE_ENABLED`              | AdSense有効化                                            | `false`                        |
+| `NEXT_PUBLIC_POSTHOG_KEY`      | PostHogプロジェクトAPIキー（未設定なら計測は完全に無効） | —                              |
+| `NEXT_PUBLIC_POSTHOG_HOST`     | PostHogのAPIホスト                                       | `https://us.i.posthog.com`     |
 
 ## テスト
 
