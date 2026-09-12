@@ -5,9 +5,19 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
+import {
+  GAME_RECORD_EDIT_MODE_STORAGE_KEY,
+  RECORD_PATTERN_STORAGE_KEY,
+} from "@app/constants/gameRecord";
 import { createGameResult } from "@app/services/gameResultsService";
 
-export default function RecordGameButton() {
+interface RecordGameButtonProps {
+  label?: string;
+}
+
+export default function RecordGameButton({
+  label = "試合を記録する",
+}: RecordGameButtonProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -16,6 +26,9 @@ export default function RecordGameButton() {
     try {
       const newGameResult = await createGameResult();
       localStorage.setItem("gameResultId", JSON.stringify(newGameResult.id));
+      // 新規記録フローなので編集フラグと前回のパターンをクリアする。
+      localStorage.removeItem(GAME_RECORD_EDIT_MODE_STORAGE_KEY);
+      localStorage.removeItem(RECORD_PATTERN_STORAGE_KEY);
       router.push("/game-result/record");
     } catch (error) {
       console.error("試合記録の作成に失敗しました", error);
@@ -36,7 +49,7 @@ export default function RecordGameButton() {
         isDisabled={isSubmitting}
         className="font-bold text-base"
       >
-        試合を記録する
+        {label}
       </Button>
     </>
   );

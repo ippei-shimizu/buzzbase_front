@@ -5,6 +5,7 @@ import { Button } from "@heroui/react";
 import { useState } from "react";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { userFollow, userUnFollow } from "@app/services/userService";
+import { trackUserFollowed } from "@app/utils/analytics";
 
 export default function FollowButton({
   userId,
@@ -25,6 +26,7 @@ export default function FollowButton({
       setFollowStatus("none");
     } else {
       const response = await userFollow(userId);
+      trackUserFollowed(userId);
       setFollowStatus(response?.follow_status ?? "following");
     }
   };

@@ -2,6 +2,7 @@
 
 import { getCalculatorDefinition } from "@app/data/baseball-stats/calculator-definitions";
 import CalculatorForm from "../../_components/CalculatorForm";
+import WhipResultCard from "./WhipResultCard";
 
 const definition = getCalculatorDefinition("whip")!;
 
@@ -21,6 +22,11 @@ export default function WhipCalculator() {
       outputs={definition.outputs}
       calculate={definition.calculate}
       nextActions={nextActions}
+      analyticsSourceTool={definition.slug}
+      renderExtraResult={(raw) => {
+        if (typeof raw !== "number" || Number.isNaN(raw)) return null;
+        return <WhipResultCard whip={raw} />;
+      }}
     />
   );
 }

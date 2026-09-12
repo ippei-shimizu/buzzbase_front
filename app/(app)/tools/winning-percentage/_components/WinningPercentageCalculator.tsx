@@ -21,6 +21,7 @@ export default function WinningPercentageCalculator() {
       outputs={definition.outputs}
       calculate={definition.calculate}
       nextActions={nextActions}
+      analyticsSourceTool={definition.slug}
     />
   );
 }

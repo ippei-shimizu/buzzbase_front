@@ -1,8 +1,15 @@
 import type { PitchingStatsRow } from "../actions";
+import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import StatsTable, { type Column, fmt2, fmtInt } from "./StatsTable";
 
 const PITCHING_COLUMNS: Column<PitchingStatsRow>[] = [
-  { key: "era", label: "防御率", format: fmt2, highlight: true },
+  {
+    key: "era",
+    label: "防御率",
+    format: fmt2,
+    highlight: true,
+    tooltip: INNING_FORMAT_TOOLTIP,
+  },
   { key: "appearances", label: "登板", format: fmtInt },
   { key: "win", label: "勝利", format: fmtInt },
   { key: "loss", label: "敗戦", format: fmtInt },
@@ -11,6 +18,7 @@ const PITCHING_COLUMNS: Column<PitchingStatsRow>[] = [
   { key: "complete_games", label: "完投", format: fmtInt },
   { key: "shutouts", label: "完封", format: fmtInt },
   { key: "innings_pitched", label: "投球回", format: fmt2 },
+  { key: "number_of_pitches", label: "総投球数", format: fmtInt },
   { key: "hits_allowed", label: "被安打", format: fmtInt },
   { key: "home_runs_hit", label: "被本塁打", format: fmtInt },
   { key: "strikeouts", label: "三振", format: fmtInt },
@@ -19,8 +27,18 @@ const PITCHING_COLUMNS: Column<PitchingStatsRow>[] = [
   { key: "run_allowed", label: "失点", format: fmtInt },
   { key: "earned_run", label: "自責点", format: fmtInt },
   { key: "whip", label: "WHIP", format: fmt2 },
-  { key: "k_per_nine", label: "K/9", format: fmt2 },
-  { key: "bb_per_nine", label: "BB/9", format: fmt2 },
+  {
+    key: "k_per_nine",
+    label: "K/9",
+    format: fmt2,
+    tooltip: INNING_FORMAT_TOOLTIP,
+  },
+  {
+    key: "bb_per_nine",
+    label: "BB/9",
+    format: fmt2,
+    tooltip: INNING_FORMAT_TOOLTIP,
+  },
   { key: "k_bb", label: "K/BB", format: fmt2 },
 ];
 

@@ -1,3 +1,4 @@
+import type { FilterValues } from "@app/components/filter/filterTypes";
 import type { GameResultData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
@@ -192,39 +193,44 @@ export const getGameResultsUserIdV2 = async (
 };
 
 /**
- * 認証ユーザー自身の試合一覧を年度・試合種別でフィルタして取得する（v2）
+ * 試合一覧の絞り込み・並び替え・ページング条件。
+ * 未指定のキーはクエリに含めず、バックエンド側の「絞り込まない」既定に委ねる。
+ */
+export type GameResultsFilterParams = FilterValues & {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: string;
+};
+
+function buildGameResultsQuery(params: GameResultsFilterParams): string {
+  const query = new URLSearchParams();
+  if (params.year) query.set("year", params.year);
+  if (params.matchType) query.set("match_type", params.matchType);
+  if (params.seasonId) query.set("season_id", params.seasonId);
+  if (params.tournamentId) query.set("tournament_id", params.tournamentId);
+  if (params.startMonth) query.set("start_month", params.startMonth);
+  if (params.endMonth) query.set("end_month", params.endMonth);
+  if (params.page) query.set("page", String(params.page));
+  if (params.perPage) query.set("per_page", String(params.perPage));
+  if (params.search) query.set("search", params.search);
+  if (params.sortBy) query.set("sort_by", params.sortBy);
+  if (params.sortOrder) query.set("sort_order", params.sortOrder);
+  return query.toString();
+}
+
+/**
+ * 認証ユーザー自身の試合一覧を絞り込んで取得する（v2）
  */
 export const getFilterGameResultsV2 = async (
-  year: string | number,
-  matchType: string,
-  seasonId?: number,
-  page?: number,
-  perPage?: number,
-  search?: string,
-  sortBy?: string,
-  sortOrder?: string,
+  params: GameResultsFilterParams = {},
 ): Promise<PaginatedResponse<unknown>> => {
   try {
-    let url = `/api/v2/game_results/filtered_index?year=${year}&match_type=${matchType}`;
-    if (seasonId) {
-      url += `&season_id=${seasonId}`;
-    }
-    if (page) {
-      url += `&page=${page}`;
-    }
-    if (perPage) {
-      url += `&per_page=${perPage}`;
-    }
-    if (search) {
-      url += `&search=${encodeURIComponent(search)}`;
-    }
-    if (sortBy) {
-      url += `&sort_by=${sortBy}`;
-    }
-    if (sortOrder) {
-      url += `&sort_order=${sortOrder}`;
-    }
-    const response = await axiosInstance.get(url);
+    const query = buildGameResultsQuery(params);
+    const response = await axiosInstance.get(
+      `/api/v2/game_results/filtered_index${query ? `?${query}` : ""}`,
+    );
     return response.data;
   } catch (error) {
     console.error(error);
@@ -233,40 +239,17 @@ export const getFilterGameResultsV2 = async (
 };
 
 /**
- * 指定ユーザーの試合一覧を年度・試合種別でフィルタして取得する（v2）
+ * 指定ユーザーの試合一覧を絞り込んで取得する（v2）
  */
 export const getFilterGameResultsUserIdV2 = async (
   userId: number,
-  year: string | number,
-  matchType: string,
-  seasonId?: number,
-  page?: number,
-  perPage?: number,
-  search?: string,
-  sortBy?: string,
-  sortOrder?: string,
+  params: GameResultsFilterParams = {},
 ): Promise<PaginatedResponse<unknown>> => {
   try {
-    let url = `/api/v2/game_results/filtered_user/${userId}?year=${year}&match_type=${matchType}`;
-    if (seasonId) {
-      url += `&season_id=${seasonId}`;
-    }
-    if (page) {
-      url += `&page=${page}`;
-    }
-    if (perPage) {
-      url += `&per_page=${perPage}`;
-    }
-    if (search) {
-      url += `&search=${encodeURIComponent(search)}`;
-    }
-    if (sortBy) {
-      url += `&sort_by=${sortBy}`;
-    }
-    if (sortOrder) {
-      url += `&sort_order=${sortOrder}`;
-    }
-    const response = await axiosInstance.get(url);
+    const query = buildGameResultsQuery(params);
+    const response = await axiosInstance.get(
+      `/api/v2/game_results/filtered_user/${userId}${query ? `?${query}` : ""}`,
+    );
     return response.data;
   } catch (error) {
     console.error(error);
