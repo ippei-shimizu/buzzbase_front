@@ -2,7 +2,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logout from "@app/components/auth/Logout";
 import { XIcon } from "@app/components/icon/XIcon";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
@@ -28,15 +27,6 @@ export default function Footer() {
               </Link>
             </div>
             <ul className="grid grid-cols-1 gap-y-4 max-w-[692px] mx-auto lg:flex items-baseline lg:gap-x-10 lg:max-w-full lg:flex-wrap">
-              <li>
-                {isLoggedIn ? (
-                  <>
-                    <Logout />
-                  </>
-                ) : (
-                  <></>
-                )}
-              </li>
               <li>
                 <Link
                   href="/calculation-of-grades"
@@ -102,12 +92,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/account-deletion"
-                  prefetch={false}
-                  className="text-sm"
-                >
-                  アカウント削除について
+                <Link href="/tokushoho" prefetch={false} className="text-sm">
+                  特定商取引法に基づく表記
                 </Link>
               </li>
             </ul>

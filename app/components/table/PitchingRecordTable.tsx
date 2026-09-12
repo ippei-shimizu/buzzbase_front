@@ -1,56 +1,30 @@
+import type {
+  PitchingStatsAggregate,
+  PitchingStatsCalculated,
+} from "@app/interface/dashboardStats";
 import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
-import { formatEra, formatRate2 } from "@app/utils/formatStats";
+import { formatEra, formatRate } from "@app/utils/formatStats";
 import StatTooltipLabel from "./StatTooltipLabel";
 
-type PersonalPitchingResults = {
-  number_of_appearances: number;
-  win: number;
-  loss: number;
-  hold: number;
-  saves: number;
-  innings_pitched: number;
-  hits_allowed: number;
-  home_runs_hit: number;
-  strikeouts: number;
-  base_on_balls: number;
-  hit_by_pitch: number;
-  run_allowed: number;
-  earned_run: number;
-  number_of_pitches: number;
-};
-
-type PersonalPitchingStatus = {
-  bb_per_nine: number;
-  complete_games: number;
-  era: number;
-  k_bb: number;
-  k_per_nine: number;
-  shutouts: number;
-  whip: number;
-  win_percentage: number;
-};
-
 type Props = {
-  personalPitchingResults: PersonalPitchingResults[];
-  personalPitchingStatus: PersonalPitchingStatus | undefined;
+  aggregate: PitchingStatsAggregate | null;
+  calculated: PitchingStatsCalculated | null;
 };
 
-export default function PitchingRecordTable(props: Props) {
-  const { personalPitchingResults, personalPitchingStatus } = props;
-
-  const pitchingResult =
-    personalPitchingResults.length > 0 ? personalPitchingResults[0] : undefined;
-
-  const pitchingStats = personalPitchingStatus
-    ? personalPitchingStatus
-    : undefined;
-
+/**
+ * 投手成績の一覧テーブル（左右 2 組のラベル/値ペア）。
+ *
+ * 率系（防御率・WHIP など）は `calculated`、実数は `aggregate` から取る。
+ * 完投・完封は率系ではなく `aggregate` 側にある点に注意。
+ * 項目・並び・ラベルは mobile の ProfileStatsTab と揃えている。
+ */
+export default function PitchingRecordTable({ aggregate, calculated }: Props) {
   const displayValue = (value: number | undefined | null) =>
     value == null ? "-" : value.toString();
   const displayEraValue = (value: number | undefined | null) =>
     value == null ? "-" : formatEra(value);
-  const displayFormattedValue = (value: number | undefined | null) =>
-    value == null ? "-" : formatRate2(value);
+  const displayRateValue = (value: number | undefined | null) =>
+    value == null ? "-" : formatRate(value);
 
   const styleTableBox = "grid grid-cols-2 text-center";
   const styleTableTitle =
@@ -59,161 +33,157 @@ export default function PitchingRecordTable(props: Props) {
     "bg-sub text-sm py-2.5 font-medium border-b-1 border-b-zinc-500";
 
   return (
-    <>
-      <div className="mt-4 border-x-1 border-t-1 border-zinc-500 rounded-md overflow-hidden">
-        <div className="grid grid-cols-2">
-          <div>
-            <div className={styleTableBox}>
-              <StatTooltipLabel
-                label="防御率"
-                tooltip={INNING_FORMAT_TOOLTIP}
-                className={styleTableTitle}
-              />
-              <span className={styleTableData}>
-                {displayEraValue(pitchingStats?.era)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>勝利</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.win)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>ホールド</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.hold)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>完投</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingStats?.complete_games)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>勝率</p>
-              <span className={styleTableData}>
-                {displayFormattedValue(pitchingStats?.win_percentage)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>失点</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.run_allowed)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>被安打</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.hits_allowed)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>奪三振</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.strikeouts)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>与四球</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.base_on_balls)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <StatTooltipLabel
-                label="BB/9"
-                tooltip={INNING_FORMAT_TOOLTIP}
-                className={styleTableTitle}
-              />
-              <span className={styleTableData}>
-                {displayEraValue(pitchingStats?.bb_per_nine)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={`${styleTableTitle} rounded-bl-md`}>WHIP</p>
-              <span className={styleTableData}>
-                {displayEraValue(pitchingStats?.whip)}
-              </span>
-            </div>
+    <div className="mt-4 border-x-1 border-t-1 border-zinc-500 rounded-md overflow-hidden">
+      <div className="grid grid-cols-2">
+        <div>
+          <div className={styleTableBox}>
+            <StatTooltipLabel
+              label="防御率"
+              tooltip={INNING_FORMAT_TOOLTIP}
+              className={styleTableTitle}
+            />
+            <span className={styleTableData}>
+              {displayEraValue(calculated?.era)}
+            </span>
           </div>
-          <div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>登板</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.number_of_appearances)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>敗戦</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.loss)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>セーブ</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.saves)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>完封</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingStats?.shutouts)}
-              </span>
-            </div>
-
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>投球回</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.innings_pitched)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>自責点</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.earned_run)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>被本塁打</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.home_runs_hit)}
-              </span>
-            </div>
-
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>与死球</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingResult?.hit_by_pitch)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <StatTooltipLabel
-                label="K/9"
-                tooltip={INNING_FORMAT_TOOLTIP}
-                className={styleTableTitle}
-              />
-              <span className={styleTableData}>
-                {displayEraValue(pitchingStats?.k_per_nine)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>K/BB</p>
-              <span className={styleTableData}>
-                {displayValue(pitchingStats?.k_bb)}
-              </span>
-            </div>
-            <div className={styleTableBox}>
-              <p className={styleTableTitle}>総投球数</p>
-              <span className={`${styleTableData} rounded-br-md`}>
-                {displayValue(pitchingResult?.number_of_pitches)}
-              </span>
-            </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>勝</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.win)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>投球回</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.innings_pitched)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>完封</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.shutouts)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>ホールド</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.hold)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>与四球</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.base_on_balls)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>被安打</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.hits_allowed)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>失点</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.run_allowed)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>勝率</p>
+            <span className={styleTableData}>
+              {displayRateValue(calculated?.win_percentage)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <StatTooltipLabel
+              label="K/9"
+              tooltip={INNING_FORMAT_TOOLTIP}
+              className={styleTableTitle}
+            />
+            <span className={styleTableData}>
+              {displayEraValue(calculated?.k_per_nine)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={`${styleTableTitle} rounded-bl-md`}>K/BB</p>
+            <span className={styleTableData}>
+              {displayEraValue(calculated?.k_bb)}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>登板</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.number_of_appearances)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>敗</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.loss)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>完投</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.complete_games)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>セーブ</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.saves)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>奪三振</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.strikeouts)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>与死球</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.hit_by_pitch)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>被本塁打</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.home_runs_hit)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>自責点</p>
+            <span className={styleTableData}>
+              {displayValue(aggregate?.earned_run)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>WHIP</p>
+            <span className={styleTableData}>
+              {displayEraValue(calculated?.whip)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <StatTooltipLabel
+              label="BB/9"
+              tooltip={INNING_FORMAT_TOOLTIP}
+              className={styleTableTitle}
+            />
+            <span className={styleTableData}>
+              {displayEraValue(calculated?.bb_per_nine)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <p className={styleTableTitle}>総投球数</p>
+            <span className={`${styleTableData} rounded-br-md`}>
+              {displayValue(aggregate?.number_of_pitches)}
+            </span>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

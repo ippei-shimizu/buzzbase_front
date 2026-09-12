@@ -10,6 +10,7 @@ import { PlusIcon } from "@app/components/icon/PlusIcon";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getGroups } from "@app/services/groupService";
 import { getCurrentUserId } from "@app/services/userService";
+import GroupJoinTooltip from "./_components/GroupJoinTooltip";
 
 export default function Group() {
   const [groups, setGroups] = useState<GroupsData[]>([]);
@@ -82,6 +83,7 @@ export default function Group() {
                   </Button>
                 </Link>
               </div>
+              <GroupJoinTooltip />
               <Divider className="mt-8" />
               <div className="mt-7">
                 <h2 className="text-2xl font-bold">グループ</h2>

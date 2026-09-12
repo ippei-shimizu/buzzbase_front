@@ -1,3 +1,4 @@
+import type { FilterValues } from "@app/components/filter/filterTypes";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const createGroup = async (formData: FormData) => {
@@ -35,19 +36,25 @@ export const getGroupDetailUsers = async (groupId: number) => {
   }
 };
 
+/**
+ * グループ詳細（メンバーの個人成績ランキング）を絞り込み条件付きで取得する。
+ * シーズンはグループ横断で意味を持たないため、フィルタとしては受け取らない。
+ *
+ * @param id グループID
+ * @param filters 年度 / 種別 / 大会 / 月範囲の絞り込み（未指定は絞り込まない）
+ */
 export const getGroupDetail = async (
   id: number,
-  year?: string,
-  matchType?: string,
-  startMonth?: string,
-  endMonth?: string,
+  filters: Omit<FilterValues, "seasonId"> = {},
 ) => {
   try {
     const params = new URLSearchParams();
-    if (year) params.append("year", year);
-    if (matchType) params.append("match_type", matchType);
-    if (startMonth) params.append("start_month", startMonth);
-    if (endMonth) params.append("end_month", endMonth);
+    if (filters.year) params.append("year", filters.year);
+    if (filters.matchType) params.append("match_type", filters.matchType);
+    if (filters.tournamentId)
+      params.append("tournament_id", filters.tournamentId);
+    if (filters.startMonth) params.append("start_month", filters.startMonth);
+    if (filters.endMonth) params.append("end_month", filters.endMonth);
     const query = params.toString();
     const response = await axiosInstance.get(
       `/api/v1/groups/${id}${query ? `?${query}` : ""}`,

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@app/lib/analytics";
+import { trackSignUpCompleted } from "@app/utils/analytics";
 
 type Props = {
   triggered: boolean;
@@ -18,6 +19,7 @@ export default function SignUpCompletionTracker({ triggered }: Props) {
     if (!triggered || hasFired.current) return;
     hasFired.current = true;
     trackEvent("sign_up", { method: "email" });
+    trackSignUpCompleted("email");
   }, [triggered]);
   return null;
 }

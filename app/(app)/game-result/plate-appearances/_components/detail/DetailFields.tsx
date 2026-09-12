@@ -1,7 +1,7 @@
 "use client";
 import type { RunnersState } from "@app/interface/plateAppearanceV2";
 import { Button, Input, Textarea } from "@heroui/react";
-import { RUNNERS_STATE_OPTIONS } from "@app/constants/runnersState";
+import { RunnersDiamond } from "@app/components/baseball/RunnersDiamond";
 
 /** 詳細項目のラベル + 説明文（mobile 同様、各項目に1文の説明を出す）。 */
 export function FieldLabel({
@@ -71,7 +71,7 @@ interface RunnersStateSelectorProps {
   description?: string;
 }
 
-/** ランナー状況をチップで選ぶ。再選択で解除。 */
+/** ランナー状況を各塁のタップで指定するダイヤモンド UI。 */
 export function RunnersStateSelector({
   value,
   onChange,
@@ -80,26 +80,7 @@ export function RunnersStateSelector({
   return (
     <div className="flex flex-col gap-y-2">
       <FieldLabel label="ランナー状況" description={description} />
-      <div className="flex flex-wrap gap-2">
-        {RUNNERS_STATE_OPTIONS.map((option) => {
-          const isSelected = value === option.key;
-          return (
-            <button
-              key={option.key}
-              type="button"
-              aria-pressed={isSelected}
-              className={`rounded-full border px-3 py-1 text-sm transition-colors ${
-                isSelected
-                  ? "border-[#d08000] bg-[#d08000] text-white"
-                  : "border-zinc-500 text-zinc-200"
-              }`}
-              onClick={() => onChange(isSelected ? null : option.key)}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
+      <RunnersDiamond value={value} onChange={onChange} />
     </div>
   );
 }

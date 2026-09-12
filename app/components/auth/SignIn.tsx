@@ -2,7 +2,7 @@
 import { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { startTransition, useCallback, useMemo, useState } from "react";
 import EmailInput from "@app/components/auth/EmailInput";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import GoogleLoginButton from "@app/components/auth/GoogleLoginButton";
@@ -15,6 +15,12 @@ import { useAuthContext } from "@app/contexts/useAuthContext";
 import { trackEvent } from "@app/lib/analytics";
 import { signIn } from "@app/services/authService";
 import { getUserData } from "@app/services/userService";
+import { trackUserLoggedIn } from "@app/utils/analytics";
+import { identifyUser } from "@app/utils/posthog";
+import {
+  isRateLimitError,
+  rateLimitErrorMessage,
+} from "@app/utils/rateLimitError";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -32,6 +38,16 @@ export default function SignIn() {
   const togglePasswordVisibility = () =>
     setIsPasswordVisible(!isPasswordVisible);
 
+  // 認証 cookie はクライアント側で書き換わるため、遷移だけでは Server Component の
+  // レンダー結果が前のユーザーのまま残る。refresh で作り直す。
+  // 単一 transition にまとめて遷移先の RSC を2回取りに行かないようにする。
+  const navigateAfterAuth = (path: string) => {
+    startTransition(() => {
+      router.push(path);
+      router.refresh();
+    });
+  };
+
   const setErrorsWithTimeout = (newErrors: React.SetStateAction<string[]>) => {
     setErrors(newErrors);
     setTimeout(() => {
@@ -47,16 +63,20 @@ export default function SignIn() {
       await signIn({ email, password });
       setIsLoggedIn(true);
       trackEvent("login", { method: "email" });
+      trackUserLoggedIn("email");
       const userData = await getUserData();
       if (userData && userData.user_id) {
+        identifyUser(userData.id);
         setIsLoggedIn(true);
-        router.push(`/mypage/${userData.user_id}`);
+        navigateAfterAuth(`/mypage/${userData.user_id}`);
       } else {
         setIsLoggedIn(true);
-        router.push("/register-username");
+        navigateAfterAuth("/register-username");
       }
     } catch (error: unknown) {
-      if (error instanceof AxiosError && error.response?.data?.errors) {
+      if (isRateLimitError(error)) {
+        setErrors([rateLimitErrorMessage(error)]);
+      } else if (error instanceof AxiosError && error.response?.data?.errors) {
         const errorMessages = error.response.data.errors;
         const isUnconfirmedError =
           error.response.status === 401 &&

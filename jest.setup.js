@@ -1,5 +1,12 @@
 // Testing Libraryのカスタムマッチャーを追加
 import "@testing-library/jest-dom";
+import { TextDecoder, TextEncoder } from "util";
+
+// jsdom には TextEncoder/TextDecoder が無く、mediabunny がモジュール読み込み時に
+// 参照するため、prepareMedia 等の import チェーンでエラーになる。Node.js 標準の
+// util 実装をグローバルに補う。
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // ResizeObserverのモック（HeroUI Tabsコンポーネント用）
 global.ResizeObserver = class ResizeObserver {
@@ -12,6 +19,9 @@ global.ResizeObserver = class ResizeObserver {
 jest.mock("framer-motion", () => ({
   ...jest.requireActual("framer-motion"),
   AnimatePresence: ({ children }) => children,
+  // HeroUI Modal は LazyMotion の features を動的 import で読み込むが、
+  // jest の CJS 環境では動的 import が失敗するため features ごとバイパスする
+  LazyMotion: ({ children }) => children,
   motion: {
     div: ({ children, ...props }) => <div {...props}>{children}</div>,
     button: ({ children, ...props }) => <button {...props}>{children}</button>,

@@ -14,11 +14,7 @@ export default function NotificationFollowed({
   onRead,
 }: NotificationFollowedProps) {
   return (
-    <div
-      className={`grid grid-cols-[28px_1fr] gap-x-3 ${
-        notice.read_at ? "opacity-30" : ""
-      }`}
-    >
+    <div className="grid grid-cols-[28px_1fr] gap-x-3">
       <Link
         href={`/mypage/${notice.actor_user_id}`}
         onClick={() => onRead(notice.id)}

@@ -48,7 +48,7 @@ export default async function StatsPage() {
               pitchingAnalysisSlot={<PitchingAnalysisSection />}
               seasonOptions={filterOptions.seasonOptions}
               tournamentOptions={filterOptions.tournamentOptions}
-              availableMonths={filterOptions.availableMonths}
+              monthOptions={filterOptions.monthOptions}
             />
           </div>
         </div>

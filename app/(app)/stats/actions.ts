@@ -1,5 +1,6 @@
 "use server";
 
+import type { FilterValues } from "@app/components/filter/filterTypes";
 import { cookies } from "next/headers";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
@@ -80,24 +81,30 @@ export async function getIsAuthenticated(): Promise<boolean> {
   return headers !== null;
 }
 
+// テーブル系エンドポイントは種別（match_type）を受け取らないため、絞り込みから除外する。
+function buildTableQuery(
+  period: StatsPeriod,
+  filters: Omit<FilterValues, "matchType">,
+): URLSearchParams {
+  const params = new URLSearchParams({ period });
+  if (filters.year) params.append("year", filters.year);
+  if (filters.seasonId) params.append("season_id", filters.seasonId);
+  if (filters.tournamentId)
+    params.append("tournament_id", filters.tournamentId);
+  if (filters.startMonth) params.append("start_month", filters.startMonth);
+  if (filters.endMonth) params.append("end_month", filters.endMonth);
+  return params;
+}
+
 export async function getBattingStats(
   period: StatsPeriod,
-  year?: string,
-  seasonId?: string,
-  tournamentId?: string,
-  startMonth?: string,
-  endMonth?: string,
+  filters: Omit<FilterValues, "matchType"> = {},
 ): Promise<BattingStatsRow[]> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return [];
 
-    const params = new URLSearchParams({ period });
-    if (year && year !== "通算") params.append("year", year);
-    if (seasonId) params.append("season_id", seasonId);
-    if (tournamentId) params.append("tournament_id", tournamentId);
-    if (startMonth) params.append("start_month", startMonth);
-    if (endMonth) params.append("end_month", endMonth);
+    const params = buildTableQuery(period, filters);
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/stats/batting?${params}`,
@@ -115,22 +122,13 @@ export async function getBattingStats(
 
 export async function getPitchingStats(
   period: StatsPeriod,
-  year?: string,
-  seasonId?: string,
-  tournamentId?: string,
-  startMonth?: string,
-  endMonth?: string,
+  filters: Omit<FilterValues, "matchType"> = {},
 ): Promise<PitchingStatsRow[]> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return [];
 
-    const params = new URLSearchParams({ period });
-    if (year && year !== "通算") params.append("year", year);
-    if (seasonId) params.append("season_id", seasonId);
-    if (tournamentId) params.append("tournament_id", tournamentId);
-    if (startMonth) params.append("start_month", startMonth);
-    if (endMonth) params.append("end_month", endMonth);
+    const params = buildTableQuery(period, filters);
 
     const response = await fetch(
       `${RAILS_API_URL}/api/v2/stats/pitching?${params}`,

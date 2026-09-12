@@ -17,7 +17,9 @@ const NavigationItems = (): NavigationItem[] => {
   return [
     {
       href: isLoggedIn ? "/dashboard" : "/",
-      label: isLoggedIn ? "ダッシュボード" : "トップ",
+      // `/dashboard` は「練習・活動」面と「ダッシュボード」面の2面を持つホームなので、
+      // 片方の面の名前ではなくホームとして案内する（mobile のホームタブと同じ位置づけ）。
+      label: isLoggedIn ? "ホーム" : "トップ",
       icon: HomeIcon,
       authRequired: false,
     },

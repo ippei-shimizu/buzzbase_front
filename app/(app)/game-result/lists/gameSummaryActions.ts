@@ -15,8 +15,7 @@ import {
 
 function buildQuery(filters: GameSummaryFilters): string {
   const params = new URLSearchParams();
-  if (filters.year && filters.year !== "通算")
-    params.append("year", filters.year);
+  if (filters.year) params.append("year", filters.year);
   if (filters.matchType) params.append("match_type", filters.matchType);
   if (filters.seasonId) params.append("season_id", filters.seasonId);
   if (filters.tournamentId)
