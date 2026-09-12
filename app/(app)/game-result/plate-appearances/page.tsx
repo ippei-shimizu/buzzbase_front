@@ -13,10 +13,12 @@ import {
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { getCurrentPitchingResult } from "@app/services/pitchingResultsService";
 import { getPlateAppearancesByGame } from "@app/services/v2/plateAppearanceService";
+import { trackGameRecordStepViewed } from "@app/utils/analytics";
 import { AddPlateAppearanceCard } from "./_components/AddPlateAppearanceCard";
 import { PlateAppearanceCard } from "./_components/PlateAppearanceCard";
 
 const PITCHING_PATH = "/game-result/pitching/";
+const GAME_RESULT_LIST_PATH = "/game-result/lists";
 const SUMMARY_PATH = "/game-result/summary/";
 
 const readRecordPattern = (): string => {
@@ -40,9 +42,15 @@ export default function PlateAppearanceListPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    trackGameRecordStepViewed(2);
+  }, []);
+
+  useEffect(() => {
     const saved = localStorage.getItem("gameResultId");
     if (!saved) {
-      router.push("/game-result/record");
+      // 記録画面へ戻すと gameResultId 不在を理由に空の試合が自動作成されるため、
+      // 記録対象を見失ったときは試合一覧へ逃がす。
+      router.push(GAME_RESULT_LIST_PATH);
       return;
     }
     const id = JSON.parse(saved) as number;

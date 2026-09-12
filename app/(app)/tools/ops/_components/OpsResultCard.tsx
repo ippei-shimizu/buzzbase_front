@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { SITE_URL } from "@app/constants/app";
 import { trackEvent } from "@app/lib/analytics";
 
@@ -89,9 +88,6 @@ export default function OpsResultCard({ ops, obp, slg }: Props) {
   const handleLineShare = () => {
     trackEvent("share", { method: "line", content_type: "ops_result" });
   };
-  const handleSignupClick = () => {
-    trackEvent("generate_lead", { source_tool: "ops" });
-  };
 
   return (
     <div className="rounded-xl border border-yellow-700/40 bg-gradient-to-br from-zinc-900 via-zinc-900 to-yellow-950/30 p-5 space-y-5">
@@ -132,21 +128,6 @@ export default function OpsResultCard({ ops, obp, slg }: Props) {
         >
           LINEでシェア
         </a>
-      </div>
-
-      <div className="rounded-lg border border-yellow-600/40 bg-yellow-900/20 px-4 py-4">
-        <p className="text-sm text-zinc-200 leading-6">
-          BUZZ BASE に無料登録すると、試合ごとに
-          OPS・打率・出塁率・長打率をまとめて記録できます。
-          グラフで成績推移を確認したり、チーム内ランキングで比較したりも可能です。
-        </p>
-        <Link
-          href="/signup"
-          onClick={handleSignupClick}
-          className="mt-3 inline-flex items-center justify-center w-full rounded-lg bg-yellow-500 hover:bg-yellow-400 transition-colors px-4 py-2.5 text-sm font-bold text-zinc-900"
-        >
-          無料登録して成績を記録する &rarr;
-        </Link>
       </div>
     </div>
   );

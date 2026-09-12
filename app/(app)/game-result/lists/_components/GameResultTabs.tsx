@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PlusIcon } from "@app/components/icon/PlusIcon";
+import SeasonManageLink from "@app/components/season/SeasonManageLink";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import MatchResultList from "@app/components/user/MatchResultList";
 import {
@@ -78,11 +79,15 @@ export function GameResultTabs({
         ))}
       </div>
 
+      <div className="mt-4 flex justify-end">
+        <SeasonManageLink />
+      </div>
+
       <button
         type="button"
         onClick={handleNewRecord}
         disabled={isSubmitting}
-        className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#d08000] py-3 font-bold text-white disabled:opacity-60"
+        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#d08000] py-3 font-bold text-white disabled:opacity-60"
       >
         <PlusIcon width="20" height="20" fill="#FFFFFF" />
         試合結果を記録する

@@ -70,7 +70,7 @@ describe("getGameSummary", () => {
     );
   });
 
-  it("フィルタをクエリパラメータに反映する（通算は送らない）", async () => {
+  it("フィルタをクエリパラメータに反映する", async () => {
     setupAuthCookies();
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -92,7 +92,7 @@ describe("getGameSummary", () => {
     expect(calledUrl).toContain("tournament_id=7");
   });
 
-  it("year=通算 のときは year を送らない", async () => {
+  it("月範囲を start_month / end_month として送る", async () => {
     setupAuthCookies();
     (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -100,11 +100,31 @@ describe("getGameSummary", () => {
       json: async () => sampleSummary,
     });
 
-    await getGameSummary({ year: "通算", matchType: "" });
+    await getGameSummary({ startMonth: "2026-04", endMonth: "2026-06" });
+
+    const query = new URLSearchParams(
+      ((global.fetch as jest.Mock).mock.calls[0][0] as string).split("?")[1],
+    );
+    expect(query.get("start_month")).toBe("2026-04");
+    expect(query.get("end_month")).toBe("2026-06");
+  });
+
+  it("未指定・空文字のフィルタはクエリに含めない", async () => {
+    setupAuthCookies();
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => sampleSummary,
+    });
+
+    await getGameSummary({ year: undefined, matchType: "", tournamentId: "7" });
 
     const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(calledUrl).toContain("tournament_id=7");
     expect(calledUrl).not.toContain("year=");
     expect(calledUrl).not.toContain("match_type=");
+    expect(calledUrl).not.toContain("start_month");
+    expect(calledUrl).not.toContain("end_month");
   });
 
   it("403 なら status:forbidden を返す", async () => {

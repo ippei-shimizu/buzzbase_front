@@ -22,6 +22,7 @@ import {
 import { PlateAppearanceWizard } from "../../_components/PlateAppearanceWizard";
 
 const LIST_PATH = "/game-result/plate-appearances";
+const GAME_RESULT_LIST_PATH = "/game-result/lists";
 
 export default function EditPlateAppearancePage() {
   const router = useRouter();
@@ -54,7 +55,9 @@ export default function EditPlateAppearancePage() {
   useEffect(() => {
     const saved = localStorage.getItem("gameResultId");
     if (!saved) {
-      router.push("/game-result/record");
+      // 記録画面へ戻すと gameResultId 不在を理由に空の試合が自動作成されるため、
+      // 記録対象を見失ったときは試合一覧へ逃がす。
+      router.push(GAME_RESULT_LIST_PATH);
       return;
     }
     const id = JSON.parse(saved) as number;
