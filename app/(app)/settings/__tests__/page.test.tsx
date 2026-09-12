@@ -2,7 +2,6 @@ const mockCookieGet = jest.fn();
 const mockRedirect = jest.fn((path: string) => {
   throw new Error(`NEXT_REDIRECT:${path}`);
 });
-const mockGetCachedFeatureFlagDecision = jest.fn();
 const mockLogout = jest.fn();
 const mockOpenProUpgradeModal = jest.fn();
 
@@ -12,11 +11,6 @@ jest.mock("next/headers", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: (path: string) => mockRedirect(path),
-}));
-
-jest.mock("@app/featureFlags/cachedFeatureFlags", () => ({
-  getCachedFeatureFlagDecision: (key: string) =>
-    mockGetCachedFeatureFlagDecision(key),
 }));
 
 jest.mock("@app/components/header/Header", () => ({
@@ -50,11 +44,8 @@ function setAuthCookies() {
   });
 }
 
-async function renderPage(
-  proFeaturesDecision: "enabled" | "disabled" | "indeterminate" = "disabled",
-) {
+async function renderPage() {
   setAuthCookies();
-  mockGetCachedFeatureFlagDecision.mockResolvedValueOnce(proFeaturesDecision);
   render(await SettingsPage());
 }
 
@@ -73,12 +64,11 @@ describe("メタデータ", () => {
 });
 
 describe("未認証", () => {
-  it("認証 cookie が無ければ flag を取得せずにリダイレクトする", async () => {
+  it("認証 cookie が無ければリダイレクトする", async () => {
     mockCookieGet.mockReturnValue(undefined);
 
     await expect(SettingsPage()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/signup?auth_required=true");
-    expect(mockGetCachedFeatureFlagDecision).not.toHaveBeenCalled();
   });
 
   it("認証 cookie が一部だけでもリダイレクトする", async () => {
@@ -92,29 +82,15 @@ describe("未認証", () => {
 
 describe("アカウントセクション", () => {
   it("プロフィール編集は常に表示する", async () => {
-    await renderPage("disabled");
+    await renderPage();
 
     expect(
       screen.getByRole("link", { name: /プロフィール編集/ }),
     ).toHaveAttribute("href", "/mypage/edit");
   });
 
-  it.each(["disabled", "indeterminate"] as const)(
-    "pro_features=%s のときはPro関連項目を出さない",
-    async (decision) => {
-      await renderPage(decision);
-
-      expect(
-        screen.queryByRole("button", { name: /Proプランを見る/ }),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("link", { name: /サブスクリプション管理/ }),
-      ).not.toBeInTheDocument();
-    },
-  );
-
-  it("pro_features=enabled のときはPro関連項目を出す", async () => {
-    await renderPage("enabled");
+  it("Pro関連項目を常に表示する", async () => {
+    await renderPage();
 
     expect(
       screen.getByRole("button", { name: /Proプランを見る/ }),
@@ -125,7 +101,7 @@ describe("アカウントセクション", () => {
   });
 
   it("Proプランを見るを押すとアップグレードモーダルを開く", async () => {
-    await renderPage("enabled");
+    await renderPage();
 
     fireEvent.click(screen.getByRole("button", { name: /Proプランを見る/ }));
 

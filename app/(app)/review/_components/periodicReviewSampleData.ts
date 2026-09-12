@@ -4,6 +4,8 @@ import type { PeriodicReview } from "@app/types/periodicReview";
  * 無料ユーザーに見せるサンプルレポート。
  * ダミー UI ではなく実カードへ流し込み、加入後に何が届くのかを実レイアウトのまま伝える。
  * 毎週届く機能だと分かるよう 3 週分並べる。値は実在の記録ではない架空の選手のもの。
+ * 実データと同じ月別ページャに載せるため、3 週とも同じ月に収める（月をまたぐと
+ * 初期表示が 1 件になり「毎週届く」ことが伝わらない）。
  *
  * id は実データと取り違えないよう負の値にする（既読化の対象にもしない）。
  */
@@ -11,8 +13,8 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
   {
     id: -1,
     period_type: "weekly",
-    period_start: "2026-07-06",
-    period_end: "2026-07-12",
+    period_start: "2026-07-20",
+    period_end: "2026-07-26",
     read: true,
     summary: {
       period_type: "weekly",
@@ -27,15 +29,72 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
         ops: 0.839,
         previous_batting_average: 0.286,
         delta: 0.026,
+        hits: 5,
+        two_base_hits: 2,
+        three_base_hits: 0,
+        home_runs: 1,
+        stolen_bases: 2,
+        strikeouts: 3,
+        scoring_position: { batting_average: 0.4, at_bats: 5, hits: 2 },
       },
       pitching: {
+        appearances: 1,
         innings_pitched: 7,
         era: 2.57,
         whip: 1.14,
         k_per_9: 9,
+        strikeouts: 7,
+        base_on_balls: 2,
+        hit_by_pitch: 0,
+        hits_allowed: 6,
+        home_runs_allowed: 0,
+        runs_allowed: 3,
+        earned_runs: 2,
       },
       theme_breakdown: [{ id: -1, title: "肩の開き", practice_count: 4 }],
-      condition: { sleep_hours_avg: 7.2, fatigue_level_avg: 2.4 },
+      condition: {
+        sleep_hours_avg: 7.2,
+        fatigue_level_avg: 2.4,
+        physical_level_avg: 3.6,
+      },
+      practice_menus: {
+        items: [
+          { name: "素振り", count: 5, total_amount: 1200, unit_label: "本" },
+          {
+            name: "ティーバッティング",
+            count: 3,
+            total_amount: 150,
+            unit_label: "本",
+          },
+          { name: "ランニング", count: 2, total_amount: 40, unit_label: "分" },
+        ],
+        other_count: 1,
+      },
+      note_days: 4,
+      goals: [
+        {
+          id: -1,
+          title: "今月2000本素振り",
+          kind: "numeric",
+          metric_key: "total_swing_count",
+          current_value: 1450,
+          target_value: 2000,
+          progress_percent: 72.5,
+          achieved: false,
+          deadline: "2026-07-31",
+        },
+        {
+          id: -2,
+          title: "打率.300を超える",
+          kind: "numeric",
+          metric_key: "batting_average",
+          current_value: 0.312,
+          target_value: 0.3,
+          progress_percent: 100,
+          achieved: true,
+          deadline: "2026-07-31",
+        },
+      ],
       insight: {
         key: "sample-1",
         id: null,
@@ -53,8 +112,8 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
   {
     id: -2,
     period_type: "weekly",
-    period_start: "2026-06-29",
-    period_end: "2026-07-05",
+    period_start: "2026-07-13",
+    period_end: "2026-07-19",
     read: true,
     summary: {
       period_type: "weekly",
@@ -69,9 +128,33 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
         ops: 0.752,
         previous_batting_average: 0.298,
         delta: -0.012,
+        hits: 4,
+        two_base_hits: 1,
+        three_base_hits: 0,
+        home_runs: 0,
+        stolen_bases: 1,
+        strikeouts: 4,
+        scoring_position: { batting_average: 0.25, at_bats: 4, hits: 1 },
       },
       theme_breakdown: [{ id: -2, title: "体重移動", practice_count: 3 }],
-      condition: { sleep_hours_avg: 6.8, fatigue_level_avg: 2.8 },
+      condition: {
+        sleep_hours_avg: 6.8,
+        fatigue_level_avg: 2.8,
+        physical_level_avg: 3.1,
+      },
+      practice_menus: {
+        items: [
+          { name: "素振り", count: 4, total_amount: 900, unit_label: "本" },
+          {
+            name: "ティーバッティング",
+            count: 2,
+            total_amount: 100,
+            unit_label: "本",
+          },
+        ],
+        other_count: 0,
+      },
+      note_days: 3,
       insight: {
         key: "sample-2",
         id: null,
@@ -89,8 +172,8 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
   {
     id: -3,
     period_type: "weekly",
-    period_start: "2026-06-22",
-    period_end: "2026-06-28",
+    period_start: "2026-07-06",
+    period_end: "2026-07-12",
     read: true,
     summary: {
       period_type: "weekly",
@@ -105,9 +188,28 @@ export const SAMPLE_PERIODIC_REVIEWS: PeriodicReview[] = [
         ops: 0.88,
         previous_batting_average: 0.312,
         delta: 0.021,
+        hits: 6,
+        two_base_hits: 2,
+        three_base_hits: 1,
+        home_runs: 0,
+        stolen_bases: 3,
+        strikeouts: 2,
+        scoring_position: { batting_average: 0.5, at_bats: 6, hits: 3 },
       },
       theme_breakdown: [{ id: -3, title: "外角対応", practice_count: 5 }],
-      condition: { sleep_hours_avg: 7.5, fatigue_level_avg: 2.1 },
+      condition: {
+        sleep_hours_avg: 7.5,
+        fatigue_level_avg: 2.1,
+        physical_level_avg: 3.9,
+      },
+      practice_menus: {
+        items: [
+          { name: "素振り", count: 6, total_amount: 1500, unit_label: "本" },
+          { name: "ノック", count: 3, total_amount: 90, unit_label: "分" },
+        ],
+        other_count: 0,
+      },
+      note_days: 5,
       insight: {
         key: "sample-3",
         id: null,
