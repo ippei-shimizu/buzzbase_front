@@ -1,0 +1,674 @@
+"use server";
+
+import type { FilterValues } from "@app/components/filter/filterTypes";
+import type { ProGatedResult } from "@app/types/pro";
+import { cookies } from "next/headers";
+import { captureServerActionError } from "../../../lib/sentry-helpers";
+import { RAILS_API_URL } from "../../constants/api";
+import {
+  EMPTY_COUNT_SITUATIONS,
+  EMPTY_PITCH_COURSE_PITCH_TYPES,
+  EMPTY_PITCH_COURSES,
+  EMPTY_PITCH_TYPES,
+  EMPTY_PITCHER_FACEOFFS,
+} from "./analysisFallbacks";
+
+// 分析系エンドポイント共通のフィルタ。絞り込み UI と同じ形を使う。
+export type AnalysisFilters = FilterValues;
+
+export interface HeadlineStats {
+  batting_average: number;
+  hit: number;
+  home_run: number;
+  runs_batted_in: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  at_bats: number;
+}
+
+export interface AdditionalStats {
+  games: number;
+  plate_appearances: number;
+  two_base_hit: number;
+  three_base_hit: number;
+  total_bases: number;
+  run: number;
+  strike_out: number;
+  swinging_strike_out: number;
+  looking_strike_out: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_hit: number;
+  sacrifice_fly: number;
+  stealing_base: number;
+  caught_stealing: number;
+  iso: number;
+  isod: number;
+  bb_per_k: number;
+}
+
+export interface RunnersSituationSummary {
+  batting_average: number;
+  at_bats: number;
+  hits: number;
+  two_base_hit: number;
+  three_base_hit: number;
+  home_run: number;
+}
+
+export interface HitLocationPoint {
+  x: number;
+  y: number;
+  plate_result_id: number;
+}
+
+export interface HitLocationData {
+  points: HitLocationPoint[];
+}
+
+export interface HitDirection {
+  id: number;
+  label: string;
+  count: number;
+  top_category: string;
+  at_bats: number;
+  hits: number;
+  two_base_hit: number;
+  three_base_hit: number;
+  home_run: number;
+  total_bases: number;
+}
+
+export interface HomeRunDirection {
+  id: number;
+  label: string;
+  count: number;
+}
+
+export interface HitDirectionData {
+  directions: HitDirection[];
+  home_runs: HomeRunDirection[];
+}
+
+export interface PlateAppearanceCategory {
+  category: string;
+  count: number;
+  percentage: number;
+}
+
+/**
+ * 防御率推移グラフの粒度。
+ * - `month`: 月単独の ERA
+ * - `season`: シーズン単独の ERA（シーズン跨ぎ比較。`season_transition_graph` が必要）
+ */
+export type EraTrendGranularity = "month" | "season";
+
+export interface EraTrendPoint {
+  key: string;
+  label: string;
+  era: number;
+}
+
+export interface EraTrendData {
+  granularity: EraTrendGranularity;
+  points: EraTrendPoint[];
+}
+
+export interface ContactQualityCategory {
+  id: number;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ContactQualityData {
+  breakdown: ContactQualityCategory[];
+  total: number;
+}
+
+export interface TimingBreakdownCategory {
+  id: number;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface TimingBreakdownData {
+  breakdown: TimingBreakdownCategory[];
+  total: number;
+}
+
+export interface CountSituation {
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+}
+
+export interface CountSituations {
+  first_pitch: CountSituation;
+  favorable_count: CountSituation;
+  pinch_count: CountSituation;
+  total_target_pa: number;
+}
+
+export interface PitcherResultCount {
+  plate_result_id: number;
+  plate_result_name: string;
+  count: number;
+}
+
+export interface PitchTypeRow {
+  id: number;
+  label: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_fly: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  result_counts: PitcherResultCount[];
+}
+
+export interface PitchTypeData {
+  rows: PitchTypeRow[];
+  total_target_pa: number;
+}
+
+// GET /api/v2/stats/pitch_courses の 1 セル分（zones は必ず 25 要素で返る）。
+export interface PitchCourseZone {
+  course: number;
+  row: number;
+  col: number;
+  is_strike_zone: boolean;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+  /** 打数が min_at_bats 以上か。false は参考値（半透明表示）。 */
+  is_reliable: boolean;
+}
+
+export interface PitchCourseZoneSummary {
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  batting_average: number;
+}
+
+export interface PitchCourseData {
+  zones: PitchCourseZone[];
+  strike_zone: PitchCourseZoneSummary;
+  ball_zone: PitchCourseZoneSummary;
+  total_target_pa: number;
+  min_at_bats: number;
+}
+
+export interface PitchCoursePitchTypeRow {
+  id: number;
+  label: string;
+  plate_appearances: number;
+  zones: PitchCourseZone[];
+}
+
+export interface PitchCoursePitchTypeData {
+  rows: PitchCoursePitchTypeRow[];
+  total_target_pa: number;
+  min_at_bats: number;
+}
+
+export interface PitcherFaceoff {
+  pitcher_id: number;
+  pitcher_name: string;
+  team_name: string | null;
+  throw_hand: "right" | "left" | null;
+  pitcher_style: string | null;
+  velocity_zone: string | null;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_fly: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  top_result: string;
+  result_counts: PitcherResultCount[];
+}
+
+export interface PitcherFaceoffData {
+  rows: PitcherFaceoff[];
+  min_plate_appearances: number;
+  total_target_pa: number;
+}
+
+export interface PitcherAttributeBucket {
+  key: string | number | null;
+  label: string;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  total_bases: number;
+  base_on_balls: number;
+  hit_by_pitch: number;
+  sacrifice_fly: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  result_counts: PitcherResultCount[];
+  display_order: number;
+}
+
+export interface PitcherAttributeSummaryData {
+  by_throw_hand: PitcherAttributeBucket[];
+  by_arm_angle: PitcherAttributeBucket[];
+  by_velocity_zone: PitcherAttributeBucket[];
+  by_pitcher_style: PitcherAttributeBucket[];
+}
+
+/**
+ * 打撃推移グラフの粒度。
+ * - `game`: 各試合時点までの累積（絞り込み後の全試合が対象で、通算なら複数年をまたぐ）
+ * - `month` / `year`: その期間単独
+ * - `season`: シーズン単独（シーズン跨ぎ比較。`season_transition_graph` が必要）
+ * - `recent_games`: 直近10試合の累積
+ */
+export type BattingTrendGranularity =
+  | "game"
+  | "month"
+  | "year"
+  | "season"
+  | "recent_games";
+
+export interface BattingTrendPoint {
+  key: string;
+  label: string;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  ops: number;
+  at_bats_in_period: number;
+  cumulative_at_bats: number;
+}
+
+export interface BattingTrendData {
+  granularity: BattingTrendGranularity;
+  points: BattingTrendPoint[];
+}
+
+async function getAuthHeaders(): Promise<Record<string, string> | null> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("access-token")?.value;
+  const client = cookieStore.get("client")?.value;
+  const uid = cookieStore.get("uid")?.value;
+  if (!accessToken || !client || !uid) return null;
+  return {
+    "Content-Type": "application/json",
+    "access-token": accessToken,
+    client,
+    uid,
+  };
+}
+
+function buildQuery(filters: AnalysisFilters): string {
+  const params = new URLSearchParams();
+  if (filters.year) params.append("year", filters.year);
+  if (filters.matchType) params.append("match_type", filters.matchType);
+  if (filters.seasonId) params.append("season_id", filters.seasonId);
+  if (filters.tournamentId)
+    params.append("tournament_id", filters.tournamentId);
+  if (filters.startMonth) params.append("start_month", filters.startMonth);
+  if (filters.endMonth) params.append("end_month", filters.endMonth);
+  return params.toString();
+}
+
+/**
+ * シーズン粒度はシーズン跨ぎで全シーズンを比較するため、単一シーズンへの絞り込みと
+ * 併用すると 1 点に縮退する。back も season 粒度では season_id を無視するので、
+ * 送信側でも落として意図を揃える。
+ */
+function seasonAwareFilters(
+  filters: AnalysisFilters,
+  granularity: BattingTrendGranularity | EraTrendGranularity,
+): AnalysisFilters {
+  if (granularity !== "season") return filters;
+  const { seasonId: _seasonId, ...rest } = filters;
+  return rest;
+}
+
+async function fetchProGatedAnalysis<T>(
+  path: string,
+  filters: AnalysisFilters,
+  action: string,
+  fallback: T,
+  extra?: Record<string, string>,
+): Promise<ProGatedResult<T>> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return { status: "ok", data: fallback };
+    const params = new URLSearchParams(buildQuery(filters));
+    if (extra) {
+      for (const [key, value] of Object.entries(extra)) {
+        params.append(key, value);
+      }
+    }
+    const query = params.toString();
+    const response = await fetch(
+      `${RAILS_API_URL}/api/v2/stats/${path}?${query}`,
+      { headers, cache: "no-store" },
+    );
+    if (response.status === 403) return { status: "pro_required" };
+    if (!response.ok) return { status: "ok", data: fallback };
+    return { status: "ok", data: (await response.json()) as T };
+  } catch (error) {
+    captureServerActionError(error, { action });
+    return { status: "ok", data: fallback };
+  }
+}
+
+// Pro ゲートの無いエンドポイント用。403 も他の失敗と同じくフォールバックに畳む。
+async function fetchAnalysis<T>(
+  path: string,
+  filters: AnalysisFilters,
+  action: string,
+  fallback: T,
+  extra?: Record<string, string>,
+): Promise<T> {
+  const result = await fetchProGatedAnalysis(
+    path,
+    filters,
+    action,
+    fallback,
+    extra,
+  );
+  return result.status === "ok" ? result.data : fallback;
+}
+
+export async function getHeadlineStats(
+  filters: AnalysisFilters = {},
+): Promise<HeadlineStats | null> {
+  return fetchAnalysis<HeadlineStats | null>(
+    "headline_stats",
+    filters,
+    "getHeadlineStats",
+    null,
+  );
+}
+
+export async function getAdditionalStats(
+  filters: AnalysisFilters = {},
+): Promise<AdditionalStats | null> {
+  return fetchAnalysis<AdditionalStats | null>(
+    "additional_stats",
+    filters,
+    "getAdditionalStats",
+    null,
+  );
+}
+
+export async function getRunnersSituation(
+  filters: AnalysisFilters = {},
+): Promise<RunnersSituationSummary | null> {
+  return fetchAnalysis<RunnersSituationSummary | null>(
+    "runners_situation",
+    filters,
+    "getRunnersSituation",
+    null,
+  );
+}
+
+/**
+ * 打撃推移を取得する。`granularity: "season"` は `season_transition_graph` の
+ * entitlement が必要で、403 は pro_required として返す（他の粒度で 403 は起きない）。
+ */
+export async function getBattingTrend(
+  filters: AnalysisFilters = {},
+  granularity: BattingTrendGranularity = "game",
+): Promise<ProGatedResult<BattingTrendData>> {
+  return fetchProGatedAnalysis<BattingTrendData>(
+    "batting_trend",
+    seasonAwareFilters(filters, granularity),
+    "getBattingTrend",
+    { granularity, points: [] },
+    { granularity },
+  );
+}
+
+export async function getContactQualities(
+  filters: AnalysisFilters = {},
+): Promise<ContactQualityData> {
+  return fetchAnalysis<ContactQualityData>(
+    "contact_qualities",
+    filters,
+    "getContactQualities",
+    { breakdown: [], total: 0 },
+  );
+}
+
+export async function getTimingBreakdown(
+  filters: AnalysisFilters = {},
+): Promise<TimingBreakdownData> {
+  return fetchAnalysis<TimingBreakdownData>(
+    "timing_breakdown",
+    filters,
+    "getTimingBreakdown",
+    { breakdown: [], total: 0 },
+  );
+}
+
+/** count_situation_average の entitlement が必要。403 は pro_required として返す。 */
+export async function getCountSituations(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<CountSituations>> {
+  return fetchProGatedAnalysis<CountSituations>(
+    "count_situations",
+    filters,
+    "getCountSituations",
+    EMPTY_COUNT_SITUATIONS,
+  );
+}
+
+/** pitch_type_average の entitlement が必要。403 は pro_required として返す。 */
+export async function getPitchTypes(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitchTypeData>> {
+  return fetchProGatedAnalysis<PitchTypeData>(
+    "pitch_types",
+    filters,
+    "getPitchTypes",
+    EMPTY_PITCH_TYPES,
+  );
+}
+
+/** pitch_course_average の entitlement が必要。403 は pro_required として返す。 */
+export async function getPitchCourses(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitchCourseData>> {
+  return fetchProGatedAnalysis<PitchCourseData>(
+    "pitch_courses",
+    filters,
+    "getPitchCourses",
+    EMPTY_PITCH_COURSES,
+  );
+}
+
+/**
+ * 球種×コースのクロス集計（pitch_course_average の entitlement が必要）。
+ * 最大 250 セルと大きいため、「球種別」タブを開いたときにだけ呼び出す。
+ */
+export async function getPitchCoursePitchTypes(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitchCoursePitchTypeData>> {
+  return fetchProGatedAnalysis<PitchCoursePitchTypeData>(
+    "pitch_course_pitch_types",
+    filters,
+    "getPitchCoursePitchTypes",
+    EMPTY_PITCH_COURSE_PITCH_TYPES,
+  );
+}
+
+/** pitcher_faceoff_average の entitlement が必要。403 は pro_required として返す。 */
+export async function getPitcherFaceoffs(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitcherFaceoffData>> {
+  return fetchProGatedAnalysis<PitcherFaceoffData>(
+    "pitcher_faceoffs",
+    filters,
+    "getPitcherFaceoffs",
+    EMPTY_PITCHER_FACEOFFS,
+  );
+}
+
+export async function getPitcherAttributeSummary(
+  filters: AnalysisFilters = {},
+): Promise<PitcherAttributeSummaryData> {
+  return fetchAnalysis<PitcherAttributeSummaryData>(
+    "pitcher_attribute_summary",
+    filters,
+    "getPitcherAttributeSummary",
+    {
+      by_throw_hand: [],
+      by_arm_angle: [],
+      by_velocity_zone: [],
+      by_pitcher_style: [],
+    },
+  );
+}
+
+/**
+ * 防御率推移を取得する。`granularity: "season"` は `season_transition_graph` の
+ * entitlement が必要で、403 は pro_required として返す（月粒度で 403 は起きない）。
+ */
+export async function getEraTrend(
+  filters: AnalysisFilters = {},
+  granularity: EraTrendGranularity = "month",
+): Promise<ProGatedResult<EraTrendData>> {
+  // era_trend は year/season/tournament のみで絞る。match_type は構造的に除外し、
+  // 誤って matchType 付きで呼ばれても送信されないことを関数自身で保証する。
+  const { matchType: _matchType, ...eraFilters } = filters;
+  const result = await fetchProGatedAnalysis<EraTrendData>(
+    "era_trend",
+    seasonAwareFilters(eraFilters, granularity),
+    "getEraTrend",
+    { granularity, points: [] },
+    { granularity },
+  );
+  // fetchProGatedAnalysis は 200 応答のボディ形状を検証しないため、
+  // back側のレスポンス形式変更未反映時などpointsが欠けていてもクラッシュしないよう防御する。
+  if (result.status !== "ok") return result;
+  return {
+    status: "ok",
+    data: {
+      granularity: result.data.granularity,
+      points: result.data.points ?? [],
+    },
+  };
+}
+
+export async function getPlateAppearanceBreakdown(
+  filters: AnalysisFilters = {},
+): Promise<PlateAppearanceCategory[]> {
+  const result = await fetchAnalysis<{ breakdown: PlateAppearanceCategory[] }>(
+    "plate_appearance_breakdown",
+    filters,
+    "getPlateAppearanceBreakdown",
+    { breakdown: [] },
+  );
+  return result.breakdown ?? [];
+}
+
+export async function getHitLocations(
+  filters: AnalysisFilters = {},
+): Promise<HitLocationData> {
+  return fetchAnalysis<HitLocationData>(
+    "hit_locations",
+    filters,
+    "getHitLocations",
+    { points: [] },
+  );
+}
+
+export async function getHitDirections(
+  filters: AnalysisFilters = {},
+): Promise<HitDirectionData> {
+  return fetchAnalysis<HitDirectionData>(
+    "hit_directions",
+    filters,
+    "getHitDirections",
+    { directions: [], home_runs: [] },
+  );
+}
+
+/** 全ユーザー共通で初期描画する打撃分析ブロック群（Pro 限定の3種は含めない）。 */
+export interface AnalysisInitialData {
+  headline: HeadlineStats | null;
+  runnersSituation: RunnersSituationSummary | null;
+  additional: AdditionalStats | null;
+  hitLocations: HitLocationData;
+  hitDirections: HitDirectionData;
+  plateBreakdown: PlateAppearanceCategory[];
+  contactQualities: ContactQualityData;
+  timingBreakdown: TimingBreakdownData;
+  pitcherAttributes: PitcherAttributeSummaryData;
+  battingTrend: BattingTrendData;
+}
+
+/**
+ * 打撃分析の初期表示ブロックをまとめて取得する（Server Component から SSR で呼ぶ）。
+ * フィルタ既定は絞り込みなし（通算・全試合）、推移は試合単位。
+ * Pro 限定の3種は entitlement を持つユーザーにだけ投げたいので、ここには含めず
+ * 呼び出し側が Pro 判定と合わせて取得する。
+ */
+export async function getInitialAnalysisData(
+  filters: AnalysisFilters = {},
+  granularity: BattingTrendGranularity = "game",
+): Promise<AnalysisInitialData> {
+  const [
+    headline,
+    runnersSituation,
+    additional,
+    hitLocations,
+    hitDirections,
+    plateBreakdown,
+    contactQualities,
+    timingBreakdown,
+    pitcherAttributes,
+    battingTrend,
+  ] = await Promise.all([
+    getHeadlineStats(filters),
+    getRunnersSituation(filters),
+    getAdditionalStats(filters),
+    getHitLocations(filters),
+    getHitDirections(filters),
+    getPlateAppearanceBreakdown(filters),
+    getContactQualities(filters),
+    getTimingBreakdown(filters),
+    getPitcherAttributeSummary(filters),
+    getBattingTrend(filters, granularity),
+  ]);
+  return {
+    headline,
+    runnersSituation,
+    additional,
+    hitLocations,
+    hitDirections,
+    plateBreakdown,
+    contactQualities,
+    timingBreakdown,
+    pitcherAttributes,
+    // 既定粒度は Pro 限定ではないため、ここに pro_required は来ない。
+    battingTrend:
+      battingTrend.status === "ok"
+        ? battingTrend.data
+        : { granularity, points: [] },
+  };
+}

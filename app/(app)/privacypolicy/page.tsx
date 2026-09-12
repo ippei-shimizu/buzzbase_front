@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
             <div className="px-4 pt-24 lg:border-x-1 lg:border-b-1 lg:border-zinc-500 lg:px-6 lg:pb-6">
               <h2 className="text-2xl font-bold">プライバシーポリシー</h2>
               <p className="text-xs text-zinc-400 mt-2">
-                最終更新日: 2026年3月15日
+                最終更新日: 2026年8月1日
               </p>
               <h3 className="text-xl font-bold mt-8">はじめに</h3>
               <p className="text-sm mt-4">
@@ -43,6 +43,12 @@ export default function PrivacyPolicy() {
                 <br />
                 ・当サービスアプリの起動時間、入力履歴等の当サービスアプリの利用履歴
                 <br />
+                ・お支払い情報（決済に必要な範囲の情報。クレジットカード番号本体は決済代行会社が管理し、当サービスでは保持しません）
+                <br />
+                ・サブスクリプションの契約状態（プラン種別、契約期間、更新・解約状況等）
+                <br />
+                ・広告識別子（IDFA等。iOSアプリでトラッキングの許可をいただいた場合のみ）
+                <br />
               </p>
               <h3 className="text-xl font-bold mt-8">利用目的</h3>
               <p className="text-sm mt-4">
@@ -59,7 +65,43 @@ export default function PrivacyPolicy() {
                 <br />
                 ・不正アクセスや不正利用の防止
                 <br />
+                ・有料プラン（Proプラン）の提供、課金処理及び契約管理
+                <br />
                 ・広告の配信および広告効果の測定
+              </p>
+              <h3 className="text-xl font-bold mt-8">
+                決済代行サービスについて
+              </h3>
+              <p className="text-sm mt-4">
+                本サービスの有料プラン（Proプラン）のお申込みにあたり、以下の決済代行サービスを利用しています。
+                <br />
+                <br />
+                Web版: Stripe, Inc.
+                の決済サービス「Stripe」でクレジットカード決済を処理しています。Stripeにおける情報の取扱いは
+                <Link
+                  href="https://stripe.com/jp/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline"
+                >
+                  Stripeのプライバシーポリシー
+                </Link>
+                をご確認ください。
+                <br />
+                <br />
+                iOSアプリ版: RevenueCat, Inc. の「RevenueCat」で、App
+                Store（Apple
+                ID）決済によるサブスクリプションの契約状態を管理しています。RevenueCatにおける情報の取扱いは
+                <Link
+                  href="https://www.revenuecat.com/privacy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline"
+                >
+                  RevenueCatのプライバシーポリシー
+                </Link>
+                をご確認ください。iOSアプリ内課金自体はApple Inc.のApp
+                Store決済システムを通じて行われ、決済情報はApple社が管理します。
               </p>
               <h3 className="text-xl font-bold mt-8">広告について</h3>
               <p className="text-sm mt-4">
@@ -102,6 +144,13 @@ export default function PrivacyPolicy() {
                   https://policies.google.com/technologies/ads
                 </Link>
                 ）をご確認ください。
+                <br />
+                <br />
+                本サービスのモバイルアプリ（iOS版）では、Google
+                LLCが提供する広告配信サービス「Google
+                AdMob」を利用しています。パーソナライズド広告の配信にあたり端末の広告識別子（IDFA）を使用することがあり、iOS
+                14.5以降ではApp Tracking
+                Transparency（ATT）フレームワークによりトラッキングの許可を確認した上で使用します。許可しない場合でも非パーソナライズド広告は表示されます。
               </p>
               <h3 className="text-xl font-bold mt-8">
                 アクセス解析ツールについて
@@ -136,6 +185,13 @@ export default function PrivacyPolicy() {
                 ・人の生命、身体または財産の保護のために必要がある場合であって、お客様の同意を得ることが困難であるとき
                 <br />
                 ・本サービスの運営に必要な範囲で業務委託先に提供する場合（広告配信、アクセス解析等）
+                <br />
+                ・決済処理のため、Stripe,
+                Inc.（Web版のクレジットカード決済）及びRevenueCat,
+                Inc.（App内課金の契約管理）に必要な範囲の情報を提供する場合
+                <br />
+                ・広告配信のため、Google LLC（Google AdMob / AdSense /
+                Analytics）に必要な範囲の情報を提供する場合
               </p>
               <h3 className="text-xl font-bold mt-8">個人情報の安全管理</h3>
               <p className="text-sm mt-4">

@@ -22,11 +22,7 @@ export default function NotificationManagementNotice({
   };
 
   return (
-    <div
-      className={`grid grid-cols-[28px_1fr] gap-x-3 ${
-        notice.read_at ? "opacity-30" : ""
-      }`}
-    >
+    <div className="grid grid-cols-[28px_1fr] gap-x-3">
       <div className="flex items-center justify-center min-w-[28px] max-w-[28px] min-h-[28px] max-h-[28px] rounded-full bg-yellow-500">
         <svg
           className="w-4 h-4 text-white"

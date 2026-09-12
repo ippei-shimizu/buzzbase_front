@@ -61,6 +61,7 @@ describe("useNotificationCount", () => {
     expect(result.current.isError).toBeUndefined();
     expect(axiosInstance.get).toHaveBeenCalledWith(
       "/api/v1/notifications/count",
+      expect.objectContaining({ timeout: expect.any(Number) }),
     );
   });
 

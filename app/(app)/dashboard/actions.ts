@@ -1,5 +1,9 @@
 "use server";
 
+import type {
+  BattingStats,
+  PitchingStats,
+} from "@app/interface/dashboardStats";
 import { cookies } from "next/headers";
 import { captureServerActionError } from "../../../lib/sentry-helpers";
 import { RAILS_API_URL } from "../../constants/api";
@@ -25,65 +29,11 @@ export interface RecentGameResult {
   } | null;
 }
 
-export interface BattingStats {
-  aggregate: {
-    number_of_matches: number;
-    hit: number;
-    two_base_hit: number;
-    three_base_hit: number;
-    home_run: number;
-    total_bases: number;
-    runs_batted_in: number;
-    run: number;
-    stealing_base: number;
-    caught_stealing: number;
-    times_at_bat: number;
-    at_bats: number;
-    base_on_balls: number;
-    hit_by_pitch: number;
-    sacrifice_hit: number;
-    sacrifice_fly: number;
-    strike_out: number;
-    error: number;
-  } | null;
-  calculated: {
-    batting_average: number;
-    on_base_percentage: number;
-    slugging_percentage: number;
-    ops: number;
-    iso: number;
-    bb_per_k: number;
-    isod: number;
-  } | null;
-}
-
-export interface PitchingStats {
-  aggregate: {
-    number_of_appearances: number;
-    win: number;
-    loss: number;
-    complete_games: number;
-    shutouts: number;
-    saves: number;
-    hold: number;
-    innings_pitched: number;
-    hits_allowed: number;
-    home_runs_hit: number;
-    strikeouts: number;
-    base_on_balls: number;
-    hit_by_pitch: number;
-    run_allowed: number;
-    earned_run: number;
-  } | null;
-  calculated: {
-    era: number;
-    win_percentage: number;
-    whip: number;
-    k_per_nine: number;
-    bb_per_nine: number;
-    k_bb: number;
-  } | null;
-}
+// 型は v2 ダッシュボード成績 API の共通定義（マイページ成績タブと共有）を再エクスポートする。
+export type {
+  BattingStats,
+  PitchingStats,
+} from "@app/interface/dashboardStats";
 
 export interface RankingEntry {
   stat_type: string;
@@ -108,12 +58,18 @@ export interface SeasonOption {
   name: string;
 }
 
+export interface TournamentOption {
+  id: number;
+  name: string;
+}
+
 export interface DashboardData {
   recent_game_results: RecentGameResult[];
   batting_stats: BattingStats;
   pitching_stats: PitchingStats;
   group_rankings: GroupRanking[];
   available_years: number[];
+  available_months?: string[];
 }
 
 export async function getDashboardData(
@@ -181,11 +137,17 @@ function buildFilterQuery(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): string {
   const params = new URLSearchParams();
   if (year && year !== "通算") params.append("year", year);
   if (matchType && matchType !== "全て") params.append("match_type", matchType);
   if (seasonId) params.append("season_id", seasonId);
+  if (tournamentId) params.append("tournament_id", tournamentId);
+  if (startMonth) params.append("start_month", startMonth);
+  if (endMonth) params.append("end_month", endMonth);
   const query = params.toString();
   return query ? `?${query}` : "";
 }
@@ -211,16 +173,48 @@ export async function getAvailableSeasons(): Promise<SeasonOption[]> {
   }
 }
 
+export async function getAvailableTournaments(): Promise<TournamentOption[]> {
+  try {
+    const headers = await getAuthHeaders();
+    if (!headers) return [];
+
+    // 全大会ではなく、自分が記録した大会のみを候補にする。
+    const url = `${RAILS_API_URL}/api/v1/tournaments/user_tournaments`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    captureServerActionError(error, { action: "getAvailableTournaments" });
+    console.error("Error fetching tournaments:", error);
+    return [];
+  }
+}
+
 export async function getFilteredBattingStats(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<BattingStats | null> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
-    const query = buildFilterQuery(year, matchType, seasonId);
+    const query = buildFilterQuery(
+      year,
+      matchType,
+      seasonId,
+      tournamentId,
+      startMonth,
+      endMonth,
+    );
     const url = `${RAILS_API_URL}/api/v2/dashboard/batting_stats${query}`;
 
     const response = await fetch(url, {
@@ -242,12 +236,22 @@ export async function getFilteredPitchingStats(
   year?: string,
   matchType?: string,
   seasonId?: string,
+  tournamentId?: string,
+  startMonth?: string,
+  endMonth?: string,
 ): Promise<PitchingStats | null> {
   try {
     const headers = await getAuthHeaders();
     if (!headers) return null;
 
-    const query = buildFilterQuery(year, matchType, seasonId);
+    const query = buildFilterQuery(
+      year,
+      matchType,
+      seasonId,
+      tournamentId,
+      startMonth,
+      endMonth,
+    );
     const url = `${RAILS_API_URL}/api/v2/dashboard/pitching_stats${query}`;
 
     const response = await fetch(url, {

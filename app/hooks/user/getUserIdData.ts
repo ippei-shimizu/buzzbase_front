@@ -6,7 +6,7 @@ import { extractUserIdFromPath } from "@app/hooks/user/extractUserIdFromPath";
 export default function useUserIdData() {
   const pathName = usePathname();
   const userId = extractUserIdFromPath(pathName);
-  const { data, error } = useSWR(
+  const { data, error, mutate } = useSWR(
     userId ? `/api/v1/users/show_user_id_data?user_id=${userId}` : null,
     fetcher,
   );
@@ -14,5 +14,6 @@ export default function useUserIdData() {
     userData: data,
     isLoadingUsers: !error && !data,
     isErrorUser: error,
+    mutateUserData: mutate,
   };
 }

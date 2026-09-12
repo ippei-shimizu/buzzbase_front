@@ -3,6 +3,7 @@ import type { NoteEditorProps } from "@app/interface";
 import { useState } from "react";
 import { createEditor, type BaseEditor, type Descendant } from "slate";
 import { Slate, Editable, withReact, type ReactEditor } from "slate-react";
+import { parseMemoToSlateValue } from "@app/utils/noteMemo";
 
 type CustomElement = { type: "paragraph"; children: CustomText[] };
 type CustomText = { text: string };
@@ -18,14 +19,8 @@ declare module "slate" {
 export default function NoteEditor({ memo, setMemo }: NoteEditorProps) {
   const [editor] = useState(() => withReact(createEditor()));
 
-  const initialValue: Descendant[] = memo
-    ? JSON.parse(memo)
-    : [
-        {
-          type: "paragraph",
-          children: [{ text: "" }],
-        },
-      ];
+  // 旧データ（プレーンテキスト）や壊れた JSON でも Slate に不正な値を渡さない。
+  const initialValue: Descendant[] = parseMemoToSlateValue(memo);
 
   const handleChange = (value: Descendant[]) => {
     setMemo(JSON.stringify(value));
@@ -40,7 +35,7 @@ export default function NoteEditor({ memo, setMemo }: NoteEditorProps) {
           onChange={handleChange}
         >
           <Editable
-            className="p-2 focus:outline-none h-full !min-h-[620px] text-sm leading-6"
+            className="p-2 focus:outline-none h-full !min-h-[140px] text-sm leading-6"
             placeholder="メモする...."
           />
         </Slate>
