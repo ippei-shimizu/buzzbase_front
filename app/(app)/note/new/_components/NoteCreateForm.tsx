@@ -150,6 +150,19 @@ export default function NoteCreateForm({
     );
 
   /**
+   * ノートの作成を計測する。添付の技術的失敗でノートごと取り消される経路があるため、
+   * サーバー上にノートが残ることが確定した時点だけで呼ぶ。
+   */
+  const trackNoteSaved = () => {
+    trackNoteCreated({ has_reflection: reflectionAnswers.length > 0 });
+    // 振り返りは「テンプレに回答したノート」として保存されるため、ノート作成と
+    // 同時に振り返り完了としても数える（機能別の使用率を別々に出すため）。
+    if (reflectionAnswers.length > 0) {
+      trackReviewCompleted({ answer_count: reflectionAnswers.length });
+    }
+  };
+
+  /**
    * ノート保存後にステージ中のメディアを順にアップロードする。
    *
    * 技術的失敗（通信断・5xx など）が1件でもあればノートごと取り消す。添付ありきで
@@ -175,6 +188,10 @@ export default function NoteCreateForm({
       setIsSubmitting(false);
       return;
     }
+
+    // ここまで来ればノートはサーバーに残る。ロールバックされたノートを
+    // 作成済みとして数えないよう、計測はこの時点まで遅らせる。
+    trackNoteSaved();
 
     stagedMedia.forEach(revokeStagedObjectUrls);
     setStagedMedia([]);
@@ -233,15 +250,9 @@ export default function NoteCreateForm({
       return;
     }
 
-    trackNoteCreated({ has_reflection: reflectionAnswers.length > 0 });
-    // 振り返りは「テンプレに回答したノート」として保存されるため、ノート作成と
-    // 同時に振り返り完了としても数える（機能別の使用率を別々に出すため）。
-    if (reflectionAnswers.length > 0) {
-      trackReviewCompleted({ answer_count: reflectionAnswers.length });
-    }
-
     // 添付が無いときはアップロード経路を通さず、そのまま一覧へ戻す。
     if (stagedMedia.length === 0) {
+      trackNoteSaved();
       router.push(NOTE_LIST_PATH);
       return;
     }
