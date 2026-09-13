@@ -79,6 +79,7 @@ const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "shadow_swing_custom_interval",
   "grass_full_history",
   "correlation_insights",
+  "unlimited_groups",
 ];
 
 describe("FEATURE_COMPARISONS", () => {
