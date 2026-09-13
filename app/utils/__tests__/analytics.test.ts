@@ -264,6 +264,22 @@ describe("analytics", () => {
       });
     });
 
+    // MOBILE_EVENT_CASES は「この表に載っているものだけ」を検証するため、
+    // 新しい trackXxx を足して ANALYTICS_EVENTS にだけ追記すると、プロパティ名・型が
+    // 一度も検証されないまま通ってしまう。表の網羅性そのものを固定する。
+    it("MOBILE_EVENT_CASES が ANALYTICS_EVENTS を網羅している", async () => {
+      const { analytics } = await loadModules("phc_test");
+
+      // 同じイベントに複数ケースを置くことはある（値の型違いなど）ため集合で比べる。
+      const coveredEvents = Array.from(
+        new Set(MOBILE_EVENT_CASES.map((c) => c.event)),
+      );
+
+      expect(coveredEvents.sort()).toEqual(
+        Object.values(analytics.ANALYTICS_EVENTS).sort(),
+      );
+    });
+
     it.each(MOBILE_EVENT_CASES)(
       "$event を mobile と同じプロパティで送る",
       async ({ event, properties, run }) => {
