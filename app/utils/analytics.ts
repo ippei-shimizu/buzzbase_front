@@ -175,9 +175,18 @@ export const trackPurchaseCompleted = (props: {
   is_trial: boolean;
 }) => capture(ANALYTICS_EVENTS.PURCHASE_COMPLETED, props);
 
-/** 購入失敗。`reason` は Checkout 開始の失敗理由をそのまま渡す。 */
+/**
+ * 購入失敗。`reason` の値の体系は Web と mobile で異なる（Web は Checkout 開始の
+ * 失敗理由、mobile は RevenueCat のエラーコード由来）。横断集計するときは
+ * PostHog の `$lib` で分けてから reason を見ること。
+ */
 export const trackPurchaseFailed = (props: {
-  reason: string;
+  reason:
+    | "unauthorized"
+    | "already_subscribed"
+    | "invalid_plan"
+    | "stripe_api_error"
+    | "unknown";
   plan_type: PlanType | null;
 }) => capture(ANALYTICS_EVENTS.PURCHASE_FAILED, props);
 
