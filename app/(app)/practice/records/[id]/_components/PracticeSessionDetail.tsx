@@ -16,7 +16,9 @@ import { toast } from "sonner";
 import { SAMPLE_CONDITION } from "@app/(app)/practice/record/_components/conditionSample";
 import HeaderDetailActions from "@app/components/header/HeaderDetailActions";
 import NoteListItem from "@app/components/note/NoteListItem";
-import ConditionCard from "@app/components/practice/ConditionCard";
+import ConditionCard, {
+  hasConditionDetail,
+} from "@app/components/practice/ConditionCard";
 import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
 import { SampleDataLabel } from "@app/components/pro/SampleDataLabel";
 import {
@@ -68,7 +70,12 @@ export default function PracticeSessionDetail({
 
   const categoryById = new Map(menus.map((menu) => [menu.id, menu.category]));
   const practiceDate = formatPracticeDate(session.logged_on);
-  const canSeeCondition = hasEntitlement("detailed_condition_log");
+  const canSeeConditionDetail = hasEntitlement("detailed_condition_log");
+  // Pro 限定セクションに出す値。自分の記録に詳細が無ければサンプルを訴求のプレビューに使う。
+  const conditionDetail =
+    session.condition !== null && hasConditionDetail(session.condition)
+      ? session.condition
+      : null;
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -152,32 +159,41 @@ export default function PracticeSessionDetail({
         {CONDITION_SECTION_TITLE}
       </h3>
       <div className="mt-3">
-        {canSeeCondition ? (
-          session.condition ? (
-            <ConditionCard
-              condition={session.condition}
-              showTitle={false}
-              className="rounded-xl bg-sub p-3"
-            />
-          ) : (
-            <p className="text-sm text-zinc-400">{CONDITION_EMPTY_MESSAGE}</p>
-          )
+        {session.condition === null ? (
+          <p className="text-sm text-zinc-400">{CONDITION_EMPTY_MESSAGE}</p>
         ) : (
-          <div className="flex flex-col gap-y-2">
-            {/* 記録済みのコンディションがあるときは、それを暗幕越しのプレビューにする。 */}
-            {isEntitlementLoading || session.condition ? null : (
-              <SampleDataLabel />
-            )}
-            <ProUpsellOverlay feature="detailed_condition_log">
-              <ConditionCard
-                condition={session.condition ?? SAMPLE_CONDITION}
-                showTitle={false}
-                className="p-1"
-              />
-            </ProUpsellOverlay>
-          </div>
+          <ConditionCard
+            condition={session.condition}
+            section="basic"
+            showTitle={false}
+            className="rounded-xl bg-sub p-3"
+          />
         )}
       </div>
+      {canSeeConditionDetail && conditionDetail !== null ? (
+        <ConditionCard
+          condition={conditionDetail}
+          section="detail"
+          showTitle={false}
+          className="mt-2 rounded-xl bg-sub p-3"
+        />
+      ) : null}
+      {canSeeConditionDetail ? null : (
+        <div className="mt-2 flex flex-col gap-y-2">
+          {/* Pro 期間中に記録した詳細があるときは、それを暗幕越しのプレビューにする。 */}
+          {isEntitlementLoading || conditionDetail !== null ? null : (
+            <SampleDataLabel />
+          )}
+          <ProUpsellOverlay feature="detailed_condition_log">
+            <ConditionCard
+              condition={conditionDetail ?? SAMPLE_CONDITION}
+              section="detail"
+              showTitle={false}
+              className="p-1"
+            />
+          </ProUpsellOverlay>
+        </div>
+      )}
 
       <h3 className="mt-8 text-sm font-bold text-white">
         {DETAIL_NOTES_SECTION_TITLE}

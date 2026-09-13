@@ -4,7 +4,8 @@ import {
   EMPTY_CONDITION_DRAFT,
   buildConditionPayload,
   buildInitialCondition,
-  hasConditionContent,
+  hasBasicConditionContent,
+  hasDetailConditionContent,
 } from "../_utils/conditionDraft";
 
 function buildCondition(overrides: Partial<ConditionLog> = {}): ConditionLog {
@@ -38,7 +39,8 @@ function buildDraft(overrides: Partial<ConditionDraft> = {}): ConditionDraft {
   return { ...EMPTY_CONDITION_DRAFT, ...overrides };
 }
 
-const PRO = { hasConditionEntitlement: true, isEntitlementLoading: false };
+const PRO = { hasDetailEntitlement: true, isEntitlementLoading: false };
+const FREE = { hasDetailEntitlement: false, isEntitlementLoading: false };
 
 describe("buildInitialCondition", () => {
   it("コンディションの無いセッションは空の編集状態にする", () => {
@@ -68,20 +70,41 @@ describe("buildInitialCondition", () => {
   });
 });
 
-describe("hasConditionContent", () => {
-  it("すべて未入力なら false", () => {
-    expect(hasConditionContent(EMPTY_CONDITION_DRAFT)).toBe(false);
-    expect(hasConditionContent(buildDraft({ sleep_hours: "  " }))).toBe(false);
+describe("hasBasicConditionContent", () => {
+  it("疲労度・体調が未入力なら false", () => {
+    expect(hasBasicConditionContent(EMPTY_CONDITION_DRAFT)).toBe(false);
+    expect(hasBasicConditionContent(buildDraft({ mood: "好調" }))).toBe(false);
+  });
+
+  it("疲労度か体調が入力されていれば true", () => {
+    expect(hasBasicConditionContent(buildDraft({ fatigue_level: 1 }))).toBe(
+      true,
+    );
+    expect(hasBasicConditionContent(buildDraft({ physical_level: 4 }))).toBe(
+      true,
+    );
+  });
+});
+
+describe("hasDetailConditionContent", () => {
+  it("Pro 限定項目が未入力なら false", () => {
+    expect(hasDetailConditionContent(EMPTY_CONDITION_DRAFT)).toBe(false);
+    expect(hasDetailConditionContent(buildDraft({ sleep_hours: "  " }))).toBe(
+      false,
+    );
+    expect(hasDetailConditionContent(buildDraft({ fatigue_level: 1 }))).toBe(
+      false,
+    );
   });
 
   it("いずれか1つでも入力があれば true", () => {
-    expect(hasConditionContent(buildDraft({ fatigue_level: 1 }))).toBe(true);
-    expect(hasConditionContent(buildDraft({ physical_level: 4 }))).toBe(true);
-    expect(hasConditionContent(buildDraft({ sleep_hours: "7" }))).toBe(true);
-    expect(hasConditionContent(buildDraft({ mood: "好調" }))).toBe(true);
-    expect(hasConditionContent(buildDraft({ memo: "眠い" }))).toBe(true);
+    expect(hasDetailConditionContent(buildDraft({ sleep_hours: "7" }))).toBe(
+      true,
+    );
+    expect(hasDetailConditionContent(buildDraft({ mood: "好調" }))).toBe(true);
+    expect(hasDetailConditionContent(buildDraft({ memo: "眠い" }))).toBe(true);
     expect(
-      hasConditionContent(buildDraft({ injuries: [{ part: "肩" }] })),
+      hasDetailConditionContent(buildDraft({ injuries: [{ part: "肩" }] })),
     ).toBe(true);
   });
 });
@@ -96,21 +119,28 @@ describe("buildConditionPayload", () => {
     injuries: [{ part: "肘", memo: " 軽い張り " }],
   });
 
-  it("entitlement が無ければ値が残っていても送らない", () => {
-    expect(
-      buildConditionPayload(filledDraft, {
-        hasConditionEntitlement: false,
-        isEntitlementLoading: false,
-      }),
-    ).toBeNull();
+  it("無料ユーザーには疲労度・体調だけ送り、詳細項目はキーごと落とす", () => {
+    expect(buildConditionPayload(filledDraft, FREE)).toEqual({
+      fatigue_level: 4,
+      physical_level: 1,
+    });
   });
 
-  it("Pro 判定が未確定の間は送らない", () => {
+  it("Pro 判定が未確定の間は詳細項目を送らない（null で既存値を消さない）", () => {
     expect(
       buildConditionPayload(filledDraft, {
-        hasConditionEntitlement: true,
+        hasDetailEntitlement: true,
         isEntitlementLoading: true,
       }),
+    ).toEqual({ fatigue_level: 4, physical_level: 1 });
+  });
+
+  it("無料ユーザーが詳細項目しか入力していなければ送らない", () => {
+    expect(
+      buildConditionPayload(
+        buildDraft({ sleep_hours: "7.5", mood: "好調" }),
+        FREE,
+      ),
     ).toBeNull();
   });
 

@@ -3,6 +3,7 @@
 import type { ConditionDraft } from "../_utils/conditionDraft";
 import type { Injury } from "@app/types/practice";
 import { Input, Textarea } from "@heroui/react";
+import { ProUpsellOverlay } from "@app/components/pro/ProUpsellOverlay";
 import {
   CONDITION_LEVELS,
   CONDITION_MOODS,
@@ -83,26 +84,14 @@ function LevelSelector({ kind, title, value, onSelect }: LevelSelectorProps) {
 /**
  * コンディション（疲労度・体調・睡眠・気分・怪我）の入力フォーム。
  * 値と onChange を親が持つ制御コンポーネントで、保存はセッション保存に相乗りする。
+ * 疲労度・体調は無料で入力でき、詳細項目は Pro 未加入なら訴求で覆って操作させない。
  */
 export default function ConditionForm({ value, onChange }: ConditionFormProps) {
   const patch = (partial: Partial<ConditionDraft>) =>
     onChange({ ...value, ...partial });
 
-  return (
+  const detailFields = (
     <div className="space-y-5">
-      <LevelSelector
-        kind="fatigue"
-        title={CONDITION_FATIGUE_LABEL}
-        value={value.fatigue_level}
-        onSelect={(fatigue_level) => patch({ fatigue_level })}
-      />
-      <LevelSelector
-        kind="physical"
-        title={CONDITION_PHYSICAL_LABEL}
-        value={value.physical_level}
-        onSelect={(physical_level) => patch({ physical_level })}
-      />
-
       <div>
         <p className={FIELD_LABEL_CLASS}>{CONDITION_SLEEP_LABEL}</p>
         <div className="mt-2 flex items-center gap-2">
@@ -168,6 +157,26 @@ export default function ConditionForm({ value, onChange }: ConditionFormProps) {
           />
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-5">
+      <LevelSelector
+        kind="fatigue"
+        title={CONDITION_FATIGUE_LABEL}
+        value={value.fatigue_level}
+        onSelect={(fatigue_level) => patch({ fatigue_level })}
+      />
+      <LevelSelector
+        kind="physical"
+        title={CONDITION_PHYSICAL_LABEL}
+        value={value.physical_level}
+        onSelect={(physical_level) => patch({ physical_level })}
+      />
+      <ProUpsellOverlay feature="detailed_condition_log">
+        {detailFields}
+      </ProUpsellOverlay>
     </div>
   );
 }

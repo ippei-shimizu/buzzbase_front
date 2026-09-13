@@ -207,11 +207,37 @@ describe("PracticeSessionDetail のコンディション", () => {
     expect(screen.queryByTestId("pro-upsell-scrim")).not.toBeInTheDocument();
   });
 
-  it("無料ユーザーにはオーバーレイを重ねる", () => {
+  it("無料ユーザーには疲労度・体調を素で出し、詳細項目だけ覆う", () => {
     setEntitlement(false);
     renderDetail({ session: withCondition });
 
+    // 暗幕の裏の要素は inert でアクセシビリティツリーから外れる。
+    expect(screen.getByText("やや疲れ").closest("[inert]")).toBeNull();
+    expect(screen.getByText("睡眠 7時間").closest("[inert]")).not.toBeNull();
     expect(screen.getByTestId("pro-upsell-scrim")).toBeInTheDocument();
+  });
+
+  it("無料ユーザーが疲労度・体調しか記録していなければ詳細はサンプルで訴求する", () => {
+    setEntitlement(false);
+    renderDetail({
+      session: buildSession({
+        condition: {
+          id: 1,
+          logged_on: "2026-07-14",
+          fatigue_level: 2,
+          physical_level: 3,
+          sleep_hours: null,
+          mood: null,
+          memo: null,
+          injuries: [],
+        },
+      }),
+    });
+
+    expect(screen.getByText("やや疲れ").closest("[inert]")).toBeNull();
+    expect(
+      screen.getByText("サンプルデータ（実際の記録ではありません）"),
+    ).toBeInTheDocument();
   });
 
   it("Pro ユーザーで記録が無ければサンプルではなく未記録として案内する", () => {

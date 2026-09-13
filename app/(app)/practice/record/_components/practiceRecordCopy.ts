@@ -53,8 +53,6 @@ export const SESSION_LOADING_MESSAGE = "この日の記録を読み込んでい�
 
 export const CONDITION_SECTION_TITLE = "コンディション（任意）";
 
-export const CONDITION_PRO_BADGE = "Pro限定";
-
 export const CONDITION_FATIGUE_LABEL = "疲労度";
 
 export const CONDITION_PHYSICAL_LABEL = "体調";
