@@ -125,11 +125,14 @@ export const trackGoalCreated = (props: {
 
 /**
  * 練習記録（日次）の保存完了。サーバー側は日付キーの upsert のため、同じ日を
- * 編集し直すと再送される。集計はユニークユーザー数で見る前提。
+ * 編集し直すと再送される。件数を「作成された記録数」として読めるよう、既存記録の
+ * 編集かどうかを `is_edit` で区別する。
+ * `menu_count` は量の入力有無に関わらず選択されたメニュー数。
  */
 export const trackPracticeRecordCreated = (props: {
   menu_count: number;
   has_condition: boolean;
+  is_edit: boolean;
 }) => capture(ANALYTICS_EVENTS.PRACTICE_RECORD_CREATED, props);
 
 export const trackNoteCreated = (props: { has_reflection: boolean }) =>
@@ -142,7 +145,10 @@ export const trackPracticeScheduleCreated = (props: {
   recurring: boolean;
 }) => capture(ANALYTICS_EVENTS.PRACTICE_SCHEDULE_CREATED, props);
 
-/** 振り返りテンプレに回答したノートの保存完了（`note created` と同時に発火する）。 */
+/**
+ * 振り返りテンプレに回答したノートの保存完了（`note created` と同時に発火する）。
+ * 計測するのは新規作成時のみで、保存後の編集でテンプレ回答を足した場合は含まない。
+ */
 export const trackReviewCompleted = (props: { answer_count: number }) =>
   capture(ANALYTICS_EVENTS.REVIEW_COMPLETED, props);
 

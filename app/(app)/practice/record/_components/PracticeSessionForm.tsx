@@ -190,6 +190,7 @@ export default function PracticeSessionForm({
     trackPracticeRecordCreated({
       menu_count: items.length,
       has_condition: conditionPayload !== null,
+      is_edit: session !== null,
     });
     toast.success(SAVE_SUCCESS_MESSAGE);
     onSaved(result.data);
