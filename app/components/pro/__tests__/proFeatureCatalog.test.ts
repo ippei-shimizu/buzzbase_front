@@ -46,7 +46,6 @@ const FREE_LIMITS_FROM_BACK: Partial<Record<ProFeature, string>> = {
  * 逆に未実装のものを足すと「Pro なら Web でも使える」という誤った訴求になる。
  *
  * 意図的に載せていないもの:
- * - unlimited_groups — グループ作成上限のゲートが front にない（文言だけが存在する）
  * - shadow_swing_vibration / shadow_swing_background — 下のテストを参照
  */
 const WEB_DELIVERED_FEATURES: ProFeature[] = [
@@ -79,6 +78,8 @@ const WEB_DELIVERED_FEATURES: ProFeature[] = [
   "shadow_swing_custom_interval",
   "grass_full_history",
   "correlation_insights",
+  // 上限判定は back にあり Web / アプリ共通。front は作成・招待リンク参加・招待の承諾の
+  // 3 経路すべてで 403 を捕捉して上限を提示するため Web 提供として扱う。
   "unlimited_groups",
 ];
 
