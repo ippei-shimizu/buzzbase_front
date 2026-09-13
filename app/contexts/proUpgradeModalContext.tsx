@@ -5,7 +5,10 @@ import type { ProFeature } from "@app/types/pro";
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 import ProUpgradeModal from "@app/components/pro/ProUpgradeModal";
-import { trackProFeatureTapped } from "@app/utils/analytics";
+import {
+  trackPaywallViewed,
+  trackProFeatureTapped,
+} from "@app/utils/analytics";
 
 export interface OpenProUpgradeModalOptions {
   /** 表示時に「○○を使うには Pro 加入が必要」のコンテキスト訴求を出すための機能キー。 */
@@ -41,7 +44,11 @@ export function ProUpgradeModalProvider({ children }: { children: ReactNode }) {
   const open = useCallback((options?: OpenProUpgradeModalOptions) => {
     // Pro 訴求はここに集約されているため、どの機能が課金意向のきっかけかを一箇所で計測する。
     // 機能非依存の CTA（LP など）は trigger を持たないため "general" として区別する。
-    trackProFeatureTapped(options?.trigger ?? "general");
+    // Paywall の表示もここが唯一の入口なので、モーダル側の useEffect ではなく
+    // 同じ場所で送る（派生 state の同期を effect で行わず、二重実行も構造的に避ける）。
+    const trackTrigger = options?.trigger ?? "general";
+    trackProFeatureTapped(trackTrigger);
+    trackPaywallViewed(trackTrigger);
     setTrigger(options?.trigger);
     setDefaultPlan(options?.defaultPlan);
     setOpenCount((prev) => prev + 1);
