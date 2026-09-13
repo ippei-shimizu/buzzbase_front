@@ -3,14 +3,17 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
-import { trackFreeLimitReached } from "@app/utils/analytics";
+import {
+  trackFreeLimitReached,
+  type FreeLimitSource,
+} from "@app/utils/analytics";
 import { GROUP_FREE_LIMIT_MESSAGE } from "@app/utils/pro/groupLimit";
 
-/** 上限に当たった導線。どこで詰まったかを PostHog 側で分離するために送る。 */
-export type GroupLimitSource =
-  | "group_create"
-  | "group_join_link"
-  | "group_invitation";
+/**
+ * 上限に当たった導線。どこで詰まったかを PostHog 側で分離するために送る。
+ * 値の一覧は計測側（`FreeLimitSource`）に集約している。
+ */
+export type GroupLimitSource = FreeLimitSource;
 
 /**
  * グループの無料枠上限に当たったときの扱い（計測 + 理由の提示 + Pro 訴求）をまとめたフック。
