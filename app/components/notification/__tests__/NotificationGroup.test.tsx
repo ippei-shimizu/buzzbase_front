@@ -96,6 +96,8 @@ describe("グループ招待の承諾", () => {
     await waitFor(() =>
       expect(mockCapture).toHaveBeenCalledWith("free limit reached", {
         feature: "unlimited_groups",
+        source: "group_invitation",
+        detection: "server",
       }),
     );
     expect(mockToastError).toHaveBeenCalledWith(

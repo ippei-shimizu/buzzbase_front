@@ -101,6 +101,10 @@ export const trackProFeatureTapped = (feature: string) =>
  * 取れないため、課金に最も近いシグナルとしてイベントで残す。
  *
  * @param feature - 上限に当たった Pro 機能の正式キー（`PRO_FEATURES`）
+ * @param props.source - 上限に当たった導線（例: `group_create` / `group_join_link`）
+ * @param props.detection - クライアント事前判定で弾いたか、サーバーの 403 に当たったか
  */
-export const trackFreeLimitReached = (feature: ProFeature) =>
-  capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature });
+export const trackFreeLimitReached = (
+  feature: ProFeature,
+  props?: { source?: string; detection?: "client" | "server" },
+) => capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature, ...props });

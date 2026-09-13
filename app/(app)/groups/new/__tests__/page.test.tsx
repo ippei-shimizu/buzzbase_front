@@ -124,6 +124,8 @@ describe("グループ作成ページの上限エラー表示", () => {
     });
     expect(mockCapture).toHaveBeenCalledWith("free limit reached", {
       feature: "unlimited_groups",
+      source: "group_create",
+      detection: "server",
     });
     expect(mockPush).not.toHaveBeenCalled();
   });

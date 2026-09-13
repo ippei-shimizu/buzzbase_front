@@ -139,8 +139,16 @@ const MOBILE_EVENT_CASES: {
   },
   {
     event: "free limit reached",
-    properties: { feature: "unlimited_groups" },
-    run: (a) => a.trackFreeLimitReached("unlimited_groups"),
+    properties: {
+      feature: "unlimited_groups",
+      source: "group_create",
+      detection: "server",
+    },
+    run: (a) =>
+      a.trackFreeLimitReached("unlimited_groups", {
+        source: "group_create",
+        detection: "server",
+      }),
   },
 ];
 

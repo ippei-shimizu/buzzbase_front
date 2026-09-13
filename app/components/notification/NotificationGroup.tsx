@@ -39,7 +39,7 @@ export default function NotificationGroup({
 }: NotificationGroupProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
-  const showGroupLimitPaywall = useGroupLimitPaywall();
+  const showGroupLimitPaywall = useGroupLimitPaywall("group_invitation");
 
   // 承認・辞退できるのは招待が保留中のときだけ。それ以外は結果を履歴として表示する
   const isPending = notice.group_invitation === "pending";

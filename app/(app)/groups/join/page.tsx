@@ -18,7 +18,7 @@ import { isGroupLimitError } from "@app/utils/pro/groupLimit";
 export default function GroupJoinPage() {
   const router = useRouter();
   useRequireAuth();
-  const showGroupLimitPaywall = useGroupLimitPaywall();
+  const showGroupLimitPaywall = useGroupLimitPaywall("group_join_link");
 
   const [code, setCode] = useState("");
   const [inviteInfo, setInviteInfo] = useState<InviteLinkInfo | null>(null);

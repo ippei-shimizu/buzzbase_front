@@ -29,7 +29,7 @@ export default function GroupNew() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   useRequireAuth();
-  const showGroupLimitPaywall = useGroupLimitPaywall();
+  const showGroupLimitPaywall = useGroupLimitPaywall("group_create");
 
   const fetchData = async () => {
     const responseCurrentUserId = await getCurrentUserId();
