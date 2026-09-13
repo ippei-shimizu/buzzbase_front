@@ -170,7 +170,12 @@ export default function GoalsContent({
           ? [FREE_LIMIT_SERVER_ERROR]
           : result.errors,
       );
-      trackFreeLimitReached(feature);
+      // 件数上限のときだけ無料枠の消尽として数える。Pro 限定の期間タイプ・自由指標は
+      // 上限到達ではなく最初から使えない機能で、openProUpgradeModal が送る
+      // pro feature tapped 側で拾える。
+      if (!editing && feature === "unlimited_monthly_goals") {
+        trackFreeLimitReached(feature);
+      }
       openProUpgradeModal({ trigger: feature });
       return;
     }
