@@ -10,6 +10,7 @@ import {
   createSchedule,
   updateSchedule,
 } from "@app/services/v2/scheduleService";
+import { trackPracticeScheduleCreated } from "@app/utils/analytics";
 import ScheduleForm from "./ScheduleForm";
 
 interface ScheduleFormContentProps {
@@ -54,6 +55,12 @@ export default function ScheduleFormContent({
       return;
     }
 
+    if (!schedule) {
+      trackPracticeScheduleCreated({
+        event_type: result.data.event_type,
+        recurring: result.data.recurring,
+      });
+    }
     toast.success(schedule ? "予定を更新しました" : "予定を登録しました");
     // 新規登録はフォームに留まらせない。追加の起点であるカレンダーへ戻し、
     // 同じ内容を続けて送信できる状態を残さない。

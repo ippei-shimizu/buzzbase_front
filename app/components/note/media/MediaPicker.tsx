@@ -7,6 +7,7 @@ import { Button } from "@heroui/react";
 import { useRef, useState } from "react";
 import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { useMediaUpload } from "@app/hooks/media/useMediaUpload";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import {
   MEDIA_ACCEPT_ATTRIBUTE,
   buildStagedLocalId,
@@ -100,6 +101,7 @@ export default function MediaPicker({
       return;
     }
     if (result.reason === "limit_reached") {
+      trackFreeLimitReached("unlimited_media_uploads");
       setIsLimitReached(true);
       setError(FREE_LIMIT_NOTICE);
     } else if (result.reason !== "canceled") {

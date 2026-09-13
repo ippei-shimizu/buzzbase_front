@@ -7,15 +7,12 @@ import { toast } from "sonner";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import HeaderMatchResultNext from "@app/components/header/HeaderMatchResultSave";
 import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
-import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { useGroupLimitPaywall } from "@app/hooks/pro/useGroupLimitPaywall";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
 import { trackGroupCreated } from "@app/utils/analytics";
-import {
-  GROUP_FREE_LIMIT_MESSAGE,
-  isGroupLimitError,
-} from "@app/utils/pro/groupLimit";
+import { isGroupLimitError } from "@app/utils/pro/groupLimit";
 
 export default function GroupNew() {
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -32,7 +29,7 @@ export default function GroupNew() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   useRequireAuth();
-  const { open: openProUpgradeModal } = useProUpgradeModal();
+  const showGroupLimitPaywall = useGroupLimitPaywall("group_create");
 
   const fetchData = async () => {
     const responseCurrentUserId = await getCurrentUserId();
@@ -142,8 +139,7 @@ export default function GroupNew() {
     } catch (error) {
       setIsSubmitting(false);
       if (isGroupLimitError(error)) {
-        toast.error(GROUP_FREE_LIMIT_MESSAGE);
-        openProUpgradeModal({ trigger: "unlimited_groups" });
+        showGroupLimitPaywall();
         return;
       }
       toast.error("グループの作成に失敗しました");

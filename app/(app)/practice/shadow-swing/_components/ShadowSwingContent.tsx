@@ -10,6 +10,7 @@ import {
   getShadowSwingStats,
   startShadowSwingSession,
 } from "@app/services/v2/shadowSwingService";
+import { trackShadowSwingCompleted } from "@app/utils/analytics";
 import {
   subscribeToNothing,
   supportsScreenWakeLock,
@@ -101,6 +102,7 @@ export default function ShadowSwingContent({
     }
 
     setSaveState("saved");
+    trackShadowSwingCompleted({ swing_count: swingCount });
     setStatsResult(await getShadowSwingStats());
   }, []);
 

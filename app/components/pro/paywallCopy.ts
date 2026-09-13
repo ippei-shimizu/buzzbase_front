@@ -162,6 +162,14 @@ export const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
     title: "グループを無制限に作成・参加",
     description:
       "Pro プランなら2つ目以降のグループも自由に作成・参加できます。チームを掛け持ちしているメンバーも安心です。",
+    // mobile の PRO_PAYWALL_COPY にはこの 3 行が無く、同じ trigger の Paywall が
+    // Web は箇条書き・アプリは description と別物になっている。mobile へ同期するまで
+    // 差が残る点に注意する。
+    benefits: [
+      "所属チームと学年・代のグループを分けて成績を共有",
+      "習い事や別チームの仲間とも、それぞれのグループでつながれる",
+      "新チームのグループを作っても、前の代のグループはそのまま残せる",
+    ],
   },
   hit_direction_average: {
     title: "方向別の打率",

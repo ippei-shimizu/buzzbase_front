@@ -116,7 +116,7 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
     pro: "全期間",
     availability: "web_and_app",
   },
-  unlimited_groups: { free: "1件", pro: "無制限", availability: "app_only" },
+  unlimited_groups: { free: "1件", pro: "無制限", availability: "web_and_app" },
   hit_direction_average: { free: "✕", pro: "○", availability: "web_and_app" },
   count_situation_average: { free: "✕", pro: "○", availability: "web_and_app" },
   pitch_type_average: { free: "✕", pro: "○", availability: "web_and_app" },

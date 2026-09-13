@@ -137,7 +137,110 @@ const MOBILE_EVENT_CASES: {
     properties: { feature: "hit_direction_average" },
     run: (a) => a.trackProFeatureTapped("hit_direction_average"),
   },
+  {
+    event: "goal created",
+    properties: { period_type: "monthly", kind: "numeric" },
+    run: (a) => a.trackGoalCreated({ period_type: "monthly", kind: "numeric" }),
+  },
+  {
+    event: "practice record created",
+    properties: { menu_count: 3, has_condition: true, is_edit: false },
+    run: (a) =>
+      a.trackPracticeRecordCreated({
+        menu_count: 3,
+        has_condition: true,
+        is_edit: false,
+      }),
+  },
+  {
+    event: "note created",
+    properties: { has_reflection: true },
+    run: (a) => a.trackNoteCreated({ has_reflection: true }),
+  },
+  {
+    event: "theme created",
+    properties: undefined,
+    run: (a) => a.trackThemeCreated(),
+  },
+  {
+    event: "practice schedule created",
+    properties: { event_type: "self_practice", recurring: false },
+    run: (a) =>
+      a.trackPracticeScheduleCreated({
+        event_type: "self_practice",
+        recurring: false,
+      }),
+  },
+  {
+    event: "review completed",
+    properties: { answer_count: 2 },
+    run: (a) => a.trackReviewCompleted({ answer_count: 2 }),
+  },
+  {
+    event: "shadow swing completed",
+    properties: { swing_count: 120 },
+    run: (a) => a.trackShadowSwingCompleted({ swing_count: 120 }),
+  },
+  {
+    event: "paywall viewed",
+    properties: { trigger: "unlimited_monthly_goals" },
+    run: (a) => a.trackPaywallViewed("unlimited_monthly_goals"),
+  },
+  {
+    event: "upgrade started",
+    properties: { plan_type: "yearly", trigger: "general" },
+    run: (a) =>
+      a.trackUpgradeStarted({ plan_type: "yearly", trigger: "general" }),
+  },
+  {
+    event: "purchase completed",
+    properties: { plan_type: "monthly", platform: "web", is_trial: true },
+    run: (a) =>
+      a.trackPurchaseCompleted({
+        plan_type: "monthly",
+        platform: "web",
+        is_trial: true,
+      }),
+  },
+  {
+    event: "purchase failed",
+    properties: { reason: "stripe_api_error", plan_type: "yearly" },
+    run: (a) =>
+      a.trackPurchaseFailed({
+        reason: "stripe_api_error",
+        plan_type: "yearly",
+      }),
+  },
+  {
+    event: "free limit reached",
+    properties: { feature: "unlimited_practice_menus" },
+    run: (a) => a.trackFreeLimitReached("unlimited_practice_menus"),
+  },
 ];
+
+/**
+ * front だけが送る追加プロパティを含むケース。mobile の同名イベントには
+ * source / detection が無いため、MOBILE_EVENT_CASES とは分けて持つ。
+ * mobile へ同期したらこの配列から MOBILE_EVENT_CASES へ移すこと。
+ */
+const FRONT_ONLY_EVENT_CASES: typeof MOBILE_EVENT_CASES = [
+  {
+    event: "free limit reached",
+    properties: {
+      feature: "unlimited_groups",
+      source: "group_create",
+      detection: "server",
+    },
+    run: (a) =>
+      a.trackFreeLimitReached("unlimited_groups", {
+        source: "group_create",
+        detection: "server",
+      }),
+  },
+];
+
+/** 送信そのものの振る舞い（有効化・失敗時の握り潰しなど）を確認する全ケース。 */
+const ALL_EVENT_CASES = [...MOBILE_EVENT_CASES, ...FRONT_ONLY_EVENT_CASES];
 
 describe("analytics", () => {
   const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -170,11 +273,39 @@ describe("analytics", () => {
         BATTING_TREND_GRANULARITY_CHANGED: "batting trend granularity changed",
         ERA_TREND_GRANULARITY_CHANGED: "era trend granularity changed",
         PRO_FEATURE_TAPPED: "pro feature tapped",
+        GOAL_CREATED: "goal created",
+        PRACTICE_RECORD_CREATED: "practice record created",
+        NOTE_CREATED: "note created",
+        THEME_CREATED: "theme created",
+        PRACTICE_SCHEDULE_CREATED: "practice schedule created",
+        REVIEW_COMPLETED: "review completed",
+        SHADOW_SWING_COMPLETED: "shadow swing completed",
+        PAYWALL_VIEWED: "paywall viewed",
+        UPGRADE_STARTED: "upgrade started",
+        PURCHASE_COMPLETED: "purchase completed",
+        PURCHASE_FAILED: "purchase failed",
+        FREE_LIMIT_REACHED: "free limit reached",
       });
     });
 
-    it.each(MOBILE_EVENT_CASES)(
-      "$event を mobile と同じプロパティで送る",
+    // MOBILE_EVENT_CASES は「この表に載っているものだけ」を検証するため、
+    // 新しい trackXxx を足して ANALYTICS_EVENTS にだけ追記すると、プロパティ名・型が
+    // 一度も検証されないまま通ってしまう。表の網羅性そのものを固定する。
+    it("MOBILE_EVENT_CASES が ANALYTICS_EVENTS を網羅している", async () => {
+      const { analytics } = await loadModules("phc_test");
+
+      // 同じイベントに複数ケースを置くことはある（値の型違いなど）ため集合で比べる。
+      const coveredEvents = Array.from(
+        new Set(MOBILE_EVENT_CASES.map((c) => c.event)),
+      );
+
+      expect(coveredEvents.sort()).toEqual(
+        Object.values(analytics.ANALYTICS_EVENTS).sort(),
+      );
+    });
+
+    it.each(ALL_EVENT_CASES)(
+      "$event を定義どおりのプロパティで送る",
       async ({ event, properties, run }) => {
         const { analytics } = await loadModules("phc_test");
 
@@ -220,7 +351,7 @@ describe("analytics", () => {
     it("計測を呼んでもエラーにならず、イベントも送らない", async () => {
       const { analytics, posthog } = await loadModules();
 
-      for (const testCase of MOBILE_EVENT_CASES) {
+      for (const testCase of ALL_EVENT_CASES) {
         expect(() => testCase.run(analytics)).not.toThrow();
       }
       expect(() => posthog.identifyUser(1)).not.toThrow();
@@ -272,7 +403,7 @@ describe("analytics", () => {
     it("イベントプロパティに個人情報を含めない", async () => {
       const { analytics } = await loadModules("phc_test");
 
-      for (const testCase of MOBILE_EVENT_CASES) {
+      for (const testCase of ALL_EVENT_CASES) {
         mockCapture.mockClear();
         testCase.run(analytics);
         const [, properties] = mockCapture.mock.calls[0] as [

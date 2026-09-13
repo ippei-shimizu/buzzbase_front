@@ -5,6 +5,7 @@ import FlagIcon from "@heroicons/react/24/outline/FlagIcon";
 import XMarkIcon from "@heroicons/react/24/outline/XMarkIcon";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import {
   MULTI_THEME_LIMIT_MESSAGE,
   THEME_EMPTY_MESSAGE,
@@ -53,6 +54,7 @@ export default function ImprovementThemeField({
       return;
     }
     if (isAtLimit) {
+      trackFreeLimitReached("multi_improvement_theme_links");
       openProUpgradeModal({ trigger: "multi_improvement_theme_links" });
       return;
     }

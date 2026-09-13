@@ -6,22 +6,19 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import Header from "@app/components/header/Header";
-import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
+import { useGroupLimitPaywall } from "@app/hooks/pro/useGroupLimitPaywall";
 import {
   acceptInviteLink,
   getInviteLinkInfo,
 } from "@app/services/groupInviteLinksService";
 import { trackGroupJoined } from "@app/utils/analytics";
-import {
-  GROUP_FREE_LIMIT_MESSAGE,
-  isGroupLimitError,
-} from "@app/utils/pro/groupLimit";
+import { isGroupLimitError } from "@app/utils/pro/groupLimit";
 
 export default function GroupJoinPage() {
   const router = useRouter();
   useRequireAuth();
-  const { open: openProUpgradeModal } = useProUpgradeModal();
+  const showGroupLimitPaywall = useGroupLimitPaywall("group_join_link");
 
   const [code, setCode] = useState("");
   const [inviteInfo, setInviteInfo] = useState<InviteLinkInfo | null>(null);
@@ -54,8 +51,7 @@ export default function GroupJoinPage() {
       router.push(`/groups/${result.group_id}`);
     } catch (error) {
       if (isGroupLimitError(error)) {
-        toast.error(GROUP_FREE_LIMIT_MESSAGE);
-        openProUpgradeModal({ trigger: "unlimited_groups" });
+        showGroupLimitPaywall();
         return;
       }
       console.error("グループへの参加に失敗しました", error);

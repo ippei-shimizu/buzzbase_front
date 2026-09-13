@@ -7,6 +7,7 @@ import { useState } from "react";
 import { themeCategoryLabel } from "@app/constants/improvementTheme";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import { canLinkMore } from "@app/utils/noteLinks";
 
 interface NoteThemeSectionProps {
@@ -60,6 +61,7 @@ export default function NoteThemeSection({
           !isLoading && hasEntitlement("multi_improvement_theme_links"),
       })
     ) {
+      trackFreeLimitReached("multi_improvement_theme_links");
       openProUpgradeModal({ trigger: "multi_improvement_theme_links" });
       return;
     }
