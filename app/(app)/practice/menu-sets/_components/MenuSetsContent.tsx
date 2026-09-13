@@ -8,6 +8,7 @@ import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { MENU_SET_FREE_LIMIT } from "@app/constants/menuSet";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import {
   CREATE_LABEL,
   FREE_LIMIT_DESCRIPTION,
@@ -39,6 +40,7 @@ export default function MenuSetsContent({ menuSets }: MenuSetsContentProps) {
 
   const handleAdd = () => {
     if (isAtFreeLimit) {
+      trackFreeLimitReached("unlimited_menu_sets");
       openProUpgradeModal({ trigger: "unlimited_menu_sets" });
       return;
     }

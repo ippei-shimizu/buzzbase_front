@@ -22,6 +22,7 @@ import {
   deletePracticeMenu,
   updatePracticeMenu,
 } from "@app/services/v2/practiceMenuService";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import {
   DELETE_KEEPS_LOGS_NOTICE,
   FREE_LIMIT_DESCRIPTION,
@@ -75,6 +76,7 @@ export default function PracticeMenusContent({
 
   const handleAdd = () => {
     if (isAtFreeLimit) {
+      trackFreeLimitReached("unlimited_practice_menus");
       openProUpgradeModal({ trigger: "unlimited_practice_menus" });
       return;
     }
@@ -112,6 +114,7 @@ export default function PracticeMenusContent({
     // 別端末での追加などでクライアント側の件数判定とずれた場合にここへ入る。
     if (!editing && result.reason === "forbidden") {
       setFormErrors([FREE_LIMIT_SERVER_ERROR]);
+      trackFreeLimitReached("unlimited_practice_menus");
       openProUpgradeModal({ trigger: "unlimited_practice_menus" });
       return;
     }
