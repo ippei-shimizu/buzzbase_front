@@ -137,6 +137,11 @@ const MOBILE_EVENT_CASES: {
     properties: { feature: "hit_direction_average" },
     run: (a) => a.trackProFeatureTapped("hit_direction_average"),
   },
+  {
+    event: "free limit reached",
+    properties: { feature: "unlimited_groups" },
+    run: (a) => a.trackFreeLimitReached("unlimited_groups"),
+  },
 ];
 
 describe("analytics", () => {
@@ -170,6 +175,7 @@ describe("analytics", () => {
         BATTING_TREND_GRANULARITY_CHANGED: "batting trend granularity changed",
         ERA_TREND_GRANULARITY_CHANGED: "era trend granularity changed",
         PRO_FEATURE_TAPPED: "pro feature tapped",
+        FREE_LIMIT_REACHED: "free limit reached",
       });
     });
 

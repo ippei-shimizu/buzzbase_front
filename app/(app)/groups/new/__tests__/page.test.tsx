@@ -122,6 +122,9 @@ describe("グループ作成ページの上限エラー表示", () => {
     expect(mockOpenProUpgradeModal).toHaveBeenCalledWith({
       trigger: "unlimited_groups",
     });
+    expect(mockCapture).toHaveBeenCalledWith("free limit reached", {
+      feature: "unlimited_groups",
+    });
     expect(mockPush).not.toHaveBeenCalled();
   });
 
@@ -136,5 +139,9 @@ describe("グループ作成ページの上限エラー表示", () => {
       ),
     );
     expect(mockOpenProUpgradeModal).not.toHaveBeenCalled();
+    expect(mockCapture).not.toHaveBeenCalledWith(
+      "free limit reached",
+      expect.anything(),
+    );
   });
 });

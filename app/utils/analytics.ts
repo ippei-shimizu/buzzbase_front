@@ -1,3 +1,4 @@
+import type { ProFeature } from "@app/types/pro";
 import { capture } from "@app/utils/posthog";
 
 /**
@@ -22,6 +23,7 @@ export const ANALYTICS_EVENTS = {
   BATTING_TREND_GRANULARITY_CHANGED: "batting trend granularity changed",
   ERA_TREND_GRANULARITY_CHANGED: "era trend granularity changed",
   PRO_FEATURE_TAPPED: "pro feature tapped",
+  FREE_LIMIT_REACHED: "free limit reached",
 } as const;
 
 type LoginType = "email" | "google" | "apple";
@@ -93,3 +95,12 @@ export const trackEraTrendGranularityChanged = (granularity: string) =>
 /** Pro 訴求（Paywall / Coming Soon）の起動。課金意向シグナルとして計測する。 */
 export const trackProFeatureTapped = (feature: string) =>
   capture(ANALYTICS_EVENTS.PRO_FEATURE_TAPPED, { feature });
+
+/**
+ * 無料プランの上限に当たった瞬間。DB のスナップショット集計では「いつ・何回ぶつかったか」が
+ * 取れないため、課金に最も近いシグナルとしてイベントで残す。
+ *
+ * @param feature - 上限に当たった Pro 機能の正式キー（`PRO_FEATURES`）
+ */
+export const trackFreeLimitReached = (feature: ProFeature) =>
+  capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature });

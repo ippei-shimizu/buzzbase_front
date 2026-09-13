@@ -13,19 +13,15 @@ import {
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { GroupIcon } from "@app/components/icon/GroupIcon";
-import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
+import { useGroupLimitPaywall } from "@app/hooks/pro/useGroupLimitPaywall";
 import {
   acceptGroupInvitation,
   declinedGroupInvitation,
 } from "@app/services/groupInvitationsService";
 import { deleteNotification } from "@app/services/notificationsService";
 import { trackGroupJoined } from "@app/utils/analytics";
-import {
-  GROUP_FREE_LIMIT_MESSAGE,
-  isGroupLimitError,
-} from "@app/utils/pro/groupLimit";
+import { isGroupLimitError } from "@app/utils/pro/groupLimit";
 
 interface NotificationGroupProps {
   notice: Notifications;
@@ -43,7 +39,7 @@ export default function NotificationGroup({
 }: NotificationGroupProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
-  const { open: openProUpgradeModal } = useProUpgradeModal();
+  const showGroupLimitPaywall = useGroupLimitPaywall();
 
   // 承認・辞退できるのは招待が保留中のときだけ。それ以外は結果を履歴として表示する
   const isPending = notice.group_invitation === "pending";
@@ -58,8 +54,7 @@ export default function NotificationGroup({
     } catch (error) {
       // 無料枠の上限は想定内の拒否なので Sentry へは送らず、その場で理由を提示する。
       if (isGroupLimitError(error)) {
-        toast.error(GROUP_FREE_LIMIT_MESSAGE);
-        openProUpgradeModal({ trigger: "unlimited_groups" });
+        showGroupLimitPaywall();
         return;
       }
       Sentry.captureException(error, {
