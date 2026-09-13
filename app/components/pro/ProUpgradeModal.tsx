@@ -175,9 +175,17 @@ export default function ProUpgradeModal({
 
           <div className="mt-4 rounded-xl border border-[#d08000]/40 bg-[#d08000]/10 p-4">
             <p className="mb-1.5 text-sm font-bold text-white">{copy.title}</p>
-            <p className="text-sm leading-relaxed text-gray-200">
-              {copy.description}
-            </p>
+            {copy.benefits?.length ? (
+              <ul className="list-disc space-y-1 pl-4 text-sm leading-relaxed text-gray-200">
+                {copy.benefits.map((benefit) => (
+                  <li key={benefit}>{benefit}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm leading-relaxed text-gray-200">
+                {copy.description}
+              </p>
+            )}
           </div>
 
           <p className="mt-3 text-sm text-gray-400">
