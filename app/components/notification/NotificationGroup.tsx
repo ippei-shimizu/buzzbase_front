@@ -13,6 +13,7 @@ import {
 import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { GroupIcon } from "@app/components/icon/GroupIcon";
 import { useGroupLimitPaywall } from "@app/hooks/pro/useGroupLimitPaywall";
 import {
@@ -40,12 +41,17 @@ export default function NotificationGroup({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
   const showGroupLimitPaywall = useGroupLimitPaywall("group_invitation");
+  const [isAccepting, setIsAccepting] = useState(false);
 
   // 承認・辞退できるのは招待が保留中のときだけ。それ以外は結果を履歴として表示する
   const isPending = notice.group_invitation === "pending";
   const statusLabel = INVITATION_STATUS_LABELS[notice.group_invitation];
 
+  // 上限に当たったユーザーはトーストとモーダルが出るまでに押し直しがちで、押した回数だけ
+  // free limit reached が送られる。経路別に比較する source の意味が崩れるため塞ぐ。
   const handleAcceptGroupInvitation = async (groupId: number, id: number) => {
+    if (isAccepting) return;
+    setIsAccepting(true);
     try {
       await acceptGroupInvitation(groupId);
       trackGroupJoined(groupId);
@@ -60,6 +66,8 @@ export default function NotificationGroup({
       Sentry.captureException(error, {
         tags: { source: "notification-group", action: "acceptInvitation" },
       });
+    } finally {
+      setIsAccepting(false);
     }
   };
 
@@ -119,6 +127,7 @@ export default function NotificationGroup({
               <Button
                 size="sm"
                 color="primary"
+                isLoading={isAccepting}
                 onPress={() =>
                   handleAcceptGroupInvitation(
                     notice.event_id,
