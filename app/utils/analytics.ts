@@ -181,6 +181,11 @@ export const trackPurchaseFailed = (props: {
   plan_type: PlanType | null;
 }) => capture(ANALYTICS_EVENTS.PURCHASE_FAILED, props);
 
-/** 無料枠の上限に到達した瞬間。最も課金に近いシグナルとして計測する。 */
+/**
+ * 無料枠の上限に阻まれた操作。最も課金に近いシグナルとして計測する。
+ * 同一ユーザーが上限に当たり続けると操作のたびに送られ、経路によって粒度も違う
+ * （新規ノートは添付操作 1 回ごと、既存ノートの編集はファイル 1 件ごと）ため、
+ * 集計はイベント数ではなくユニークユーザー数で行う。
+ */
 export const trackFreeLimitReached = (feature: ProFeature) =>
   capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature });
