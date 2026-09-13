@@ -30,6 +30,27 @@ const TIMEOUT_MESSAGES = {
 } as const;
 
 /**
+ * この Checkout セッションの購入完了をまだ計測していなければ記録して true を返す。
+ * 解約後の再加入は別の session_id になるため、正しく再計上される。
+ *
+ * @param sessionId - Stripe Checkout のセッションID
+ * @returns 計測してよいなら true
+ */
+const markPurchaseTracked = (sessionId: string | null): boolean => {
+  if (!sessionId) return false;
+  const key = `purchase_completed:${sessionId}`;
+  try {
+    if (sessionStorage.getItem(key) !== null) return false;
+    sessionStorage.setItem(key, "1");
+    return true;
+  } catch {
+    // Safari のプライベートモードなどで sessionStorage が使えない場合は
+    // 重複を許容してでも計測を優先する。
+    return true;
+  }
+};
+
+/**
  * Checkout からの復帰直後に Pro 反映を待ち、反映され次第サブスクリプション管理画面へ送る。
  *
  * ポーリングは読み取り専用の getProStatusResult() だけで行い、syncProStatus() は呼ばない。
@@ -42,7 +63,8 @@ export default function ProActivationWaiter() {
   const searchParams = useSearchParams();
   // Checkout 経由でのみ session_id が付く。直接開かれたときに待たせても反映される
   // 決済が存在しないため、その場合はポーリングせず案内だけ出す。
-  const hasCheckoutSession = Boolean(searchParams.get("session_id"));
+  const checkoutSessionId = searchParams.get("session_id");
+  const hasCheckoutSession = Boolean(checkoutSessionId);
 
   const [state, setState] = useState<WaitState>(
     hasCheckoutSession ? "polling" : "idle",
@@ -71,12 +93,17 @@ export default function ProActivationWaiter() {
         setState("activated");
         // Pro 反映を確認できた時点を購入完了とみなす。Checkout からの復帰直後は
         // まだ webhook が届いておらず、この画面に来ただけでは成立を判定できない。
-        const { plan_type, platform, in_trial } = result.proStatus.subscription;
-        trackPurchaseCompleted({
-          plan_type,
-          platform: platform ?? "web",
-          is_trial: in_trial,
-        });
+        // pro_active は永続的に true のため、この URL を開き直すたびに再送される。
+        // Checkout セッション単位で 1 回に絞り、転換率の分子が水増しされるのを防ぐ。
+        if (markPurchaseTracked(checkoutSessionId)) {
+          const { plan_type, platform, in_trial } =
+            result.proStatus.subscription;
+          trackPurchaseCompleted({
+            plan_type,
+            platform: platform ?? "web",
+            is_trial: in_trial,
+          });
+        }
         // 戻る操作でこの待機画面へ戻さない。決済は完了済みで再度待つ意味がない。
         router.replace(SUBSCRIPTION_PATH);
         return;
@@ -95,7 +122,7 @@ export default function ProActivationWaiter() {
       cancelled = true;
       if (timer !== undefined) clearTimeout(timer);
     };
-  }, [hasCheckoutSession, router]);
+  }, [hasCheckoutSession, checkoutSessionId, router]);
 
   if (state === "activated") {
     return (
