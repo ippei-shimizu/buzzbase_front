@@ -64,7 +64,8 @@ export interface Injury {
 
 /**
  * その日のコンディション（1日1件）。
- * 記録・参照ともに Pro 限定（entitlement: detailed_condition_log）。
+ * 疲労度・体調は無料で記録・参照でき、睡眠時間・気分・メモ・怪我のみ Pro 限定
+ * （entitlement: detailed_condition_log）。
  */
 export interface ConditionLog {
   id: number;

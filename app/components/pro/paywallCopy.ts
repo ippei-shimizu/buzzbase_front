@@ -76,7 +76,7 @@ export const PRO_PAYWALL_COPY: Record<ProFeature, PaywallCopy> = {
   detailed_condition_log: {
     title: "コンディションを詳しく記録",
     description:
-      "体調・気分・睡眠などを細かく記録し、調子の良し悪しの傾向を把握できます。",
+      "疲労度・体調に加えて、睡眠時間・気分・怪我まで記録し、調子の良し悪しの傾向を把握できます。",
   },
   unlimited_improvement_themes: {
     title: "取り組む課題を無制限に",

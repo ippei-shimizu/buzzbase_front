@@ -48,11 +48,14 @@ export function buildInitialCondition(
   };
 }
 
-/** 1つでも入力があるか。何も無いまま送ると既存のコンディションを空で上書きしてしまう。 */
-export function hasConditionContent(draft: ConditionDraft): boolean {
+/** 疲労度・体調（無料項目）に入力があるか。 */
+export function hasBasicConditionContent(draft: ConditionDraft): boolean {
+  return draft.fatigue_level !== null || draft.physical_level !== null;
+}
+
+/** 睡眠・気分・メモ・怪我（Pro 限定項目）に入力があるか。 */
+export function hasDetailConditionContent(draft: ConditionDraft): boolean {
   return (
-    draft.fatigue_level !== null ||
-    draft.physical_level !== null ||
     draft.sleep_hours.trim() !== "" ||
     draft.mood !== null ||
     draft.memo.trim() !== "" ||
@@ -60,12 +63,10 @@ export function hasConditionContent(draft: ConditionDraft): boolean {
   );
 }
 
-/** 編集状態を送信値へ変換する。空文字・非数の睡眠時間は未入力（null）として送る。 */
-function toConditionInput(draft: ConditionDraft): ConditionInput {
+/** 空文字・非数の睡眠時間は未入力（null）として送る。 */
+function toDetailConditionInput(draft: ConditionDraft): ConditionInput {
   const sleepHours = Number(draft.sleep_hours);
   return {
-    fatigue_level: draft.fatigue_level,
-    physical_level: draft.physical_level,
     sleep_hours:
       draft.sleep_hours.trim() === "" || Number.isNaN(sleepHours)
         ? null
@@ -81,7 +82,7 @@ function toConditionInput(draft: ConditionDraft): ConditionInput {
 
 interface ConditionPayloadOptions {
   /** detailed_condition_log を持っているか。 */
-  hasConditionEntitlement: boolean;
+  hasDetailEntitlement: boolean;
   /** Pro 判定が未確定か。 */
   isEntitlementLoading: boolean;
 }
@@ -89,16 +90,21 @@ interface ConditionPayloadOptions {
 /**
  * 保存リクエストに載せるコンディションを決める。載せない場合は null。
  *
- * back はコンディション付きの保存を Pro 限定として 403 で弾き、そのとき
- * 練習量やメモを含む更新全体がロールバックされる。Pro から無料へ戻ったユーザーの
- * 編集状態に値が残っていても保存そのものを失敗させないよう、
- * entitlement が無いとき・判定が未確定のときは値の有無に関わらず送らない。
+ * 疲労度・体調は無料でも記録できるので常に載せる。詳細項目は entitlement が無いとき・
+ * 判定が未確定のときはキーごと落とす。null を送ると back が既存値を空で上書きしてしまうため、
+ * 「送らない」と「空にする」を区別する必要がある。
  */
 export function buildConditionPayload(
   draft: ConditionDraft,
-  { hasConditionEntitlement, isEntitlementLoading }: ConditionPayloadOptions,
+  { hasDetailEntitlement, isEntitlementLoading }: ConditionPayloadOptions,
 ): ConditionInput | null {
-  if (isEntitlementLoading || !hasConditionEntitlement) return null;
-  if (!hasConditionContent(draft)) return null;
-  return toConditionInput(draft);
+  const canSendDetail = !isEntitlementLoading && hasDetailEntitlement;
+  const hasDetail = canSendDetail && hasDetailConditionContent(draft);
+  if (!hasBasicConditionContent(draft) && !hasDetail) return null;
+
+  return {
+    fatigue_level: draft.fatigue_level,
+    physical_level: draft.physical_level,
+    ...(canSendDetail ? toDetailConditionInput(draft) : {}),
+  };
 }

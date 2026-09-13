@@ -65,7 +65,11 @@ export const FEATURE_COMPARISONS: Record<ProFeature, FeatureComparison> = {
     pro: "自由編集",
     availability: "web_and_app",
   },
-  detailed_condition_log: { free: "✕", pro: "○", availability: "web_and_app" },
+  detailed_condition_log: {
+    free: "疲労度・体調",
+    pro: "睡眠・気分・怪我も",
+    availability: "web_and_app",
+  },
   unlimited_improvement_themes: {
     free: "2件",
     pro: "無制限",

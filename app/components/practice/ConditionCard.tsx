@@ -9,10 +9,17 @@ import {
   parseDecimal,
 } from "@app/constants/practice";
 
+/**
+ * 描画する範囲。無料項目（疲労度・体調）と Pro 限定項目（睡眠・気分・怪我・メモ）は
+ * 呼び出し元が別々に扱えるよう、セクション単位で描き分けられるようにする。
+ */
+export type ConditionSection = "all" | "basic" | "detail";
+
 interface ConditionCardProps {
   condition: ConditionLog;
   /** 呼び出し元が独自に見出しを描画する場合は false にして二重表示を防ぐ。 */
   showTitle?: boolean;
+  section?: ConditionSection;
   className?: string;
 }
 
@@ -22,6 +29,16 @@ const LEVEL_TITLES: Record<ConditionLevelKind, string> = {
   fatigue: "疲労度",
   physical: "体調",
 };
+
+/** Pro 限定セクションに表示できる値があるか。無いときはサンプルのプレビューへ差し替える。 */
+export function hasConditionDetail(condition: ConditionLog): boolean {
+  return (
+    parseDecimal(condition.sleep_hours) !== null ||
+    Boolean(condition.mood) ||
+    Boolean(condition.memo) ||
+    (condition.injuries ?? []).length > 0
+  );
+}
 
 interface ConditionLevelTileProps {
   kind: ConditionLevelKind;
@@ -53,10 +70,12 @@ function ConditionLevelTile({ kind, level }: ConditionLevelTileProps) {
 /**
  * 記録済みコンディションの表示カード。
  * 練習記録の詳細表示と、無料ユーザー向けのプレビューで共通利用する。
+ * section で無料項目 / Pro 限定項目のどちらを描くかを選べる。
  */
 export default function ConditionCard({
   condition,
   showTitle = true,
+  section = "all",
   className,
 }: ConditionCardProps) {
   // back の decimal は "7.0" のような文字列で返るため、そのまま出さず数値化して表示する。
@@ -65,6 +84,8 @@ export default function ConditionCard({
   const hasLevel =
     conditionLevelMeta(condition.fatigue_level) !== null ||
     conditionLevelMeta(condition.physical_level) !== null;
+  const showsBasic = section !== "detail";
+  const showsDetail = section !== "basic";
 
   return (
     <div className={className}>
@@ -73,7 +94,7 @@ export default function ConditionCard({
           {SECTION_TITLE}
         </h3>
       ) : null}
-      {hasLevel ? (
+      {showsBasic && hasLevel ? (
         <div className="flex gap-2.5">
           {condition.fatigue_level !== null ? (
             <ConditionLevelTile
@@ -89,7 +110,7 @@ export default function ConditionCard({
           ) : null}
         </div>
       ) : null}
-      {sleepHours !== null || condition.mood ? (
+      {showsDetail && (sleepHours !== null || condition.mood) ? (
         <div className="mt-2.5 flex flex-wrap gap-2">
           {sleepHours !== null ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#3A3A3A] px-2.5 py-1.5 text-xs font-bold text-white">
@@ -105,7 +126,7 @@ export default function ConditionCard({
           ) : null}
         </div>
       ) : null}
-      {injuries.length > 0 ? (
+      {showsDetail && injuries.length > 0 ? (
         <ul className="mt-2.5 flex flex-wrap gap-2">
           {injuries.map((injury, index) => (
             <li
@@ -121,7 +142,7 @@ export default function ConditionCard({
           ))}
         </ul>
       ) : null}
-      {condition.memo ? (
+      {showsDetail && condition.memo ? (
         <p className="mt-2.5 text-[13px] leading-5 text-zinc-300">
           {condition.memo}
         </p>

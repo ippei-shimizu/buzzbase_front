@@ -783,42 +783,37 @@ describe("PracticeRecordContent", () => {
     }
 
     describe("無料プラン", () => {
-      it("暗幕越しにサンプルのコンディションをプレビューする", () => {
+      it("疲労度・体調は入力でき、詳細項目だけ暗幕で覆う", () => {
         renderContent();
 
+        expect(
+          screen.getByRole("button", { name: "疲労度: 元気" }),
+        ).toBeEnabled();
+        expect(
+          screen.getByRole("button", { name: "体調: 不調" }),
+        ).toBeEnabled();
         expect(screen.getByTestId("pro-upsell-scrim")).toBeInTheDocument();
-        expect(
-          screen.getByText("サンプルデータ（実際の記録ではありません）"),
-        ).toBeVisible();
-        expect(screen.getByText("やや疲れ")).toBeVisible();
-        expect(screen.getByText("睡眠 7.5時間")).toBeVisible();
-        expect(screen.getByText("Pro限定")).toBeVisible();
       });
 
-      it("入力フォームは出さない", () => {
+      it("入力した疲労度・体調を送り、詳細項目はキーごと送らない", async () => {
+        const user = userEvent.setup();
         renderContent();
 
-        expect(
-          screen.queryByRole("button", { name: "疲労度: 元気" }),
-        ).toBeNull();
-        expect(screen.queryByLabelText("睡眠時間")).toBeNull();
-      });
+        await user.click(screen.getByRole("checkbox", { name: "素振り" }));
+        await user.click(screen.getByRole("button", { name: "疲労度: 元気" }));
+        await user.click(screen.getByRole("button", { name: "体調: 不調" }));
+        await user.click(
+          screen.getByRole("button", { name: "練習記録のみ保存" }),
+        );
 
-      it("既存の記録があればサンプルではなく自分のコンディションをプレビューする", () => {
-        renderContent({
-          initialSession: buildSession({ condition: buildCondition() }),
+        await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
+        expect(savedInput().condition).toEqual({
+          fatigue_level: 4,
+          physical_level: 1,
         });
-
-        // decimal は "7.0" の文字列で返るため、数値化して "7時間" と出す。
-        expect(screen.getByText("睡眠 7時間")).toBeVisible();
-        expect(screen.getByText("全体的に体は軽かった")).toBeVisible();
-        expect(screen.getByText("腰（重い）")).toBeVisible();
-        expect(
-          screen.queryByText("サンプルデータ（実際の記録ではありません）"),
-        ).toBeNull();
       });
 
-      it("既存のコンディションが残っていても condition を送らない", async () => {
+      it("Pro 期間中に記録した詳細項目は送り返さない（空で上書きしない）", async () => {
         const user = userEvent.setup();
         renderContent({
           initialSession: buildSession({
@@ -832,7 +827,10 @@ describe("PracticeRecordContent", () => {
         );
 
         await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
-        expect(savedInput()).not.toHaveProperty("condition");
+        expect(savedInput().condition).toEqual({
+          fatigue_level: 3,
+          physical_level: 2,
+        });
         expect(savedItems()).toEqual([
           { practice_menu_id: 1, amount: 300, weight: null },
         ]);
@@ -840,7 +838,7 @@ describe("PracticeRecordContent", () => {
     });
 
     describe("Pro 判定が未確定の間", () => {
-      it("既存のコンディションがあっても condition を送らない", async () => {
+      it("詳細項目は送らず、疲労度・体調だけ送る", async () => {
         const user = userEvent.setup();
         mockEntitlement({ granted: true, isLoading: true });
         renderContent({
@@ -855,17 +853,20 @@ describe("PracticeRecordContent", () => {
         );
 
         await waitFor(() => expect(mockUpsert).toHaveBeenCalledTimes(1));
-        expect(savedInput()).not.toHaveProperty("condition");
+        expect(savedInput().condition).toEqual({
+          fatigue_level: 3,
+          physical_level: 2,
+        });
       });
 
-      it("Pro 限定バッジも入力フォームも出さない", () => {
+      it("Pro 限定バッジを出さず、疲労度・体調は入力できる", () => {
         mockEntitlement({ granted: true, isLoading: true });
         renderContent();
 
         expect(screen.queryByText("Pro限定")).toBeNull();
         expect(
-          screen.queryByRole("button", { name: "疲労度: 元気" }),
-        ).toBeNull();
+          screen.getByRole("button", { name: "疲労度: 元気" }),
+        ).toBeEnabled();
       });
     });
 
@@ -1108,25 +1109,6 @@ describe("PracticeRecordContent", () => {
         expect(savedInput().condition?.fatigue_level).toBe(4);
       });
 
-      it("コンディション付きの保存が 403 ならコンディションの Pro 訴求を出す", async () => {
-        const user = userEvent.setup();
-        mockUpsert.mockResolvedValue({
-          ok: false,
-          reason: "forbidden",
-          errors: ["コンディション記録は Pro プラン限定です"],
-        });
-        renderContent();
-
-        await saveWithCondition(user);
-
-        expect(
-          await screen.findByText("コンディション記録は Pro プラン限定です"),
-        ).toBeVisible();
-        expect(mockOpenProUpgradeModal).toHaveBeenCalledWith({
-          trigger: "detailed_condition_log",
-        });
-        expect(toast.success).not.toHaveBeenCalled();
-      });
     });
   });
 });
