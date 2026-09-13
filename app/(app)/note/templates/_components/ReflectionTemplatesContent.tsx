@@ -24,6 +24,7 @@ import {
   deleteReflectionTemplate,
   updateReflectionTemplate,
 } from "@app/services/v2/reflectionTemplateService";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import {
   DELETE_NOTICE,
   FREE_LIMIT_DESCRIPTION,
@@ -83,6 +84,7 @@ export default function ReflectionTemplatesContent({
 
   const handleAdd = () => {
     if (isAtFreeLimit) {
+      trackFreeLimitReached(PAYWALL_TRIGGER);
       openProUpgradeModal({ trigger: PAYWALL_TRIGGER });
       return;
     }
@@ -94,6 +96,7 @@ export default function ReflectionTemplatesContent({
   // プリセットの編集だけは自作テンプレの新規作成に等しく、back も 403 を返す。
   const handleEdit = (template: ReflectionTemplate) => {
     if (template.is_preset && isAtFreeLimit) {
+      trackFreeLimitReached(PAYWALL_TRIGGER);
       openProUpgradeModal({ trigger: PAYWALL_TRIGGER });
       return;
     }
@@ -132,6 +135,7 @@ export default function ReflectionTemplatesContent({
     // 別端末での追加などでクライアント側の件数判定とずれた場合にここへ入る。
     if (result.reason === "forbidden") {
       setFormErrors([FREE_LIMIT_SERVER_ERROR]);
+      trackFreeLimitReached(PAYWALL_TRIGGER);
       openProUpgradeModal({ trigger: PAYWALL_TRIGGER });
       return;
     }

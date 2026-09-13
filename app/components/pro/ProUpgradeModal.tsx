@@ -41,6 +41,7 @@ import {
 } from "@app/components/pro/proFeatureCatalog";
 import { PRO_PLAN_PRICES } from "@app/components/pro/proPricing";
 import { useProStatus } from "@app/hooks/pro/useProStatus";
+import { trackPurchaseFailed, trackUpgradeStarted } from "@app/utils/analytics";
 
 const TRIAL_NOTICE =
   "7 日間の無料トライアル期間中に解約すれば料金はかかりません。";
@@ -108,11 +109,15 @@ export default function ProUpgradeModal({
   const isTrialEligible =
     !isProStatusLoading && !proStatus.subscription.has_used_trial;
 
+  // paywall viewed は開く側（proUpgradeModalContext の open）で送る。
+  const paywallTrigger = trigger ?? "general";
+
   const copy = (trigger && PRO_PAYWALL_COPY[trigger]) ?? DEFAULT_PAYWALL_COPY;
   // ハイライトカードで既に訴求している機能を比較表でも繰り返さない。
   const visibleGroups = filterFeatureGroups(FEATURE_GROUPS, trigger);
 
   const handleCheckout = () => {
+    trackUpgradeStarted({ plan_type: plan, trigger: paywallTrigger });
     startTransition(async () => {
       const result = await startProCheckout({ plan });
 
@@ -121,6 +126,8 @@ export default function ProUpgradeModal({
         window.location.assign(result.checkoutUrl);
         return;
       }
+
+      trackPurchaseFailed({ reason: result.error, plan_type: plan });
 
       const messages: Record<typeof result.error, string> = {
         unauthorized: "ログインしてからお試しください",
