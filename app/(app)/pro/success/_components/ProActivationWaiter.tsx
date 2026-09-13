@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getProStatusResult } from "@app/(app)/pro/actions";
+import { trackPurchaseCompleted } from "@app/utils/analytics";
 
 // Stripe Checkout 完了から Webhook がローカルの Subscription を更新するまでの待ち時間。
 // 上限を設けないと Webhook が落ちた場合にタブを開いている限り叩き続けるため、
@@ -68,6 +69,14 @@ export default function ProActivationWaiter() {
 
       if (result.status === "ok" && result.proStatus.subscription.pro_active) {
         setState("activated");
+        // Pro 反映を確認できた時点を購入完了とみなす。Checkout からの復帰直後は
+        // まだ webhook が届いておらず、この画面に来ただけでは成立を判定できない。
+        const { plan_type, platform, in_trial } = result.proStatus.subscription;
+        trackPurchaseCompleted({
+          plan_type,
+          platform: platform ?? "web",
+          is_trial: in_trial,
+        });
         // 戻る操作でこの待機画面へ戻さない。決済は完了済みで再度待つ意味がない。
         router.replace(SUBSCRIPTION_PATH);
         return;
