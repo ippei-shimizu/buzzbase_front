@@ -13,6 +13,7 @@ import { ProUpsellCard } from "@app/components/pro/ProUpsellCard";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import { createImprovementTheme } from "@app/services/v2/improvementThemeService";
+import { trackFreeLimitReached, trackThemeCreated } from "@app/utils/analytics";
 import {
   THEME_TABS,
   groupThemesByStatus,
@@ -53,6 +54,7 @@ export default function ThemesContent({ initialThemes }: ThemesContentProps) {
 
   const handleAdd = () => {
     if (isAtFreeLimit) {
+      trackFreeLimitReached("unlimited_improvement_themes");
       openProUpgradeModal({ trigger: "unlimited_improvement_themes" });
       return;
     }
@@ -68,6 +70,7 @@ export default function ThemesContent({ initialThemes }: ThemesContentProps) {
 
     if (result.ok) {
       setThemes((prev) => [...prev, result.data]);
+      trackThemeCreated();
       setFormToken(null);
       // 作成した課題は必ず取組中なので、そのタブへ寄せて追加結果を見せる。
       setTab("open");
@@ -78,6 +81,7 @@ export default function ThemesContent({ initialThemes }: ThemesContentProps) {
     // 作成時の 403 は Pro 限定機能ではなく無料枠の超過を意味する。
     if (result.reason === "forbidden") {
       setFormErrors([FREE_LIMIT_SERVER_ERROR]);
+      trackFreeLimitReached("unlimited_improvement_themes");
       openProUpgradeModal({ trigger: "unlimited_improvement_themes" });
       return;
     }

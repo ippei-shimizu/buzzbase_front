@@ -26,6 +26,7 @@ import {
   unachieveGoal,
   updateGoal,
 } from "@app/services/v2/goalService";
+import { trackFreeLimitReached, trackGoalCreated } from "@app/utils/analytics";
 import { goalForbiddenFeature } from "../_utils/goalEntitlement";
 import {
   type GoalFormValues,
@@ -121,6 +122,7 @@ export default function GoalsContent({
 
   const handleAdd = () => {
     if (isAtFreeLimit) {
+      trackFreeLimitReached("unlimited_monthly_goals");
       openProUpgradeModal({ trigger: "unlimited_monthly_goals" });
       return;
     }
@@ -145,6 +147,10 @@ export default function GoalsContent({
         replaceGoal(result.data);
       } else {
         setGoals((prev) => [...prev, result.data]);
+        trackGoalCreated({
+          period_type: result.data.period_type,
+          kind: result.data.kind,
+        });
       }
       setForm(null);
       toast.success(editing ? "目標を更新しました" : "目標を作成しました");
@@ -164,6 +170,7 @@ export default function GoalsContent({
           ? [FREE_LIMIT_SERVER_ERROR]
           : result.errors,
       );
+      trackFreeLimitReached(feature);
       openProUpgradeModal({ trigger: feature });
       return;
     }

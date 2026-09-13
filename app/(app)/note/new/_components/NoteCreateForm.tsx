@@ -34,6 +34,11 @@ import {
   deleteBaseballNote,
 } from "@app/services/v2/baseballNoteService";
 import {
+  trackFreeLimitReached,
+  trackNoteCreated,
+  trackReviewCompleted,
+} from "@app/utils/analytics";
+import {
   buildStagedUploadNotice,
   revokeStagedObjectUrls,
   summarizeStagedUploads,
@@ -174,6 +179,10 @@ export default function NoteCreateForm({
     stagedMedia.forEach(revokeStagedObjectUrls);
     setStagedMedia([]);
 
+    if (summary.limitReached > 0) {
+      trackFreeLimitReached("unlimited_media_uploads");
+    }
+
     if (
       summary.limitReached > 0 ||
       summary.canceled > 0 ||
@@ -222,6 +231,13 @@ export default function NoteCreateForm({
       setErrorsWithTimeout(result.errors);
       setIsSubmitting(false);
       return;
+    }
+
+    trackNoteCreated({ has_reflection: reflectionAnswers.length > 0 });
+    // 振り返りは「テンプレに回答したノート」として保存されるため、ノート作成と
+    // 同時に振り返り完了としても数える（機能別の使用率を別々に出すため）。
+    if (reflectionAnswers.length > 0) {
+      trackReviewCompleted({ answer_count: reflectionAnswers.length });
     }
 
     // 添付が無いときはアップロード経路を通さず、そのまま一覧へ戻す。

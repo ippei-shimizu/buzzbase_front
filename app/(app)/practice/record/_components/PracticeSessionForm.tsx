@@ -20,6 +20,10 @@ import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
 import { upsertPracticeSession } from "@app/services/v2/practiceSessionService";
 import {
+  trackFreeLimitReached,
+  trackPracticeRecordCreated,
+} from "@app/utils/analytics";
+import {
   buildConditionPayload,
   buildInitialCondition,
 } from "../_utils/conditionDraft";
@@ -173,6 +177,7 @@ export default function PracticeSessionForm({
       // どちらでもなければ back の文言をそのまま出す。
       if (result.reason === "forbidden") {
         if (themeIds.length > 1) {
+          trackFreeLimitReached("multi_improvement_theme_links");
           openProUpgradeModal({ trigger: "multi_improvement_theme_links" });
         } else if (conditionPayload !== null) {
           openProUpgradeModal({ trigger: "detailed_condition_log" });
@@ -182,6 +187,10 @@ export default function PracticeSessionForm({
       return;
     }
 
+    trackPracticeRecordCreated({
+      menu_count: items.length,
+      has_condition: conditionPayload !== null,
+    });
     toast.success(SAVE_SUCCESS_MESSAGE);
     onSaved(result.data);
     if (withNote) {
