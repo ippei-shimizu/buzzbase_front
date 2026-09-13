@@ -218,6 +218,30 @@ const MOBILE_EVENT_CASES: {
   },
 ];
 
+/**
+ * front だけが送る追加プロパティを含むケース。mobile の同名イベントには
+ * source / detection が無いため、MOBILE_EVENT_CASES とは分けて持つ。
+ * mobile へ同期したらこの配列から MOBILE_EVENT_CASES へ移すこと。
+ */
+const FRONT_ONLY_EVENT_CASES: typeof MOBILE_EVENT_CASES = [
+  {
+    event: "free limit reached",
+    properties: {
+      feature: "unlimited_groups",
+      source: "group_create",
+      detection: "server",
+    },
+    run: (a) =>
+      a.trackFreeLimitReached("unlimited_groups", {
+        source: "group_create",
+        detection: "server",
+      }),
+  },
+];
+
+/** 送信そのものの振る舞い（有効化・失敗時の握り潰しなど）を確認する全ケース。 */
+const ALL_EVENT_CASES = [...MOBILE_EVENT_CASES, ...FRONT_ONLY_EVENT_CASES];
+
 describe("analytics", () => {
   const originalKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
@@ -280,8 +304,8 @@ describe("analytics", () => {
       );
     });
 
-    it.each(MOBILE_EVENT_CASES)(
-      "$event を mobile と同じプロパティで送る",
+    it.each(ALL_EVENT_CASES)(
+      "$event を定義どおりのプロパティで送る",
       async ({ event, properties, run }) => {
         const { analytics } = await loadModules("phc_test");
 
@@ -327,7 +351,7 @@ describe("analytics", () => {
     it("計測を呼んでもエラーにならず、イベントも送らない", async () => {
       const { analytics, posthog } = await loadModules();
 
-      for (const testCase of MOBILE_EVENT_CASES) {
+      for (const testCase of ALL_EVENT_CASES) {
         expect(() => testCase.run(analytics)).not.toThrow();
       }
       expect(() => posthog.identifyUser(1)).not.toThrow();
@@ -379,7 +403,7 @@ describe("analytics", () => {
     it("イベントプロパティに個人情報を含めない", async () => {
       const { analytics } = await loadModules("phc_test");
 
-      for (const testCase of MOBILE_EVENT_CASES) {
+      for (const testCase of ALL_EVENT_CASES) {
         mockCapture.mockClear();
         testCase.run(analytics);
         const [, properties] = mockCapture.mock.calls[0] as [

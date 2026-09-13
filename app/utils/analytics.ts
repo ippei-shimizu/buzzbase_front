@@ -47,6 +47,15 @@ type LoginType = "email" | "google" | "apple";
  */
 export type ProTrigger = ProFeature | "general";
 
+/**
+ * 無料枠の上限に当たった導線。PostHog の次元値になるため、typo で値が増えないよう
+ * 列挙で縛る。他の無料枠へ広げるときはここへ追加する。
+ */
+export type FreeLimitSource =
+  | "group_create"
+  | "group_join_link"
+  | "group_invitation";
+
 /** 試合記録フローのステップ。1: 試合情報 / 2: 打席 / 3: 投手成績 / summary: まとめ。 */
 export type GameRecordStep = 1 | 2 | 3 | "summary";
 
@@ -191,10 +200,22 @@ export const trackPurchaseFailed = (props: {
 }) => capture(ANALYTICS_EVENTS.PURCHASE_FAILED, props);
 
 /**
- * 無料枠の上限に阻まれた操作。最も課金に近いシグナルとして計測する。
+ * 無料枠の上限に阻まれた操作。DB のスナップショット集計では「いつ・何回ぶつかったか」が
+ * 取れないため、課金に最も近いシグナルとしてイベントで残す。
+ *
  * 同一ユーザーが上限に当たり続けると操作のたびに送られ、経路によって粒度も違う
  * （新規ノートは添付操作 1 回ごと、既存ノートの編集はファイル 1 件ごと）ため、
  * 集計はイベント数ではなくユニークユーザー数で行う。
+ *
+ * `source` / `detection` は現状グループ導線にのみ付与している。他の導線は両方とも
+ * 送っていないため、**`detection` 未設定は「未計装」であって `client` ではない**。
+ * `detection: "client"` で絞るとクライアント事前判定の大半が抜け落ちる点に注意する。
+ *
+ * @param feature - 上限に当たった Pro 機能の正式キー（`PRO_FEATURES`）
+ * @param props.source - 上限に当たった導線
+ * @param props.detection - クライアント事前判定で弾いたか、サーバーの 403 に当たったか
  */
-export const trackFreeLimitReached = (feature: ProFeature) =>
-  capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature });
+export const trackFreeLimitReached = (
+  feature: ProFeature,
+  props?: { source?: FreeLimitSource; detection?: "client" | "server" },
+) => capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature, ...props });

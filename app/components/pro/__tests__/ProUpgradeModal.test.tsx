@@ -16,6 +16,7 @@ jest.mock("@app/hooks/pro/useProStatus", () => ({
 }));
 
 import { fireEvent, render, screen } from "@testing-library/react";
+import { PRO_PAYWALL_COPY } from "@app/components/pro/paywallCopy";
 import { APP_ONLY_LABEL } from "@app/components/pro/proFeatureCatalog";
 import { DEFAULT_PRO_STATUS } from "@app/types/pro";
 import ProUpgradeModal from "../ProUpgradeModal";
@@ -120,6 +121,32 @@ describe("ProUpgradeModal", () => {
     );
     expect(
       screen.getByText("シーズンを跨いだ成長を可視化"),
+    ).toBeInTheDocument();
+  });
+
+  it("benefits を持つ機能では description ではなく箇条書きを表示する", () => {
+    render(
+      <ProUpgradeModal isOpen onClose={jest.fn()} trigger="unlimited_groups" />,
+    );
+
+    const { benefits, description } = PRO_PAYWALL_COPY.unlimited_groups;
+    for (const benefit of benefits ?? []) {
+      expect(screen.getByText(benefit)).toBeInTheDocument();
+    }
+    expect(screen.queryByText(description)).not.toBeInTheDocument();
+  });
+
+  it("benefits を持たない機能では description を表示する", () => {
+    render(
+      <ProUpgradeModal
+        isOpen
+        onClose={jest.fn()}
+        trigger="season_transition_graph"
+      />,
+    );
+
+    expect(
+      screen.getByText(PRO_PAYWALL_COPY.season_transition_graph.description),
     ).toBeInTheDocument();
   });
 
