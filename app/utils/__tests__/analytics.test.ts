@@ -137,6 +137,81 @@ const MOBILE_EVENT_CASES: {
     properties: { feature: "hit_direction_average" },
     run: (a) => a.trackProFeatureTapped("hit_direction_average"),
   },
+  {
+    event: "goal created",
+    properties: { period_type: "monthly", kind: "numeric" },
+    run: (a) => a.trackGoalCreated({ period_type: "monthly", kind: "numeric" }),
+  },
+  {
+    event: "practice record created",
+    properties: { menu_count: 3, has_condition: true },
+    run: (a) =>
+      a.trackPracticeRecordCreated({ menu_count: 3, has_condition: true }),
+  },
+  {
+    event: "note created",
+    properties: { has_reflection: true },
+    run: (a) => a.trackNoteCreated({ has_reflection: true }),
+  },
+  {
+    event: "theme created",
+    properties: undefined,
+    run: (a) => a.trackThemeCreated(),
+  },
+  {
+    event: "practice schedule created",
+    properties: { event_type: "self_practice", recurring: false },
+    run: (a) =>
+      a.trackPracticeScheduleCreated({
+        event_type: "self_practice",
+        recurring: false,
+      }),
+  },
+  {
+    event: "review completed",
+    properties: { answer_count: 2 },
+    run: (a) => a.trackReviewCompleted({ answer_count: 2 }),
+  },
+  {
+    event: "shadow swing completed",
+    properties: { swing_count: 120 },
+    run: (a) => a.trackShadowSwingCompleted({ swing_count: 120 }),
+  },
+  {
+    event: "paywall viewed",
+    properties: { trigger: "unlimited_monthly_goals" },
+    run: (a) => a.trackPaywallViewed("unlimited_monthly_goals"),
+  },
+  {
+    event: "upgrade started",
+    properties: { plan_type: "yearly", trigger: "general" },
+    run: (a) =>
+      a.trackUpgradeStarted({ plan_type: "yearly", trigger: "general" }),
+  },
+  {
+    event: "purchase completed",
+    properties: { plan_type: "monthly", platform: "web", is_trial: true },
+    run: (a) =>
+      a.trackPurchaseCompleted({
+        plan_type: "monthly",
+        platform: "web",
+        is_trial: true,
+      }),
+  },
+  {
+    event: "purchase failed",
+    properties: { reason: "stripe_api_error", plan_type: "yearly" },
+    run: (a) =>
+      a.trackPurchaseFailed({
+        reason: "stripe_api_error",
+        plan_type: "yearly",
+      }),
+  },
+  {
+    event: "free limit reached",
+    properties: { feature: "unlimited_practice_menus" },
+    run: (a) => a.trackFreeLimitReached("unlimited_practice_menus"),
+  },
 ];
 
 describe("analytics", () => {
@@ -170,6 +245,18 @@ describe("analytics", () => {
         BATTING_TREND_GRANULARITY_CHANGED: "batting trend granularity changed",
         ERA_TREND_GRANULARITY_CHANGED: "era trend granularity changed",
         PRO_FEATURE_TAPPED: "pro feature tapped",
+        GOAL_CREATED: "goal created",
+        PRACTICE_RECORD_CREATED: "practice record created",
+        NOTE_CREATED: "note created",
+        THEME_CREATED: "theme created",
+        PRACTICE_SCHEDULE_CREATED: "practice schedule created",
+        REVIEW_COMPLETED: "review completed",
+        SHADOW_SWING_COMPLETED: "shadow swing completed",
+        PAYWALL_VIEWED: "paywall viewed",
+        UPGRADE_STARTED: "upgrade started",
+        PURCHASE_COMPLETED: "purchase completed",
+        PURCHASE_FAILED: "purchase failed",
+        FREE_LIMIT_REACHED: "free limit reached",
       });
     });
 
