@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { createMenuSet, updateMenuSet } from "@app/services/v2/menuSetService";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import { FREE_LIMIT_SERVER_ERROR } from "./menuSetCopy";
 import MenuSetForm from "./MenuSetForm";
 
@@ -53,6 +54,7 @@ export default function MenuSetFormContent({
     // 別端末での追加などでクライアント側の件数判定とずれた場合にここへ入る。
     if (!menuSet && result.reason === "forbidden") {
       setServerErrors([FREE_LIMIT_SERVER_ERROR]);
+      trackFreeLimitReached("unlimited_menu_sets");
       openProUpgradeModal({ trigger: "unlimited_menu_sets" });
       return;
     }

@@ -12,7 +12,7 @@ import {
   acceptInviteLink,
   getInviteLinkInfo,
 } from "@app/services/groupInviteLinksService";
-import { trackGroupJoined } from "@app/utils/analytics";
+import { trackFreeLimitReached, trackGroupJoined } from "@app/utils/analytics";
 import {
   GROUP_FREE_LIMIT_MESSAGE,
   isGroupLimitError,
@@ -55,6 +55,7 @@ export default function GroupJoinPage() {
     } catch (error) {
       if (isGroupLimitError(error)) {
         toast.error(GROUP_FREE_LIMIT_MESSAGE);
+        trackFreeLimitReached("unlimited_groups");
         openProUpgradeModal({ trigger: "unlimited_groups" });
         return;
       }

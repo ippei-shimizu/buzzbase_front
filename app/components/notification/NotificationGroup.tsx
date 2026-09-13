@@ -21,7 +21,7 @@ import {
   declinedGroupInvitation,
 } from "@app/services/groupInvitationsService";
 import { deleteNotification } from "@app/services/notificationsService";
-import { trackGroupJoined } from "@app/utils/analytics";
+import { trackFreeLimitReached, trackGroupJoined } from "@app/utils/analytics";
 import {
   GROUP_FREE_LIMIT_MESSAGE,
   isGroupLimitError,
@@ -59,6 +59,7 @@ export default function NotificationGroup({
       // 無料枠の上限は想定内の拒否なので Sentry へは送らず、その場で理由を提示する。
       if (isGroupLimitError(error)) {
         toast.error(GROUP_FREE_LIMIT_MESSAGE);
+        trackFreeLimitReached("unlimited_groups");
         openProUpgradeModal({ trigger: "unlimited_groups" });
         return;
       }

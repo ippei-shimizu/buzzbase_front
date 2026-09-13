@@ -11,7 +11,7 @@ import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import useRequireAuth from "@app/hooks/auth/useRequireAuth";
 import { createGroup } from "@app/services/groupService";
 import { getCurrentUserId, getFollowingUser } from "@app/services/userService";
-import { trackGroupCreated } from "@app/utils/analytics";
+import { trackFreeLimitReached, trackGroupCreated } from "@app/utils/analytics";
 import {
   GROUP_FREE_LIMIT_MESSAGE,
   isGroupLimitError,
@@ -143,6 +143,7 @@ export default function GroupNew() {
       setIsSubmitting(false);
       if (isGroupLimitError(error)) {
         toast.error(GROUP_FREE_LIMIT_MESSAGE);
+        trackFreeLimitReached("unlimited_groups");
         openProUpgradeModal({ trigger: "unlimited_groups" });
         return;
       }

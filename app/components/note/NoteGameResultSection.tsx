@@ -6,6 +6,7 @@ import { BallIcon } from "@app/components/icon/BallIcon";
 import { useProUpgradeModal } from "@app/contexts/proUpgradeModalContext";
 import { useGameResultSearch } from "@app/hooks/note/useGameResultSearch";
 import { useEntitlement } from "@app/hooks/pro/useEntitlement";
+import { trackFreeLimitReached } from "@app/utils/analytics";
 import { formatJaFullDate } from "@app/utils/formatDate";
 import { canLinkMore } from "@app/utils/noteLinks";
 
@@ -60,6 +61,7 @@ export default function NoteGameResultSection({
         hasMultiLink: !isLoading && hasEntitlement("multi_game_result_notes"),
       })
     ) {
+      trackFreeLimitReached("multi_game_result_notes");
       openProUpgradeModal({ trigger: "multi_game_result_notes" });
       return;
     }
