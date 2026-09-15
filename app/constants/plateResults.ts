@@ -102,12 +102,21 @@ export const OUT_TYPE_OPTIONS: readonly OutTypeOption[] = [
 // ヒット種別サブ選択。plate_result_id と hit_type を併送する。
 // 走本塁打は柵越えと同じ plate_result_id / hit_type で、home_run_type だけが異なる
 // （記録上どちらも本塁打なので、集計に使う plate_result_id は分けない）。
-export interface HitTypeOption {
-  label: string;
-  plate_result_id: PlateResultId;
-  hit_type: HitType;
-  home_run_type?: HomeRunType;
-}
+// hit_type をタグにした判別可能なユニオンにして、本塁打以外に home_run_type が
+// 付くことと、本塁打で home_run_type を書き忘れることの両方を型で塞ぐ。
+export type HitTypeOption =
+  | {
+      label: string;
+      plate_result_id: PlateResultId;
+      hit_type: Exclude<HitType, "home_run">;
+      home_run_type?: never;
+    }
+  | {
+      label: string;
+      plate_result_id: typeof PLATE_RESULT_IDS.HOME_RUN;
+      hit_type: "home_run";
+      home_run_type: HomeRunType;
+    };
 
 export const HIT_TYPE_OPTIONS: readonly HitTypeOption[] = [
   {
