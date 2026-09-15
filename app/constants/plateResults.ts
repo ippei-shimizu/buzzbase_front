@@ -9,6 +9,7 @@
 
 import type {
   HitType,
+  HomeRunType,
   OutType,
   SwingType,
 } from "@app/interface/plateAppearanceV2";
@@ -99,10 +100,13 @@ export const OUT_TYPE_OPTIONS: readonly OutTypeOption[] = [
 ] as const;
 
 // ヒット種別サブ選択。plate_result_id と hit_type を併送する。
+// 走本塁打は柵越えと同じ plate_result_id / hit_type で、home_run_type だけが異なる
+// （記録上どちらも本塁打なので、集計に使う plate_result_id は分けない）。
 export interface HitTypeOption {
   label: string;
   plate_result_id: PlateResultId;
   hit_type: HitType;
+  home_run_type?: HomeRunType;
 }
 
 export const HIT_TYPE_OPTIONS: readonly HitTypeOption[] = [
@@ -125,6 +129,13 @@ export const HIT_TYPE_OPTIONS: readonly HitTypeOption[] = [
     label: "本塁打",
     plate_result_id: PLATE_RESULT_IDS.HOME_RUN,
     hit_type: "home_run",
+    home_run_type: "over_fence",
+  },
+  {
+    label: "走本塁打",
+    plate_result_id: PLATE_RESULT_IDS.HOME_RUN,
+    hit_type: "home_run",
+    home_run_type: "inside_the_park",
   },
 ] as const;
 
