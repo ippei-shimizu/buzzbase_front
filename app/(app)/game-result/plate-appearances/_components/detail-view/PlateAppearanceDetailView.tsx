@@ -118,6 +118,7 @@ export function PlateAppearanceDetailView({
             <DetailRow
               label="ヒット種別"
               value={
+                pa.hit_type === "home_run" &&
                 pa.home_run_type === "inside_the_park"
                   ? INSIDE_THE_PARK_HIT_TYPE_LABEL
                   : HIT_TYPE_LABELS[pa.hit_type]
