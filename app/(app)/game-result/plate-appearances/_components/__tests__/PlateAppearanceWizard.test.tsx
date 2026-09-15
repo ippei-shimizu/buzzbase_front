@@ -29,6 +29,7 @@ const buildEditingPlateAppearance = (
     out_type: null,
     hit_type: null,
     swing_type: null,
+    home_run_type: null,
     rbi: 0,
     run_scored: 0,
     stolen_bases: 0,
@@ -122,6 +123,91 @@ describe("打席記録ウィザードの計測", () => {
         is_edit: true,
         has_pitcher: true,
         has_detail: true,
+      }),
+    );
+  });
+
+  it("モーダルで走本塁打を選ぶと home_run_type を付けて送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          hit_location_x: "0.500",
+          hit_location_y: "0.300",
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("ヒット"));
+    await user.click(screen.getByText("走本塁打"));
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
+    expect(mockUpdate).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({
+        plate_result_id: 10,
+        hit_type: "home_run",
+        home_run_type: "inside_the_park",
+      }),
+    );
+  });
+
+  it("走本塁打から二塁打へ選び直すと home_run_type が null に戻る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          plate_result_id: 10,
+          hit_type: "home_run",
+          home_run_type: "inside_the_park",
+          hit_location_x: "0.500",
+          hit_location_y: "0.300",
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("ヒット"));
+    await user.click(screen.getByText("二塁打"));
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
+    expect(mockUpdate).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ hit_type: "double", home_run_type: null }),
+    );
+  });
+
+  it("走本塁打の打席を編集して更新すると home_run_type を維持したまま送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          plate_result_id: 10,
+          hit_type: "home_run",
+          home_run_type: "inside_the_park",
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
+    expect(mockUpdate).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({
+        plate_result_id: 10,
+        hit_type: "home_run",
+        home_run_type: "inside_the_park",
       }),
     );
   });
