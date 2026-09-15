@@ -126,6 +126,34 @@ describe("打席記録ウィザードの計測", () => {
     );
   });
 
+  it("走本塁打の打席を編集して更新すると home_run_type を維持したまま送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          plate_result_id: 10,
+          hit_type: "home_run",
+          home_run_type: "inside_the_park",
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalled());
+    expect(mockUpdate).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({
+        plate_result_id: 10,
+        hit_type: "home_run",
+        home_run_type: "inside_the_park",
+      }),
+    );
+  });
+
   it("保存せず画面を離れると plate appearance canceled を送る", () => {
     const { unmount } = render(
       <PlateAppearanceWizard
