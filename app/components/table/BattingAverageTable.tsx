@@ -2,7 +2,10 @@ import type {
   BattingStatsAggregate,
   BattingStatsCalculated,
 } from "@app/interface/dashboardStats";
-import { formatRate } from "@app/utils/formatStats";
+import {
+  formatRate,
+  formatHomeRunWithInsideThePark,
+} from "@app/utils/formatStats";
 
 type Props = {
   aggregate: BattingStatsAggregate | null;
@@ -129,7 +132,12 @@ export default function BattingAverageTable({ aggregate, calculated }: Props) {
           <div className={styleTableBox}>
             <p className={styleTableTitle}>本塁打</p>
             <span className={styleTableData}>
-              {displayValue(aggregate?.home_run)}
+              {aggregate?.home_run == null
+                ? "-"
+                : formatHomeRunWithInsideThePark(
+                    aggregate.home_run,
+                    aggregate.inside_the_park_home_run,
+                  )}
             </span>
           </div>
           <div className={styleTableBox}>

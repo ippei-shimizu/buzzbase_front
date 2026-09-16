@@ -18,7 +18,12 @@ import {
   monthOptionsFromRecorded,
   type MonthOption,
 } from "@app/utils/buildMonthOptions";
-import { formatRate, formatRate2, formatEra } from "@app/utils/formatStats";
+import {
+  formatRate,
+  formatRate2,
+  formatEra,
+  formatHomeRunWithInsideThePark,
+} from "@app/utils/formatStats";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
@@ -313,7 +318,12 @@ function BattingTable({ battingStats }: { battingStats: BattingStats }) {
           <div className={styleTableBox}>
             <p className={styleTableTitle}>本塁打</p>
             <span className={styleTableData}>
-              {displayValue(agg?.home_run)}
+              {agg?.home_run == null
+                ? "-"
+                : formatHomeRunWithInsideThePark(
+                    agg.home_run,
+                    agg.inside_the_park_home_run,
+                  )}
             </span>
           </div>
           <div className={styleTableBox}>

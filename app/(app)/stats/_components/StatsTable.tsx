@@ -168,7 +168,7 @@ export default function StatsTable<
                   }}
                 >
                   {columns.map((col) => {
-                    const val = row[col.key] as number;
+                    const val = (row[col.key] as number | undefined) ?? 0;
                     const formatted = col.format
                       ? col.format(val)
                       : String(val);
