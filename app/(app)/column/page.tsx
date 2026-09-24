@@ -1,12 +1,4 @@
 import type { Metadata } from "next";
-import {
-  KBB_COLUMN_DESCRIPTION,
-  KBB_COLUMN_TITLE,
-} from "./k-bb/_constants/meta";
-import {
-  WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
-  WINNING_PERCENTAGE_COLUMN_TITLE,
-} from "./winning-percentage/_constants/meta";
 import Link from "next/link";
 import {
   BATTING_AVERAGE_COLUMN_DESCRIPTION,
@@ -17,9 +9,17 @@ import {
   ERA_COLUMN_TITLE,
 } from "./era/_constants/meta";
 import {
+  KBB_COLUMN_DESCRIPTION,
+  KBB_COLUMN_TITLE,
+} from "./k-bb/_constants/meta";
+import {
   OPS_COLUMN_DESCRIPTION,
   OPS_COLUMN_TITLE,
 } from "./ops/_constants/meta";
+import {
+  WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
+  WINNING_PERCENTAGE_COLUMN_TITLE,
+} from "./winning-percentage/_constants/meta";
 
 export const metadata: Metadata = {
   title: "コラム一覧｜野球の指標・用語をわかりやすく解説",
