@@ -9,7 +9,7 @@ import {
   ERA_COLUMN_TITLE,
 } from "./era/_constants/meta";
 import {
-  KBB_COLUMN_DESCRIPTION,
+  KBB_COLUMN_CARD_DESCRIPTION,
   KBB_COLUMN_TITLE,
 } from "./k-bb/_constants/meta";
 import {
@@ -17,7 +17,7 @@ import {
   OPS_COLUMN_TITLE,
 } from "./ops/_constants/meta";
 import {
-  WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
+  WINNING_PERCENTAGE_COLUMN_CARD_DESCRIPTION,
   WINNING_PERCENTAGE_COLUMN_TITLE,
 } from "./winning-percentage/_constants/meta";
 
@@ -535,7 +535,7 @@ const categories: Category[] = [
               {
                 slug: "k-bb",
                 title: KBB_COLUMN_TITLE,
-                description: KBB_COLUMN_DESCRIPTION,
+                description: KBB_COLUMN_CARD_DESCRIPTION,
               },
             ],
           },
@@ -557,7 +557,7 @@ const categories: Category[] = [
               {
                 slug: "winning-percentage",
                 title: WINNING_PERCENTAGE_COLUMN_TITLE,
-                description: WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
+                description: WINNING_PERCENTAGE_COLUMN_CARD_DESCRIPTION,
               },
             ],
           },
