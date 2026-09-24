@@ -4,6 +4,8 @@ import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import OpsLevelChecker from "./_components/OpsLevelChecker";
+import { OPS_BENCHMARKS } from "./_constants/benchmarks";
 
 const faqItems = [
   {
@@ -17,9 +19,24 @@ const faqItems = [
       ".700はリーグ平均水準（レギュラー定着の目安）、.800はクリーンアップ任せられる好打者、.900は中心打者・タイトル争いに絡むレベル、1.000超えはMVP・首位打者級の超一流打者を意味します。",
   },
   {
+    question: "OPS .700 を超えるための課題は？",
+    answer:
+      "出塁率（OBP）.330 / 長打率（SLG）.370 程度が目安です。三振が多すぎて出塁率が低いタイプか、ゴロが多すぎて長打率が伸びないタイプかで取り組むべき課題が変わります。",
+  },
+  {
+    question: "OPS .800 を超えるにはどうすればいい？",
+    answer:
+      "出塁率（OBP）を .350 以上に保ちつつ長打率（SLG）を .450 以上に伸ばすのが目安です。四球を恐れずに選ぶ姿勢と、長打になりやすいバッティング軌道の両立がポイントになります。",
+  },
+  {
     question: "OPS 1超え（1.000以上）の意味は？",
     answer:
       "出塁率と長打率の合計が1.000を超える状態のことです。NPBでも年間で達成できる選手は数人レベル、MLBでも歴代の超一流打者の象徴的な数字として扱われます。",
+  },
+  {
+    question: "OPSの理論上の最大値は？",
+    answer:
+      "出塁率の理論最大は 1.000、長打率の理論最大は 4.000（毎打席本塁打）なので、OPS の理論上の最大値は 5.000 です。ただし実戦でこの数値に近づくことはなく、規定打席ベースでのシーズン最高値は MLB のバリー・ボンズ（2004 年）の 1.422、NPB の王貞治（1974 年）の 1.293 が事実上の天井です。",
   },
   {
     question: "高校野球のOPS目安は？",
@@ -38,47 +55,22 @@ const faqItems = [
   },
 ];
 
-const benchmarks = [
-  {
-    level: "S（超一流）",
-    ops: "1.000以上",
-    pro: "NPB・MLB ともMVP / 首位打者争い",
-    high: "甲子園を主導するスラッガー",
-    middle: "全国大会で上位を狙える強打者",
-    color: "text-amber-400",
-  },
-  {
-    level: "A（中心打者）",
-    ops: ".900〜.999",
-    pro: "リーグ代表クラスのクリーンアップ",
-    high: "強豪校の主軸打者",
-    middle: "シニア・ボーイズ全国レベルの4番",
-    color: "text-yellow-400",
-  },
-  {
-    level: "B（好打者）",
-    ops: ".800〜.899",
-    pro: "クリーンアップを任される好打者",
-    high: "強豪校レギュラー上位／地方大会の主軸",
-    middle: "シニア・ボーイズの主軸打者",
-    color: "text-yellow-500",
-  },
-  {
-    level: "C（平均）",
-    ops: ".700〜.799",
-    pro: "リーグ平均前後・安定したレギュラー",
-    high: "公立校でも十分レギュラーレベル",
-    middle: "シニア・ボーイズで安定したレギュラー",
-    color: "text-zinc-300",
-  },
-  {
-    level: "D（要改善）",
-    ops: ".700未満",
-    pro: "出場機会が減るリスクあり",
-    high: "出塁・長打のどちらかを伸ばす必要",
-    middle: "個別の課題（打撃フォーム等）を見直し",
-    color: "text-zinc-500",
-  },
+const mlbRecords = [
+  "バリー・ボンズ（2004年）: 1.422",
+  "バリー・ボンズ（2002年）: 1.381",
+  "ベーブ・ルース（1920年）: 1.379",
+  "バリー・ボンズ（2001年）: 1.379",
+  "ベーブ・ルース（1921年）: 1.359",
+  "ベーブ・ルース（1923年）: 1.309",
+  "テッド・ウィリアムズ（1941年）: 1.287",
+];
+
+const npbRecords = [
+  "王貞治（1974年）: 1.293",
+  "ランディ・バース（1986年）: 1.258",
+  "王貞治（1973年）: 1.255",
+  "落合博満（1985年）: 1.244",
+  "バレンティン（2013年）: 1.234",
 ];
 
 export default function OpsCriteriaColumnPage() {
@@ -86,7 +78,7 @@ export default function OpsCriteriaColumnPage() {
     <>
       <ColumnArticleJsonLd
         headline="OPSはいくつから良い？レベル別の目安・基準・現場感を野球指標で解説"
-        description="OPS（オーピーエス）はいくつから良いのか、.700／.800／.900／1.000 の意味とカテゴリ別の目安、現場感を解説。"
+        description="OPS（オーピーエス）はいくつから良いのか、.700／.800／.900／1.000 の意味とカテゴリ別の目安、現場感、理論上の最大値と歴代最高記録まで解説。"
         path="/column/ops-criteria"
         breadcrumbLeafName="OPSの目安・基準"
         faq={faqItems}
@@ -108,7 +100,7 @@ export default function OpsCriteriaColumnPage() {
         <strong>
           「.700で平均」「.800で好打者」「.900で中心打者」「1.000で超一流」
         </strong>
-        の4段階で覚えるとシンプルです。本記事ではNPB・MLB・高校野球・中学野球それぞれのレベル別目安と、「4番を任されるOPS」「強豪校レギュラーのOPS」など現場感のある数字を紹介します。
+        の4段階で覚えるとシンプルです。本記事ではNPB・MLB・高校野球・中学野球それぞれのレベル別目安と、「4番を任されるOPS」「強豪校レギュラーのOPS」など現場感のある数字、OPSの理論上の最大値と歴代最高記録まで紹介します。自分のOPSを入力すると、カテゴリ別にどのレベルかをその場で判定できます。
       </p>
 
       <p className="text-sm text-zinc-400 leading-6 mt-2">
@@ -122,52 +114,35 @@ export default function OpsCriteriaColumnPage() {
         を併せてご覧ください。
       </p>
 
-      <section className="mt-10">
-        <h2 className="text-xl font-bold mb-4">
-          数値帯ごとのOPSの意味（.700／.800／.900／1.000）
-        </h2>
+      <nav
+        aria-label="この記事の目次"
+        className="mt-6 rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4"
+      >
+        <p className="text-sm font-bold text-zinc-200 mb-2">この記事の目次</p>
+        <ul className="grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
+          {[
+            ["#benchmarks", "カテゴリ別 OPS 目安テーブル"],
+            ["#checker", "あなたのOPSはどのレベル？"],
+            ["#ops-700", "OPS .700 は平均？"],
+            ["#ops-800", "OPS .800 はどのレベル？"],
+            ["#ops-900", "OPS .900 は中心打者"],
+            ["#ops-1000", "OPS 1.000 超えの意味"],
+            ["#ops-max", "OPS の最大値と歴代最高記録"],
+            ["#field-sense", "現場感のある目安"],
+          ].map(([href, label]) => (
+            <li key={href}>
+              <a
+                href={href}
+                className="text-yellow-500 hover:text-yellow-400 transition-colors"
+              >
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
-        <div className="space-y-4">
-          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
-            <p className="font-bold text-zinc-200">
-              <span className="text-yellow-500">.700</span> ／ リーグ平均ライン
-            </p>
-            <p className="text-sm text-zinc-300 leading-6 mt-2">
-              NPB・MLBともリーグ全体の平均OPSが.700前後で推移しています。レギュラー定着の最低ラインと言われることが多く、ここを超えるかどうかで「平均的なバッター」と評価されるかが分かれます。
-            </p>
-          </div>
-          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
-            <p className="font-bold text-zinc-200">
-              <span className="text-yellow-500">.800</span> ／ 好打者の入口
-            </p>
-            <p className="text-sm text-zinc-300 leading-6 mt-2">
-              リーグ平均を1割上回る水準で、クリーンアップ（3〜5番）を任される好打者の目安です。長打力か出塁率のどちらかが平均より明確に高く、得点貢献度の高いバッターです。
-            </p>
-          </div>
-          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
-            <p className="font-bold text-zinc-200">
-              <span className="text-yellow-500">.900</span> ／
-              中心打者・タイトル争い
-            </p>
-            <p className="text-sm text-zinc-300 leading-6 mt-2">
-              チームの中心打者として打線を引っ張るクラス。OPSランキングで上位に入り、シーズン後半にはタイトル争いに名前が挙がる水準です。
-            </p>
-          </div>
-          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
-            <p className="font-bold text-zinc-200">
-              <span className="text-amber-400">1.000</span> ／
-              超一流（MVP・首位打者級）
-            </p>
-            <p className="text-sm text-zinc-300 leading-6 mt-2">
-              年間を通して1.000を超える選手はNPBでも数人レベル。MLBでも歴代の超一流打者の象徴的な数値として扱われ、「1超え（いちこえ）」と呼ばれることもあります。
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <AdBanner slot={adSlots.columnMiddle} className="mt-8" />
-
-      <section className="mt-10">
+      <section id="benchmarks" className="mt-10 scroll-mt-24">
         <h2 className="text-xl font-bold mb-4">
           カテゴリ別 OPS 目安テーブル（プロ／高校／中学）
         </h2>
@@ -196,8 +171,8 @@ export default function OpsCriteriaColumnPage() {
               </tr>
             </thead>
             <tbody>
-              {benchmarks.map((row) => (
-                <tr key={row.level} className="even:bg-zinc-800/50 align-top">
+              {OPS_BENCHMARKS.map((row) => (
+                <tr key={row.key} className="even:bg-zinc-800/50 align-top">
                   <td
                     className={`px-3 py-2 border-b border-zinc-700 font-bold ${row.color}`}
                   >
@@ -222,7 +197,154 @@ export default function OpsCriteriaColumnPage() {
         </div>
       </section>
 
+      <section id="checker" className="mt-8 scroll-mt-24">
+        <OpsLevelChecker />
+        <p className="mt-3 text-sm text-zinc-400 leading-6">
+          OPS がまだ分からない場合は{" "}
+          <Link
+            href="/tools/ops"
+            className="text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
+          >
+            OPS計算ツール
+          </Link>{" "}
+          で安打数・打数・四球・死球・塁打数から計算できます。
+        </p>
+      </section>
+
+      <AdBanner slot={adSlots.columnMiddle} className="mt-8" />
+
       <section className="mt-10">
+        <h2 className="text-xl font-bold mb-4">
+          数値帯ごとのOPSの意味（.700／.800／.900／1.000）
+        </h2>
+
+        <div className="space-y-6">
+          <div
+            id="ops-700"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4 scroll-mt-24"
+          >
+            <h3 className="font-bold text-zinc-200">
+              <span className="text-yellow-500">.700</span> ／
+              リーグ平均ライン（OPS .700 は平均？）
+            </h3>
+            <p className="text-sm text-zinc-300 leading-6 mt-2">
+              歴史的には NPB・MLB ともリーグ全体の平均 OPS が .700
+              前後とされ、レギュラー定着の最低ラインと言われてきました。直近の
+              NPB は .660〜.700 まで低下しているため、.700
+              を安定して超えてくれば「リーグ平均より上のレギュラー」として十分に評価されます。逆に
+              .700
+              を下回り続けると、守備や走塁での貢献がなければスタメンを外れやすくなります。
+            </p>
+            <p className="text-sm text-zinc-300 leading-6 mt-2">
+              金属バットで数字が出やすい高校野球では、.700
+              は「平均よりやや下」「公立校のレギュラーレベル」のイメージです。強豪校のレギュラー上位を狙うなら
+              .800 以上、4番候補なら .900 以上が必要になってきます。
+            </p>
+            <p className="text-sm text-zinc-400 leading-6 mt-2">
+              .700 を超えるための目安は <strong>OBP .330 + SLG .370</strong>
+              。三振が多くて出塁率が低いタイプは選球眼の改善、ゴロが多くて長打率が伸びないタイプは打球角度の改善が課題になります。
+            </p>
+          </div>
+
+          <div
+            id="ops-800"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4 scroll-mt-24"
+          >
+            <h3 className="font-bold text-zinc-200">
+              <span className="text-yellow-500">.800</span> ／ 好打者の入口（OPS
+              .800 はどのレベル？）
+            </h3>
+            <p className="text-sm text-zinc-300 leading-6 mt-2">
+              リーグ平均を1割以上上回る水準で、クリーンアップ（3〜5番）を任される好打者の目安です。NPB
+              のレギュラーでシーズン .800
+              以上を残すと、オールスター候補や打撃部門の上位ランキングに名前が挙がるレベルで、MLB
+              でも「中軸を任せられる打者」の基準として扱われます。
+            </p>
+            <p className="text-sm text-zinc-300 leading-6 mt-2">
+              高校野球では強豪校のレギュラー上位や地方大会の主軸として通用するレベルです。.900
+              を超えてくると甲子園を見据える強打者の入口になります。
+            </p>
+            <p className="text-sm text-zinc-400 leading-6 mt-2">
+              .800 を継続する目安は <strong>OBP .350 + SLG .450</strong>
+              。四球を選ぶ目と長打を打つバットスピードをバランス良く伸ばす必要があり、極端な選球タイプや極端なフリースインガーは到達しづらい数値です。
+            </p>
+          </div>
+
+          <div
+            id="ops-900"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4 scroll-mt-24"
+          >
+            <h3 className="font-bold text-zinc-200">
+              <span className="text-yellow-500">.900</span> ／
+              中心打者・タイトル争い
+            </h3>
+            <p className="text-sm text-zinc-300 leading-6 mt-2">
+              チームの中心打者として打線を引っ張るクラス。OPSランキングで上位に入り、シーズン後半にはタイトル争いに名前が挙がる水準です。高校野球なら強豪校の主軸、中学硬式なら全国レベルの4番候補にあたります。
+            </p>
+          </div>
+
+          <div
+            id="ops-1000"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4 scroll-mt-24"
+          >
+            <h3 className="font-bold text-zinc-200">
+              <span className="text-amber-400">1.000</span> ／
+              超一流（MVP・首位打者級）
+            </h3>
+            <p className="text-sm text-zinc-300 leading-6 mt-2">
+              年間を通して1.000を超える選手はNPBでも数人レベル。MLBでも歴代の超一流打者の象徴的な数値として扱われ、「1超え（いちこえ）」と呼ばれることもあります。達成に必要な出塁率・長打率のバランスや歴代の達成者は{" "}
+              <Link
+                href="/column/ops-1000"
+                className="text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
+              >
+                OPS 1.000 を超える選手の特徴
+              </Link>{" "}
+              で詳しく解説しています。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="ops-max" className="mt-10 scroll-mt-24">
+        <h2 className="text-xl font-bold mb-4">
+          OPSの最大値（マックス）は？理論値と歴代最高記録
+        </h2>
+        <p className="text-sm text-zinc-300 leading-6">
+          OPS = OBP + SLG なので、OBP の理論最大 1.000（すべての打席で出塁）と
+          SLG の理論最大 4.000（毎打席本塁打）を足した <strong>5.000</strong>{" "}
+          が数学的な上限です。1〜2 打席であれば計算上 5.000
+          になり得ますが、規定打席に達するシーズン単位では現実的に観測されず、実戦での天井は
+          MLB の <strong>1.422（バリー・ボンズ 2004 年）</strong>、NPB の{" "}
+          <strong>1.293（王貞治 1974 年）</strong> です。
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
+            <h3 className="font-bold text-zinc-200 mb-2">
+              MLB歴代シーズン最高OPS
+            </h3>
+            <ul className="text-sm text-zinc-300 leading-6 list-disc ml-5 space-y-1">
+              {mlbRecords.map((record) => (
+                <li key={record}>{record}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
+            <h3 className="font-bold text-zinc-200 mb-2">
+              NPB歴代シーズン最高OPS
+            </h3>
+            <ul className="text-sm text-zinc-300 leading-6 list-disc ml-5 space-y-1">
+              {npbRecords.map((record) => (
+                <li key={record}>{record}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <p className="text-sm text-zinc-400 leading-6 mt-3">
+          ※年度・出典・規定打席のカウントによって小数第3位以下が変動する場合があります。
+        </p>
+      </section>
+
+      <section id="field-sense" className="mt-10 scroll-mt-24">
         <h2 className="text-xl font-bold mb-4">
           現場感：「4番を任されるOPS」「強豪校レギュラーのOPS」
         </h2>
@@ -250,7 +372,9 @@ export default function OpsCriteriaColumnPage() {
       </section>
 
       <div className="mt-8 rounded-xl bg-gradient-to-r from-yellow-900/30 to-yellow-800/20 border border-yellow-700/40 px-5 py-6 text-center">
-        <p className="text-lg font-bold mb-2">あなたのOPSはどのレベル？</p>
+        <p className="text-lg font-bold mb-2">
+          OPSを計算してレベルを確認しよう
+        </p>
         <p className="text-sm text-zinc-300 mb-4">
           安打数・打数・四球・死球・塁打数を入力するだけでOPS・出塁率・長打率を自動計算。レベル評価バッジ付き。
         </p>
@@ -299,13 +423,6 @@ export default function OpsCriteriaColumnPage() {
             </p>
           </Link>
           <Link
-            href="/column/ops-800"
-            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
-          >
-            <p className="font-bold text-sm">OPS .800 はどのレベル？</p>
-            <p className="text-xs text-zinc-400 mt-1">プロ・高校野球での意味</p>
-          </Link>
-          <Link
             href="/column/ops-1000"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
@@ -315,13 +432,20 @@ export default function OpsCriteriaColumnPage() {
             </p>
           </Link>
           <Link
-            href="/column/ops-700"
+            href="/column/npb-ops-average"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
-            <p className="font-bold text-sm">OPS .700 は平均？</p>
+            <p className="font-bold text-sm">NPB の平均 OPS の推移</p>
             <p className="text-xs text-zinc-400 mt-1">
-              プロ・高校野球での位置づけ
+              リーグ平均はいくつか、年度別に整理
             </p>
+          </Link>
+          <Link
+            href="/column/ops-vs-batting-average"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
+          >
+            <p className="font-bold text-sm">OPSと打率・長打率の違い</p>
+            <p className="text-xs text-zinc-400 mt-1">指標の使い分け方</p>
           </Link>
         </div>
       </section>
