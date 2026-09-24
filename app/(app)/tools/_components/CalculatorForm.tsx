@@ -3,6 +3,8 @@
 import { Input, Button } from "@heroui/react";
 import Link from "next/link";
 import { useState, useCallback } from "react";
+import AdBanner from "@app/components/ad/AdBanner";
+import { adSlots } from "@app/components/ad/adConfig";
 import {
   type CalculatorField,
   type CalculatorOutput,
@@ -174,6 +176,16 @@ export default function CalculatorForm({
             </div>
           ))}
         </div>
+      ) : null}
+
+      {/* 計算結果を見た直後は注目度が最も高いため、結果カードと CTA の間に広告枠を置く。
+          高さを確保しておかないと広告読み込み時に CTA が押し下げられて CLS になる。 */}
+      {results.length > 0 ? (
+        <AdBanner
+          slot={adSlots.toolsResultRectangle}
+          format="rectangle"
+          className="min-h-[280px]"
+        />
       ) : null}
 
       {results.length > 0 ? (
