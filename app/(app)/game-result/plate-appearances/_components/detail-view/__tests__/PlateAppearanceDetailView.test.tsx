@@ -21,6 +21,7 @@ const buildPlateAppearance = (
   out_type: null,
   hit_type: "single",
   swing_type: null,
+  home_run_type: null,
   hit_location_x: "0.500",
   hit_location_y: "0.300",
   rbi: 0,
@@ -135,6 +136,38 @@ describe("PlateAppearanceDetailView", () => {
     );
     expect(screen.getByText("三振の種類")).toBeInTheDocument();
     expect(screen.getByText("空振り")).toBeInTheDocument();
+  });
+
+  it("走本塁打はヒット種別を「本塁打（走本塁打）」で表示する", () => {
+    render(
+      <PlateAppearanceDetailView
+        plateAppearance={buildPlateAppearance({
+          plate_result_id: 10,
+          hit_type: "home_run",
+          home_run_type: "inside_the_park",
+          batting_result: "中走本",
+        })}
+        currentUserId={1}
+      />,
+    );
+    expect(screen.getByText("ヒット種別")).toBeInTheDocument();
+    expect(screen.getByText("本塁打（走本塁打）")).toBeInTheDocument();
+  });
+
+  it("柵越え本塁打はヒット種別を「本塁打」で表示する", () => {
+    render(
+      <PlateAppearanceDetailView
+        plateAppearance={buildPlateAppearance({
+          plate_result_id: 10,
+          hit_type: "home_run",
+          home_run_type: "over_fence",
+          batting_result: "中本",
+        })}
+        currentUserId={1}
+      />,
+    );
+    expect(screen.getByText("本塁打")).toBeInTheDocument();
+    expect(screen.queryByText("本塁打（走本塁打）")).not.toBeInTheDocument();
   });
 
   it("旧形式の打席にはバナーを表示する", () => {

@@ -6,6 +6,7 @@ import type {
 } from "@app/constants/plateResults";
 import type {
   HitType,
+  HomeRunType,
   OutType,
   PlateAppearanceV2,
   SwingType,
@@ -108,6 +109,9 @@ export function PlateAppearanceWizard({
   const [swingType, setSwingType] = useState<SwingType | null>(
     editingPlateAppearance?.swing_type ?? null,
   );
+  const [homeRunType, setHomeRunType] = useState<HomeRunType | null>(
+    editingPlateAppearance?.home_run_type ?? null,
+  );
   const [scores, setScores] = useState({
     rbi: editingPlateAppearance?.rbi ?? 0,
     runScored: editingPlateAppearance?.run_scored ?? 0,
@@ -165,6 +169,7 @@ export function PlateAppearanceWizard({
     setOutType(option.out_type);
     setHitType(null);
     setSwingType(null);
+    setHomeRunType(null);
     setIsOutModalOpen(false);
     goToScore();
   };
@@ -174,6 +179,7 @@ export function PlateAppearanceWizard({
     setHitType(option.hit_type);
     setOutType(null);
     setSwingType(null);
+    setHomeRunType(option.home_run_type ?? null);
     setIsHitModalOpen(false);
     goToScore();
   };
@@ -183,6 +189,7 @@ export function PlateAppearanceWizard({
     setOutType(null);
     setHitType(null);
     setSwingType(null);
+    setHomeRunType(null);
     goToScore();
   };
 
@@ -197,6 +204,7 @@ export function PlateAppearanceWizard({
     setOutType(null);
     setHitType(null);
     setSwingType(selectedSwingType ?? null);
+    setHomeRunType(null);
     goToScore();
   };
 
@@ -216,6 +224,7 @@ export function PlateAppearanceWizard({
       out_type: outType,
       hit_type: hitType,
       swing_type: swingType,
+      home_run_type: homeRunType,
       hit_location_x: hitLocation ? roundHitLocation(hitLocation.x) : null,
       hit_location_y: hitLocation ? roundHitLocation(hitLocation.y) : null,
       rbi: scores.rbi,

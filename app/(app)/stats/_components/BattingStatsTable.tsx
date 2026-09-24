@@ -28,6 +28,37 @@ const BATTING_COLUMNS: Column<BattingStatsRow>[] = [
   { key: "babip", label: "BABIP", format: fmt3 },
 ];
 
+// 本塁打の内数なので、走本塁打が 1 本も無いときは列ごと出さない（getBattingColumns で判定）。
+const INSIDE_THE_PARK_HOME_RUN_COLUMN: Column<BattingStatsRow> = {
+  key: "inside_the_park_home_run",
+  label: "走本",
+  format: fmtInt,
+  tooltip:
+    "本塁打の内数（ランニング本塁打）。本塁打の数には走本塁打も含まれます。",
+};
+
+/**
+ * 打撃成績テーブルの列定義を返す。
+ * 走本塁打が 1 本以上ある行があるときだけ「本塁打」の右隣に「走本」列を差し込む。
+ */
+export function getBattingColumns(
+  rows: BattingStatsRow[],
+): Column<BattingStatsRow>[] {
+  const hasInsideThePark = rows.some(
+    (row) => (row.inside_the_park_home_run ?? 0) > 0,
+  );
+  if (!hasInsideThePark) return BATTING_COLUMNS;
+
+  const homeRunIndex = BATTING_COLUMNS.findIndex(
+    (column) => column.key === "home_run",
+  );
+  return [
+    ...BATTING_COLUMNS.slice(0, homeRunIndex + 1),
+    INSIDE_THE_PARK_HOME_RUN_COLUMN,
+    ...BATTING_COLUMNS.slice(homeRunIndex + 1),
+  ];
+}
+
 interface Props {
   rows: BattingStatsRow[];
 }
@@ -40,5 +71,5 @@ export default function BattingStatsTable({ rows }: Props) {
       </p>
     );
   }
-  return <StatsTable rows={rows} columns={BATTING_COLUMNS} />;
+  return <StatsTable rows={rows} columns={getBattingColumns(rows)} />;
 }

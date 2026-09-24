@@ -183,6 +183,25 @@ describe("IndividualResultsList", () => {
       expect(statValue("BB/K")).toBe(".778");
     });
 
+    it("走本塁打があるときは本塁打の値に内数を添える", async () => {
+      mockBattingStats.mockResolvedValue({
+        status: "ok",
+        data: {
+          ...battingStats,
+          aggregate: {
+            ...battingStats.aggregate!,
+            home_run: 3,
+            inside_the_park_home_run: 1,
+          },
+        },
+      });
+
+      render(<IndividualResultsList userId={USER_ID} />);
+
+      expect(await screen.findByText("打撃成績")).toBeInTheDocument();
+      expect(statValue("本塁打")).toBe("3（走1）");
+    });
+
     it("打撃のヘッドラインを表示する", async () => {
       render(<IndividualResultsList userId={USER_ID} />);
 
