@@ -151,11 +151,12 @@ describe("NavigationMenu の未ログイン時のモバイル表示", () => {
   beforeEach(() => {
     localStorage.clear();
     jest.clearAllMocks();
+    jest.restoreAllMocks();
     mockUserId.mockReturnValue(null);
     mockFetcher.mockResolvedValue([]);
   });
 
-  const getNav = () => screen.getByRole("navigation", { hidden: true });
+  const getNav = () => screen.getByRole("navigation");
 
   it("未ログインならモバイルでは隠し、デスクトップでは表示する", () => {
     mockIsLoggedIn.mockReturnValue(false);
