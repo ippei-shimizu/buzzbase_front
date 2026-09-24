@@ -47,7 +47,7 @@ export default function NavigationMenu() {
 
   // 未ログイン時はモバイルのタブバーを出さない。各項目はログイン要求に誘導するだけで導線価値が低く、
   // 下端を fixed 要素で塞ぐと AdSense がアンカー広告を配信しないため。
-  // 認証確定前も隠し、表示してから消えるちらつきを避ける。デスクトップのサイドバーは対象外。
+  // 認証確定前も隠し、表示してから消えるちらつきを避ける。
   const shouldHideOnMobile = isLoggedIn !== true;
 
   return (
