@@ -35,7 +35,7 @@ export default function OpsLevelChecker() {
 
       {parsed !== null && benchmark === null ? (
         <p role="alert" className="mt-3 text-sm text-red-400">
-          0 以上の数値を入力してください
+          0〜5.000 の範囲で入力してください
         </p>
       ) : null}
 

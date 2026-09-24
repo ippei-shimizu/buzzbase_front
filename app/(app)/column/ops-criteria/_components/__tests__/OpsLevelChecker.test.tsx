@@ -15,9 +15,11 @@ describe("findOpsBenchmark", () => {
     expect(findOpsBenchmark(ops)?.key).toBe(key);
   });
 
-  it("負数や NaN は判定しない", () => {
+  it("負数・NaN・Infinity・理論最大値超えは判定しない", () => {
     expect(findOpsBenchmark(-0.1)).toBeNull();
     expect(findOpsBenchmark(Number.NaN)).toBeNull();
+    expect(findOpsBenchmark(Number.POSITIVE_INFINITY)).toBeNull();
+    expect(findOpsBenchmark(5.001)).toBeNull();
   });
 });
 

@@ -70,11 +70,20 @@ export const OPS_BENCHMARKS: OpsBenchmark[] = [
   },
 ];
 
+/** OBP の理論最大 1.000 + SLG の理論最大 4.000。本文の #ops-max セクションと同じ根拠 */
+export const OPS_THEORETICAL_MAX = 5;
+
+// 判定は min 降順で最初に一致した行を採る。表示都合で OPS_BENCHMARKS を並べ替えても
+// 壊れないよう、ここで明示的にソートした配列を持つ（sort は破壊的なので複製する）
+const BENCHMARKS_DESC = [...OPS_BENCHMARKS].sort((a, b) => b.min - a.min);
+
 /**
  * OPS の値からカテゴリ別目安の行を返す。
- * @param ops 判定したい OPS。負数や NaN は D 扱いにせず null を返す
+ * @param ops 判定したい OPS。NaN / Infinity / 負数 / 理論最大値超えは判定せず null を返す
  */
 export function findOpsBenchmark(ops: number): OpsBenchmark | null {
-  if (Number.isNaN(ops) || ops < 0) return null;
-  return OPS_BENCHMARKS.find((row) => ops >= row.min) ?? null;
+  if (!Number.isFinite(ops) || ops < 0 || ops > OPS_THEORETICAL_MAX) {
+    return null;
+  }
+  return BENCHMARKS_DESC.find((row) => ops >= row.min) ?? null;
 }
