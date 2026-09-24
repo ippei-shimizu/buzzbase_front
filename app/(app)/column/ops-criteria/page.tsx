@@ -136,7 +136,6 @@ export default function OpsCriteriaColumnPage() {
             ["#ops-700", "OPS .700 は平均？"],
             ["#ops-800", "OPS .800 はどのレベル？"],
             ["#ops-900", "OPS .900 は中心打者"],
-            ["#ops-1000", "OPS 1.000 超えの意味"],
             ["#ops-max", "OPS の最大値と歴代最高記録"],
             ["#field-sense", "現場感のある目安"],
           ].map(([href, label]) => (
@@ -293,13 +292,11 @@ export default function OpsCriteriaColumnPage() {
             </p>
           </div>
 
-          <div
-            id="ops-1000"
-            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4 scroll-mt-24"
-          >
+          {/* 1.000 の受け皿は /column/ops-1000 に残すため、ここは目次に載せず要約と送客に留める */}
+          <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-5 py-4">
             <h3 className="font-bold text-zinc-200">
               <span className="text-amber-400">1.000</span> ／
-              超一流（MVP・首位打者級）
+              超一流（詳細は専用記事）
             </h3>
             <p className="text-sm text-zinc-300 leading-6 mt-2">
               年間を通して1.000を超える選手はNPBでも数人レベル。MLBでも歴代の超一流打者の象徴的な数値として扱われ、「1超え（いちこえ）」と呼ばれることもあります。達成に必要な出塁率・長打率のバランスや歴代の達成者は{" "}
