@@ -65,7 +65,8 @@ export const pitchingStats: PitchingStat[] = [
       "投手の勝ちゲームに対する貢献度を示す指標で、高いほど投手がチームの勝利に大きく貢献していることを意味します。",
     ],
     slug: "winning-percentage",
-    columnUrl: "/column/winning-percentage",
+    // 投手成績セクションからの導線なので、チーム視点の冒頭ではなく投手の勝率の節に着地させる
+    columnUrl: "/column/winning-percentage#pitcher-winning-percentage",
   },
   {
     title: "投球回",

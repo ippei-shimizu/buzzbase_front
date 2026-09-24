@@ -225,7 +225,7 @@ export default function WinningPercentageColumnPage() {
         </p>
       </section>
 
-      <section className="mt-8">
+      <section id="pitcher-winning-percentage" className="mt-8 scroll-mt-24">
         <h2 className="mb-3 text-xl font-bold">投手の勝率と最高勝率</h2>
         <p className="text-sm text-zinc-300 leading-6">
           投手個人の勝率もチームと同じ式で計算します。NPB
