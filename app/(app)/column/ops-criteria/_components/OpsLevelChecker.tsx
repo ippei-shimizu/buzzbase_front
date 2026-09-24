@@ -15,7 +15,7 @@ export default function OpsLevelChecker() {
 
   return (
     <div className="rounded-xl border border-yellow-700/40 bg-gradient-to-r from-yellow-900/30 to-yellow-800/20 px-5 py-6">
-      <p className="text-lg font-bold">あなたのOPSはどのレベル？</p>
+      <h2 className="text-lg font-bold">あなたのOPSはどのレベル？</h2>
       <p className="mt-1 text-sm text-zinc-300">
         OPS を入力すると、プロ・高校・中学それぞれの目安を表示します。
       </p>
