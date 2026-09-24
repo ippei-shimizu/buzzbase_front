@@ -15,6 +15,8 @@ export type OutType =
   | "foul_fly";
 export type HitType = "single" | "double" | "triple" | "home_run";
 export type SwingType = "swinging" | "looking";
+// 本塁打の内訳。ランニング本塁打（走本塁打）も記録上は本塁打なので plate_result_id は本塁打のまま。
+export type HomeRunType = "over_fence" | "inside_the_park";
 export type RunnersState =
   | "no_runner"
   | "first"
@@ -39,6 +41,7 @@ export interface PlateAppearanceV2 {
   out_type: OutType | null;
   hit_type: HitType | null;
   swing_type: SwingType | null;
+  home_run_type: HomeRunType | null;
   hit_location_x: string | null;
   hit_location_y: string | null;
   rbi: number | null;
@@ -83,6 +86,7 @@ export interface PlateAppearanceV2Input {
   out_type?: OutType | null;
   hit_type?: HitType | null;
   swing_type?: SwingType | null;
+  home_run_type?: HomeRunType | null;
   hit_location_x?: number | null;
   hit_location_y?: number | null;
   rbi?: number | null;
