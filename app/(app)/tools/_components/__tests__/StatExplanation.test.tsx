@@ -27,7 +27,7 @@ describe("StatExplanation の関連コラム", () => {
     expect(link).toHaveAttribute("href", "/column/batting-average");
     expect(screen.getByText("意味・計算方法・目安")).toBeInTheDocument();
     expect(
-      screen.getByRole("complementary", { name: "もっと詳しく" }),
+      screen.getByRole("heading", { name: "もっと詳しく", level: 3 }),
     ).toBeInTheDocument();
   });
 

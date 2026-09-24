@@ -39,11 +39,10 @@ export default function StatExplanation({
         </div>
 
         {relatedColumns.length > 0 ? (
-          <aside
-            aria-label="もっと詳しく"
-            className="rounded-lg border border-yellow-700/40 bg-yellow-900/10 px-4 py-3"
-          >
-            <p className="text-sm font-bold text-zinc-200 mb-2">もっと詳しく</p>
+          <div className="rounded-lg border border-yellow-700/40 bg-yellow-900/10 px-4 py-3">
+            <h3 className="text-sm font-bold text-zinc-200 mb-2">
+              もっと詳しく
+            </h3>
             <ul className="space-y-2">
               {relatedColumns.map((column) => (
                 <li key={column.href}>
@@ -59,7 +58,7 @@ export default function StatExplanation({
                 </li>
               ))}
             </ul>
-          </aside>
+          </div>
         ) : null}
       </section>
 
