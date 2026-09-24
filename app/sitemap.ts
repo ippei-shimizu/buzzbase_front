@@ -41,6 +41,9 @@ export function listColumnSlugs(columnDir: string = COLUMN_DIR): string[] {
     .sort();
 }
 
+// ソースツリーを読むため、リクエスト時ではなくビルド時に 1 度だけ評価させる
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const toolPaths = getAllCalculatorSlugs().map((slug) => `/tools/${slug}`);
   const columnPaths = listColumnSlugs().map((slug) => `/column/${slug}`);
