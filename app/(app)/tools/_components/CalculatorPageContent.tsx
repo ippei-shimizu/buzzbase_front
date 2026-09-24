@@ -100,7 +100,7 @@ export default function CalculatorPageContent({
 
       <RelatedTools slugs={definition.relatedSlugs} />
 
-      <AdBanner slot={adSlots.toolsDetailHorizontal} format="horizontal" />
+      <AdBanner slot={adSlots.toolsDetailHorizontal} />
     </>
   );
 }

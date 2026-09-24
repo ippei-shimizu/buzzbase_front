@@ -79,6 +79,8 @@ export default function ToolsPage() {
         </div>
       </section>
 
+      <AdBanner slot={adSlots.toolsListHorizontal} />
+
       <section>
         <h2 className="text-lg font-bold mb-3">チーム指標</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -89,8 +91,6 @@ export default function ToolsPage() {
       </section>
 
       <AdBanner slot={adSlots.toolsListBottom} />
-
-      <AdBanner slot={adSlots.toolsListHorizontal} format="horizontal" />
     </div>
   );
 }
