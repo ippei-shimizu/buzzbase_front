@@ -625,7 +625,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
           "1.00未満はエース級、1.00〜1.20は優秀、1.20〜1.40が平均的とされます。",
       },
     ],
-    relatedSlugs: ["era", "k-9", "k-bb"],
+    relatedSlugs: ["era", "opponent-batting-average", "k-bb"],
     cta: {
       heading: "WHIPの推移を記録して、投球の安定感を数値で確認しよう",
       body: "BUZZ BASEアプリなら試合結果を入力するだけでWHIPを含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
