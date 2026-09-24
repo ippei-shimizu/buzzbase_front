@@ -977,8 +977,8 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
       {
         name: "atBats",
-        label: "打数（対戦打者の打数）",
-        placeholder: "例: 120",
+        label: "打数",
+        placeholder: "例: 120（四死球・犠打を除く）",
         min: 0,
         step: 1,
       },
