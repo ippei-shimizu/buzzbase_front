@@ -26,9 +26,15 @@ describe("StatExplanation の関連コラム", () => {
     const link = screen.getByRole("link", { name: "打率とは？" });
     expect(link).toHaveAttribute("href", "/column/batting-average");
     expect(screen.getByText("意味・計算方法・目安")).toBeInTheDocument();
+    const block = screen.getByRole("heading", {
+      name: "もっと詳しく",
+      level: 3,
+    });
+    const lastParagraph = screen.getByText("二段落目。");
     expect(
-      screen.getByRole("heading", { name: "もっと詳しく", level: 3 }),
-    ).toBeInTheDocument();
+      lastParagraph.compareDocumentPosition(block) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("relatedColumns が無ければブロックごと出さない", () => {
