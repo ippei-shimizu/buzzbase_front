@@ -962,8 +962,8 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     formulaExample: "例：打数120で被安打30の場合、被打率 = 30 ÷ 120 = .250",
     guide: [
       { label: ".220未満", description: "エース級（非常に打たれにくい）" },
-      { label: ".220〜.249", description: "優秀な投手" },
-      { label: ".250〜.269", description: "平均的な投手" },
+      { label: ".220〜.244", description: "優秀な投手" },
+      { label: ".245〜.269", description: "平均的な投手" },
       { label: ".270〜.289", description: "やや打たれやすい" },
       { label: ".290以上", description: "改善が必要" },
     ],
