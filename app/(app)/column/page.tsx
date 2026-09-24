@@ -87,28 +87,10 @@ const categories: Category[] = [
             label: "数値別解説",
             articles: [
               {
-                slug: "ops-800",
-                title: "OPS .800 はどのレベル？プロ・高校野球での意味",
-                description:
-                  "クリーンアップを任される好打者の目安。リーグ平均との比較や、達成するための OBP / SLG バランスを解説。",
-              },
-              {
                 slug: "ops-1000",
                 title: "OPS 1.000 を超える選手の特徴と「1超え」の意味",
                 description:
                   "OPS 1超えの難易度、達成に必要な OBP / SLG、NPB・MLB 歴代の 1.000 超えスラッガーを整理。",
-              },
-              {
-                slug: "ops-700",
-                title: "OPS .700 は平均？高校野球・プロ野球での位置づけ",
-                description:
-                  "リーグ平均水準でレギュラー定着の最低ライン。プロ・高校野球での意味と .700 を超えるための課題を解説。",
-              },
-              {
-                slug: "ops-max",
-                title: "OPS の最大値（マックス）は？理論値と歴代最高記録",
-                description:
-                  "OPS の理論上の最大値（5.000）と実戦での天井、NPB・MLB 歴代シーズン最高 OPS を整理。",
               },
             ],
           },

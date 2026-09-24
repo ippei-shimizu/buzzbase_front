@@ -191,7 +191,7 @@ export default function NpbOpsAverageColumnPage() {
             </p>
           </Link>
           <Link
-            href="/column/ops-700"
+            href="/column/ops-criteria#ops-700"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
             <p className="font-bold text-sm">OPS .700 は平均？</p>
