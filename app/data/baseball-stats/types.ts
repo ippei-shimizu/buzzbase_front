@@ -36,7 +36,7 @@ export type FaqItem = {
 /** 計算ツールの解説直下から誘導する解説コラムへのリンク */
 export type RelatedColumn = {
   label: string;
-  href: string;
+  href: `/column/${string}`;
   description: string;
 };
 
