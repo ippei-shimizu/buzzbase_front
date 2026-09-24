@@ -4,6 +4,7 @@ import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
 import OpsColumnJsonLd from "./_components/OpsColumnJsonLd";
+import { OPS_COLUMN_TITLE } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -70,9 +71,7 @@ export default function OpsColumnPage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold">
-        OPSとは？意味・計算方法・いくつから良いかの目安を解説
-      </h1>
+      <h1 className="text-2xl font-bold">{OPS_COLUMN_TITLE}</h1>
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">

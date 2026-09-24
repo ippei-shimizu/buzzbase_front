@@ -1,3 +1,5 @@
+import { OPS_COLUMN_DESCRIPTION, OPS_COLUMN_TITLE } from "../_constants/meta";
+
 type FaqItem = {
   question: string;
   answer: string;
@@ -11,9 +13,8 @@ export default function OpsColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "OPSとは？意味・計算方法・いくつから良いかの目安を解説",
-    description:
-      "OPS（オーピーエス）は出塁率と長打率を足した打者の総合指標。計算式と、.700で平均・.800で好打者・.900で強打者・1.000超えで超一流という目安をNPB・MLB・高校野球・中学野球別に解説。無料の計算ツール付き。",
+    headline: OPS_COLUMN_TITLE,
+    description: OPS_COLUMN_DESCRIPTION,
     url: "https://buzzbase.jp/column/ops",
     publisher: {
       "@type": "Organization",

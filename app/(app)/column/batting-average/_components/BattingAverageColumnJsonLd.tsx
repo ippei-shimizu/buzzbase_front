@@ -1,3 +1,8 @@
+import {
+  BATTING_AVERAGE_COLUMN_DESCRIPTION,
+  BATTING_AVERAGE_COLUMN_TITLE,
+} from "../_constants/meta";
+
 type FaqItem = {
   question: string;
   answer: string;
@@ -11,9 +16,8 @@ export default function BattingAverageColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "打率とは？計算方法（出し方）と3割の価値・目安をわかりやすく解説",
-    description:
-      "打率は安打数÷打数で求める最も基本的な打撃指標。四球が含まれない理由、打数と打席数の違い、.250で平均・.300で好打者などNPB・高校野球・中学野球の目安を解説。無料の打率計算ツール付き。",
+    headline: BATTING_AVERAGE_COLUMN_TITLE,
+    description: BATTING_AVERAGE_COLUMN_DESCRIPTION,
     url: "https://buzzbase.jp/column/batting-average",
     publisher: {
       "@type": "Organization",
