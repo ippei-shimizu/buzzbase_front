@@ -11,10 +11,9 @@ export default function EraColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline:
-      "防御率（ERA・ぼうぎょりつ）とは？計算方法・目安値・良い数値の基準を解説",
+    headline: "防御率とは？計算方法と良い数値の目安を先発・中継ぎ別に解説",
     description:
-      "防御率（ERA）の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、先発・中継ぎ別の基準も掲載。",
+      "防御率（ERA）は自責点×9÷投球回で求める投手の指標。2.00以下でエース級、3.00台でリーグ平均などNPB・MLB・高校野球・中学野球の目安と、先発・中継ぎ・抑え別の基準をわかりやすく解説。無料の計算ツール付き。",
     url: "https://buzzbase.jp/column/era",
     publisher: {
       "@type": "Organization",

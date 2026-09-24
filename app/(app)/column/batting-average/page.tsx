@@ -66,7 +66,7 @@ export default function BattingAverageColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">
-        打率とは？計算方法・打率の出し方・目安値をわかりやすく解説
+        打率とは？計算方法（出し方）と3割の価値・目安をわかりやすく解説
       </h1>
 
       {/* リード文 */}

@@ -71,7 +71,7 @@ export default function OpsColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">
-        OPSとは？意味・計算方法・高校野球/プロ野球の目安を解説
+        OPSとは？意味・計算方法・いくつから良いかの目安を解説
       </h1>
 
       {/* リード文 */}

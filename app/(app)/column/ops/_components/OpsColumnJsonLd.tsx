@@ -11,10 +11,9 @@ export default function OpsColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline:
-      "OPSとは（オーピーエス）｜読み方・計算方法・高校野球/プロ野球の目安を解説",
+    headline: "OPSとは？意味・計算方法・いくつから良いかの目安を解説",
     description:
-      "OPS（オーピーエス）の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
+      "OPS（オーピーエス）は出塁率と長打率を足した打者の総合指標。計算式と、.700で平均・.800で好打者・.900で強打者・1.000超えで超一流という目安をNPB・MLB・高校野球・中学野球別に解説。無料の計算ツール付き。",
     url: "https://buzzbase.jp/column/ops",
     publisher: {
       "@type": "Organization",

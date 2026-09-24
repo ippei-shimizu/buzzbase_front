@@ -66,7 +66,7 @@ export default function EraColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">
-        防御率（ERA）とは？計算方法・目安値・良い数値の基準を解説
+        防御率とは？計算方法と良い数値の目安を先発・中継ぎ別に解説
       </h1>
 
       {/* リード文 */}
