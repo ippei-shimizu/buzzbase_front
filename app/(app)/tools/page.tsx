@@ -13,7 +13,14 @@ export const metadata: Metadata = {
 };
 
 const battingSlugs = ["batting-average", "obp", "slugging", "ops"];
-const pitchingSlugs = ["era", "whip", "k-bb", "k-9", "bb-9"];
+const pitchingSlugs = [
+  "era",
+  "whip",
+  "k-bb",
+  "k-9",
+  "bb-9",
+  "opponent-batting-average",
+];
 const teamSlugs = ["winning-percentage"];
 
 function getTools(slugs: string[]): CalculatorDefinition[] {
