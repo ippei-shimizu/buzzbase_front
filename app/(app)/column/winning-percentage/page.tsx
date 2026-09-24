@@ -74,13 +74,13 @@ const npbBenchmarks = [
   },
   {
     level: "D",
-    range: ".450〜.499",
+    range: ".400〜.499",
     label: "負け越し・B クラス",
     description: "借金を抱えた状態。下位に沈みやすい",
   },
   {
     level: "E",
-    range: ".450 未満",
+    range: ".400 未満",
     label: "下位低迷",
     description: "最下位争い。シーズン通算で .350 を切ることは稀",
   },
