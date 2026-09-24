@@ -59,4 +59,9 @@ export const adSlots = {
   columnBottom: "6882100207",
   /** コラムページ 最下部 横長ディスプレイ広告 */
   columnHorizontal: "4770675289",
+  /**
+   * ツール詳細ページ 計算結果直下 レクタングル広告
+   * TODO: AdSense 管理画面でディスプレイ広告ユニット「BUZZ BASE toolsResultRectangle」を作成し、そのスロット ID を設定する
+   */
+  toolsResultRectangle: "",
 } as const;
