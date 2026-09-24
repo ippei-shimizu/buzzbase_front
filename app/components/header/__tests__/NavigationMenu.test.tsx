@@ -146,3 +146,39 @@ describe("NavigationMenu のグループ未参加バッジ", () => {
     expect(await findBadge()).toBeInTheDocument();
   });
 });
+
+describe("NavigationMenu の未ログイン時のモバイル表示", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    jest.clearAllMocks();
+    mockUserId.mockReturnValue(null);
+    mockFetcher.mockResolvedValue([]);
+  });
+
+  const getNav = () => screen.getByRole("navigation", { hidden: true });
+
+  it("未ログインならモバイルでは隠し、デスクトップでは表示する", () => {
+    mockIsLoggedIn.mockReturnValue(false);
+
+    renderMenu();
+
+    expect(getNav()).toHaveClass("hidden", "lg:block");
+  });
+
+  it("認証確定前もモバイルでは隠す（表示してから消えるちらつき防止）", () => {
+    mockIsLoggedIn.mockReturnValue(undefined);
+
+    renderMenu();
+
+    expect(getNav()).toHaveClass("hidden", "lg:block");
+  });
+
+  it("ログイン済みならモバイルでも表示する", () => {
+    mockIsLoggedIn.mockReturnValue(true);
+    mockUserId.mockReturnValue(1);
+
+    renderMenu();
+
+    expect(getNav()).not.toHaveClass("hidden");
+  });
+});
