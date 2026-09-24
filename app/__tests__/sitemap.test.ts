@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import sitemap, { listColumnSlugs } from "../sitemap";
+import { getAllCalculatorSlugs } from "@app/data/baseball-stats/calculator-definitions";
+import sitemap, { STATIC_PATHS, listColumnSlugs } from "../sitemap";
 
 describe("sitemap", () => {
   it("トップ・ツール一覧・コラム一覧・成績算出ページを含む", () => {
@@ -17,12 +18,21 @@ describe("sitemap", () => {
     );
   });
 
-  it("計算ツールとコラム記事を実ディレクトリから列挙する", () => {
+  it("計算ツールとコラム記事を列挙し、URL に使えない名前を含まない", () => {
     const urls = sitemap().map((entry) => entry.url);
 
-    expect(urls).toContain("https://buzzbase.jp/tools/era");
-    expect(urls).toContain("https://buzzbase.jp/column/ops");
-    expect(urls.some((url) => url.includes("/column/_"))).toBe(false);
+    expect(urls).toHaveLength(
+      STATIC_PATHS.length +
+        getAllCalculatorSlugs().length +
+        listColumnSlugs().length,
+    );
+    // ルートグループ "(...)"・動的セグメント "[...]"・非ルートの "_..." が混ざると
+    // 実在しない URL を Search Console に送り続けることになる
+    expect(
+      urls.every((url) =>
+        /^https:\/\/buzzbase\.jp\/([a-z0-9-]+(\/[a-z0-9-]+)*)?$/.test(url),
+      ),
+    ).toBe(true);
   });
 
   it("URL が重複しない", () => {
