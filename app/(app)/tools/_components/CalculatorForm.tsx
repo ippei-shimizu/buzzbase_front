@@ -183,12 +183,13 @@ export default function CalculatorForm({
       ) : null}
 
       {/* 計算結果を見た直後は注目度が最も高いため、結果カードと CTA の間に広告枠を置く。
-          高さを確保しておかないと広告読み込み時に CTA が押し下げられて CLS になる。 */}
+          高さを確保しておかないと広告読み込み時に CTA が押し下げられて CLS になる。
+          rectangle は固定幅のため中央寄せし、未充填が確定したら高さ予約を解除して空白を残さない。 */}
       {hasCalculated ? (
         <AdBanner
           slot={adSlots.toolsResultRectangle}
           format="rectangle"
-          className="min-h-[280px]"
+          className="flex justify-center min-h-[280px] has-[[data-ad-status='unfilled']]:min-h-0 has-[[data-ad-status='unfilled']]:my-0"
         />
       ) : null}
 
