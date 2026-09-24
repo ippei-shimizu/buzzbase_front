@@ -1,4 +1,12 @@
 import type { Metadata } from "next";
+import {
+  KBB_COLUMN_DESCRIPTION,
+  KBB_COLUMN_TITLE,
+} from "./k-bb/_constants/meta";
+import {
+  WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
+  WINNING_PERCENTAGE_COLUMN_TITLE,
+} from "./winning-percentage/_constants/meta";
 import Link from "next/link";
 import {
   BATTING_AVERAGE_COLUMN_DESCRIPTION,
@@ -511,6 +519,45 @@ const categories: Category[] = [
                   "失点率（RA）はいくつから良い？目安・計算方法・防御率との違い",
                 description:
                   "失点率（RA）の計算方法、レベル別の目安、防御率との使い分けを整理。",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "K/BB",
+        description:
+          "奪三振 ÷ 与四球で制球力と奪三振能力のバランスを示す指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "k-bb",
+                title: KBB_COLUMN_TITLE,
+                description: KBB_COLUMN_DESCRIPTION,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: "チーム指標",
+    description: "チームの成績評価に使う指標群（勝率など）",
+    stats: [
+      {
+        name: "勝率",
+        description: "勝利数 ÷（勝利数＋敗戦数）で順位を決める基本指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "winning-percentage",
+                title: WINNING_PERCENTAGE_COLUMN_TITLE,
+                description: WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
               },
             ],
           },
