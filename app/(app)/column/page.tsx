@@ -1,5 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  BATTING_AVERAGE_COLUMN_DESCRIPTION,
+  BATTING_AVERAGE_COLUMN_TITLE,
+} from "./batting-average/_constants/meta";
+import {
+  ERA_COLUMN_DESCRIPTION,
+  ERA_COLUMN_TITLE,
+} from "./era/_constants/meta";
+import {
+  OPS_COLUMN_DESCRIPTION,
+  OPS_COLUMN_TITLE,
+} from "./ops/_constants/meta";
 
 export const metadata: Metadata = {
   title: "コラム一覧｜野球の指標・用語をわかりやすく解説",
@@ -47,9 +59,8 @@ const categories: Category[] = [
             articles: [
               {
                 slug: "ops",
-                title: "OPSとは（オーピーエス）？意味・計算方法・目安を解説",
-                description:
-                  "OPSの読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
+                title: OPS_COLUMN_TITLE,
+                description: OPS_COLUMN_DESCRIPTION,
               },
             ],
           },
@@ -141,10 +152,8 @@ const categories: Category[] = [
             articles: [
               {
                 slug: "batting-average",
-                title:
-                  "打率（AVG・だりつ）とは？計算方法・打率の出し方・目安値を解説",
-                description:
-                  "打率の読み方・意味・計算式・打率の出し方を解説。NPB・MLB・高校野球・中学野球の目安値、ポジション別の基準も掲載。",
+                title: BATTING_AVERAGE_COLUMN_TITLE,
+                description: BATTING_AVERAGE_COLUMN_DESCRIPTION,
               },
             ],
           },
@@ -400,10 +409,8 @@ const categories: Category[] = [
             articles: [
               {
                 slug: "era",
-                title:
-                  "防御率（ERA・ぼうぎょりつ）とは？計算方法・目安値を解説",
-                description:
-                  "防御率の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、先発・中継ぎ別の基準も掲載。",
+                title: ERA_COLUMN_TITLE,
+                description: ERA_COLUMN_DESCRIPTION,
               },
             ],
           },

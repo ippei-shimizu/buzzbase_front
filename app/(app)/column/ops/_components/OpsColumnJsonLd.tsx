@@ -1,3 +1,5 @@
+import { OPS_COLUMN_DESCRIPTION, OPS_COLUMN_TITLE } from "../_constants/meta";
+
 type FaqItem = {
   question: string;
   answer: string;
@@ -11,10 +13,8 @@ export default function OpsColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline:
-      "OPSとは（オーピーエス）｜読み方・計算方法・高校野球/プロ野球の目安を解説",
-    description:
-      "OPS（オーピーエス）の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
+    headline: OPS_COLUMN_TITLE,
+    description: OPS_COLUMN_DESCRIPTION,
     url: "https://buzzbase.jp/column/ops",
     publisher: {
       "@type": "Organization",

@@ -4,6 +4,7 @@ import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
 import BattingAverageColumnJsonLd from "./_components/BattingAverageColumnJsonLd";
+import { BATTING_AVERAGE_COLUMN_TITLE } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -65,9 +66,7 @@ export default function BattingAverageColumnPage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold">
-        打率とは？計算方法・打率の出し方・目安値をわかりやすく解説
-      </h1>
+      <h1 className="text-2xl font-bold">{BATTING_AVERAGE_COLUMN_TITLE}</h1>
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">
