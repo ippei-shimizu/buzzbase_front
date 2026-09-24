@@ -23,6 +23,7 @@ export default function CalculationOfGrades() {
                 打率・防御率・OPSなど、野球で使われる全29指標の計算式と意味を解説します。
               </p>
               <TableOfContents />
+              <AdBanner slot={adSlots.calcGradesHorizontal} />
               <div className="mt-6">
                 <BattingStatsSection />
                 <AdBanner slot={adSlots.calcGradesMiddle} />
@@ -33,10 +34,6 @@ export default function CalculationOfGrades() {
                 />
                 <PitchingStatsSection />
                 <AdBanner slot={adSlots.calcGradesBottom} />
-                <AdBanner
-                  slot={adSlots.calcGradesHorizontal}
-                  format="horizontal"
-                />
               </div>
             </div>
           </div>

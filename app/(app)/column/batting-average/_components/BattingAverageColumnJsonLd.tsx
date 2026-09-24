@@ -1,3 +1,8 @@
+import {
+  BATTING_AVERAGE_COLUMN_DESCRIPTION,
+  BATTING_AVERAGE_COLUMN_TITLE,
+} from "../_constants/meta";
+
 type FaqItem = {
   question: string;
   answer: string;
@@ -11,10 +16,8 @@ export default function BattingAverageColumnJsonLd({ faq }: Props) {
   const article = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline:
-      "打率（AVG・だりつ）とは？計算方法・打率の出し方・目安値をわかりやすく解説",
-    description:
-      "打率（AVG）の読み方・意味・計算式・打率の出し方を解説。NPB・MLB・高校野球・中学野球の目安値、ポジション別の基準も掲載。",
+    headline: BATTING_AVERAGE_COLUMN_TITLE,
+    description: BATTING_AVERAGE_COLUMN_DESCRIPTION,
     url: "https://buzzbase.jp/column/batting-average",
     publisher: {
       "@type": "Organization",
