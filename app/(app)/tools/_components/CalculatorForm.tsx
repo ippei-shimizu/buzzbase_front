@@ -57,6 +57,9 @@ export default function CalculatorForm({
     number | Record<string, number | null> | null
   >(null);
   const [error, setError] = useState<string | null>(null);
+  // 計算成功後は広告枠を出しっぱなしにする。results を条件にすると入力エラーのたびに
+  // ins が DOM から消え、処理待ちの adsbygoogle.push が充填先を失う
+  const [hasCalculated, setHasCalculated] = useState(false);
 
   const handleChange = useCallback((name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -106,6 +109,7 @@ export default function CalculatorForm({
       setResults(formatted);
     }
     setRawResult(calculated);
+    setHasCalculated(true);
     trackEvent(
       "tool_calculate",
       analyticsSourceTool ? { tool: analyticsSourceTool } : undefined,
@@ -180,7 +184,7 @@ export default function CalculatorForm({
 
       {/* 計算結果を見た直後は注目度が最も高いため、結果カードと CTA の間に広告枠を置く。
           高さを確保しておかないと広告読み込み時に CTA が押し下げられて CLS になる。 */}
-      {results.length > 0 ? (
+      {hasCalculated ? (
         <AdBanner
           slot={adSlots.toolsResultRectangle}
           format="rectangle"
