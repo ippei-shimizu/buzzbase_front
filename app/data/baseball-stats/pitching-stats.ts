@@ -90,7 +90,9 @@ export const pitchingStats: PitchingStat[] = [
   {
     title: "被安打",
     equation: "",
-    descriptions: ["投手が許したヒット（単打、二塁打、三塁打）の総数です。"],
+    descriptions: [
+      "投手が許したヒット（単打、二塁打、三塁打、本塁打）の総数です。",
+    ],
   },
   {
     title: "被打率",
