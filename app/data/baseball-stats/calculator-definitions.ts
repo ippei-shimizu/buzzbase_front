@@ -800,7 +800,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     slug: "winning-percentage",
     title: "勝率計算ツール",
     metaTitle:
-      "野球の勝率計算ツール｜80勝60敗なら.571。勝ち数と負け数を入力するだけ【無料】",
+      "野球の勝率計算ツール｜80勝60敗なら.571。勝利数と敗北数を入力するだけ【無料】",
     metaDescription:
       "勝利数と敗北数を入力するだけで野球の勝率を自動計算。引き分けを除外するNPB方式の計算式、.600で優勝争い・.500で五分などの目安、投手の最高勝率の条件も解説。登録不要・無料でブラウザからすぐ使えます。",
     heading: "勝率計算ツール",
