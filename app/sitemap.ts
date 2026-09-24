@@ -4,8 +4,17 @@ import path from "node:path";
 import { SITE_URL } from "@app/constants/app";
 import { getAllCalculatorSlugs } from "@app/data/baseball-stats/calculator-definitions";
 
-/** 検索エンジンに届けたい公開ページ。認証が必要な画面やアカウント系は含めない */
-const STATIC_PATHS = ["/", "/tools", "/column", "/calculation-of-grades"];
+/** 検索エンジンに届けたい公開ページ。認証が必要な画面やアカウント系（/signin, /signup）は含めない */
+export const STATIC_PATHS = [
+  "/",
+  "/tools",
+  "/column",
+  "/calculation-of-grades",
+  "/termsofservice",
+  "/privacypolicy",
+  "/tokushoho",
+  "/contact",
+];
 
 const COLUMN_DIR = path.join(process.cwd(), "app", "(app)", "column");
 
