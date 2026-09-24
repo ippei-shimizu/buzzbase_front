@@ -104,7 +104,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     slug: "era",
     title: "防御率計算ツール",
     metaTitle:
-      "防御率計算ツール｜7回2自責点なら2.57。自責点と投球回を入力するだけ【無料・登録不要】",
+      "防御率（ERA）計算ツール｜7回2自責点なら2.57。自責点と投球回を入力するだけ【無料】",
     metaDescription:
       "自責点と投球回を入力するだけで防御率（ERA）を即計算。2.00以下でエース級、3点台でリーグ平均などNPB・高校野球の目安も掲載。投球回の端数（1/3・2/3）の入力方法もFAQで解説。登録不要・無料。",
     heading: "防御率（ERA）計算ツール",
@@ -344,7 +344,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     slug: "slugging",
     title: "長打率計算ツール",
     metaTitle:
-      "長打率計算ツール｜150打数・塁打数75なら.500。塁打数と打数を入れるだけ【無料】",
+      "長打率（SLG）計算ツール｜塁打数75・150打数なら.500。2つの数値を入れるだけ【無料】",
     metaDescription:
       "塁打数と打数を入力するだけで長打率（SLG）を自動計算。塁打数は単打×1＋二塁打×2＋三塁打×3＋本塁打×4で求められます。.500で一流の長打者、.550以上でリーグトップクラスなどNPB・高校野球の目安も解説。登録不要・無料。",
     heading: "長打率（SLG）計算ツール",
