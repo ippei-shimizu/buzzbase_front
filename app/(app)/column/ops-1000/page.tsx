@@ -120,14 +120,14 @@ export default function Ops1000ColumnPage() {
             </p>
           </Link>
           <Link
-            href="/column/ops-800"
+            href="/column/ops-criteria#ops-800"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
             <p className="font-bold text-sm">OPS .800 はどのレベル？</p>
             <p className="text-xs text-zinc-400 mt-1">好打者の入口ライン</p>
           </Link>
           <Link
-            href="/column/ops-max"
+            href="/column/ops-criteria#ops-max"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
             <p className="font-bold text-sm">OPS の最大値（マックス）は？</p>
