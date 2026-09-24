@@ -33,10 +33,7 @@ export default function CalculationOfGrades() {
                 />
                 <PitchingStatsSection />
                 <AdBanner slot={adSlots.calcGradesBottom} />
-                <AdBanner
-                  slot={adSlots.calcGradesHorizontal}
-                  format="horizontal"
-                />
+                <AdBanner slot={adSlots.calcGradesHorizontal} />
               </div>
             </div>
           </div>

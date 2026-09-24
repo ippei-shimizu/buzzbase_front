@@ -90,7 +90,7 @@ export default function ToolsPage() {
 
       <AdBanner slot={adSlots.toolsListBottom} />
 
-      <AdBanner slot={adSlots.toolsListHorizontal} format="horizontal" />
+      <AdBanner slot={adSlots.toolsListHorizontal} />
     </div>
   );
 }

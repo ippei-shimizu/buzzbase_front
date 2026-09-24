@@ -468,11 +468,7 @@ export default function OpsColumnPage() {
         body="BUZZ BASEアプリなら試合結果を入力するだけで、OPSを含む全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
-      <AdBanner
-        slot={adSlots.columnHorizontal}
-        format="horizontal"
-        className="mt-8"
-      />
+      <AdBanner slot={adSlots.columnHorizontal} className="mt-8" />
     </>
   );
 }
