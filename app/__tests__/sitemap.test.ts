@@ -42,6 +42,25 @@ describe("sitemap", () => {
   });
 });
 
+describe("コラム一覧との整合", () => {
+  it("コラム一覧ページに載っている slug 集合とディレクトリの集合が一致する", () => {
+    // 一覧は page.tsx 内の categories 配列が正で、page ファイルからは export できないため
+    // ソースの slug リテラルを拾って突き合わせる。乖離すると一覧のリンク切れか
+    // サイトマップの漏れのどちらかが起きている
+    const indexSource = fs.readFileSync(
+      path.join(process.cwd(), "app", "(app)", "column", "page.tsx"),
+      "utf-8",
+    );
+    const listedSlugs = Array.from(
+      indexSource.matchAll(/slug: "([a-z0-9-]+)"/g),
+    )
+      .map((match) => match[1])
+      .sort();
+
+    expect(listedSlugs).toEqual(listColumnSlugs());
+  });
+});
+
 describe("listColumnSlugs", () => {
   let tempDir: string;
 
