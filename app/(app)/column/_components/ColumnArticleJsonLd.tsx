@@ -8,7 +8,7 @@ type Props = {
   headline: string;
   /** 記事概要（Article.description に使う） */
   description: string;
-  /** 記事 URL（path のみ。例: "/column/ops-800"） */
+  /** 記事 URL（path のみ。例: "/column/ops-1000"） */
   path: string;
   /** Breadcrumb の最終要素に表示する短い名前（例: "OPS .800"） */
   breadcrumbLeafName: string;

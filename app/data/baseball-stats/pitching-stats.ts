@@ -64,6 +64,9 @@ export const pitchingStats: PitchingStat[] = [
     descriptions: [
       "投手の勝ちゲームに対する貢献度を示す指標で、高いほど投手がチームの勝利に大きく貢献していることを意味します。",
     ],
+    slug: "winning-percentage",
+    // 投手成績セクションからの導線なので、チーム視点の冒頭ではなく投手の勝率の節に着地させる
+    columnUrl: "/column/winning-percentage#pitcher-winning-percentage",
   },
   {
     title: "投球回",
@@ -90,7 +93,17 @@ export const pitchingStats: PitchingStat[] = [
   {
     title: "被安打",
     equation: "",
-    descriptions: ["投手が許したヒット（単打、二塁打、三塁打）の総数です。"],
+    descriptions: [
+      "投手が許したヒット（単打、二塁打、三塁打、本塁打）の総数です。",
+    ],
+  },
+  {
+    title: "被打率",
+    equation: "被安打 ÷ 打数",
+    descriptions: [
+      "投手が対戦した打者にどれだけの割合で安打を許したかを示す指標です。打者の打率を投手側から見た値で、低いほど打たれにくい投手です。",
+    ],
+    slug: "opponent-batting-average",
   },
   {
     title: "被本塁打",
@@ -135,6 +148,7 @@ export const pitchingStats: PitchingStat[] = [
       "制球力と支配力のバランスを示す指標です。奪三振と与四球から簡単に計算できます。",
     ],
     slug: "k-bb",
+    columnUrl: "/column/k-bb",
   },
   {
     title: "WHIP",

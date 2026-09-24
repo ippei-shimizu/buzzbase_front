@@ -55,7 +55,9 @@ export async function generateMetadata({
   return {
     ...baseMetadata,
     openGraph: {
-      title: definition.metaTitle,
+      // SERP 向けの metaTitle には計算例が入るため、シェアカードではユーザー自身の
+      // 数値と例示値が並ばないよう heading ベースのタイトルにする
+      title: `防御率 ${eraText}｜${definition.heading}`,
       description: `防御率 ${eraText} の計算結果。あなたも BUZZ BASE で防御率を計算してシェアしよう。`,
       images: [
         {
@@ -68,7 +70,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: definition.metaTitle,
+      title: `防御率 ${eraText}｜${definition.heading}`,
       description: `防御率（ERA） ${eraText}`,
       images: [ogImageUrl],
     },

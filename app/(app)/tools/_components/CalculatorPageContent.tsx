@@ -67,6 +67,7 @@ export default function CalculatorPageContent({
         formula={definition.formula}
         formulaExample={definition.formulaExample}
         guide={definition.guide}
+        relatedColumns={definition.relatedColumns}
       />
 
       <AdBanner slot={adSlots.toolsDetailMiddle} />

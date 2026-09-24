@@ -3,7 +3,7 @@ import { type Metadata } from "next";
 export const metadata: Metadata = {
   title: "OPSはいくつから良い？レベル別の目安・基準・現場感を野球指標で解説",
   description:
-    "OPS（オーピーエス）はいくつから良いのか、.700／.800／.900／1.000 の意味とカテゴリ別（中学・高校・大学・社会人・プロ）の目安を解説。チームで4番を任されるOPSや強豪校レギュラーのOPSなど現場感を交えて紹介。",
+    "OPS（オーピーエス）はいくつから良いのか、.700／.800／.900／1.000 の意味とカテゴリ別（中学・高校・大学・社会人・プロ）の目安を解説。4番を任されるOPSや強豪校レギュラーのOPSなどの現場感、理論上の最大値（5.000）と NPB・MLB 歴代最高記録まで紹介。",
   alternates: {
     canonical: "https://buzzbase.jp/column/ops-criteria",
   },
