@@ -93,6 +93,14 @@ export const pitchingStats: PitchingStat[] = [
     descriptions: ["投手が許したヒット（単打、二塁打、三塁打）の総数です。"],
   },
   {
+    title: "被打率",
+    equation: "被安打 ÷ 打数",
+    descriptions: [
+      "投手が対戦した打者にどれだけの割合で安打を許したかを示す指標です。打者の打率を投手側から見た値で、低いほど打たれにくい投手です。",
+    ],
+    slug: "opponent-batting-average",
+  },
+  {
     title: "被本塁打",
     equation: "",
     descriptions: [
