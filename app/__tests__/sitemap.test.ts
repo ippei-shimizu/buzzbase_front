@@ -43,13 +43,17 @@ describe("listColumnSlugs", () => {
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it("page.tsx を持つルートディレクトリだけを昇順で返す", () => {
+  it("URL にそのまま使える名前で page.tsx を持つディレクトリだけを昇順で返す", () => {
     fs.mkdirSync(path.join(tempDir, "ops"));
     fs.writeFileSync(path.join(tempDir, "ops", "page.tsx"), "");
     fs.mkdirSync(path.join(tempDir, "era"));
     fs.writeFileSync(path.join(tempDir, "era", "page.tsx"), "");
     fs.mkdirSync(path.join(tempDir, "_components"));
     fs.writeFileSync(path.join(tempDir, "_components", "page.tsx"), "");
+    fs.mkdirSync(path.join(tempDir, "[slug]"));
+    fs.writeFileSync(path.join(tempDir, "[slug]", "page.tsx"), "");
+    fs.mkdirSync(path.join(tempDir, "(group)"));
+    fs.writeFileSync(path.join(tempDir, "(group)", "page.tsx"), "");
     fs.mkdirSync(path.join(tempDir, "draft"));
     fs.writeFileSync(path.join(tempDir, "layout.tsx"), "");
 

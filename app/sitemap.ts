@@ -32,7 +32,9 @@ export function listColumnSlugs(columnDir: string = COLUMN_DIR): string[] {
     .filter(
       (entry) =>
         entry.isDirectory() &&
-        !entry.name.startsWith("_") &&
+        // ルートグループ "(...)"・動的セグメント "[...]"・パラレルルート "@..."・
+        // 非ルートの "_..." は URL に変換できないため、そのまま使える名前だけを採る
+        /^[a-z0-9-]+$/.test(entry.name) &&
         fs.existsSync(path.join(columnDir, entry.name, "page.tsx")),
     )
     .map((entry) => entry.name)
