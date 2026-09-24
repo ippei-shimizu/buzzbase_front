@@ -1,4 +1,5 @@
 import { getCalculatorDefinition } from "../calculator-definitions";
+import { pitchingStats } from "../pitching-stats";
 
 const definition = getCalculatorDefinition("opponent-batting-average")!;
 
@@ -30,6 +31,13 @@ describe("被打率計算ツールの定義", () => {
   it("関連ツールが既存の投手指標ツールを指している", () => {
     for (const slug of definition.relatedSlugs) {
       expect(getCalculatorDefinition(slug)).toBeDefined();
+    }
+  });
+
+  it("成績算出ページの slug がすべて計算ツールの定義に解決できる", () => {
+    for (const stat of pitchingStats) {
+      if (!stat.slug) continue;
+      expect(getCalculatorDefinition(stat.slug)).toBeDefined();
     }
   });
 });
