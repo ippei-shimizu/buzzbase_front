@@ -1,8 +1,12 @@
+import Link from "next/link";
+import { type RelatedColumn } from "@app/data/baseball-stats/types";
+
 type Props = {
   explanation: string;
   formula: string;
   formulaExample: string;
   guide: { label: string; description: string }[];
+  relatedColumns?: RelatedColumn[];
 };
 
 export default function StatExplanation({
@@ -10,6 +14,7 @@ export default function StatExplanation({
   formula,
   formulaExample,
   guide,
+  relatedColumns = [],
 }: Props) {
   return (
     <div className="mt-10 space-y-8">
@@ -32,6 +37,30 @@ export default function StatExplanation({
             </p>
           ))}
         </div>
+
+        {relatedColumns.length > 0 ? (
+          <aside
+            aria-label="もっと詳しく"
+            className="rounded-lg border border-yellow-700/40 bg-yellow-900/10 px-4 py-3"
+          >
+            <p className="text-sm font-bold text-zinc-200 mb-2">もっと詳しく</p>
+            <ul className="space-y-2">
+              {relatedColumns.map((column) => (
+                <li key={column.href}>
+                  <Link
+                    href={column.href}
+                    className="text-sm font-bold text-yellow-500 hover:text-yellow-400 transition-colors"
+                  >
+                    {column.label}
+                  </Link>
+                  <p className="text-xs text-zinc-400 mt-0.5">
+                    {column.description}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        ) : null}
       </section>
 
       {guide.length > 0 ? (

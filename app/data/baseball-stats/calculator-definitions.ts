@@ -95,6 +95,20 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["obp", "ops", "slugging"],
+    relatedColumns: [
+      {
+        label: "打率とは？意味・計算方法・目安をわかりやすく解説",
+        href: "/column/batting-average",
+        description:
+          "四球が含まれない理由、打数と打席数の違い、NPB・高校野球の目安",
+      },
+      {
+        label: "打率はいくつから良い？レベル別の目安・基準",
+        href: "/column/batting-average-criteria",
+        description:
+          ".250 / .280 / .300 / .350 の意味とカテゴリ別・ポジション別の目安",
+      },
+    ],
     cta: {
       heading: "打率.300を目指して毎試合記録しよう",
       body: "BUZZ BASEアプリなら試合結果を入力するだけで打率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
@@ -191,6 +205,18 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["whip", "k-9", "k-bb"],
+    relatedColumns: [
+      {
+        label: "防御率とは？計算方法と良い数値の目安を解説",
+        href: "/column/era",
+        description: "自責点と失点の違い、計算例、NPB・高校野球の目安",
+      },
+      {
+        label: "防御率はいくつから良い？レベル別の目安・基準",
+        href: "/column/era-criteria",
+        description: "1点台〜4点台の意味と先発・中継ぎ・抑え別の基準",
+      },
+    ],
     cta: {
       heading: "防御率の推移を記録して成長を可視化しよう",
       body: "BUZZ BASEアプリなら試合結果を入力するだけで防御率を含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
@@ -334,6 +360,19 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["batting-average", "obp", "slugging"],
+    relatedColumns: [
+      {
+        label: "OPSとは？意味・計算方法と目安を解説",
+        href: "/column/ops",
+        description:
+          "出塁率と長打率を足す理由、計算例、NPB・高校野球・中学野球の目安",
+      },
+      {
+        label: "OPSはいくつから良い？レベル別の目安・基準",
+        href: "/column/ops-criteria",
+        description: ".700 / .800 / .900 / 1.000 の意味と4番を任される現場感",
+      },
+    ],
     cta: {
       heading: "今日の試合のOPSを記録して、チーム1位を目指そう",
       body: "BUZZ BASEアプリなら試合結果を入力するだけでOPSを含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
@@ -430,6 +469,18 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["batting-average", "ops", "obp"],
+    relatedColumns: [
+      {
+        label: "長打率（SLG）とは？意味・計算方法・目安を解説",
+        href: "/column/slg",
+        description: "塁打数の数え方、打率との違い、NPB基準の目安",
+      },
+      {
+        label: "長打率はいくつから良い？レベル別の目安・基準",
+        href: "/column/slg-criteria",
+        description: ".400 / .450 / .500 の意味とポジション別の目安",
+      },
+    ],
     cta: {
       heading: "長打率を記録して、パワーヒッターランキングに参加しよう",
       body: "BUZZ BASEアプリなら試合結果を入力するだけで長打率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
@@ -549,6 +600,18 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
       },
     ],
     relatedSlugs: ["batting-average", "ops", "slugging"],
+    relatedColumns: [
+      {
+        label: "出塁率（OBP）とは？意味・計算方法・目安を解説",
+        href: "/column/obp",
+        description: "四死球と犠飛の扱い、打率との違い、NPB・高校野球の目安",
+      },
+      {
+        label: "出塁率はいくつから良い？レベル別の目安・基準",
+        href: "/column/obp-criteria",
+        description: ".350 / .380 / .400 の意味とカテゴリ別の目安",
+      },
+    ],
     cta: {
       heading: "出塁率をシーズン通して記録。チーム内ランキングに挑戦",
       body: "BUZZ BASEアプリなら試合結果を入力するだけで出塁率を含む全指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。",
