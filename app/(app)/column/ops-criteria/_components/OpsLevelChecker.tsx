@@ -29,43 +29,50 @@ export default function OpsLevelChecker() {
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder="0.850"
+          aria-invalid={parsed !== null && benchmark === null}
+          aria-describedby="ops-checker-error"
           className="mt-1 w-full rounded-lg border border-zinc-600 bg-zinc-900/60 px-4 py-2.5 text-base text-white placeholder:text-zinc-600 focus:border-yellow-500 focus:outline-none"
         />
       </label>
 
       {parsed !== null && benchmark === null ? (
-        <p role="alert" className="mt-3 text-sm text-red-400">
+        <p
+          id="ops-checker-error"
+          role="alert"
+          className="mt-3 text-sm text-red-400"
+        >
           0〜5.000 の範囲で入力してください
         </p>
       ) : null}
 
-      {benchmark ? (
-        <div
-          role="status"
-          className="mt-4 rounded-lg border border-zinc-700/70 bg-zinc-950/50 px-4 py-3"
-        >
-          <p className={`text-base font-bold ${benchmark.color}`}>
-            {benchmark.level}
-            <span className="ml-2 text-sm font-normal text-zinc-400">
-              OPS {benchmark.ops}
-            </span>
-          </p>
-          <dl className="mt-3 space-y-2 text-sm">
-            <div className="flex gap-3">
-              <dt className="w-16 shrink-0 text-zinc-400">プロ野球</dt>
-              <dd className="text-zinc-200">{benchmark.pro}</dd>
-            </div>
-            <div className="flex gap-3">
-              <dt className="w-16 shrink-0 text-zinc-400">高校野球</dt>
-              <dd className="text-zinc-200">{benchmark.high}</dd>
-            </div>
-            <div className="flex gap-3">
-              <dt className="w-16 shrink-0 text-zinc-400">中学野球</dt>
-              <dd className="text-zinc-200">{benchmark.middle}</dd>
-            </div>
-          </dl>
-        </div>
-      ) : null}
+      {/* polite なライブリージョンは先に存在している箱の中身が変わったときだけ読み上げられる
+          ため、結果と同時にマウントせず箱を常に置いておく */}
+      <div role="status" aria-live="polite">
+        {benchmark ? (
+          <div className="mt-4 rounded-lg border border-zinc-700/70 bg-zinc-950/50 px-4 py-3">
+            <p className={`text-base font-bold ${benchmark.color}`}>
+              {benchmark.level}
+              <span className="ml-2 text-sm font-normal text-zinc-400">
+                OPS {benchmark.ops}
+              </span>
+            </p>
+            <dl className="mt-3 space-y-2 text-sm">
+              <div className="flex gap-3">
+                <dt className="w-16 shrink-0 text-zinc-400">プロ野球</dt>
+                <dd className="text-zinc-200">{benchmark.pro}</dd>
+              </div>
+              <div className="flex gap-3">
+                <dt className="w-16 shrink-0 text-zinc-400">高校野球</dt>
+                <dd className="text-zinc-200">{benchmark.high}</dd>
+              </div>
+              <div className="flex gap-3">
+                <dt className="w-16 shrink-0 text-zinc-400">中学野球</dt>
+                <dd className="text-zinc-200">{benchmark.middle}</dd>
+              </div>
+            </dl>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

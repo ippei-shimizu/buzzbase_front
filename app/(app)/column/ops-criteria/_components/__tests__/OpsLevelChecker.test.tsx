@@ -27,7 +27,7 @@ describe("OpsLevelChecker", () => {
   it("入力前は判定結果を出さない", () => {
     render(<OpsLevelChecker />);
 
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
   it("OPS を入力するとカテゴリ別の目安を表示する", async () => {
@@ -48,6 +48,10 @@ describe("OpsLevelChecker", () => {
     await user.type(screen.getByRole("spinbutton"), "-1");
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("spinbutton")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 });
