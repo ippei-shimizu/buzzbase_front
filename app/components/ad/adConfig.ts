@@ -45,14 +45,6 @@ export const adSlots = {
   groupDetailInFeed: "7771003447",
   /** グループ一覧 インフィード広告 */
   groupListInFeed: "9020372484",
-  /** ノート一覧 インフィード広告 */
-  noteListInFeed: "4687076509",
-  /** フォロワー インフィード広告 */
-  followersInFeed: "7707290815",
-  /** フォロー中 インフィード広告 */
-  followingInFeed: "6457921774",
-  /** お知らせ一覧 インフィード広告 */
-  noticeListInFeed: "5133231818",
   /** 試合詳細結果 インフィード広告 */
   gameResultDetailInFeed: "",
   /** ツール詳細ページ 最下部 横長ディスプレイ広告 */

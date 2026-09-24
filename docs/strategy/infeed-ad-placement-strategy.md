@@ -32,20 +32,16 @@ Google AdSense自動広告と併用しつつ、確実に表示させたい枠を
 
 ### 新規追加一覧
 
-| ページ                 | パス                       | 配置位置                          | adSlotキー（案）             |
-| ---------------------- | -------------------------- | --------------------------------- | ---------------------------- |
-| マイページ             | `/mypage/[slug]`           | フッターと成績+試合セクションの間 | `mypageBottomInFeed`         |
-| マイページ             | `/mypage/[slug]`           | 試合タブの一覧の間に紛れて配置    | `mypageMatchListInFeed`      |
-| ダッシュボード         | `/dashboard`               | 投手成績と直近の試合の間          | `dashboardMiddleInFeed`      |
-| 試合結果一覧           | `/game-result/lists`       | 試合一覧の中に紛れて配置          | `gameResultListMiddleInFeed` |
-| 試合結果サマリー       | `/game-result/summary`     | サマリーコンテンツ下              | `gameResultSummaryInFeed`    |
-| グループ詳細           | `/groups/[slug]`           | ランキングテーブル群の末尾        | `groupDetailInFeed`          |
-| グループ一覧           | `/groups`                  | ページ最下部                      | `groupListInFeed`            |
-| ノート一覧             | `/note`                    | 末尾                              | `noteListInFeed`             |
-| ノート詳細             | `/note/[slug]`             | 末尾                              | `noteDetailInFeed`           |
-| フォロワー一覧         | `/mypage/[slug]/followers` | ユーザーリスト下                  | `followersInFeed`            |
-| フォロー一覧           | `/mypage/[slug]/following` | ユーザーリスト下                  | `followingInFeed`            |
-| 運営からのお知らせ一覧 | `/notice-from-management`  | お知らせリスト下                  | `noticeListInFeed`           |
+| ページ           | パス                   | 配置位置                          | adSlotキー（案）             |
+| ---------------- | ---------------------- | --------------------------------- | ---------------------------- |
+| マイページ       | `/mypage/[slug]`       | フッターと成績+試合セクションの間 | `mypageBottomInFeed`         |
+| マイページ       | `/mypage/[slug]`       | 試合タブの一覧の間に紛れて配置    | `mypageMatchListInFeed`      |
+| ダッシュボード   | `/dashboard`           | 投手成績と直近の試合の間          | `dashboardMiddleInFeed`      |
+| 試合結果一覧     | `/game-result/lists`   | 試合一覧の中に紛れて配置          | `gameResultListMiddleInFeed` |
+| 試合結果サマリー | `/game-result/summary` | サマリーコンテンツ下              | `gameResultSummaryInFeed`    |
+| グループ詳細     | `/groups/[slug]`       | ランキングテーブル群の末尾        | `groupDetailInFeed`          |
+| グループ一覧     | `/groups`              | ページ最下部                      | `groupListInFeed`            |
+| ノート詳細       | `/note/[slug]`         | 末尾                              | `noteDetailInFeed`           |
 
 ---
 
@@ -114,12 +110,8 @@ export const adSlots = {
   mypageInFeed: "取得したスロットID",
   /** グループ詳細 インフィード広告 */
   groupDetailInFeed: "取得したスロットID",
-  /** ノート一覧 インフィード広告 */
-  noteListInFeed: "取得したスロットID",
   /** グループ一覧 インフィード広告 */
   groupListInFeed: "取得したスロットID",
-  /** 運営お知らせ一覧 インフィード広告 */
-  noticeListInFeed: "取得したスロットID",
 } as const;
 ```
 
@@ -144,10 +136,6 @@ import { adSlots } from "@app/components/ad/adConfig";
 **グループ詳細** (`/groups/[slug]/page.tsx`):
 
 - `GroupBattingRankingTable` / `GroupPitchingRankingTable` の下、各Tabコンテンツの末尾
-
-**ノート一覧** (`/note/page.tsx`):
-
-- `NoteListComponent` の下、`NoteAddButton` の前
 
 ### layoutKey について
 
@@ -224,8 +212,9 @@ CTA② → toolsDetailBottom → RelatedTools → toolsDetailHorizontal（横長
 
 ## 更新履歴
 
-| 日付       | 内容                                                 |
-| ---------- | ---------------------------------------------------- |
-| 2026-03-18 | 初版作成                                             |
-| 2026-03-18 | 横長ディスプレイ広告（ページ最下部）の配置戦略を追加 |
-| 2026-03-18 | インフィード広告の配置一覧をユーザー指定の12枠に更新 |
+| 日付       | 内容                                                                                          |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| 2026-03-18 | 初版作成                                                                                      |
+| 2026-03-18 | 横長ディスプレイ広告（ページ最下部）の配置戦略を追加                                          |
+| 2026-03-18 | インフィード広告の配置一覧をユーザー指定の12枠に更新                                          |
+| 2026-09-24 | 収益ゼロのアプリ内インフィード枠4つ（ノート一覧・フォロワー・フォロー中・お知らせ一覧）を撤去 |
