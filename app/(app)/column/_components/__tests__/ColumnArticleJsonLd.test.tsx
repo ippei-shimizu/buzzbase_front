@@ -27,6 +27,7 @@ describe("ColumnArticleJsonLd", () => {
     );
     expect(article).toMatchObject({
       headline: baseProps.headline,
+      description: baseProps.description,
       url: "https://buzzbase.jp/column/ops",
       datePublished: "2026-03-24T00:00:00+09:00",
       dateModified: "2026-09-24T00:00:00+09:00",
@@ -39,6 +40,21 @@ describe("ColumnArticleJsonLd", () => {
         "@type": "WebPage",
         "@id": "https://buzzbase.jp/column/ops",
       },
+    });
+  });
+
+  it("BreadcrumbList の最終要素に breadcrumbLeafName と記事 URL を出力する", () => {
+    const { container } = render(
+      <ColumnArticleJsonLd {...baseProps} faq={[]} />,
+    );
+
+    const breadcrumb = parseJsonLd(container).find(
+      (json) => json["@type"] === "BreadcrumbList",
+    );
+    expect(breadcrumb.itemListElement.at(-1)).toMatchObject({
+      position: 3,
+      name: baseProps.breadcrumbLeafName,
+      item: "https://buzzbase.jp/column/ops",
     });
   });
 
