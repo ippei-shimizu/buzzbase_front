@@ -21,6 +21,11 @@ describe("formatRate（小数3桁の率系成績）", () => {
     expect(formatRate(1)).toBe("1.000");
     expect(formatRate(1.25)).toBe("1.250");
   });
+
+  // 判定は丸め前の値、置換は丸め後の文字列に掛かるため、両者がズレる境界を固定する
+  it("丸めで1になる値は整数部を残す", () => {
+    expect(formatRate(0.9999)).toBe("1.000");
+  });
 });
 
 describe("formatRate2（小数2桁の率系成績）", () => {
@@ -34,6 +39,10 @@ describe("formatRate2（小数2桁の率系成績）", () => {
 
   it("1以上は整数部を残す", () => {
     expect(formatRate2(1)).toBe("1.00");
+  });
+
+  it("丸めで1になる値は整数部を残す", () => {
+    expect(formatRate2(0.999)).toBe("1.00");
   });
 });
 
