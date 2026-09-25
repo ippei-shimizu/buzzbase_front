@@ -100,7 +100,7 @@ export default function MediaViewer({
                 className="max-h-[60vh] w-full rounded-lg bg-black"
               />
             ) : (
-              // R2 の公開ドメインと blob: を混在で扱うため next/image は使わない。
+              // R2 の署名 URL と blob: を混在で扱うため next/image は使わない。
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={content.url}
