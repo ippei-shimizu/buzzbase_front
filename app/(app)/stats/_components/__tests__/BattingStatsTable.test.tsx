@@ -117,4 +117,15 @@ describe("打撃成績テーブルの得点圏打率列", () => {
     expect(screen.getAllByText("-")).toHaveLength(2);
     expect(screen.queryByText("0.000")).not.toBeInTheDocument();
   });
+
+  it("dashWhenMissing を付けていない列は未返却を従来どおり 0 として表示する", () => {
+    render(
+      <BattingStatsTable
+        rows={[buildRow({ babip: undefined, error: undefined })]}
+      />,
+    );
+
+    expect(screen.getByText("0.000")).toBeInTheDocument();
+    expect(screen.getAllByText("-")).toHaveLength(1);
+  });
 });
