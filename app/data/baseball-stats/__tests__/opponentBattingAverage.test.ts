@@ -19,13 +19,11 @@ describe("被打率計算ツールの定義", () => {
     expect(definition.calculate({ hitsAllowed: 10, atBats: 8 })).toBeNull();
   });
 
-  // formatRate は value === 0 のとき先頭 0 を落とさないため、他の表示（.250 等）と
-  // 桁の形式が揃わない。修正時に気付けるよう現挙動を固定しておく。
   it("被安打 0 でも計算できる", () => {
     const result = definition.calculate({ hitsAllowed: 0, atBats: 12 });
 
     expect(result).toBe(0);
-    expect(definition.outputs[0].format(result as number)).toBe("0.000");
+    expect(definition.outputs[0].format(result as number)).toBe(".000");
   });
 
   it("関連ツールが既存の投手指標ツールを指している", () => {
