@@ -80,3 +80,14 @@ describe("打撃成績テーブルの走本塁打列", () => {
     );
   });
 });
+
+describe("打撃成績テーブルの率系の表示", () => {
+  it("打率 0 も他の画面と同じく .000 と表示する", () => {
+    render(
+      <BattingStatsTable rows={[buildRow({ hit: 0, batting_average: 0 })]} />,
+    );
+
+    expect(screen.getByText(".000")).toBeInTheDocument();
+    expect(screen.queryByText("0.000")).not.toBeInTheDocument();
+  });
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { formatEra, formatRate } from "@app/utils/formatStats";
 
 interface Column<T> {
   key: keyof T;
@@ -13,18 +14,6 @@ interface Column<T> {
 interface StatsTableProps<T> {
   rows: T[];
   columns: Column<T>[];
-}
-
-function formatRate(value: number): string {
-  const formatted = value.toFixed(3);
-  if (value !== 0 && value < 1 && value > -1) {
-    return formatted.replace(/^0/, "");
-  }
-  return formatted;
-}
-
-function formatEra(value: number): string {
-  return value.toFixed(2);
 }
 
 const fmtInt = (v: number) => String(v);
