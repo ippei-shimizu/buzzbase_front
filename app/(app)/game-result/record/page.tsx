@@ -686,10 +686,10 @@ export default function GameRecord() {
             prefecture_id: undefined,
           },
         });
-        opponentTeamId = newTeamResponse.data.id;
+        opponentTeamId = Number(newTeamResponse.data.id);
       }
       // 自チームと同じく相手チームも必須項目なので、id を確定できなければ中断する。
-      if (!opponentTeamId) {
+      if (!opponentTeamId || Number.isNaN(opponentTeamId)) {
         setErrorsWithTimeout(["相手チームの登録に失敗しました。"]);
         return;
       }
@@ -700,7 +700,7 @@ export default function GameRecord() {
           date_and_time: existingGameDate ? existingGameDate : gameDate,
           match_type: matchType,
           my_team_id: resolvedMyTeamId,
-          opponent_team_id: Number(opponentTeamId),
+          opponent_team_id: opponentTeamId,
           my_team_score: myTeamScore,
           opponent_team_score: opponentTeamScore,
           batting_order: existingMatchBattingOrder
