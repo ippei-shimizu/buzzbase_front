@@ -117,8 +117,11 @@ describe("相手チームの入力", () => {
     expect(opponentTeamInput).toHaveValue("未登録チームZ");
 
     // 候補リストが開いている間は React Aria が他の要素を aria-hidden にするため、
-    // 保存操作の前にリストを閉じる。
+    // 保存操作の前にリストを閉じる。Escape は revert() を通るので、選択解除が
+    // できていないと入力欄が選択済みチーム名に巻き戻る。
     await user.keyboard("{Escape}");
+    expect(opponentTeamInput).toHaveValue("未登録チームZ");
+
     await user.click(screen.getByRole("radio", { name: "未出場" }));
     await user.click(screen.getByRole("button", { name: /試合結果まとめ/ }));
 
