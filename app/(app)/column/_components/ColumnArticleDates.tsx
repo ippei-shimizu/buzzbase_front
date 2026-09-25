@@ -5,7 +5,16 @@ type Props = {
   updatedAt: string;
 };
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 function formatDate(isoDate: string) {
+  // 日付は記事ごとの meta.ts に手書きで散るため、形式ずれは静的ビルドで落とす
+  if (!ISO_DATE_PATTERN.test(isoDate)) {
+    throw new Error(
+      `公開日・更新日は YYYY-MM-DD で指定してください: ${isoDate}`,
+    );
+  }
+
   const [year, month, day] = isoDate.split("-");
   return `${year}年${Number(month)}月${Number(day)}日`;
 }
