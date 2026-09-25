@@ -28,8 +28,8 @@ describe("ColumnArticleJsonLd", () => {
     expect(article).toMatchObject({
       headline: baseProps.headline,
       url: "https://buzzbase.jp/column/ops",
-      datePublished: "2026-03-24",
-      dateModified: "2026-09-24",
+      datePublished: "2026-03-24T00:00:00+09:00",
+      dateModified: "2026-09-24T00:00:00+09:00",
       author: {
         "@type": "Organization",
         name: "BUZZ BASE",

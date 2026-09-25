@@ -21,6 +21,8 @@ type Props = {
 };
 
 const SITE_URL = "https://buzzbase.jp";
+// タイムゾーンを省くと Googlebot 側のタイムゾーンで解釈され、JST 基準の日付が前日にずれうる
+const JST_START_OF_DAY = "T00:00:00+09:00";
 
 /**
  * /column 配下の短いストック記事向け、共有 JSON-LD コンポーネント。
@@ -47,8 +49,8 @@ export default function ColumnArticleJsonLd({
       "@type": "WebPage",
       "@id": url,
     },
-    datePublished,
-    dateModified,
+    datePublished: `${datePublished}${JST_START_OF_DAY}`,
+    dateModified: `${dateModified}${JST_START_OF_DAY}`,
     author: {
       "@type": "Organization",
       name: "BUZZ BASE",
