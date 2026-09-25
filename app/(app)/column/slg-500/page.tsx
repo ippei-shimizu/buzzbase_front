@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -29,6 +31,8 @@ export default function Slg500ColumnPage() {
         path="/column/slg-500"
         breadcrumbLeafName="長打率 .500"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -41,6 +45,10 @@ export default function Slg500ColumnPage() {
       <h1 className="text-2xl font-bold">
         長打率 .500 とは？中心打者ラインの意味と達成条件を解説
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="mt-4 text-sm text-zinc-300 leading-6">
         長打率 <strong>.500</strong> は、NPB の「中心打者」ライン。リーグ平均

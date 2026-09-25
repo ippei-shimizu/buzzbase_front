@@ -3,8 +3,14 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import OpsColumnJsonLd from "./_components/OpsColumnJsonLd";
-import { OPS_COLUMN_TITLE } from "./_constants/meta";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+  OPS_COLUMN_DESCRIPTION,
+  OPS_COLUMN_TITLE,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -62,7 +68,15 @@ const faqItems = [
 export default function OpsColumnPage() {
   return (
     <>
-      <OpsColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline={OPS_COLUMN_TITLE}
+        description={OPS_COLUMN_DESCRIPTION}
+        path="/column/ops"
+        breadcrumbLeafName="OPSとは"
+        faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
@@ -72,6 +86,10 @@ export default function OpsColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">{OPS_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">

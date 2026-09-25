@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -29,6 +31,8 @@ export default function Obp380ColumnPage() {
         path="/column/obp-380"
         breadcrumbLeafName="出塁率 .380"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -41,6 +45,10 @@ export default function Obp380ColumnPage() {
       <h1 className="text-2xl font-bold">
         出塁率 .380 とは？好打者上位ラインの目安と達成選手
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="mt-4 text-sm text-zinc-300 leading-6">
         出塁率 <strong>.380</strong> は、NPB

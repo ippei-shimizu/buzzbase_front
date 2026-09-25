@@ -14,6 +14,10 @@ type Props = {
   breadcrumbLeafName: string;
   /** FAQPage に展開する FAQ。空配列なら FAQPage を出力しない */
   faq: FaqItem[];
+  /** 公開日（YYYY-MM-DD） */
+  datePublished: string;
+  /** 最終更新日（YYYY-MM-DD）。本文を直したらここだけ書き換える */
+  dateModified: string;
 };
 
 const SITE_URL = "https://buzzbase.jp";
@@ -28,6 +32,8 @@ export default function ColumnArticleJsonLd({
   path,
   breadcrumbLeafName,
   faq,
+  datePublished,
+  dateModified,
 }: Props) {
   const url = `${SITE_URL}${path}`;
 
@@ -37,6 +43,17 @@ export default function ColumnArticleJsonLd({
     headline,
     description,
     url,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+    datePublished,
+    dateModified,
+    author: {
+      "@type": "Organization",
+      name: "BUZZ BASE",
+      url: SITE_URL,
+    },
     publisher: {
       "@type": "Organization",
       name: "BUZZ BASE",

@@ -3,8 +3,14 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import EraColumnJsonLd from "./_components/EraColumnJsonLd";
-import { ERA_COLUMN_TITLE } from "./_constants/meta";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+  ERA_COLUMN_DESCRIPTION,
+  ERA_COLUMN_TITLE,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -57,7 +63,15 @@ const faqItems = [
 export default function EraColumnPage() {
   return (
     <>
-      <EraColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline={ERA_COLUMN_TITLE}
+        description={ERA_COLUMN_DESCRIPTION}
+        path="/column/era"
+        breadcrumbLeafName="防御率とは"
+        faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
@@ -67,6 +81,10 @@ export default function EraColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">{ERA_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">

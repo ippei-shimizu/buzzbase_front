@@ -8,3 +8,7 @@ export const KBB_COLUMN_CARD_DESCRIPTION =
 
 export const KBB_COLUMN_DESCRIPTION =
   "K/BB（奪三振÷与四球）は投手の制球力と奪三振能力のバランスを示す指標。計算方法と、3.00以上で優秀・5.00以上でリーグトップ級などNPB・高校野球の目安、K/9・BB/9・WHIPとの違いを解説。無料の計算ツール付き。";
+
+export const COLUMN_PUBLISHED_AT = "2026-09-24";
+
+export const COLUMN_UPDATED_AT = "2026-09-24";
