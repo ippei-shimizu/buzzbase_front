@@ -75,7 +75,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <AdBanner slot={adSlots.toolsListMiddle} />
+      <AdBanner slot={adSlots.toolsListBattingBottom} />
 
       <section className="mb-8">
         <h2 className="text-lg font-bold mb-3">投手指標</h2>
@@ -97,7 +97,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <AdBanner slot={adSlots.toolsListBottom} />
+      <AdBanner slot={adSlots.toolsListTeamBottom} />
     </div>
   );
 }

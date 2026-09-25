@@ -24,9 +24,9 @@ export const adSlots = {
   /** ツール詳細ページ 解説/目安の下 ディスプレイ広告 */
   toolsDetailMiddle: "5252651311",
   /** ツール一覧ページ 打撃指標セクション下 ディスプレイ広告 */
-  toolsListMiddle: "3425965724",
-  /** ツール一覧ページ 最下部 ディスプレイ広告 */
-  toolsListBottom: "2112884050",
+  toolsListBattingBottom: "3425965724",
+  /** ツール一覧ページ チーム指標セクション下（最下部） ディスプレイ広告 */
+  toolsListTeamBottom: "2112884050",
   /** 成績算出ページ 打撃成績下 ディスプレイ広告 */
   calcGradesMiddle: "9799802384",
   /** 成績算出ページ 投手成績下 ディスプレイ広告 */
