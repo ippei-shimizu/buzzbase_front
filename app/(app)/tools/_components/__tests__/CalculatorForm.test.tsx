@@ -31,7 +31,7 @@ describe("CalculatorForm", () => {
     expect(
       screen.getByText("安打数には0以上の整数を入力してください"),
     ).toBeInTheDocument();
-    expect(screen.queryByText(".750")).not.toBeInTheDocument();
+    expect(screen.queryByText("打率")).not.toBeInTheDocument();
   });
 
   it("整数を入力すると計算結果を表示する", async () => {
