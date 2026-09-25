@@ -94,7 +94,7 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
           "打率は通常、小数第3位まで表記します（例: .300、.275）。首位打者争いなど同率の場合は小数第4位以降まで比較して順位を決定します。日本では「3割2分5厘」のように割・分・厘で読むのが一般的です。",
       },
     ],
-    relatedSlugs: ["obp", "ops", "risp-batting-average"],
+    relatedSlugs: ["obp", "ops", "slugging", "risp-batting-average"],
     relatedColumns: [
       {
         label: "打率とは？意味・計算方法・目安をわかりやすく解説",
@@ -360,7 +360,12 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
           "高校野球は金属バットを使用するためプロ野球より数値が高くなる傾向があります。OPS .900以上であれば好打者、1.000を超えるとチームの中心打者レベルです。ただし高校野球ではOPSより打率が重視されることが多く、OPSはチーム分析や選手比較に活用すると効果的です。",
       },
     ],
-    relatedSlugs: ["batting-average", "obp", "slugging"],
+    relatedSlugs: [
+      "batting-average",
+      "obp",
+      "slugging",
+      "risp-batting-average",
+    ],
     relatedColumns: [
       {
         label: "OPSとは？意味・計算方法と目安を解説",
