@@ -6,10 +6,10 @@ import Breadcrumbs from "../../tools/_components/Breadcrumbs";
 import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
 import {
-  COLUMN_PUBLISHED_AT,
-  COLUMN_UPDATED_AT,
   BATTING_AVERAGE_COLUMN_DESCRIPTION,
   BATTING_AVERAGE_COLUMN_TITLE,
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
 } from "./_constants/meta";
 
 const faqItems = [
