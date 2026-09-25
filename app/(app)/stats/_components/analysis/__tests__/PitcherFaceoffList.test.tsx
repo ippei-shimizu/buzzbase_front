@@ -25,14 +25,13 @@ const buildRow = (pitcherId: number, pitcherName: string): PitcherFaceoff => ({
   result_counts: [],
 });
 
-const renderList = () =>
-  render(
-    <PitcherFaceoffList
-      rows={[buildRow(1, "投手A"), buildRow(2, "投手B")]}
-      minPlateAppearances={3}
-      totalTargetPa={20}
-    />,
-  );
+const buildList = (rows: PitcherFaceoff[]) => (
+  <PitcherFaceoffList rows={rows} minPlateAppearances={3} totalTargetPa={20} />
+);
+
+const renderList = (
+  rows: PitcherFaceoff[] = [buildRow(1, "投手A"), buildRow(2, "投手B")],
+) => render(buildList(rows));
 
 const toggleOf = (pitcherName: string) =>
   screen.getByRole("button", { name: new RegExp(pitcherName) });
@@ -60,6 +59,19 @@ describe("PitcherFaceoffList", () => {
 
     expect(toggleOf("投手A")).toHaveAttribute("aria-expanded", "false");
     expect(toggleOf("投手B")).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getAllByText("出塁率")).toHaveLength(1);
+  });
+
+  // rows の差し替えは再フェッチでも起きるため、展開状態は意図的に持ち越す。
+  it("rows が差し替わっても開いている投手の展開状態を保つ", async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderList();
+
+    await user.click(toggleOf("投手A"));
+    rerender(buildList([buildRow(1, "投手A"), buildRow(3, "投手C")]));
+
+    expect(toggleOf("投手A")).toHaveAttribute("aria-expanded", "true");
+    expect(toggleOf("投手C")).toHaveAttribute("aria-expanded", "false");
     expect(screen.getAllByText("出塁率")).toHaveLength(1);
   });
 });
