@@ -95,6 +95,34 @@ type userData = {
   team_id: number;
 };
 
+/**
+ * チーム名の入力値から既存チームの id を引き直す。
+ * @param teams チーム候補の一覧
+ * @param confirmedId 現在確定している既存チームの id
+ * @param value 入力中のチーム名
+ * @returns 一致する既存チームの id。一致しなければ null（保存時に新規作成させる）
+ */
+const resolveTeamIdByName = (
+  teams: Team[],
+  confirmedId: number | null,
+  value: string,
+): number | null => {
+  // 保存時は trim 後の名前で新規作成するため、id の引き直しも同じ基準で比較する。
+  const name = value.trim();
+  // 候補選択の直後は同じテキストで onInputChange が続けて発火する。名前だけで
+  // 引き直すと同名チームがあるとき先頭の id にすり替わるため、確定済み id の
+  // 名前と一致する間はその id を維持する。
+  const confirmed =
+    confirmedId === null
+      ? undefined
+      : teams.find((team) => String(team.id) === String(confirmedId));
+  if (confirmed && confirmed.name === name) {
+    return confirmedId;
+  }
+  const matched = teams.find((team) => team.name === name);
+  return matched ? Number(matched.id) : null;
+};
+
 export default function GameRecord() {
   const [userData, setUserData] = useState<userData | null>(null);
   const [existingGameDate, setExistingGameDate] = useState<string>("");
@@ -108,9 +136,10 @@ export default function GameRecord() {
   const [matchType, setMatchType] = useState("regular");
   const [opponentTeam, setOpponentTeam] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 相手チームの id。既存チームが確定しているときだけ入り、手入力中は null。
   const [existingOpponentTeam, setExistingOpponentTeam] = useState<
-    number | undefined
-  >(undefined);
+    number | null
+  >(null);
   // 点数は完封 0-0 を許容するため初期値 0。手入力で空にしたときは null（未入力）。
   const [myTeamScore, setMyTeamScore] = useState<number | null>(0);
   const [opponentTeamScore, setOpponentTeamScore] = useState<number | null>(0);
@@ -332,6 +361,19 @@ export default function GameRecord() {
     }
   }, [myTeamId, teamsData]);
 
+  // 編集時は opponent_team_id だけ先に確定するため、自チームと同じく一覧が揃って
+  // から表示名へ解決する。名前が空のまま controlled な入力欄に渡すと未入力に見える。
+  useEffect(() => {
+    if (existingOpponentTeam) {
+      const foundTeam = teamsData.find(
+        (team) => String(team.id) === String(existingOpponentTeam),
+      );
+      if (foundTeam) {
+        setOpponentTeam(foundTeam.name);
+      }
+    }
+  }, [existingOpponentTeam, teamsData]);
+
   // 今日の日付
   const [gameDate, setGameDate] = useState(() => {
     const today = new Date();
@@ -359,19 +401,7 @@ export default function GameRecord() {
   // 未確定(null)に戻して保存時に新規作成させる。
   const handleMyTeamInputChange = (value: string) => {
     setMyTeam(value);
-    setMyTeamId((prev) => {
-      // 候補選択の直後は同じテキストで onInputChange が続けて発火する。名前だけで
-      // 引き直すと同名チームがあるとき先頭の id にすり替わるため、確定済み id の
-      // 名前と一致する間はその id を維持する。
-      const confirmed = teamsData.find(
-        (team) => String(team.id) === String(prev),
-      );
-      if (confirmed && confirmed.name === value) {
-        return prev;
-      }
-      const matched = teamsData.find((team) => team.name === value);
-      return matched ? Number(matched.id) : null;
-    });
+    setMyTeamId((prev) => resolveTeamIdByName(teamsData, prev, value));
   };
   // 候補の選択。allowsCustomValue では打ち替え時に null が飛びうるため、null は
   // 無視して入力中の文字列を消さない（id の解除は onInputChange 側が担う）。
@@ -386,22 +416,28 @@ export default function GameRecord() {
     }
   };
 
-  // 相手チーム設定
+  // 相手チーム名の入力。自チームと同じく、入力名が候補と完全一致すれば id を確定し、
+  // そうでなければ未確定(null)に戻して保存時に新規作成させる。
+  const handleOpponentTeamInputChange = (value: string) => {
+    setOpponentTeam(value);
+    setExistingOpponentTeam((prev) =>
+      resolveTeamIdByName(teamsData, prev, value),
+    );
+  };
+  // 候補の選択。allowsCustomValue では打ち替え時に null が飛びうるため、null は
+  // 無視して入力中の文字列を消さない（id の解除は onInputChange 側が担う）。
   const handleOpponentTeamChange = (teamKey: React.Key | null) => {
-    if (teamKey === null) {
-      // クリア時は id と名前の両方を空にして、選択済みチーム名が残らないようにする。
-      setExistingOpponentTeam(undefined);
-      setOpponentTeam("");
-      return;
-    }
+    if (teamKey == null) return;
     // teamKey は選択された既存チームの id。id 文字列をそのまま opponentTeam に
     // 入れると保存時に名前として createOrUpdateTeam へ渡り不正なチームが作られるため、
     // id を保持しつつ表示名はチーム一覧から解決する。
-    setExistingOpponentTeam(Number(teamKey));
     const selectedTeam = teamsData.find(
       (team) => String(team.id) === String(teamKey),
     );
-    setOpponentTeam(selectedTeam?.name ?? "");
+    if (selectedTeam) {
+      setExistingOpponentTeam(Number(selectedTeam.id));
+      setOpponentTeam(selectedTeam.name);
+    }
   };
 
   const handleTournamentInputChange = (value: string) => {
@@ -650,7 +686,12 @@ export default function GameRecord() {
             prefecture_id: undefined,
           },
         });
-        opponentTeamId = newTeamResponse.data.id;
+        opponentTeamId = Number(newTeamResponse.data.id);
+      }
+      // 自チームと同じく相手チームも必須項目なので、id を確定できなければ中断する。
+      if (!opponentTeamId || Number.isNaN(opponentTeamId)) {
+        setErrorsWithTimeout(["相手チームの登録に失敗しました。"]);
+        return;
       }
       const matchResultData = {
         match_result: {
@@ -659,9 +700,7 @@ export default function GameRecord() {
           date_and_time: existingGameDate ? existingGameDate : gameDate,
           match_type: matchType,
           my_team_id: resolvedMyTeamId,
-          opponent_team_id: existingOpponentTeam
-            ? existingOpponentTeam
-            : Number(opponentTeamId),
+          opponent_team_id: opponentTeamId,
           my_team_score: myTeamScore,
           opponent_team_score: opponentTeamScore,
           batting_order: existingMatchBattingOrder
@@ -923,12 +962,13 @@ export default function GameRecord() {
                   className="[&>div]:justify-between"
                   size="sm"
                   color={isOpponentTeamValid ? "default" : "danger"}
+                  inputValue={opponentTeam}
                   selectedKey={
                     existingOpponentTeam
                       ? existingOpponentTeam.toString()
                       : null
                   }
-                  onInputChange={(value) => setOpponentTeam(value)}
+                  onInputChange={handleOpponentTeamInputChange}
                   onSelectionChange={handleOpponentTeamChange}
                 >
                   {teamsData.map((data) => (
