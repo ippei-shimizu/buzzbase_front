@@ -12,6 +12,8 @@ export const isAdsenseEnabled =
 export const isAdsenseScriptEnabled =
   isAdsenseEnabled && process.env.NODE_ENV === "production";
 
+// ディスプレイ広告はすべて AdBanner のデフォルト（format="auto"）で描画される。
+// 枠ごとの違いは配置だけなので、JSDoc には配置と種別（ディスプレイ / インフィード）だけを書く
 export const adSlots = {
   /** 計算ツールページ CTAバナー下 ディスプレイ広告 */
   toolsDisplay: "6569468966",
@@ -43,17 +45,17 @@ export const adSlots = {
   groupDetailInFeed: "7771003447",
   /** グループ一覧 インフィード広告 */
   groupListInFeed: "9020372484",
-  /** ツール詳細ページ 関連ツール下 レスポンシブディスプレイ広告 */
+  /** ツール詳細ページ 関連ツール下 ディスプレイ広告 */
   toolsDetailFooter: "7612055498",
-  /** ツール一覧ページ 投手指標セクション下 レスポンシブディスプレイ広告 */
+  /** ツール一覧ページ 投手指標セクション下 ディスプレイ広告 */
   toolsListPitchingBottom: "3672810486",
-  /** 成績算出ページ 目次下 レスポンシブディスプレイ広告 */
+  /** 成績算出ページ 目次下 ディスプレイ広告 */
   calcGradesTop: "7196288375",
   /** コラムページ 中間 ディスプレイ広告 */
   columnMiddle: "1821345216",
   /** コラムページ 下部 ディスプレイ広告 */
   columnBottom: "6882100207",
-  /** コラムページ 最下部 レスポンシブディスプレイ広告 */
+  /** コラムページ 最下部 ディスプレイ広告 */
   columnFooter: "4770675289",
   /**
    * ツール詳細ページ 計算結果直下 レクタングル広告
