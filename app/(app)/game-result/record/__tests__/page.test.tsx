@@ -29,8 +29,13 @@ jest.mock("@app/services/gameResultsService", () => ({
 const mockCreateMatchResults = jest.fn((..._args: unknown[]) =>
   Promise.resolve({ id: 1 }),
 );
+const mockCheckExistingMatchResults = jest.fn(
+  (..._args: unknown[]): Promise<Record<string, unknown> | null> =>
+    Promise.resolve(null),
+);
 jest.mock("@app/services/matchResultsService", () => ({
-  checkExistingMatchResults: () => Promise.resolve(null),
+  checkExistingMatchResults: (...args: unknown[]) =>
+    mockCheckExistingMatchResults(...args),
   createMatchResults: (...args: unknown[]) => mockCreateMatchResults(...args),
   getMatchResultFormDefaults: () => Promise.resolve(null),
   updateMatchResult: () => Promise.resolve({}),
@@ -179,5 +184,95 @@ describe("相手チームの入力", () => {
         }),
       }),
     );
+  });
+
+  it("候補から選んだ後に打ち替えて入力欄から離れても、打ち替えた名前が残る", async () => {
+    const user = userEvent.setup();
+    render(<GameRecord />);
+
+    const myTeamInput = await screen.findByRole("combobox", {
+      name: /自チーム/,
+    });
+    const opponentTeamInput = await screen.findByRole("combobox", {
+      name: /相手チーム/,
+    });
+
+    await user.type(myTeamInput, "テスト高校A");
+    await user.click(opponentTeamInput);
+    await user.click(
+      await screen.findByRole("option", { name: "テスト高校B" }),
+    );
+    await user.tripleClick(opponentTeamInput);
+    await user.paste("未登録チームZ");
+
+    // blur 時は commitCustomValue が onSelectionChange(null) を飛ばすため、
+    // ここで名前まで消えると入力済みなのに未入力扱いになる。
+    await user.tab();
+    expect(opponentTeamInput).toHaveValue("未登録チームZ");
+
+    await user.click(screen.getByRole("radio", { name: "未出場" }));
+    await user.click(screen.getByRole("button", { name: /試合結果まとめ/ }));
+
+    await waitFor(() => {
+      expect(mockCreateMatchResults).toHaveBeenCalled();
+    });
+    expect(mockCreateMatchResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        match_result: expect.objectContaining({ opponent_team_id: 99 }),
+      }),
+    );
+  });
+
+  it("候補から選んだ後に入力を全消しすると、未入力として弾かれる", async () => {
+    const user = userEvent.setup();
+    render(<GameRecord />);
+
+    const myTeamInput = await screen.findByRole("combobox", {
+      name: /自チーム/,
+    });
+    const opponentTeamInput = await screen.findByRole("combobox", {
+      name: /相手チーム/,
+    });
+
+    await user.type(myTeamInput, "テスト高校A");
+    await user.click(opponentTeamInput);
+    await user.click(
+      await screen.findByRole("option", { name: "テスト高校B" }),
+    );
+    await user.clear(opponentTeamInput);
+
+    await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("radio", { name: "未出場" }));
+    await user.click(screen.getByRole("button", { name: /試合結果まとめ/ }));
+
+    expect(
+      await screen.findByText("相手チーム名が未入力です。"),
+    ).toBeInTheDocument();
+    expect(mockCreateMatchResults).not.toHaveBeenCalled();
+  });
+
+  it("既存試合の編集で開くと opponent_team_id からチーム名が復元される", async () => {
+    mockCheckExistingMatchResults.mockResolvedValueOnce({
+      id: 10,
+      date_and_time: "2026-09-01T00:00:00+09:00",
+      match_type: "regular",
+      tournament_id: null,
+      my_team_id: 1,
+      my_team_score: 3,
+      opponent_team_score: 2,
+      batting_order: "1",
+      memo: null,
+      opponent_team_id: 2,
+      defensive_position: "1",
+      inning_format: 9,
+      appearance_type: "starter",
+    });
+    render(<GameRecord />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: /相手チーム/ })).toHaveValue(
+        "テスト高校B",
+      );
+    });
   });
 });
