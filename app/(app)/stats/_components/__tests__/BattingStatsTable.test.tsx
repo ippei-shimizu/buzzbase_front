@@ -80,3 +80,38 @@ describe("打撃成績テーブルの走本塁打列", () => {
     );
   });
 });
+
+// ヘッダーは 1 文字ずつ改行した縦書きで描画される。
+const VERTICAL_SCORING_POSITION_LABEL = /^得\s点\s圏\s打\s率$/;
+
+describe("打撃成績テーブルの得点圏打率列", () => {
+  it("得点圏打率を 3 桁の打率表記で表示する", () => {
+    render(
+      <BattingStatsTable
+        rows={[buildRow({ scoring_position_batting_average: 0.25 })]}
+      />,
+    );
+
+    expect(
+      screen.getByText(VERTICAL_SCORING_POSITION_LABEL),
+    ).toBeInTheDocument();
+    expect(screen.getByText(".250")).toBeInTheDocument();
+  });
+
+  it("得点圏の打数が無い行は .000 ではなく「-」を表示する", () => {
+    render(
+      <BattingStatsTable
+        rows={[
+          buildRow({ label: "2025", scoring_position_batting_average: null }),
+          buildRow({
+            label: "2026",
+            scoring_position_batting_average: undefined,
+          }),
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByText("-")).toHaveLength(2);
+    expect(screen.queryByText(".000")).not.toBeInTheDocument();
+  });
+});

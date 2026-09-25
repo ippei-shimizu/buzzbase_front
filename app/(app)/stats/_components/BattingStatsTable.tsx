@@ -23,6 +23,14 @@ const BATTING_COLUMNS: Column<BattingStatsRow>[] = [
   { key: "error", label: "失策", format: fmtInt },
   { key: "slugging_percentage", label: "長打率", format: fmt3 },
   { key: "ops", label: "OPS", format: fmt3 },
+  {
+    key: "scoring_position_batting_average",
+    label: "得点圏打率",
+    format: fmt3,
+    tooltip:
+      "走者が二塁・三塁にいる場面（得点圏）での打率です。走者状況を記録した打席が対象で、対象の打席が無いときは「-」と表示します。",
+    dashWhenMissing: true,
+  },
   { key: "iso", label: "ISO", format: fmt3 },
   { key: "bb_per_k", label: "BB/K", format: fmt3 },
   { key: "babip", label: "BABIP", format: fmt3 },
