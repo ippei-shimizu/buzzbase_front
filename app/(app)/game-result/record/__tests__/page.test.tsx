@@ -128,6 +128,7 @@ describe("相手チームの入力", () => {
     await waitFor(() => {
       expect(mockCreateMatchResults).toHaveBeenCalled();
     });
+    expect(mockCreateOrUpdateTeam).toHaveBeenCalledTimes(1);
     expect(mockCreateOrUpdateTeam).toHaveBeenCalledWith({
       team: {
         name: "未登録チームZ",
