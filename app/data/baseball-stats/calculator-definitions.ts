@@ -1120,7 +1120,8 @@ export const calculatorDefinitions: Record<string, CalculatorDefinition> = {
     guide: [
       { label: ".350以上", description: "リーグ上位（勝負強さが際立つ）" },
       { label: ".300〜.349", description: "勝負強い打者" },
-      { label: ".250〜.299", description: "平均的な打者" },
+      { label: ".280〜.299", description: "リーグ平均より上" },
+      { label: ".250〜.279", description: "平均的な打者" },
       { label: ".200〜.249", description: "やや苦戦している打者" },
       { label: ".200未満", description: "チャンスで結果が出ていない" },
     ],
