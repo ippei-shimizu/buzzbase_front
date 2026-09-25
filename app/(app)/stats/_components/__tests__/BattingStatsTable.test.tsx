@@ -85,12 +85,15 @@ describe("打撃成績テーブルの走本塁打列", () => {
 const VERTICAL_SCORING_POSITION_LABEL = /^得\s点\s圏\s打\s率$/;
 
 describe("打撃成績テーブルの得点圏打率列", () => {
-  it("得点圏打率を 3 桁の打率表記で表示する", () => {
-    render(
-      <BattingStatsTable
-        rows={[buildRow({ scoring_position_batting_average: 0.25 })]}
-      />,
+  it("得点圏打率を OPS の右隣に 3 桁の打率表記で表示する", () => {
+    const rows = [buildRow({ scoring_position_batting_average: 0.25 })];
+
+    const keys = getBattingColumns(rows).map((column) => column.key);
+    expect(keys.indexOf("scoring_position_batting_average")).toBe(
+      keys.indexOf("ops") + 1,
     );
+
+    render(<BattingStatsTable rows={rows} />);
 
     expect(
       screen.getByText(VERTICAL_SCORING_POSITION_LABEL),
