@@ -78,7 +78,7 @@ export default function CalculatorForm({
         return;
       }
       const num = parseFloat(val);
-      if (isNaN(num) || num < 0) {
+      if (!Number.isFinite(num) || num < 0) {
         setError(`${field.label}には0以上の数値を入力してください`);
         return;
       }
