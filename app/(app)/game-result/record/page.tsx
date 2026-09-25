@@ -107,16 +107,19 @@ const resolveTeamIdByName = (
   confirmedId: number | null,
   value: string,
 ): number | null => {
+  // 保存時は trim 後の名前で新規作成するため、id の引き直しも同じ基準で比較する。
+  const name = value.trim();
   // 候補選択の直後は同じテキストで onInputChange が続けて発火する。名前だけで
   // 引き直すと同名チームがあるとき先頭の id にすり替わるため、確定済み id の
   // 名前と一致する間はその id を維持する。
-  const confirmed = teams.find(
-    (team) => String(team.id) === String(confirmedId),
-  );
-  if (confirmed && confirmed.name === value) {
+  const confirmed =
+    confirmedId === null
+      ? undefined
+      : teams.find((team) => String(team.id) === String(confirmedId));
+  if (confirmed && confirmed.name === name) {
     return confirmedId;
   }
-  const matched = teams.find((team) => team.name === value);
+  const matched = teams.find((team) => team.name === name);
   return matched ? Number(matched.id) : null;
 };
 
