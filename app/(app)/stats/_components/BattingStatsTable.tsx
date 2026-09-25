@@ -28,7 +28,7 @@ const BATTING_COLUMNS: Column<BattingStatsRow>[] = [
     label: "得点圏打率",
     format: fmt3,
     tooltip:
-      "走者が二塁・三塁にいる場面（得点圏）での打率です。走者状況を記録した打席が対象で、対象の打席が無いときは「-」と表示します。",
+      "二塁または三塁に走者がいる場面（得点圏。一・二塁や満塁も含みます）での打率です。走者状況を記録した打席が対象で、得点圏での打数が 0 のときは「-」と表示します。",
     dashWhenMissing: true,
   },
   { key: "iso", label: "ISO", format: fmt3 },
