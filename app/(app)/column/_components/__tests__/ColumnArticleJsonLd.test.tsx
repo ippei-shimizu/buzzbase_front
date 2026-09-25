@@ -65,4 +65,23 @@ describe("ColumnArticleJsonLd", () => {
     );
     expect(faqPage.mainEntity[0].name).toBe("OPSの読み方は？");
   });
+
+  it("文言に </script> が含まれても script 要素が閉じない", () => {
+    const { container } = render(
+      <ColumnArticleJsonLd
+        {...baseProps}
+        headline="OPS</script><script>alert(1)</script>とは"
+        faq={[]}
+      />,
+    );
+
+    const scripts = container.querySelectorAll(
+      'script[type="application/ld+json"]',
+    );
+    expect(scripts).toHaveLength(2);
+    expect(scripts[0].innerHTML).not.toContain("</script>");
+    expect(JSON.parse(scripts[0].innerHTML).headline).toBe(
+      "OPS</script><script>alert(1)</script>とは",
+    );
+  });
 });

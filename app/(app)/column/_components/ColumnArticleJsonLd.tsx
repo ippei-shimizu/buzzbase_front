@@ -24,6 +24,11 @@ const SITE_URL = "https://buzzbase.jp";
 // タイムゾーンを省くと Googlebot 側のタイムゾーンで解釈され、JST 基準の日付が前日にずれうる
 const JST_START_OF_DAY = "T00:00:00+09:00";
 
+/** JSON-LD は script 要素の中に直接書き出すため、`</script>` で閉じられないよう `<` を退避する */
+function toJsonLdHtml(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
 /**
  * /column 配下の短いストック記事向け、共有 JSON-LD コンポーネント。
  * Article / BreadcrumbList を常に出力し、FAQ がある場合のみ FAQPage を追加する。
@@ -108,17 +113,17 @@ export default function ColumnArticleJsonLd({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLdHtml(article) }}
       />
       {faqPage ? (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPage) }}
+          dangerouslySetInnerHTML={{ __html: toJsonLdHtml(faqPage) }}
         />
       ) : null}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbList) }}
+        dangerouslySetInnerHTML={{ __html: toJsonLdHtml(breadcrumbList) }}
       />
     </>
   );
