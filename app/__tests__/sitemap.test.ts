@@ -2,6 +2,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { getAllCalculatorSlugs } from "@app/data/baseball-stats/calculator-definitions";
+import {
+  battingToolSlugs,
+  pitchingToolSlugs,
+  teamToolSlugs,
+} from "@app/data/baseball-stats/tool-groups";
 import sitemap, { STATIC_PATHS, listColumnSlugs } from "../sitemap";
 
 describe("sitemap", () => {
@@ -87,5 +92,24 @@ describe("listColumnSlugs", () => {
     fs.writeFileSync(path.join(tempDir, "layout.tsx"), "");
 
     expect(listColumnSlugs(tempDir)).toEqual(["era", "ops"]);
+  });
+
+  // 定義だけ足してルートを作り忘れると Search Console に 404 を送り続け、
+  // 一覧に入れ忘れるとサイト内から辿れない枝葉のページになる
+  it("全計算ツールにルートと一覧カードが存在する", () => {
+    const listedSlugs = [
+      ...battingToolSlugs,
+      ...pitchingToolSlugs,
+      ...teamToolSlugs,
+    ];
+
+    for (const slug of getAllCalculatorSlugs()) {
+      expect(
+        fs.existsSync(
+          path.join(process.cwd(), "app", "(app)", "tools", slug, "page.tsx"),
+        ),
+      ).toBe(true);
+      expect(listedSlugs).toContain(slug);
+    }
   });
 });
