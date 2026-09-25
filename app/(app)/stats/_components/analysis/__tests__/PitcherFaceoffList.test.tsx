@@ -47,6 +47,7 @@ describe("PitcherFaceoffList", () => {
 
     expect(toggleOf("投手A")).toHaveAttribute("aria-expanded", "true");
     expect(toggleOf("投手B")).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getAllByText("出塁率")).toHaveLength(2);
   });
 
   it("開いている投手を再度押すとその投手だけ閉じる", async () => {
@@ -59,5 +60,6 @@ describe("PitcherFaceoffList", () => {
 
     expect(toggleOf("投手A")).toHaveAttribute("aria-expanded", "false");
     expect(toggleOf("投手B")).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getAllByText("出塁率")).toHaveLength(1);
   });
 });
