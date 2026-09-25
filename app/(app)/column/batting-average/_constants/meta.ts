@@ -5,3 +5,7 @@ export const BATTING_AVERAGE_COLUMN_TITLE =
 
 export const BATTING_AVERAGE_COLUMN_DESCRIPTION =
   "打率（AVG・だりつ）は安打数÷打数で求める最も基本的な打撃指標。四球が含まれない理由、打数と打席数の違い、.250で平均・.300で好打者などNPB・高校野球の目安を解説。無料の打率計算ツール付き。";
+
+export const COLUMN_PUBLISHED_AT = "2026-03-24";
+
+export const COLUMN_UPDATED_AT = "2026-09-24";

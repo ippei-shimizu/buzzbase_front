@@ -8,3 +8,7 @@ export const WINNING_PERCENTAGE_COLUMN_CARD_DESCRIPTION =
 
 export const WINNING_PERCENTAGE_COLUMN_DESCRIPTION =
   "野球の勝率は勝利数÷（勝利数＋敗戦数）で求め、引き分けは除外します。計算例、.600で優勝争い・.500で五分などNPBの目安、ゲーム差との関係、投手の最高勝率の条件まで解説。無料の計算ツール付き。";
+
+export const COLUMN_PUBLISHED_AT = "2026-09-24";
+
+export const COLUMN_UPDATED_AT = "2026-09-24";

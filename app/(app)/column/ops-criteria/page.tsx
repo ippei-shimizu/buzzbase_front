@@ -3,9 +3,11 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
 import OpsLevelChecker from "./_components/OpsLevelChecker";
 import { OPS_BENCHMARKS } from "./_constants/benchmarks";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -92,6 +94,8 @@ export default function OpsCriteriaColumnPage() {
         path="/column/ops-criteria"
         breadcrumbLeafName="OPSの目安・基準"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -104,6 +108,10 @@ export default function OpsCriteriaColumnPage() {
       <h1 className="text-2xl font-bold">
         OPSはいくつから良い？レベル別の目安・基準を野球指標で解説
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         OPS（オーピーエス）の良し悪しを判断する目安は、

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -34,6 +36,8 @@ export default function RunsCriteriaColumnPage() {
         path="/column/runs-criteria"
         breadcrumbLeafName="失点率の目安"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -46,6 +50,10 @@ export default function RunsCriteriaColumnPage() {
       <h1 className="text-2xl font-bold">
         失点率（RA）はいくつから良い？目安・計算方法・防御率との違い
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         失点率（RA：Run Average）とは、投手が 9

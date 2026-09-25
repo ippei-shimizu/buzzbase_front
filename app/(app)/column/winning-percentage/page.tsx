@@ -3,8 +3,11 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
 import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
   WINNING_PERCENTAGE_COLUMN_DESCRIPTION,
   WINNING_PERCENTAGE_COLUMN_TITLE,
 } from "./_constants/meta";
@@ -95,6 +98,8 @@ export default function WinningPercentageColumnPage() {
         path="/column/winning-percentage"
         breadcrumbLeafName="勝率とは"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -105,6 +110,10 @@ export default function WinningPercentageColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">{WINNING_PERCENTAGE_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="mt-4 text-sm text-zinc-300 leading-6">
         野球の勝率（英語表記：<strong>Winning Percentage / WPCT</strong>

@@ -3,7 +3,14 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import RunsColumnJsonLd from "./_components/RunsColumnJsonLd";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+  RUNS_COLUMN_DESCRIPTION,
+  RUNS_COLUMN_TITLE,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -56,7 +63,15 @@ const faqItems = [
 export default function RunsColumnPage() {
   return (
     <>
-      <RunsColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline={RUNS_COLUMN_TITLE}
+        description={RUNS_COLUMN_DESCRIPTION}
+        path="/column/runs"
+        breadcrumbLeafName="失点とは"
+        faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
@@ -65,9 +80,11 @@ export default function RunsColumnPage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold">
-        野球の失点とは？自責点との違い・失点率の計算方法を解説
-      </h1>
+      <h1 className="text-2xl font-bold">{RUNS_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">

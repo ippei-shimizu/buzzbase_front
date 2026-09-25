@@ -15,6 +15,12 @@
 - 数値別ページを統合するときは、旧ページの FAQ を**全件引き継ぐ**。本文に情報が残っていても FAQPage から落ちると疑問文型クエリの受け皿を失う
 - 単体で残すページ（例: `/column/ops-1000`）のクエリに対して、統合先にアンカー付きの独立セクションや目次項目を作らない。クラスタ内の競合を再生産する
 
+## 公開日・更新日
+
+- 日付は各記事の `_constants/meta.ts` の `COLUMN_PUBLISHED_AT` / `COLUMN_UPDATED_AT` に置く。JSON-LD（`datePublished` / `dateModified`）と h1 下の表示が同じ値を見る
+- **`COLUMN_UPDATED_AT` は本文の意味が変わったときだけ触る**。広告枠のリネームや整形など実差分の無い変更で日付だけ新しくすると、Google は本文の差分を見ているため評価されず、更新シグナルの信頼度を下げる方向に効く
+- 記事を新設したら `_constants/meta.ts` と `<ColumnArticleDates>` を必ず置く（`app/(app)/column/__tests__/articleDates.test.ts` が全記事分を検証する）
+
 ## 文言の置き場所
 
 - 文言は `app/(app)/column/<slug>/_constants/meta.ts` に集約する。layout の metadata・page の h1・`*JsonLd.tsx`・`column/page.tsx` のカードが参照するので、改稿はこのファイルだけ触る
