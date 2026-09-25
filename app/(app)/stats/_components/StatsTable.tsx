@@ -171,13 +171,11 @@ export default function StatsTable<
                 >
                   {columns.map((col) => {
                     const raw = row[col.key] as number | null | undefined;
-                    const val = raw ?? 0;
+                    const format = col.format ?? ((v: number) => String(v));
                     const formatted =
                       raw == null && col.dashWhenMissing
                         ? "-"
-                        : col.format
-                          ? col.format(val)
-                          : String(val);
+                        : format(raw ?? 0);
                     return (
                       <div
                         key={String(col.key)}
