@@ -12,7 +12,13 @@ export const metadata: Metadata = {
     "打率・防御率・OPS・出塁率・長打率・WHIP・勝率など、野球の主要指標を無料で自動計算。登録不要でブラウザからすぐ使えます。",
 };
 
-const battingSlugs = ["batting-average", "obp", "slugging", "ops"];
+const battingSlugs = [
+  "batting-average",
+  "obp",
+  "slugging",
+  "ops",
+  "risp-batting-average",
+];
 const pitchingSlugs = [
   "era",
   "whip",

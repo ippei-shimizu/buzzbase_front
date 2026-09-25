@@ -38,6 +38,14 @@ export const battingStats: BattingStat[] = [
     columnUrl: "/column/ops",
   },
   {
+    title: "得点圏打率",
+    equation: "得点圏での安打 ÷ 得点圏での打数",
+    descriptions: [
+      "二塁または三塁に走者がいる場面に限った打率です。チャンスでどれだけ安打を打てたかを示します。",
+    ],
+    slug: "risp-batting-average",
+  },
+  {
     title: "ISO",
     equation: "（二塁打 + 三塁打×2 + 本塁打×3）÷ 打数",
     descriptions: [
