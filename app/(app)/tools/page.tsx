@@ -86,7 +86,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <AdBanner slot={adSlots.toolsListHorizontal} />
+      <AdBanner slot={adSlots.toolsListPitchingBottom} />
 
       <section>
         <h2 className="text-lg font-bold mb-3">チーム指標</h2>

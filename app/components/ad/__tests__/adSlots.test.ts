@@ -2,10 +2,7 @@ import { adSlots } from "../adConfig";
 
 // AdSense 管理画面でユニットを作る前に枠のコードだけ先にマージする運用があるため、
 // 未設定を許容するスロットはここに明示する。ID を設定したらこの配列から外す
-const PENDING_SLOTS: (keyof typeof adSlots)[] = [
-  "gameResultDetailInFeed",
-  "toolsResultRectangle",
-];
+const PENDING_SLOTS: (keyof typeof adSlots)[] = ["toolsResultRectangle"];
 
 describe("adSlots", () => {
   it.each(

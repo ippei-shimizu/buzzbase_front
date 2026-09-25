@@ -331,7 +331,7 @@ export default function EraCriteriaColumnPage() {
         body="BUZZ BASEアプリなら試合結果を入力するだけで、防御率を含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
-      <AdBanner slot={adSlots.columnHorizontal} className="mt-8" />
+      <AdBanner slot={adSlots.columnFooter} className="mt-8" />
     </>
   );
 }
