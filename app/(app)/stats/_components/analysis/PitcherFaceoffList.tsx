@@ -68,6 +68,7 @@ export function PitcherFaceoffList({
 
       {rows.map((row) => {
         const isExpanded = expandedIds.has(row.pitcher_id);
+        const detailId = `pitcher-faceoff-detail-${row.pitcher_id}`;
         const attributes = [
           row.team_name,
           formatThrowHand(row.throw_hand),
@@ -80,11 +81,13 @@ export function PitcherFaceoffList({
               type="button"
               onClick={() => toggleExpanded(row.pitcher_id)}
               aria-expanded={isExpanded}
+              aria-controls={detailId}
               className="flex w-full items-center border-b border-[#27272A] py-2.5 text-left"
             >
               <div className="flex-1 overflow-hidden">
                 <p className="mb-0.5 truncate text-sm font-semibold text-[#F4F4F4]">
-                  {isExpanded ? "▼" : "▶"} {row.pitcher_name}
+                  <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>{" "}
+                  {row.pitcher_name}
                 </p>
                 {attributes.length > 0 ? (
                   <p className="mb-0.5 truncate text-[11px] text-[#A1A1AA]">
@@ -105,7 +108,7 @@ export function PitcherFaceoffList({
               </div>
             </button>
             {isExpanded ? (
-              <div className="mb-1">
+              <div id={detailId} className="mb-1">
                 <PitcherStatsDetailGrid
                   plateAppearances={row.plate_appearances}
                   atBats={row.at_bats}
