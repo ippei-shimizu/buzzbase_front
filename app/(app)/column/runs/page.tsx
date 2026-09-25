@@ -5,7 +5,12 @@ import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
 import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
-import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
+import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+  RUNS_COLUMN_DESCRIPTION,
+  RUNS_COLUMN_TITLE,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -59,8 +64,8 @@ export default function RunsColumnPage() {
   return (
     <>
       <ColumnArticleJsonLd
-        headline="野球の失点とは？自責点との違い・失点率の計算方法を解説"
-        description="野球の失点の意味・自責点との違い・失点率の計算方法を解説。防御率との関係もわかりやすく説明します。"
+        headline={RUNS_COLUMN_TITLE}
+        description={RUNS_COLUMN_DESCRIPTION}
         path="/column/runs"
         breadcrumbLeafName="失点とは"
         faq={faqItems}
@@ -75,9 +80,7 @@ export default function RunsColumnPage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold">
-        野球の失点とは？自責点との違い・失点率の計算方法を解説
-      </h1>
+      <h1 className="text-2xl font-bold">{RUNS_COLUMN_TITLE}</h1>
       <ColumnArticleDates
         publishedAt={COLUMN_PUBLISHED_AT}
         updatedAt={COLUMN_UPDATED_AT}
