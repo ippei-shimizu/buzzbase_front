@@ -1,5 +1,6 @@
 import { battingStats } from "../batting-stats";
 import { getCalculatorDefinition } from "../calculator-definitions";
+import { pitchingStats } from "../pitching-stats";
 
 const definition = getCalculatorDefinition("risp-batting-average")!;
 
@@ -41,7 +42,7 @@ describe("得点圏打率計算ツールの定義", () => {
   });
 
   it("成績算出ページの slug がすべて計算ツールの定義に解決できる", () => {
-    for (const stat of battingStats) {
+    for (const stat of [...battingStats, ...pitchingStats]) {
       if (!stat.slug) continue;
       expect(getCalculatorDefinition(stat.slug)).toBeDefined();
     }
