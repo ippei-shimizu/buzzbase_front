@@ -24,7 +24,7 @@ function formatDate(isoDate: string) {
  */
 export default function ColumnArticleDates({ publishedAt, updatedAt }: Props) {
   return (
-    <p className="text-xs text-zinc-500 mt-2">
+    <p className="text-xs text-zinc-400 mt-2">
       <time dateTime={publishedAt}>公開日 {formatDate(publishedAt)}</time>
       <span className="mx-1.5">/</span>
       <time dateTime={updatedAt}>更新日 {formatDate(updatedAt)}</time>
