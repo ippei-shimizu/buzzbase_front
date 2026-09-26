@@ -191,6 +191,12 @@ export interface PitchCourseZone {
   at_bats: number;
   hits: number;
   batting_average: number;
+  total_bases: number;
+  /** 三振 + 振り逃げ。 */
+  strikeouts: number;
+  swinging_strikeouts: number;
+  /** 振り逃げは swing_type を持たないため、空振り + 見逃しが strikeouts に満たないことがある。 */
+  looking_strikeouts: number;
   /** 打数が min_at_bats 以上か。false は参考値（半透明表示）。 */
   is_reliable: boolean;
 }
@@ -200,6 +206,10 @@ export interface PitchCourseZoneSummary {
   at_bats: number;
   hits: number;
   batting_average: number;
+  total_bases: number;
+  strikeouts: number;
+  swinging_strikeouts: number;
+  looking_strikeouts: number;
 }
 
 export interface PitchCourseData {

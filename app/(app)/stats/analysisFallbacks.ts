@@ -57,6 +57,10 @@ const emptyZoneSummary = (): PitchCourseZoneSummary =>
     at_bats: 0,
     hits: 0,
     batting_average: 0,
+    total_bases: 0,
+    strikeouts: 0,
+    swinging_strikeouts: 0,
+    looking_strikeouts: 0,
   });
 
 // back の zones と同じく必ず 25 要素を持たせ、ヒートマップ描画を安定させる。
@@ -71,6 +75,10 @@ const EMPTY_PITCH_COURSE_ZONES: PitchCourseZone[] = PITCH_COURSES.map(
       at_bats: 0,
       hits: 0,
       batting_average: 0,
+      total_bases: 0,
+      strikeouts: 0,
+      swinging_strikeouts: 0,
+      looking_strikeouts: 0,
       is_reliable: false,
     }),
 );

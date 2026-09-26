@@ -350,35 +350,51 @@ const buildSampleZones = (
   seeds: ReadonlyArray<[number, number, number]>,
 ): PitchCourseZone[] =>
   PITCH_COURSES.map((course) => {
-    const seed = seeds.find(([c]) => c === course);
+    const seed = seeds.find(([seedCourse]) => seedCourse === course);
     const atBats = seed?.[1] ?? 0;
     const hits = seed?.[2] ?? 0;
+    const isStrikeZone = isStrikeZoneCourse(course);
+    // ボール球は手を出すと三振しやすい、という傾向をゾーン内外の割合差で出す。
+    const strikeouts = Math.floor((atBats - hits) / (isStrikeZone ? 3 : 2));
+    const swingingStrikeouts = Math.ceil(strikeouts / 2);
     return {
       course,
       row: pitchCourseRow(course),
       col: pitchCourseCol(course),
-      is_strike_zone: isStrikeZoneCourse(course),
+      is_strike_zone: isStrikeZone,
       plate_appearances: atBats,
       at_bats: atBats,
       hits,
       batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
+      total_bases: hits + Math.floor(hits / 2),
+      strikeouts,
+      swinging_strikeouts: swingingStrikeouts,
+      looking_strikeouts: strikeouts - swingingStrikeouts,
       is_reliable: atBats >= 3,
     };
   });
 
 const SAMPLE_PITCH_COURSE_ZONES = buildSampleZones(SAMPLE_PITCH_COURSE_SEEDS);
 
-const sumZones = (zones: PitchCourseZone[]) => ({
-  plate_appearances: zones.reduce((sum, z) => sum + z.plate_appearances, 0),
-  at_bats: zones.reduce((sum, z) => sum + z.at_bats, 0),
-  hits: zones.reduce((sum, z) => sum + z.hits, 0),
-});
+const sumZones = (zones: PitchCourseZone[]) => {
+  const sumOf = (pick: (zone: PitchCourseZone) => number) =>
+    zones.reduce((sum, zone) => sum + pick(zone), 0);
+  return {
+    plate_appearances: sumOf((zone) => zone.plate_appearances),
+    at_bats: sumOf((zone) => zone.at_bats),
+    hits: sumOf((zone) => zone.hits),
+    total_bases: sumOf((zone) => zone.total_bases),
+    strikeouts: sumOf((zone) => zone.strikeouts),
+    swinging_strikeouts: sumOf((zone) => zone.swinging_strikeouts),
+    looking_strikeouts: sumOf((zone) => zone.looking_strikeouts),
+  };
+};
 
 const sampleStrike = sumZones(
-  SAMPLE_PITCH_COURSE_ZONES.filter((z) => z.is_strike_zone),
+  SAMPLE_PITCH_COURSE_ZONES.filter((zone) => zone.is_strike_zone),
 );
 const sampleBall = sumZones(
-  SAMPLE_PITCH_COURSE_ZONES.filter((z) => !z.is_strike_zone),
+  SAMPLE_PITCH_COURSE_ZONES.filter((zone) => !zone.is_strike_zone),
 );
 
 export const SAMPLE_PITCH_COURSES: PitchCourseData = {
