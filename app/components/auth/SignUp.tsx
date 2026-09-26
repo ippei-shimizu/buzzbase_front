@@ -14,6 +14,7 @@ import LoadingSpinner from "@app/components/spinner/LoadingSpinner";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { trackEvent } from "@app/lib/analytics";
 import { signUp } from "@app/services/authService";
+import { writePendingConfirmationUid } from "@app/utils/pendingConfirmationStorage";
 import {
   isRateLimitError,
   rateLimitErrorMessage,
@@ -58,6 +59,7 @@ export default function SignUp() {
         passwordConfirmation,
         confirm_success_url: process.env.NEXT_PUBLIC_CONFIRM_SUCCESS_URL,
       });
+      writePendingConfirmationUid(email);
       trackEvent("sign_up_started", { method: "email" });
       router.push("/registration-confirmation");
     } catch (error: unknown) {
