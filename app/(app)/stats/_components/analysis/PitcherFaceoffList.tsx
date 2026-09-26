@@ -81,7 +81,7 @@ export function PitcherFaceoffList({
               type="button"
               onClick={() => toggleExpanded(row.pitcher_id)}
               aria-expanded={isExpanded}
-              aria-controls={detailId}
+              aria-controls={isExpanded ? detailId : undefined}
               className="flex w-full items-center border-b border-[#27272A] py-2.5 text-left"
             >
               <div className="flex-1 overflow-hidden">

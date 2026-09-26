@@ -29,7 +29,7 @@ function InsightRow({
       type="button"
       onClick={onToggle}
       aria-expanded={isExpanded}
-      aria-controls={detailId}
+      aria-controls={isExpanded ? detailId : undefined}
       className="mb-1 flex w-full items-center justify-between rounded-lg bg-[#27272A] px-2.5 py-2 text-left"
     >
       <span className="flex-1 text-[13px] font-semibold text-[#F4F4F4]">
