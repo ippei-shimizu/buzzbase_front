@@ -102,7 +102,10 @@ describe("PitchCourseCard の投手別タブ", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(".800")).toBeInTheDocument();
 
-    await user.selectOptions(selector, "控え投手 3打席");
+    await user.selectOptions(
+      selector,
+      screen.getByRole("option", { name: "控え投手 3打席" }),
+    );
 
     expect(screen.getByText(".000")).toBeInTheDocument();
     expect(screen.queryByText(".800")).not.toBeInTheDocument();
