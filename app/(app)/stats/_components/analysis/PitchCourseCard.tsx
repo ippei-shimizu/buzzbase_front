@@ -6,7 +6,7 @@ import type {
   PitcherFaceoffCourseData,
 } from "../../analysisActions";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { PitchCourseGrid } from "@app/components/baseball/PitchCourseGrid";
 import { formatBattingAverage } from "@app/utils/formatStats";
 
@@ -134,13 +134,20 @@ function ZoneHeatmap({
 }
 
 /** ヒートマップ下の注記。参考値の閾値は back が返す min_at_bats に合わせる。 */
-function Notes({ minAtBats }: { minAtBats: number }) {
+function Notes({
+  minAtBats,
+  children,
+}: {
+  minAtBats: number;
+  children?: ReactNode;
+}) {
   return (
     <div className="mt-3 flex flex-col gap-y-0.5">
       <p className="text-[11px] text-[#71717A]">
         打数が{minAtBats}未満のコースは参考値です
       </p>
       <p className="text-[11px] text-[#71717A]">捕手目線で表示しています</p>
+      {children}
     </div>
   );
 }
@@ -360,11 +367,12 @@ export function PitchCourseCard({
                   />
                 </div>
               ) : null}
-              <Notes minAtBats={pitchers.min_at_bats} />
-              <p className="text-[11px] text-[#71717A]">
-                コースを記録した対戦が{pitchers.min_plate_appearances}
-                打席以上の投手のみ表示しています
-              </p>
+              <Notes minAtBats={pitchers.min_at_bats}>
+                <p className="text-[11px] text-[#71717A]">
+                  コースを記録した対戦が{pitchers.min_plate_appearances}
+                  打席以上の投手のみ表示しています
+                </p>
+              </Notes>
             </>
           )}
         </div>
