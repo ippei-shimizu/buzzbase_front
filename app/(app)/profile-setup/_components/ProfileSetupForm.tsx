@@ -5,7 +5,7 @@ import type { BattingSide } from "@app/constants/handedness";
 import type { Team } from "@app/interface";
 import type { ThrowHand } from "@app/interface/pitcher";
 import * as Sentry from "@sentry/nextjs";
-import { useState, type Key } from "react";
+import { useEffect, useState, type Key } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import ErrorMessages from "@app/components/auth/ErrorMessages";
 import { updateUserPositions } from "@app/services/positionService";
@@ -40,6 +40,7 @@ interface Props {
 }
 
 const NO_TEAMS: Team[] = [];
+const TEAM_SEARCH_DEBOUNCE_MS = 250;
 
 export default function ProfileSetupForm({
   userId,
@@ -61,12 +62,27 @@ export default function ProfileSetupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const trimmedTeamName = teamName.trim();
+  const [teamSearchQuery, setTeamSearchQuery] = useState(trimmedTeamName);
+  // IME の変換途中でも入力が変わるため、打ち止めてから検索して 1 文字ごとのリクエストを避ける。
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setTeamSearchQuery(trimmedTeamName),
+      TEAM_SEARCH_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [trimmedTeamName]);
   const { data: searchedTeams } = useSWR(
-    trimmedTeamName ? ["profile-setup/teams", trimmedTeamName] : null,
+    teamSearchQuery ? ["profile-setup/teams", teamSearchQuery] : null,
     ([, query]) => searchTeams(query),
     { keepPreviousData: true },
   );
-  const teamSuggestions = trimmedTeamName ? (searchedTeams ?? NO_TEAMS) : [];
+  // デバウンス中は前の検索語の結果が残る。今の入力に合わない候補を出すと、blur 時に
+  // フォーカス中の候補が確定されて入力した名前が置き換わるため、部分一致するものだけ残す。
+  const teamSuggestions = trimmedTeamName
+    ? (searchedTeams ?? NO_TEAMS).filter((team) =>
+        team.name.includes(trimmedTeamName),
+      )
+    : NO_TEAMS;
 
   const summarize = (skipped: boolean): ProfileSetupSummary => ({
     skipped,

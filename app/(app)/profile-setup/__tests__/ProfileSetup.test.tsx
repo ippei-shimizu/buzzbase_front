@@ -221,6 +221,22 @@ describe("登録直後のプロフィール入力", () => {
   });
 
   describe("所属チームの入力", () => {
+    it("1 文字ごとではなく、入力が止まってから検索する", async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      const teamInput = await screen.findByRole("combobox", {
+        name: "所属チーム",
+      });
+      await user.type(teamInput, "ブルー");
+
+      await screen.findByRole("option", {
+        name: "ブルーウェーブ",
+        hidden: true,
+      });
+      expect(mockSearchTeams.mock.calls).toEqual([["ブルー"]]);
+    });
+
     it("候補から選んだまま保存すると、新規作成せず選んだチームの id を送る", async () => {
       const user = userEvent.setup();
       renderPage();
