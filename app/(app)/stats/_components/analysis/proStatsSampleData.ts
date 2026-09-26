@@ -2,6 +2,7 @@ import type {
   CountSituations,
   HitDirection,
   PitchCourseData,
+  PitchCoursePitchTypeData,
   PitchCourseZone,
   PitcherFaceoff,
   PitcherFaceoffCourseData,
@@ -394,6 +395,63 @@ export const SAMPLE_PITCH_COURSES: PitchCourseData = {
   },
   total_target_pa:
     sampleStrike.plate_appearances + sampleBall.plate_appearances,
+  min_at_bats: 3,
+};
+
+// 球種×コースのサンプル。球種ごとに得意コースが違う（ストレートは高め、変化球は低めに弱い）ことを見せる。
+export const SAMPLE_PITCH_TYPE_COURSES: PitchCoursePitchTypeData = {
+  rows: [
+    {
+      id: 1,
+      label: "ストレート",
+      plate_appearances: 32,
+      zones: buildSampleZones([
+        [7, 4, 2],
+        [8, 5, 3],
+        [9, 3, 1],
+        [12, 5, 2],
+        [13, 6, 3],
+        [14, 3, 1],
+        [18, 3, 1],
+        [3, 3, 1],
+      ]),
+    },
+    {
+      id: 2,
+      label: "スライダー",
+      plate_appearances: 21,
+      zones: buildSampleZones([
+        [13, 4, 2],
+        [14, 3, 1],
+        [19, 5, 0],
+        [20, 3, 0],
+        [24, 3, 0],
+        [18, 3, 1],
+      ]),
+    },
+    {
+      id: 3,
+      label: "カーブ",
+      plate_appearances: 12,
+      zones: buildSampleZones([
+        [12, 3, 1],
+        [17, 4, 1],
+        [22, 3, 0],
+        [18, 2, 1],
+      ]),
+    },
+    {
+      id: 4,
+      label: "チェンジアップ",
+      plate_appearances: 8,
+      zones: buildSampleZones([
+        [18, 3, 1],
+        [19, 3, 0],
+        [23, 2, 0],
+      ]),
+    },
+  ],
+  total_target_pa: 73,
   min_at_bats: 3,
 };
 

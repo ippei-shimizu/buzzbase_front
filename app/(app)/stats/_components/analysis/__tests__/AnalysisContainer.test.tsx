@@ -78,6 +78,7 @@ import {
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getPitchCoursePitchTypes,
   getPitchCourses,
   getPitcherAttributeSummary,
   getPitcherFaceoffCourses,
@@ -594,6 +595,22 @@ describe("AnalysisContainer の Pro 出し分け", () => {
         screen.getByRole("button", { name: /投手 A/ }),
       ).toBeInTheDocument();
       expect(screen.queryByText("20打数 8安打")).not.toBeInTheDocument();
+    });
+
+    it("コース別カードの球種別タブもサンプルで開け、API は呼ばない", async () => {
+      const mockGetPitchCoursePitchTypes =
+        getPitchCoursePitchTypes as jest.MockedFunction<
+          typeof getPitchCoursePitchTypes
+        >;
+      const user = userEvent.setup();
+      await renderContainer();
+
+      await user.click(await screen.findByRole("button", { name: "球種別" }));
+
+      expect(
+        await screen.findByRole("button", { name: "スライダー (21)" }),
+      ).toBeInTheDocument();
+      expect(mockGetPitchCoursePitchTypes).not.toHaveBeenCalled();
     });
 
     it("方向別を含む5ブロックすべてでサンプルであることを明示する", async () => {

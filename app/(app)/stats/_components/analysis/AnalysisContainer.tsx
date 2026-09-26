@@ -56,6 +56,7 @@ import {
   SAMPLE_COUNT_SITUATIONS,
   SAMPLE_HIT_DIRECTIONS,
   SAMPLE_PITCH_COURSES,
+  SAMPLE_PITCH_TYPE_COURSES,
   SAMPLE_PITCH_TYPES,
   SAMPLE_PITCHER_FACEOFF_COURSES,
   SAMPLE_PITCHER_FACEOFFS,
@@ -84,6 +85,7 @@ interface AnalysisContainerProps {
   monthOptions: FilterOption[];
 }
 
+const loadSamplePitchTypeCross = async () => SAMPLE_PITCH_TYPE_COURSES;
 const loadSamplePitcherCross = async () => SAMPLE_PITCHER_FACEOFF_COURSES;
 
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
@@ -366,6 +368,7 @@ export function AnalysisContainer({
           <ProSampleSection feature="pitch_course_average">
             <PitchCourseCard
               data={SAMPLE_PITCH_COURSES}
+              loadPitchTypeCross={loadSamplePitchTypeCross}
               loadPitcherCross={loadSamplePitcherCross}
             />
           </ProSampleSection>
