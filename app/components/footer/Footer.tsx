@@ -9,7 +9,9 @@ export default function Footer() {
   const { isLoggedIn } = useAuthContext();
   const pathName = usePathname();
 
-  const shouldHideFooter = pathName.includes("/register-username");
+  const shouldHideFooter =
+    pathName.includes("/register-username") ||
+    pathName.includes("/profile-setup");
   return (
     <>
       {!shouldHideFooter && (

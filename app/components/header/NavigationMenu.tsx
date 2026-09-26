@@ -43,7 +43,9 @@ export default function NavigationMenu() {
     }
   };
 
-  const shouldHideNavigationMenu = pathName.includes("/register-username");
+  const shouldHideNavigationMenu =
+    pathName.includes("/register-username") ||
+    pathName.includes("/profile-setup");
 
   return (
     <>
