@@ -1,5 +1,5 @@
 "use client";
-import type { AwardData, UserAwards } from "@app/interface";
+import type { AwardData, Team, UserAwards } from "@app/interface";
 import type { ThrowHand } from "@app/interface/pitcher";
 import type { SharedSelection } from "@heroui/system";
 import {
@@ -44,7 +44,8 @@ import {
 import { getPrefectures } from "@app/services/prefectureService";
 import {
   createOrUpdateTeam,
-  getTeams,
+  getMyTeam,
+  searchTeams,
   updateTeam,
 } from "@app/services/teamsService";
 import { getUserData, updateProfile } from "@app/services/userService";
@@ -73,13 +74,6 @@ type BaseballCategory = {
   alphabet: string;
 };
 
-type Teams = {
-  prefecture_id: number;
-  category_id: number;
-  id: number;
-  name: string;
-};
-
 export default function ProfileEdit() {
   const [profile, setProfile] = useState<{
     name: string;
@@ -104,7 +98,11 @@ export default function ProfileEdit() {
     BaseballCategory[]
   >([]);
   const [baseballCategoryValue, setBaseballCategoryValue] = useState("");
-  const [teams, setTeams] = useState<Teams[] | undefined>(undefined);
+  const [teams, setTeams] = useState<Team[] | undefined>(undefined);
+  const teamSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const teamRequestId = useRef(0);
+  // 候補は検索ごとに入れ替わるため、確定済みチームの名前は候補とは別に持つ。
+  const confirmedTeam = useRef<{ id: number; name: string } | null>(null);
   const [teamName, setTeamName] = useState("");
   const [isDisabled, setIsDisabled] = useState(true);
   const [selectedCategoryId, setSelectedCategoryId] = useState<
@@ -157,10 +155,6 @@ export default function ProfileEdit() {
       const baseballCategoryData = await getBaseballCategory();
       setBaseballCategories(baseballCategoryData);
 
-      // チーム一覧取得
-      const teamsData = await getTeams();
-      setTeams(teamsData);
-
       const positionIds = data.positions.map((position: { id: number }) =>
         position.id.toString(),
       );
@@ -168,17 +162,22 @@ export default function ProfileEdit() {
 
       // チーム初期値設定
       if (data.team_id) {
-        const userTeam = teamsData.find(
-          (team: { id: number }) => team.id === data.team_id,
-        );
+        // 名前検索では件数上限から漏れうるため、サーバー側で解決済みの所属チームを使い名前からマスタの id に引き当てる。
+        const userTeam = await getMyTeam(String(data.user_id));
         if (userTeam) {
+          confirmedTeam.current = { id: data.team_id, name: userTeam.name };
           setTeamName(userTeam.name);
-          setSelectedTeamId(userTeam.id);
-          setSelectedCategoryId(userTeam.category_id);
-          setSelectedPrefectureId(userTeam.prefecture_id);
+          setSelectedTeamId(data.team_id);
           const category = baseballCategoryData.find(
-            (category: { id: number }) => category.id === userTeam.category_id,
+            (category: BaseballCategory) =>
+              category.name === userTeam.category_name,
           );
+          const prefecture = prefectureData.find(
+            (prefecture: Prefecture) =>
+              prefecture.name === userTeam.prefecture_name,
+          );
+          setSelectedCategoryId(category?.id);
+          setSelectedPrefectureId(prefecture?.id);
           if (category) {
             setBaseballCategoryValue(category.name);
           }
@@ -204,6 +203,14 @@ export default function ProfileEdit() {
   useEffect(() => {
     fetchData();
   }, [isLoggedIn]);
+
+  // 入力直後に画面を離れても、デバウンス中のチーム検索を発火させない。
+  useEffect(
+    () => () => {
+      if (teamSearchTimer.current) clearTimeout(teamSearchTimer.current);
+    },
+    [],
+  );
 
   // disabled制御
   useEffect(() => {
@@ -288,7 +295,7 @@ export default function ProfileEdit() {
     if (teamName.trim() !== "") {
       const teamData = {
         team: {
-          name: teamName,
+          name: teamName.trim(),
           category_id: selectedCategoryId,
           prefecture_id: selectedPrefectureId,
         },
@@ -435,10 +442,43 @@ export default function ProfileEdit() {
     );
   };
 
+  // デバウンス + 最新リクエスト勝ちで、高速入力時の過剰リクエストとレースを防ぐ。
+  const handleTeamInputChange = (value: string) => {
+    setTeamName(value);
+    const name = value.trim();
+    // 確定済みチームの名前と一致する間だけ id を維持し、打ち替えたら未確定に戻す。
+    setSelectedTeamId(
+      confirmedTeam.current && confirmedTeam.current.name === name
+        ? confirmedTeam.current.id
+        : undefined,
+    );
+    if (teamSearchTimer.current) clearTimeout(teamSearchTimer.current);
+    const requestId = teamRequestId.current + 1;
+    teamRequestId.current = requestId;
+    if (!name) {
+      // 名前を空にしたら所属チームを外す。カテゴリー / 地域は入力欄が disabled になり画面から消せないため一緒に落とす。
+      setSelectedCategoryId(undefined);
+      setSelectedPrefectureId(undefined);
+      setBaseballCategoryValue("");
+      setTeams([]);
+      return;
+    }
+    teamSearchTimer.current = setTimeout(() => {
+      searchTeams(name)
+        .then((searchedTeams) => {
+          if (requestId === teamRequestId.current) setTeams(searchedTeams);
+        })
+        .catch((error) => {
+          console.error("チームの検索に失敗しました", error);
+        });
+    }, 250);
+  };
+
   // 既にdbに保存されているチーム名選択時の処理
   const handleTeamSelectionChange = async (teamId: number) => {
     const selectedTeam = teams?.find((team) => team.id === teamId);
     if (selectedTeam) {
+      confirmedTeam.current = { id: selectedTeam.id, name: selectedTeam.name };
       setTeamName(selectedTeam.name);
       setSelectedTeamId(selectedTeam.id);
       const category = baseballCategories.find(
@@ -677,8 +717,10 @@ export default function ProfileEdit() {
                   className="pt-0.5"
                   inputValue={teamName}
                   defaultItems={teams}
-                  onInputChange={(value) => setTeamName(value)}
+                  onInputChange={handleTeamInputChange}
                   onSelectionChange={(value) => {
+                    // blur 時の custom value 確定でも null が飛ぶため、名前は消さない。
+                    if (value == null) return;
                     handleTeamSelectionChange(Number(value));
                   }}
                   selectedKey={

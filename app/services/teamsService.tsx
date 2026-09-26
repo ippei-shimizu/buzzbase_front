@@ -1,4 +1,4 @@
-import type { Team, teamData } from "@app/interface";
+import type { MyTeam, Team, teamData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getTeamName = async (id: number) => {
@@ -10,19 +10,35 @@ export const getTeamName = async (id: number) => {
   }
 };
 
-export const getTeams = async () => {
+/** GET /api/v1/teams の limit 上限（back の MAX_LIMIT と揃える）。 */
+export const TEAM_SEARCH_MAX_LIMIT = 100;
+
+/**
+ * ユーザーの所属チームを、カテゴリー名・地域名まで解決済みの形で取得する。
+ * @param userId ユーザーの公開 ID（`user_id`）
+ * @returns 所属チーム。所属チームが無い・取得に失敗したときは null
+ */
+export const getMyTeam = async (userId: string): Promise<MyTeam | null> => {
   try {
-    const response = await axiosInstance.get("/api/v1/teams");
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
+    const response = await axiosInstance.get<Partial<MyTeam>>(
+      `/api/v1/teams/${encodeURIComponent(userId)}/my_team`,
+    );
+    const { name, category_name, prefecture_name } = response.data;
+    return name
+      ? {
+          name,
+          category_name: category_name ?? null,
+          prefecture_name: prefecture_name ?? null,
+        }
+      : null;
+  } catch {
+    return null;
   }
 };
 
 /**
  * チーム名の部分一致検索。teams は全ユーザー共有で単調増加するマスタのため、
- * サジェストでは全件取得の `getTeams` を使わずこちらを使う。
+ * 全件取得はせず必ず検索語と件数を付けて取得する。
  *
  * @param query 検索語（前後の空白は除いて送る）
  * @param limit 取得件数（back 側の上限は 100）

@@ -14,9 +14,9 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { THROW_HAND_FULL_LABELS } from "@app/constants/throwHand";
-import { getTeams } from "@app/services/teamsService";
+import { getTeamName } from "@app/services/teamsService";
 import { getPitchers } from "@app/services/v2/pitcherService";
 import { PitcherFormModal } from "./PitcherFormModal";
 
@@ -49,7 +49,8 @@ export function PitcherSelector({
   defaultTeamId,
 }: PitcherSelectorProps) {
   const [pitchers, setPitchers] = useState<Pitcher[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamNames, setTeamNames] = useState<Record<string, string>>({});
+  const requestedTeamIds = useRef(new Set<string>());
   const [query, setQuery] = useState("");
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -62,16 +63,33 @@ export function PitcherSelector({
     getPitchers({ per_page: 200 }).then((response) =>
       setPitchers(response.data),
     );
-    getTeams().then(setTeams);
   }, []);
 
-  const teamNameById = new Map(
-    teams.map((team) => [String(team.id), team.name]),
-  );
+  // チーム名は一覧を開いたときだけ使うので、そのとき投手に紐づくチーム分だけ引く。
+  useEffect(() => {
+    if (!isPickerOpen) return;
+    pitchers.forEach((pitcher) => {
+      if (pitcher.team_id == null) return;
+      const teamId = String(pitcher.team_id);
+      if (requestedTeamIds.current.has(teamId)) return;
+      requestedTeamIds.current.add(teamId);
+      getTeamName(pitcher.team_id).then((name: string) => {
+        // 失敗時は "" が返る。記録を戻して開き直したときに再取得させる。
+        if (!name) {
+          requestedTeamIds.current.delete(teamId);
+          return;
+        }
+        setTeamNames((prev) => ({ ...prev, [teamId]: name }));
+      });
+    });
+  }, [isPickerOpen, pitchers]);
+
+  const teams: Team[] = Object.entries(teamNames).map(([id, name]) => ({
+    id,
+    name,
+  }));
   const teamNameFor = (pitcher: Pitcher): string | undefined =>
-    pitcher.team_id != null
-      ? teamNameById.get(String(pitcher.team_id))
-      : undefined;
+    pitcher.team_id != null ? teamNames[String(pitcher.team_id)] : undefined;
 
   const selected = pitchers.find((pitcher) => pitcher.id === value) ?? null;
   const filtered = query
