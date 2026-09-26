@@ -6,7 +6,9 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import SignIn from "@app/components/auth/SignIn";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
-import EmailConfirmationAutoLogin from "./_components/EmailConfirmationAutoLogin";
+import EmailConfirmationAutoLogin, {
+  hasConfirmationTokens,
+} from "./_components/EmailConfirmationAutoLogin";
 import SignUpCompletionTracker from "./_components/SignUpCompletionTracker";
 
 function SignInContent() {
@@ -21,25 +23,33 @@ function SignInContent() {
   const { isLoggedIn } = useAuthContext();
   const prevIsLoggedInRef = useRef(isLoggedIn);
 
-  const hasConfirmationTokens = Boolean(
-    confirmationAccessToken && confirmationClient && confirmationUid,
-  );
+  const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false);
+
+  const withConfirmationTokens = hasConfirmationTokens({
+    accessToken: confirmationAccessToken,
+    client: confirmationClient,
+    uid: confirmationUid,
+  });
 
   const logoutSuccess = logoutParams === "success" && !toastTimedOut;
   const message = logoutSuccess ? "ログアウトしました" : "";
 
   useEffect(() => {
+    // ref は「直前のレンダーの isLoggedIn」を表す不変条件なので、
+    // 早期 return する経路でも必ず更新する
+    const prevIsLoggedIn = prevIsLoggedInRef.current;
+    prevIsLoggedInRef.current = isLoggedIn;
+
     // メール確認のトークンで自動ログインする場合は、遷移先を
     // EmailConfirmationAutoLogin 側が決めるためここでは動かさない
-    if (hasConfirmationTokens) return;
+    if (withConfirmationTokens) return;
     // セッション復元で既にログイン済みの場合のみリダイレクト
     // このページ上でログインした場合（false→true）はリダイレクトしない
     // （GoogleLoginButtonやSignInが自前でナビゲーションを行うため）
-    if (isLoggedIn === true && prevIsLoggedInRef.current !== false) {
+    if (isLoggedIn === true && prevIsLoggedIn !== false) {
       router.push("/");
     }
-    prevIsLoggedInRef.current = isLoggedIn;
-  }, [isLoggedIn, router, hasConfirmationTokens]);
+  }, [isLoggedIn, router, withConfirmationTokens]);
 
   useEffect(() => {
     if (logoutParams !== "success") return;
@@ -51,11 +61,14 @@ function SignInContent() {
 
   return (
     <>
+      {/* GA4 の sign_up は EmailConfirmationAutoLogin の遷移より先に送る必要があるため、
+          子の effect が JSX の記述順に flush されることに依存してこの順序を保つ */}
       <SignUpCompletionTracker triggered={confirmationUrl === "true"} />
       <EmailConfirmationAutoLogin
         accessToken={confirmationAccessToken}
         client={confirmationClient}
         uid={confirmationUid}
+        onAutoLoginChange={setIsAutoLoggingIn}
       />
       {logoutSuccess && <ToastSuccess text={message} />}
       <Image
@@ -67,21 +80,29 @@ function SignInContent() {
       />
       <div className="h-full flex flex-col items-center justify-center px-4">
         <div className="w-11/12 max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
-          {confirmationUrl && !hasConfirmationTokens && (
-            <p className="mb-10 text-sm text-yellow-500 lg:text-base">
-              メールアドレスの認証が成功しました！
-              <br />
-              先ほどのメールアドレスとパスワードを入力してください。
+          {isAutoLoggingIn ? (
+            <p role="status" className="text-base text-yellow-500">
+              メールアドレスの認証が完了しました。ログインしています...
             </p>
+          ) : (
+            <>
+              {confirmationUrl && !withConfirmationTokens && (
+                <p className="mb-10 text-sm text-yellow-500 lg:text-base">
+                  メールアドレスの認証が成功しました！
+                  <br />
+                  先ほどのメールアドレスとパスワードを入力してください。
+                </p>
+              )}
+              <h2 className="text-2xl font-bold mb-9">ログイン</h2>
+              <SignIn />
+              <p className="text-sm text-zinc-400 mt-8 text-center">
+                まだ登録していない方は
+                <Link href="/signup" className="text-yellow-500 ml-1">
+                  新規会員登録（無料）
+                </Link>
+              </p>
+            </>
           )}
-          <h2 className="text-2xl font-bold mb-9">ログイン</h2>
-          <SignIn />
-          <p className="text-sm text-zinc-400 mt-8 text-center">
-            まだ登録していない方は
-            <Link href="/signup" className="text-yellow-500 ml-1">
-              新規会員登録（無料）
-            </Link>
-          </p>
         </div>
       </div>
     </>
