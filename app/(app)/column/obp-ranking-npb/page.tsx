@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 type RankingRow = {
   player: string;
@@ -92,6 +94,8 @@ export default function ObpRankingNpbColumnPage() {
         path="/column/obp-ranking-npb"
         breadcrumbLeafName="NPB 出塁率ランキング"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -104,6 +108,10 @@ export default function ObpRankingNpbColumnPage() {
       <h1 className="text-2xl font-bold">
         NPB 出塁率ランキング｜歴代シーズン上位と最高出塁率タイトル獲得者
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="mt-4 text-sm text-zinc-300 leading-6">
         NPB（日本プロ野球）の歴代シーズン出塁率の上位を整理しました。

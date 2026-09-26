@@ -3,8 +3,14 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import BattingAverageColumnJsonLd from "./_components/BattingAverageColumnJsonLd";
-import { BATTING_AVERAGE_COLUMN_TITLE } from "./_constants/meta";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import {
+  BATTING_AVERAGE_COLUMN_DESCRIPTION,
+  BATTING_AVERAGE_COLUMN_TITLE,
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -57,7 +63,15 @@ const faqItems = [
 export default function BattingAverageColumnPage() {
   return (
     <>
-      <BattingAverageColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline={BATTING_AVERAGE_COLUMN_TITLE}
+        description={BATTING_AVERAGE_COLUMN_DESCRIPTION}
+        path="/column/batting-average"
+        breadcrumbLeafName="打率とは"
+        faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
@@ -67,6 +81,10 @@ export default function BattingAverageColumnPage() {
       />
 
       <h1 className="text-2xl font-bold">{BATTING_AVERAGE_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">
@@ -518,7 +536,7 @@ export default function BattingAverageColumnPage() {
         body="BUZZ BASEアプリなら試合結果を入力するだけで、打率を含む全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
-      <AdBanner slot={adSlots.columnHorizontal} className="mt-8" />
+      <AdBanner slot={adSlots.columnFooter} className="mt-8" />
     </>
   );
 }

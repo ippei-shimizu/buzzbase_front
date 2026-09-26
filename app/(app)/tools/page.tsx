@@ -3,6 +3,11 @@ import Link from "next/link";
 import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import { calculatorDefinitions } from "@app/data/baseball-stats/calculator-definitions";
+import {
+  battingToolSlugs,
+  pitchingToolSlugs,
+  teamToolSlugs,
+} from "@app/data/baseball-stats/tool-groups";
 import { type CalculatorDefinition } from "@app/data/baseball-stats/types";
 
 export const metadata: Metadata = {
@@ -11,17 +16,6 @@ export const metadata: Metadata = {
   description:
     "打率・防御率・OPS・出塁率・長打率・WHIP・勝率など、野球の主要指標を無料で自動計算。登録不要でブラウザからすぐ使えます。",
 };
-
-const battingSlugs = ["batting-average", "obp", "slugging", "ops"];
-const pitchingSlugs = [
-  "era",
-  "whip",
-  "k-bb",
-  "k-9",
-  "bb-9",
-  "opponent-batting-average",
-];
-const teamSlugs = ["winning-percentage"];
 
 function getTools(slugs: string[]): CalculatorDefinition[] {
   return slugs
@@ -55,9 +49,9 @@ function ToolCard({ tool }: { tool: CalculatorDefinition }) {
 }
 
 export default function ToolsPage() {
-  const battingTools = getTools(battingSlugs);
-  const pitchingTools = getTools(pitchingSlugs);
-  const teamTools = getTools(teamSlugs);
+  const battingTools = getTools(battingToolSlugs);
+  const pitchingTools = getTools(pitchingToolSlugs);
+  const teamTools = getTools(teamToolSlugs);
 
   return (
     <div>
@@ -75,7 +69,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <AdBanner slot={adSlots.toolsListMiddle} />
+      <AdBanner slot={adSlots.toolsListBattingBottom} />
 
       <section className="mb-8">
         <h2 className="text-lg font-bold mb-3">投手指標</h2>
@@ -86,7 +80,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <AdBanner slot={adSlots.toolsListHorizontal} />
+      <AdBanner slot={adSlots.toolsListPitchingBottom} />
 
       <section>
         <h2 className="text-lg font-bold mb-3">チーム指標</h2>
@@ -97,7 +91,7 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <AdBanner slot={adSlots.toolsListBottom} />
+      <AdBanner slot={adSlots.toolsListTeamBottom} />
     </div>
   );
 }

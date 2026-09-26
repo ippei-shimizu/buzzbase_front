@@ -78,8 +78,13 @@ export default function CalculatorForm({
         return;
       }
       const num = parseFloat(val);
-      if (isNaN(num) || num < 0) {
+      if (!Number.isFinite(num) || num < 0) {
         setError(`${field.label}には0以上の数値を入力してください`);
+        return;
+      }
+      // input の step は spinner にしか効かず、直接入力された小数は弾けない
+      if (field.step === 1 && !Number.isInteger(num)) {
+        setError(`${field.label}には0以上の整数を入力してください`);
         return;
       }
       numericValues[field.name] = num;

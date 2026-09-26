@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -29,6 +31,8 @@ export default function Era1ColumnPage() {
         path="/column/era-1"
         breadcrumbLeafName="防御率 1 点台"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -41,6 +45,10 @@ export default function Era1ColumnPage() {
       <h1 className="text-2xl font-bold">
         防御率 1 点台はどのレベル？歴代エースと達成条件
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         防御率 <strong>1.00 〜 1.99</strong>{" "}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { formatEra, formatRate } from "@app/utils/formatStats";
 
 interface Column<T> {
   key: keyof T;
@@ -8,23 +9,13 @@ interface Column<T> {
   format?: (value: number) => string;
   highlight?: boolean;
   tooltip?: string;
+  /** 値が null / 未返却のときに 0 として整形せず「-」を出す。母数 0 を 0 と区別したい指標で使う */
+  dashWhenMissing?: boolean;
 }
 
 interface StatsTableProps<T> {
   rows: T[];
   columns: Column<T>[];
-}
-
-function formatRate(value: number): string {
-  const formatted = value.toFixed(3);
-  if (value !== 0 && value < 1 && value > -1) {
-    return formatted.replace(/^0/, "");
-  }
-  return formatted;
-}
-
-function formatEra(value: number): string {
-  return value.toFixed(2);
 }
 
 const fmtInt = (v: number) => String(v);
@@ -168,10 +159,12 @@ export default function StatsTable<
                   }}
                 >
                   {columns.map((col) => {
-                    const val = (row[col.key] as number | undefined) ?? 0;
-                    const formatted = col.format
-                      ? col.format(val)
-                      : String(val);
+                    const raw = row[col.key] as number | null | undefined;
+                    const format = col.format ?? ((v: number) => String(v));
+                    const formatted =
+                      raw == null && col.dashWhenMissing
+                        ? "-"
+                        : format(raw ?? 0);
                     return (
                       <div
                         key={String(col.key)}

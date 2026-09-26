@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 type AverageRow = {
   year: string;
@@ -54,6 +56,8 @@ export default function NpbEraAverageColumnPage() {
         path="/column/npb-era-average"
         breadcrumbLeafName="NPB 防御率平均値の推移"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -66,6 +70,10 @@ export default function NpbEraAverageColumnPage() {
       <h1 className="text-2xl font-bold">
         NPB 防御率平均値の推移｜セ・パ両リーグの平均と歴代エースの比較
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         NPB（日本プロ野球）のリーグ平均防御率は、近年
