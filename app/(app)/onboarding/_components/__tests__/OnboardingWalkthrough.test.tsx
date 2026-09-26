@@ -194,6 +194,20 @@ describe("OnboardingWalkthrough", () => {
       ]);
     });
 
+    // 往復ぶんの再送は許容する仕様（通過率はユニークユーザー数で集計する前提）なので、重複排除を入れたら落ちるよう固定する
+    it("戻って進み直したときは同じステップを再送する", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+      await user.click(screen.getByRole("button", { name: "戻る" }));
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+        { step_index: 0, illustration: "autoCalc" },
+      ]);
+    });
+
     it("端で押し戻してステップが変わらないときは再送しない", async () => {
       const { user } = renderWalkthrough();
 
