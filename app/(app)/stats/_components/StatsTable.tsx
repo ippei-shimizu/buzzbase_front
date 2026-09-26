@@ -9,6 +9,8 @@ interface Column<T> {
   format?: (value: number) => string;
   highlight?: boolean;
   tooltip?: string;
+  /** 値が null / 未返却のときに 0 として整形せず「-」を出す。母数 0 を 0 と区別したい指標で使う */
+  dashWhenMissing?: boolean;
 }
 
 interface StatsTableProps<T> {
@@ -157,10 +159,12 @@ export default function StatsTable<
                   }}
                 >
                   {columns.map((col) => {
-                    const val = (row[col.key] as number | undefined) ?? 0;
-                    const formatted = col.format
-                      ? col.format(val)
-                      : String(val);
+                    const raw = row[col.key] as number | null | undefined;
+                    const format = col.format ?? ((v: number) => String(v));
+                    const formatted =
+                      raw == null && col.dashWhenMissing
+                        ? "-"
+                        : format(raw ?? 0);
                     return (
                       <div
                         key={String(col.key)}
