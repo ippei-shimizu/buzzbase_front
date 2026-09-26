@@ -4,7 +4,7 @@ import type {
   PitchCourseZone,
   PitcherFaceoffCourseData,
 } from "../../../analysisActions";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   PITCH_COURSES,
@@ -368,8 +368,9 @@ describe("PitchCourseCard の指標・粒度切替", () => {
 
     await user.click(screen.getByRole("button", { name: "3x3" }));
 
-    expect(screen.getByText(".333")).toBeInTheDocument();
-    expect(screen.getByText("6打数")).toBeInTheDocument();
+    const highThirdBase = screen.getByRole("group", { name: "高め・三塁側" });
+    expect(within(highThirdBase).getByText(".333")).toBeInTheDocument();
+    expect(within(highThirdBase).getByText("6打数")).toBeInTheDocument();
     expect(screen.queryByText("1.000")).not.toBeInTheDocument();
   });
 

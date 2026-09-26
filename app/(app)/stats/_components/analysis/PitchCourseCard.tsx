@@ -208,7 +208,12 @@ function CourseHeatmap({
               }}
             >
               {foldToGrid3(zones).map((cell) => (
-                <div key={cell.key}>
+                <div
+                  key={cell.key}
+                  role="group"
+                  aria-label={cell.label}
+                  title={cell.label}
+                >
                   <MetricCell reading={read(cell.counts, cell.courseCount)} />
                 </div>
               ))}
