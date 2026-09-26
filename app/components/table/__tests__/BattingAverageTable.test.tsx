@@ -2,7 +2,7 @@ import type {
   BattingStatsAggregate,
   BattingStatsCalculated,
 } from "@app/interface/dashboardStats";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import BattingAverageTable from "../BattingAverageTable";
 
 const aggregate: BattingStatsAggregate = {
@@ -40,10 +40,14 @@ const buildCalculated = (
   ...overrides,
 });
 
+const scoringPositionCell = () => {
+  const cell = screen.getByRole("button", { name: "得点圏打率" }).parentElement;
+  if (!cell) throw new Error("得点圏打率のセルが見つかりません");
+  return cell;
+};
+
 const scoringPositionValue = () =>
-  screen
-    .getByRole("button", { name: "得点圏打率" })
-    .parentElement?.querySelector("span")?.textContent;
+  within(scoringPositionCell()).getByText(/^(\.\d{3}|-)$/).textContent;
 
 describe("BattingAverageTable", () => {
   it("得点圏打率を他の率系と同じ表記で表示する", () => {
