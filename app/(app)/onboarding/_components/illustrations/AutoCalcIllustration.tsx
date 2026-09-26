@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import {
   ArtCanvas,
   BODY,
@@ -15,9 +15,6 @@ import {
 
 // 下端をキャンバスの外に出し、画面の続きがあるように見せる。
 const PHONE = { x: 22, y: 14, width: 132, height: 246 } as const;
-
-// ウォークスルーは1枚ずつしか描画しないため、id が文書内で重複しない。
-const PHONE_SCREEN_CLIP_ID = "onboardingAutoCalcPhoneScreen";
 
 const PLATE_APPEARANCES = [
   { label: "1打席", result: "右安", isHit: true },
@@ -48,6 +45,7 @@ const METRIC_CARD = { x: 176, width: 94, height: 44 } as const;
 
 /** ベゼル・ダイナミックアイランド・サイドボタンまで描いた端末。画面の中身は画面外へはみ出さないようクリップする。 */
 function PhoneMock({ children }: { children: ReactNode }) {
+  const screenClipId = useId();
   const { x, y, width, height } = PHONE;
   const bodyRadius = width * 0.19;
   const bezel = width * 0.045;
@@ -95,7 +93,7 @@ function PhoneMock({ children }: { children: ReactNode }) {
         strokeWidth={1.2}
       />
       <defs>
-        <clipPath id={PHONE_SCREEN_CLIP_ID}>
+        <clipPath id={screenClipId}>
           <rect
             x={screenX}
             y={screenY}
@@ -113,7 +111,7 @@ function PhoneMock({ children }: { children: ReactNode }) {
         rx={bodyRadius - bezel}
         fill="#1B1B1E"
       />
-      <g clipPath={`url(#${PHONE_SCREEN_CLIP_ID})`}>{children}</g>
+      <g clipPath={`url(#${screenClipId})`}>{children}</g>
       <rect
         x={x + (width - islandWidth) / 2}
         y={screenY + bezel * 0.9}
