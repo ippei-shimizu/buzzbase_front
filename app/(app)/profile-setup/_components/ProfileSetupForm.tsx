@@ -125,12 +125,13 @@ export default function ProfileSetupForm({
       formData.append("user[batting_side]", battingSide ?? "");
       await updateProfile(formData);
       await updateUserPositions({ userId, positionIds: selectedPositionIds });
-      // 遷移先のマイページ等が SWR キャッシュの古いプロフィールを一瞬でも表示しないよう、
-      // 再検証ではなく破棄して次のマウントで取り直させる。
+      // 遷移先のマイページが SWR キャッシュの古いプロフィールを表示しないよう破棄する。
+      // 対象を絞るのは、遷移をまたいでマウントされ続ける UserProvider のキーを巻き込まないため。
       await mutate(
-        (key) => typeof key === "string" && key.startsWith("/api/v1/user"),
+        (key) =>
+          typeof key === "string" &&
+          key.startsWith("/api/v1/users/show_user_id_data"),
         undefined,
-        { revalidate: false },
       );
       onLeave(summarize(false));
     } catch (error) {

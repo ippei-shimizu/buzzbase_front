@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { SWRConfig } from "swr";
+import useSWR, { SWRConfig } from "swr";
 import ProfileSetup from "../_components/ProfileSetup";
 
 const mockCapture = jest.fn();
@@ -63,9 +63,18 @@ const buildUser = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+// 遷移をまたいでマウントされ続ける UserProvider の代わり。
+const CurrentUserProbe = () => {
+  const { data } = useSWR("/api/v1/users/current", () =>
+    Promise.resolve({ id: 7 }),
+  );
+  return <p>current user: {data?.id ?? "none"}</p>;
+};
+
 const renderPage = () =>
   render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+      <CurrentUserProbe />
       <ProfileSetup />
     </SWRConfig>,
   );
@@ -182,6 +191,19 @@ describe("登録直後のプロフィール入力", () => {
       positionIds: [2],
     });
     expect(mockCreateOrUpdateTeam).not.toHaveBeenCalled();
+  });
+
+  it("保存しても、マウント中のログインユーザー情報のキャッシュは消さない", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    expect(await screen.findByText("current user: 7")).toBeInTheDocument();
+    await user.click(
+      await screen.findByRole("button", { name: "保存してはじめる" }),
+    );
+
+    await waitFor(() => expect(mockReplace).toHaveBeenCalled());
+    expect(screen.getByText("current user: 7")).toBeInTheDocument();
   });
 
   it("既存の所属チーム名を解決できないときは保存させない", async () => {

@@ -55,11 +55,9 @@ export default function ProfileSetup() {
     trackProfileSetupViewed();
   }, []);
 
-  // 保存時に他画面のプロフィールキャッシュ（"/api/v1/user" 始まりの文字列キー）を破棄するため、
-  // この画面自身は巻き込まれないよう配列キーにしている。
   const { data: user, error: userError } = useSWR<CurrentUser>(
-    isLoggedIn === true ? ["profile-setup/current-user"] : null,
-    () => getUserData(),
+    isLoggedIn === true ? "/api/v1/user" : null,
+    getUserData,
   );
   const { data: positions, error: positionsError } = useSWR<PositionOption[]>(
     isLoggedIn === true ? "/api/v1/positions" : null,
