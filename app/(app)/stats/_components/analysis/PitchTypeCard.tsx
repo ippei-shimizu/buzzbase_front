@@ -1,8 +1,8 @@
 "use client";
 import type { PitchTypeRow } from "../../analysisActions";
-import { useState } from "react";
 import { formatBattingAverage } from "@app/utils/formatStats";
 import { PitcherStatsDetailGrid } from "./PitcherStatsDetailGrid";
+import { useExpandedIds } from "./useExpandedIds";
 
 interface PitchTypeCardProps {
   rows: PitchTypeRow[];
@@ -55,21 +55,7 @@ function InsightRow({
  * ハイライトし、0打数の球種は「その他 N 球種」に集約する。行タップで詳細グリッドを展開（複数行を同時に展開できる）。
  */
 export function PitchTypeCard({ rows, totalTargetPa }: PitchTypeCardProps) {
-  const [expandedIds, setExpandedIds] = useState<ReadonlySet<number>>(
-    () => new Set(),
-  );
-
-  const toggleExpanded = (pitchTypeId: number) => {
-    setExpandedIds((current) => {
-      const next = new Set(current);
-      if (next.has(pitchTypeId)) {
-        next.delete(pitchTypeId);
-      } else {
-        next.add(pitchTypeId);
-      }
-      return next;
-    });
-  };
+  const { expandedIds, toggleExpanded } = useExpandedIds();
 
   if (totalTargetPa === 0) {
     return (
