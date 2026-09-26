@@ -92,6 +92,10 @@ describe("PitchCourseCard の投手別タブ", () => {
 
     await user.click(screen.getByRole("button", { name: "投手別" }));
 
+    expect(screen.getByRole("button", { name: "投手別" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     const selector = await screen.findByRole("combobox", { name: "対戦投手" });
     expect(
       screen.getByRole("option", { name: "エース投手（相手高校） 5打席" }),

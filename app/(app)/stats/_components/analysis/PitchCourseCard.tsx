@@ -229,6 +229,7 @@ export function PitchCourseCard({
             <button
               key={key}
               type="button"
+              aria-pressed={tab === key}
               className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors ${
                 tab === key
                   ? "bg-[#d08000] text-white"
