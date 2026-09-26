@@ -14,6 +14,13 @@ describe("buildAppStoreUrl", () => {
     );
   });
 
+  // public/images/app-store-qr.svg はこの URL を焼き込んだ静的 QR のため、ここが落ちたら SVG も作り直す。
+  it("静的 QR に焼き込んだ tool_qr の URL と一致する", () => {
+    expect(buildAppStoreUrl("tool_qr")).toBe(
+      "https://apps.apple.com/app/apple-store/id6761011816?pt=128690561&ct=tool_qr&mt=8",
+    );
+  });
+
   it("campaign 名に URL の区切り文字が含まれてもクエリを壊さない", () => {
     const url = new URL(buildAppStoreUrl("a&b=c"));
 
