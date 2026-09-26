@@ -258,9 +258,9 @@ export function PlateAppearanceWizard({
     if (result.ok) {
       isCompletedRef.current = true;
       trackPlateAppearanceCompleted({
+        ...toDetailInputFlags(detail),
         is_edit: isEdit,
         has_hit_direction: directionId !== null,
-        ...toDetailInputFlags(detail),
       });
       // onCompleted が遷移しなかった場合でもボタンが永続 disabled にならないよう先に解除する。
       setIsSubmitting(false);
