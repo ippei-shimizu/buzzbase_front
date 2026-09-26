@@ -204,6 +204,14 @@ export default function ProfileEdit() {
     fetchData();
   }, [isLoggedIn]);
 
+  // 入力直後に画面を離れても、デバウンス中のチーム検索を発火させない。
+  useEffect(
+    () => () => {
+      if (teamSearchTimer.current) clearTimeout(teamSearchTimer.current);
+    },
+    [],
+  );
+
   // disabled制御
   useEffect(() => {
     setIsDisabled(!teamName || teamName.length === 0);

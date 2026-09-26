@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GameRecord from "../page";
 
@@ -476,6 +476,23 @@ describe("相手チームの入力", () => {
         match_result: expect.objectContaining({ opponent_team_id: 3 }),
       }),
     );
+  });
+
+  it("チーム名を入力した直後に画面を離れると、デバウンス中の検索を送らない", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<GameRecord />);
+
+    const opponentTeamInput = await screen.findByRole("combobox", {
+      name: /相手チーム/,
+    });
+    await user.type(opponentTeamInput, "テスト");
+    const requestCountBeforeLeave = teamListRequests().length;
+    unmount();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+
+    expect(teamListRequests()).toHaveLength(requestCountBeforeLeave);
   });
 
   it("入力中に既存試合の自チームが届いたら、入力欄の名前をその自チームの名前に揃える", async () => {

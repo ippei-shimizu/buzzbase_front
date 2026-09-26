@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MypageEdit from "../page";
 
@@ -257,6 +257,25 @@ describe("チーム設定", () => {
     teamListRequests.forEach(([, config]) => {
       expect(config?.params?.q).toBeTruthy();
     });
+  });
+
+  it("チーム名を入力した直後に画面を離れると、デバウンス中の検索を送らない", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<MypageEdit />);
+
+    const teamInput = await screen.findByRole("combobox", {
+      name: "チーム名",
+    });
+    await user.type(teamInput, "テスト");
+    const teamListRequests = () =>
+      mockAxiosGet.mock.calls.filter(([url]) => url === "/api/v1/teams");
+    const requestCountBeforeLeave = teamListRequests().length;
+    unmount();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    });
+
+    expect(teamListRequests()).toHaveLength(requestCountBeforeLeave);
   });
 
   it("所属チームを別の名前に打ち替えて保存すると、元のチームを改名せず打ち替えた名前で登録する", async () => {

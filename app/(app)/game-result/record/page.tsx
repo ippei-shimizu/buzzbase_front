@@ -228,6 +228,18 @@ export default function GameRecord() {
   const latestMyTeamId = useRef<number | null>(null);
   const latestOpponentTeamId = useRef<number | null>(null);
 
+  // 入力直後に画面を離れても、デバウンス中の検索を発火させない。
+  useEffect(
+    () => () => {
+      [stadiumSearchTimer, myTeamSearchTimer, opponentTeamSearchTimer].forEach(
+        (searchTimer) => {
+          if (searchTimer.current) clearTimeout(searchTimer.current);
+        },
+      );
+    },
+    [],
+  );
+
   const rememberTeamNames = (teams: SearchedTeam[]) => {
     teams.forEach((team) => {
       teamNamesById.current.set(String(team.id), team.name);
