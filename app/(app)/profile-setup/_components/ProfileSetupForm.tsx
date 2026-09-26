@@ -84,6 +84,7 @@ export default function ProfileSetupForm({
       )
     : NO_TEAMS;
 
+  // mobile と揃え、スキップ時も保存済みの値ではなくフォーム上の値（復元値を含む）を送る。
   const summarize = (skipped: boolean): ProfileSetupSummary => ({
     skipped,
     has_team: trimmedTeamName.length > 0,
