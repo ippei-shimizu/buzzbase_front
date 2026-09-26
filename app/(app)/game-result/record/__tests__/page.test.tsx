@@ -478,6 +478,46 @@ describe("相手チームの入力", () => {
     );
   });
 
+  it("入力中に既存試合の自チームが届いたら、入力欄の名前をその自チームの名前に揃える", async () => {
+    mockGetUserData.mockResolvedValueOnce({ positions: [], team_id: 1 });
+    let deliverExistingMatch: (value: Record<string, unknown>) => void = () =>
+      undefined;
+    mockCheckExistingMatchResults.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          deliverExistingMatch = resolve;
+        }),
+    );
+    const user = userEvent.setup();
+    render(<GameRecord />);
+
+    const myTeamInput = await screen.findByRole("combobox", {
+      name: /自チーム/,
+    });
+    await waitFor(() => expect(myTeamInput).toHaveValue("テスト高校A"));
+    await user.clear(myTeamInput);
+    await user.type(myTeamInput, "テスト高校");
+    await findTeamOptions("テスト高校B");
+
+    deliverExistingMatch({
+      id: 10,
+      date_and_time: "2026-09-01T00:00:00+09:00",
+      match_type: "regular",
+      tournament_id: null,
+      my_team_id: 2,
+      my_team_score: 3,
+      opponent_team_score: 2,
+      batting_order: "1",
+      memo: null,
+      opponent_team_id: 1,
+      defensive_position: "1",
+      inning_format: 9,
+      appearance_type: "no_play",
+    });
+
+    await waitFor(() => expect(myTeamInput).toHaveValue("テスト高校B"));
+  });
+
   it("編集で開いた自チームの名前を解決できなくても、既存試合の自チームの id で保存できる", async () => {
     mockCheckExistingMatchResults.mockResolvedValueOnce({
       id: 10,

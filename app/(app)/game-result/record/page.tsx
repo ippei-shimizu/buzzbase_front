@@ -422,16 +422,19 @@ export default function GameRecord() {
   ) => {
     latestTeamId.current = teamId;
     if (!teamId) return;
-    // 自チームと相手チームが同じ id（紅白戦）だと名前は判明済みなので、空欄のときだけ埋める。
+    // 名前と id が食い違ったまま保存されないよう、採用した id の名前に揃える。
+    // 入力が trim 後に一致している間は、打鍵中の空白を消さないよう入力を残す。
+    const alignTeamName = (name: string) =>
+      setTeamName((current) => (current.trim() === name ? current : name));
     const knownName = teamNamesById.current.get(String(teamId));
     if (knownName !== undefined) {
-      setTeamName((current) => current || knownName);
+      alignTeamName(knownName);
       return;
     }
     getTeamName(teamId).then((name: string) => {
       if (!name) return;
       teamNamesById.current.set(String(teamId), name);
-      if (latestTeamId.current === teamId) setTeamName(() => name);
+      if (latestTeamId.current === teamId) alignTeamName(name);
     });
   };
 
