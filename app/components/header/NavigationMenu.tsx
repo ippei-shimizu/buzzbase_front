@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
+import { isRegistrationFlowPath } from "@app/constants/registrationFlow";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { useGroupNavBadge } from "@app/hooks/onboarding/useGroupNavBadge";
 import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
@@ -43,9 +44,7 @@ export default function NavigationMenu() {
     }
   };
 
-  const shouldHideNavigationMenu =
-    pathName.includes("/register-username") ||
-    pathName.includes("/profile-setup");
+  const shouldHideNavigationMenu = isRegistrationFlowPath(pathName);
 
   return (
     <>
