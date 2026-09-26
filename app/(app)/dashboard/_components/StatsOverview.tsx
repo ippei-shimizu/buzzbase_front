@@ -371,7 +371,7 @@ function BattingTable({ battingStats }: { battingStats: BattingStats }) {
             <StatTooltipLabel
               label="得点圏打率"
               tooltip={SCORING_POSITION_BATTING_AVERAGE_TOOLTIP}
-              className={styleTableTitle}
+              className={`${styleTableTitle} whitespace-nowrap`}
             />
             <span className={styleTableData}>
               {displayFormattedValue(calc?.scoring_position_batting_average)}
