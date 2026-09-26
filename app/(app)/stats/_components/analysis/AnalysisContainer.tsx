@@ -353,6 +353,8 @@ export function AnalysisContainer({
         )}
         {pitchCourses ? (
           <PitchCourseCard
+            // 遅延取得したクロス集計は前のフィルタの値なので、フィルタが変わったらカードごと作り直す
+            key={JSON.stringify(filters)}
             data={pitchCourses}
             loadPitchTypeCross={loadPitchTypeCross}
             loadPitcherCross={loadPitcherCross}
