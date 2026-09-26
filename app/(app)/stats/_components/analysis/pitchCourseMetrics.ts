@@ -1,8 +1,11 @@
 import type { PitchCourseZone } from "../../analysisActions";
 import {
   PITCH_COURSES,
+  PITCH_COURSE_HEIGHT_BAND_LABELS,
+  PITCH_COURSE_SIDE_BAND_LABELS,
   PITCH_COURSE_TRACK_FRACTIONS,
   isStrikeZoneCourse,
+  pitchCourseBand,
   pitchCourseCol,
   pitchCourseRow,
 } from "@app/constants/pitchCourse";
@@ -84,16 +87,6 @@ export const sumPitchCourseCounts = (
     EMPTY_COUNTS,
   );
 
-const HEIGHT_BAND_LABELS = ["高め", "真ん中", "低め"] as const;
-const SIDE_BAND_LABELS = ["三塁側", "真ん中", "一塁側"] as const;
-
-/** 5x5 の行・列番号 (1〜5) → 3 バンドの番号 (0〜2)。{1,2} / {3} / {4,5} に分ける。 */
-const bandOf = (track: number): number => {
-  if (track <= 2) return 0;
-  if (track === 3) return 1;
-  return 2;
-};
-
 /** 3x3 のトラック比。5x5 の外周トラックを隣の内側トラックに合算し、ゾーン図の幾何を揃える。 */
 export const PITCH_COURSE_GRID3_TRACK_FRACTIONS: ReadonlyArray<number> = [
   PITCH_COURSE_TRACK_FRACTIONS[0] + PITCH_COURSE_TRACK_FRACTIONS[1],
@@ -119,8 +112,8 @@ const foldCell = (
 export const foldToGrid3 = (
   zones: ReadonlyArray<PitchCourseZone>,
 ): FoldedPitchCourseCell[] =>
-  HEIGHT_BAND_LABELS.flatMap((heightLabel, heightBand) =>
-    SIDE_BAND_LABELS.map((sideLabel, sideBand) =>
+  PITCH_COURSE_HEIGHT_BAND_LABELS.flatMap((heightLabel, heightBand) =>
+    PITCH_COURSE_SIDE_BAND_LABELS.map((sideLabel, sideBand) =>
       foldCell(
         `${heightBand}-${sideBand}`,
         heightBand === 1 && sideBand === 1
@@ -128,8 +121,8 @@ export const foldToGrid3 = (
           : `${heightLabel}・${sideLabel}`,
         zones,
         (course) =>
-          bandOf(pitchCourseRow(course)) === heightBand &&
-          bandOf(pitchCourseCol(course)) === sideBand,
+          pitchCourseBand(pitchCourseRow(course)) === heightBand &&
+          pitchCourseBand(pitchCourseCol(course)) === sideBand,
       ),
     ),
   );
@@ -146,13 +139,13 @@ export const foldToHeightAndSide = (
       "high",
       "高め",
       zones,
-      (course) => bandOf(pitchCourseRow(course)) === 0,
+      (course) => pitchCourseBand(pitchCourseRow(course)) === 0,
     ),
     foldCell(
       "low",
       "低め",
       zones,
-      (course) => bandOf(pitchCourseRow(course)) === 2,
+      (course) => pitchCourseBand(pitchCourseRow(course)) === 2,
     ),
   ],
   side: [
@@ -160,13 +153,13 @@ export const foldToHeightAndSide = (
       "third_base",
       "三塁側",
       zones,
-      (course) => bandOf(pitchCourseCol(course)) === 0,
+      (course) => pitchCourseBand(pitchCourseCol(course)) === 0,
     ),
     foldCell(
       "first_base",
       "一塁側",
       zones,
-      (course) => bandOf(pitchCourseCol(course)) === 2,
+      (course) => pitchCourseBand(pitchCourseCol(course)) === 2,
     ),
   ],
 });
