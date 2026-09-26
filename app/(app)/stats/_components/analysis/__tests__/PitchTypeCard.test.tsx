@@ -63,6 +63,7 @@ describe("PitchTypeCard", () => {
     const { rerender } = renderCard();
 
     await user.click(toggleOf("ストレート"));
+    await user.click(toggleOf("カーブ"));
     rerender(buildCard([buildRow(1, "ストレート"), buildRow(3, "スライダー")]));
 
     expect(toggleOf("ストレート")).toHaveAttribute("aria-expanded", "true");
