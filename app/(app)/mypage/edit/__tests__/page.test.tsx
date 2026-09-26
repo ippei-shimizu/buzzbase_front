@@ -259,6 +259,24 @@ describe("チーム設定", () => {
     });
   });
 
+  it("復元した所属チーム名を全消しして保存すると、所属チームを外して保存できる", async () => {
+    mockGetUserData.mockResolvedValueOnce(userDataWithTeam(2));
+    const user = userEvent.setup();
+    render(<MypageEdit />);
+
+    const teamInput = await screen.findByRole("combobox", {
+      name: "チーム名",
+    });
+    await waitFor(() => expect(teamInput).toHaveValue("テスト高校B"));
+    await user.clear(teamInput);
+    await user.tab();
+
+    await user.click(screen.getByText("保存"));
+
+    await waitFor(() => expect(mockUpdateProfile).toHaveBeenCalled());
+    expect(savedTeamId()).toBe("");
+  });
+
   it("チーム名を入力した直後に画面を離れると、デバウンス中の検索を送らない", async () => {
     const user = userEvent.setup();
     const { unmount } = render(<MypageEdit />);

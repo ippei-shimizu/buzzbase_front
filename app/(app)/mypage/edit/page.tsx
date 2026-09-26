@@ -456,6 +456,10 @@ export default function ProfileEdit() {
     const requestId = teamRequestId.current + 1;
     teamRequestId.current = requestId;
     if (!name) {
+      // 名前を空にしたら所属チームを外す。カテゴリー / 地域は入力欄が disabled になり画面から消せないため一緒に落とす。
+      setSelectedCategoryId(undefined);
+      setSelectedPrefectureId(undefined);
+      setBaseballCategoryValue("");
       setTeams([]);
       return;
     }
