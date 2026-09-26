@@ -186,7 +186,7 @@ export default function BattingAverageTable({ aggregate, calculated }: Props) {
             <StatTooltipLabel
               label="得点圏打率"
               tooltip={SCORING_POSITION_BATTING_AVERAGE_TOOLTIP}
-              className={styleTableTitle}
+              className={`${styleTableTitle} whitespace-nowrap`}
             />
             <span className={styleTableData}>
               {displayFormattedValue(
