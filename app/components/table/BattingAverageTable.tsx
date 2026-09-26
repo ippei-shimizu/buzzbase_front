@@ -2,6 +2,8 @@ import type {
   BattingStatsAggregate,
   BattingStatsCalculated,
 } from "@app/interface/dashboardStats";
+import StatTooltipLabel from "@app/components/table/StatTooltipLabel";
+import { SCORING_POSITION_BATTING_AVERAGE_TOOLTIP } from "@app/constants/battingTooltips";
 import {
   formatRate,
   formatHomeRunWithInsideThePark,
@@ -103,10 +105,14 @@ export default function BattingAverageTable({ aggregate, calculated }: Props) {
             </span>
           </div>
           <div className={styleTableBox}>
-            <p className={`${styleTableTitle} rounded-bl-md`}>ISOD</p>
+            <p className={styleTableTitle}>ISOD</p>
             <span className={styleTableData}>
               {displayFormattedValue(calculated?.isod)}
             </span>
+          </div>
+          <div className={styleTableBox} aria-hidden="true">
+            <p className={`${styleTableTitle} rounded-bl-md`}>&nbsp;</p>
+            <span className={styleTableData}>&nbsp;</span>
           </div>
         </div>
 
@@ -174,6 +180,18 @@ export default function BattingAverageTable({ aggregate, calculated }: Props) {
             <p className={styleTableTitle}>長打率</p>
             <span className={styleTableData}>
               {displayFormattedValue(calculated?.slugging_percentage)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <StatTooltipLabel
+              label="得点圏打率"
+              tooltip={SCORING_POSITION_BATTING_AVERAGE_TOOLTIP}
+              className={styleTableTitle}
+            />
+            <span className={styleTableData}>
+              {displayFormattedValue(
+                calculated?.scoring_position_batting_average,
+              )}
             </span>
           </div>
           <div className={styleTableBox}>
