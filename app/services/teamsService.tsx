@@ -10,16 +10,6 @@ export const getTeamName = async (id: number) => {
   }
 };
 
-export const getTeams = async () => {
-  try {
-    const response = await axiosInstance.get("/api/v1/teams");
-    return response.data;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-};
-
 /** GET /api/v1/teams の limit 上限（back の MAX_LIMIT と揃える）。 */
 export const TEAM_SEARCH_MAX_LIMIT = 100;
 
