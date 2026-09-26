@@ -9,11 +9,11 @@ import type {
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { PitchCourseGrid } from "@app/components/baseball/PitchCourseGrid";
+import { PITCH_COURSES, STRIKE_ZONE_COURSES } from "@app/constants/pitchCourse";
 import {
   PITCH_COURSE_GRANULARITIES,
   PITCH_COURSE_GRID3_TRACK_FRACTIONS,
   PITCH_COURSE_METRICS,
-  expectedPlateAppearanceShare,
   foldToGrid3,
   foldToHeightAndSide,
   foldToStrikeAndBallZone,
@@ -135,13 +135,19 @@ function TilePair({
   read,
 }: {
   cells: FoldedPitchCourseCell[];
-  read: (counts: PitchCourseCounts) => PitchCourseMetricReading;
+  read: (
+    counts: PitchCourseCounts,
+    courseCount: number,
+  ) => PitchCourseMetricReading;
 }) {
   return (
     <div className="grid grid-cols-2 gap-2">
       {cells.map((cell) => (
         <div key={cell.key} className="h-[84px]">
-          <MetricCell reading={read(cell.counts)} label={cell.label} />
+          <MetricCell
+            reading={read(cell.counts, cell.courseCount)}
+            label={cell.label}
+          />
         </div>
       ))}
     </div>
@@ -160,13 +166,12 @@ function CourseHeatmap({
   granularity: PitchCourseGranularity;
 }) {
   const total = sumPitchCourseCounts(zones);
-  const context = {
-    minAtBats,
-    totalPlateAppearances: total.plate_appearances,
-    expectedShare: expectedPlateAppearanceShare(granularity),
-  };
-  const read = (counts: PitchCourseCounts) =>
-    readPitchCourseMetric(metric, counts, context);
+  const read = (counts: PitchCourseCounts, courseCount: number) =>
+    readPitchCourseMetric(metric, counts, {
+      minAtBats,
+      totalPlateAppearances: total.plate_appearances,
+      courseCount,
+    });
 
   const renderView = () => {
     switch (granularity) {
@@ -181,7 +186,7 @@ function CourseHeatmap({
                   const zone = zoneByCourse.get(course);
                   return zone ? (
                     <MetricCell
-                      reading={read(zone)}
+                      reading={read(zone, 1)}
                       isStrikeZone={isStrikeZone}
                     />
                   ) : null;
@@ -204,7 +209,7 @@ function CourseHeatmap({
             >
               {foldToGrid3(zones).map((cell) => (
                 <div key={cell.key}>
-                  <MetricCell reading={read(cell.counts)} />
+                  <MetricCell reading={read(cell.counts, cell.courseCount)} />
                 </div>
               ))}
             </div>
@@ -389,14 +394,13 @@ export function PitchCourseCard({
     },
   ] as const;
   const availableTabs = tabs.filter((item) => item.isAvailable);
-  const summaryContext = {
-    minAtBats: data.min_at_bats,
-    totalPlateAppearances:
-      data.strike_zone.plate_appearances + data.ball_zone.plate_appearances,
-    expectedShare: expectedPlateAppearanceShare("zone"),
-  };
-  const readSummary = (summary: PitchCourseZoneSummary) =>
-    readPitchCourseMetric(metric, summary, summaryContext);
+  const readSummary = (summary: PitchCourseZoneSummary, courseCount: number) =>
+    readPitchCourseMetric(metric, summary, {
+      minAtBats: data.min_at_bats,
+      totalPlateAppearances:
+        data.strike_zone.plate_appearances + data.ball_zone.plate_appearances,
+      courseCount,
+    });
 
   return (
     <section className="rounded-xl bg-[#3A3A3A] p-4">
@@ -452,11 +456,17 @@ export function PitchCourseCard({
             <div className="mt-3 grid grid-cols-2 gap-x-3">
               <ZoneSummaryTile
                 label="ストライクゾーン"
-                reading={readSummary(data.strike_zone)}
+                reading={readSummary(
+                  data.strike_zone,
+                  STRIKE_ZONE_COURSES.length,
+                )}
               />
               <ZoneSummaryTile
                 label="ボールゾーン"
-                reading={readSummary(data.ball_zone)}
+                reading={readSummary(
+                  data.ball_zone,
+                  PITCH_COURSES.length - STRIKE_ZONE_COURSES.length,
+                )}
               />
             </div>
           )}

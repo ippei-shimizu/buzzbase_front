@@ -1,5 +1,11 @@
 import type { PitchCourseZone } from "../../analysisActions";
-import { PITCH_COURSE_TRACK_FRACTIONS } from "@app/constants/pitchCourse";
+import {
+  PITCH_COURSES,
+  PITCH_COURSE_TRACK_FRACTIONS,
+  isStrikeZoneCourse,
+  pitchCourseCol,
+  pitchCourseRow,
+} from "@app/constants/pitchCourse";
 import { formatBattingAverage } from "@app/utils/formatStats";
 
 export type PitchCourseMetric =
@@ -47,6 +53,8 @@ export interface FoldedPitchCourseCell {
   key: string;
   label: string;
   counts: PitchCourseCounts;
+  /** 畳み込んだ 5x5 のコース数。打席分布の均等配分の基準に使う。 */
+  courseCount: number;
 }
 
 const EMPTY_COUNTS: PitchCourseCounts = {
@@ -93,24 +101,37 @@ export const PITCH_COURSE_GRID3_TRACK_FRACTIONS: ReadonlyArray<number> = [
   PITCH_COURSE_TRACK_FRACTIONS[3] + PITCH_COURSE_TRACK_FRACTIONS[4],
 ];
 
+const foldCell = (
+  key: string,
+  label: string,
+  zones: ReadonlyArray<PitchCourseZone>,
+  includesCourse: (course: number) => boolean,
+): FoldedPitchCourseCell => ({
+  key,
+  label,
+  counts: sumPitchCourseCounts(
+    zones.filter((zone) => includesCourse(zone.course)),
+  ),
+  courseCount: PITCH_COURSES.filter(includesCourse).length,
+});
+
 /** 25 マスを 高め/真ん中/低め × 三塁側/真ん中/一塁側 の 9 セル（行優先）に畳む。 */
 export const foldToGrid3 = (
   zones: ReadonlyArray<PitchCourseZone>,
 ): FoldedPitchCourseCell[] =>
   HEIGHT_BAND_LABELS.flatMap((heightLabel, heightBand) =>
-    SIDE_BAND_LABELS.map((sideLabel, sideBand) => ({
-      key: `${heightBand}-${sideBand}`,
-      label:
+    SIDE_BAND_LABELS.map((sideLabel, sideBand) =>
+      foldCell(
+        `${heightBand}-${sideBand}`,
         heightBand === 1 && sideBand === 1
           ? "真ん中"
           : `${heightLabel}・${sideLabel}`,
-      counts: sumPitchCourseCounts(
-        zones.filter(
-          (zone) =>
-            bandOf(zone.row) === heightBand && bandOf(zone.col) === sideBand,
-        ),
+        zones,
+        (course) =>
+          bandOf(pitchCourseRow(course)) === heightBand &&
+          bandOf(pitchCourseCol(course)) === sideBand,
       ),
-    })),
+    ),
   );
 
 /**
@@ -119,62 +140,49 @@ export const foldToGrid3 = (
  */
 export const foldToHeightAndSide = (
   zones: ReadonlyArray<PitchCourseZone>,
-): { height: FoldedPitchCourseCell[]; side: FoldedPitchCourseCell[] } => {
-  const cellOf = (
-    key: string,
-    label: string,
-    matches: (zone: PitchCourseZone) => boolean,
-  ): FoldedPitchCourseCell => ({
-    key,
-    label,
-    counts: sumPitchCourseCounts(zones.filter(matches)),
-  });
-  return {
-    height: [
-      cellOf("high", "高め", (zone) => bandOf(zone.row) === 0),
-      cellOf("low", "低め", (zone) => bandOf(zone.row) === 2),
-    ],
-    side: [
-      cellOf("third_base", "三塁側", (zone) => bandOf(zone.col) === 0),
-      cellOf("first_base", "一塁側", (zone) => bandOf(zone.col) === 2),
-    ],
-  };
-};
+): { height: FoldedPitchCourseCell[]; side: FoldedPitchCourseCell[] } => ({
+  height: [
+    foldCell(
+      "high",
+      "高め",
+      zones,
+      (course) => bandOf(pitchCourseRow(course)) === 0,
+    ),
+    foldCell(
+      "low",
+      "低め",
+      zones,
+      (course) => bandOf(pitchCourseRow(course)) === 2,
+    ),
+  ],
+  side: [
+    foldCell(
+      "third_base",
+      "三塁側",
+      zones,
+      (course) => bandOf(pitchCourseCol(course)) === 0,
+    ),
+    foldCell(
+      "first_base",
+      "一塁側",
+      zones,
+      (course) => bandOf(pitchCourseCol(course)) === 2,
+    ),
+  ],
+});
 
 /** ストライクゾーン（中央 3x3）とボールゾーン（外周 16）の 2 セルに畳む。 */
 export const foldToStrikeAndBallZone = (
   zones: ReadonlyArray<PitchCourseZone>,
 ): FoldedPitchCourseCell[] => [
-  {
-    key: "strike",
-    label: "ストライクゾーン",
-    counts: sumPitchCourseCounts(zones.filter((zone) => zone.is_strike_zone)),
-  },
-  {
-    key: "ball",
-    label: "ボールゾーン",
-    counts: sumPitchCourseCounts(zones.filter((zone) => !zone.is_strike_zone)),
-  },
+  foldCell("strike", "ストライクゾーン", zones, isStrikeZoneCourse),
+  foldCell(
+    "ball",
+    "ボールゾーン",
+    zones,
+    (course) => !isStrikeZoneCourse(course),
+  ),
 ];
-
-/**
- * 打席分布の基準になる「均等に散ったときの 1 セルの打席割合」。
- * 高低・内外は各軸が 3 バンド（真ん中を含む）なので 1/3 を基準にする。
- */
-export const expectedPlateAppearanceShare = (
-  granularity: PitchCourseGranularity,
-): number => {
-  switch (granularity) {
-    case "grid5":
-      return 1 / 25;
-    case "grid3":
-      return 1 / 9;
-    case "split4":
-      return 1 / 3;
-    case "zone":
-      return 1 / 2;
-  }
-};
 
 // 打者にとって良い=暖色、悪い=寒色。フィルタを変えても同じ値が同じ色になるよう固定しきい値にする。
 const RATING_COLORS = [
@@ -230,7 +238,8 @@ export interface PitchCourseMetricContext {
   minAtBats: number;
   /** 打席分布の割合の分母（表示中の全コースの打席合計）。 */
   totalPlateAppearances: number;
-  expectedShare: number;
+  /** セルが畳んだ 5x5 のコース数。均等に散ったときの割合は courseCount / 25。 */
+  courseCount: number;
 }
 
 export interface PitchCourseMetricReading {
@@ -265,7 +274,9 @@ export const readPitchCourseMetric = (
       return {
         value: `${counts.plate_appearances}打席`,
         detail: formatPercent(share),
-        color: colorForPlateAppearanceShare(share / context.expectedShare),
+        color: colorForPlateAppearanceShare(
+          share / (context.courseCount / PITCH_COURSES.length),
+        ),
         isReliable: true,
       };
     }

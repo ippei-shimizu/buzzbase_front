@@ -11,7 +11,6 @@ import {
   colorForPlateAppearanceShare,
   colorForSlugging,
   colorForStrikeoutRate,
-  expectedPlateAppearanceShare,
   foldToGrid3,
   foldToHeightAndSide,
   foldToStrikeAndBallZone,
@@ -58,7 +57,7 @@ const buildZones = (
 const CONTEXT = {
   minAtBats: 3,
   totalPlateAppearances: 100,
-  expectedShare: 1 / 25,
+  courseCount: 1,
 };
 
 describe("sumPitchCourseCounts", () => {
@@ -114,6 +113,9 @@ describe("foldToGrid3", () => {
     expect(cells[0].counts).toMatchObject({ at_bats: 6, hits: 2 });
     expect(cells[4].counts).toMatchObject({ at_bats: 3, hits: 1 });
     expect(cells[8].counts).toMatchObject({ at_bats: 2, hits: 1 });
+    expect(cells.map((cell) => cell.courseCount)).toEqual([
+      4, 2, 4, 2, 1, 2, 4, 2, 4,
+    ]);
   });
 
   it("率は合算後の生カウントから計算し直す（セルの率を平均しない）", () => {
@@ -157,6 +159,9 @@ describe("foldToHeightAndSide", () => {
       ["三塁側", 2],
       ["一塁側", 3],
     ]);
+    expect([...height, ...side].map((cell) => cell.courseCount)).toEqual([
+      10, 10, 10, 10,
+    ]);
   });
 });
 
@@ -173,6 +178,7 @@ describe("foldToStrikeAndBallZone", () => {
 
     expect(strike.counts.plate_appearances).toBe(3);
     expect(ball.counts.plate_appearances).toBe(12);
+    expect([strike.courseCount, ball.courseCount]).toEqual([9, 16]);
   });
 });
 
@@ -264,25 +270,48 @@ describe("readPitchCourseMetric", () => {
     ).toBe(true);
   });
 
-  it("打席分布は割合を均等配分の割合で割った比で色を決める", () => {
+  it("打席分布は割合を「畳んだコース数 / 25」の均等配分で割った比で色を決める", () => {
     const zoneCounts = counts({ plate_appearances: 8 });
 
-    const grid5 = readPitchCourseMetric("plate_appearances", zoneCounts, {
-      ...CONTEXT,
-      expectedShare: expectedPlateAppearanceShare("grid5"),
-    });
-    const grid3 = readPitchCourseMetric("plate_appearances", zoneCounts, {
-      ...CONTEXT,
-      expectedShare: expectedPlateAppearanceShare("grid3"),
-    });
-
-    expect(grid5).toMatchObject({
+    expect(
+      readPitchCourseMetric("plate_appearances", zoneCounts, CONTEXT),
+    ).toMatchObject({
       value: "8打席",
       detail: "8%",
       color: colorForPlateAppearanceShare(2.0),
       isReliable: true,
     });
-    expect(grid3.color).toBe(colorForPlateAppearanceShare(0.72));
+    expect(
+      readPitchCourseMetric("plate_appearances", zoneCounts, {
+        ...CONTEXT,
+        courseCount: 4,
+      }).color,
+    ).toBe(colorForPlateAppearanceShare(0.5));
+  });
+
+  it("25 コースに均等に散った打席は、どの粒度でも全セルが同じ濃さになる", () => {
+    const zones = buildZones(
+      Object.fromEntries(
+        PITCH_COURSES.map((course) => [course, { plate_appearances: 4 }]),
+      ),
+    );
+    const { height, side } = foldToHeightAndSide(zones);
+    const colorOf = (zoneCounts: PitchCourseCounts, courseCount: number) =>
+      readPitchCourseMetric("plate_appearances", zoneCounts, {
+        ...CONTEXT,
+        courseCount,
+      }).color;
+    const colors = [
+      ...zones.map((zone) => colorOf(zone, 1)),
+      ...[
+        ...foldToGrid3(zones),
+        ...height,
+        ...side,
+        ...foldToStrikeAndBallZone(zones),
+      ].map((cell) => colorOf(cell.counts, cell.courseCount)),
+    ];
+
+    expect(new Set(colors)).toEqual(new Set([colorForPlateAppearanceShare(1)]));
   });
 
   it("分母が 0 なら無彩色の '-' にする", () => {
