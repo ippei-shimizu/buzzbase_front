@@ -14,37 +14,71 @@ import {
 } from "@app/constants/pitchCourse";
 import { PitchCourseCard } from "../PitchCourseCard";
 
-const buildZones = (
-  seeds: Record<number, { atBats: number; hits: number }>,
-): PitchCourseZone[] =>
+interface ZoneSeed {
+  atBats: number;
+  hits: number;
+  plateAppearances?: number;
+  totalBases?: number;
+  strikeouts?: number;
+  swingingStrikeouts?: number;
+  lookingStrikeouts?: number;
+}
+
+const buildZones = (seeds: Record<number, ZoneSeed>): PitchCourseZone[] =>
   PITCH_COURSES.map((course) => {
-    const atBats = seeds[course]?.atBats ?? 0;
-    const hits = seeds[course]?.hits ?? 0;
+    const seed = seeds[course];
+    const atBats = seed?.atBats ?? 0;
+    const hits = seed?.hits ?? 0;
     return {
       course,
       row: pitchCourseRow(course),
       col: pitchCourseCol(course),
       is_strike_zone: isStrikeZoneCourse(course),
-      plate_appearances: atBats,
+      plate_appearances: seed?.plateAppearances ?? atBats,
       at_bats: atBats,
       hits,
       batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
+      total_bases: seed?.totalBases ?? hits,
+      strikeouts: seed?.strikeouts ?? 0,
+      swinging_strikeouts: seed?.swingingStrikeouts ?? 0,
+      looking_strikeouts: seed?.lookingStrikeouts ?? 0,
       is_reliable: atBats >= 3,
     };
   });
 
-const COURSE_DATA: PitchCourseData = {
-  zones: buildZones({ 13: { atBats: 4, hits: 1 } }),
-  strike_zone: {
-    plate_appearances: 4,
-    at_bats: 4,
-    hits: 1,
-    batting_average: 0.25,
-  },
-  ball_zone: { plate_appearances: 0, at_bats: 0, hits: 0, batting_average: 0 },
-  total_target_pa: 4,
-  min_at_bats: 3,
+const summarize = (
+  zones: PitchCourseZone[],
+): PitchCourseData["strike_zone"] => {
+  const sumOf = (pick: (zone: PitchCourseZone) => number) =>
+    zones.reduce((sum, zone) => sum + pick(zone), 0);
+  const atBats = sumOf((zone) => zone.at_bats);
+  const hits = sumOf((zone) => zone.hits);
+  return {
+    plate_appearances: sumOf((zone) => zone.plate_appearances),
+    at_bats: atBats,
+    hits,
+    batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
+    total_bases: sumOf((zone) => zone.total_bases),
+    strikeouts: sumOf((zone) => zone.strikeouts),
+    swinging_strikeouts: sumOf((zone) => zone.swinging_strikeouts),
+    looking_strikeouts: sumOf((zone) => zone.looking_strikeouts),
+  };
 };
+
+const buildCourseData = (seeds: Record<number, ZoneSeed>): PitchCourseData => {
+  const zones = buildZones(seeds);
+  const strikeZone = summarize(zones.filter((zone) => zone.is_strike_zone));
+  const ballZone = summarize(zones.filter((zone) => !zone.is_strike_zone));
+  return {
+    zones,
+    strike_zone: strikeZone,
+    ball_zone: ballZone,
+    total_target_pa: strikeZone.plate_appearances + ballZone.plate_appearances,
+    min_at_bats: 3,
+  };
+};
+
+const COURSE_DATA = buildCourseData({ 13: { atBats: 4, hits: 1 } });
 
 const PITCHER_DATA: PitcherFaceoffCourseData = {
   rows: [
@@ -224,5 +258,205 @@ describe("PitchCourseCard の球種別タブ", () => {
 
     expect(loadPitchTypeCross).toHaveBeenCalledTimes(1);
     expect(loadPitcherCross).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("PitchCourseCard の指標・粒度切替", () => {
+  const pitcherDataWith = (
+    seeds: Record<number, ZoneSeed>,
+  ): PitcherFaceoffCourseData => {
+    const zones = buildZones(seeds);
+    const plateAppearances = zones.reduce(
+      (sum, zone) => sum + zone.plate_appearances,
+      0,
+    );
+    return {
+      rows: [
+        {
+          id: 21,
+          label: "対戦投手",
+          team_name: null,
+          plate_appearances: plateAppearances,
+          zones,
+        },
+      ],
+      total_target_pa: plateAppearances,
+      min_at_bats: 3,
+      min_plate_appearances: 3,
+    };
+  };
+
+  const openPitcherTab = async (
+    user: ReturnType<typeof userEvent.setup>,
+    pitcherData: PitcherFaceoffCourseData,
+  ) => {
+    render(
+      <PitchCourseCard
+        data={COURSE_DATA}
+        loadPitcherCross={async () => pitcherData}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "投手別" }));
+    await screen.findByRole("combobox", { name: "対戦投手" });
+  };
+
+  it("見出しはコース別分析で、既定は打率・5x5", () => {
+    render(<PitchCourseCard data={COURSE_DATA} />);
+
+    expect(
+      screen.getByRole("heading", { name: "コース別分析" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打率" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "5x5" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("長打率に切り替えると塁打から計算した値を打数と併記する", async () => {
+    const user = userEvent.setup();
+    await openPitcherTab(
+      user,
+      pitcherDataWith({ 19: { atBats: 5, hits: 4, totalBases: 7 } }),
+    );
+    expect(screen.getByText(".800")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "長打率" }));
+
+    expect(screen.getByText("1.400")).toBeInTheDocument();
+    expect(screen.getByText("5打数")).toBeInTheDocument();
+    expect(screen.queryByText(".800")).not.toBeInTheDocument();
+  });
+
+  it("三振率は打席を分母に%で表示し、三振の内訳を出す", async () => {
+    const user = userEvent.setup();
+    await openPitcherTab(
+      user,
+      pitcherDataWith({
+        19: {
+          atBats: 5,
+          hits: 1,
+          plateAppearances: 6,
+          strikeouts: 2,
+          swingingStrikeouts: 1,
+        },
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: "三振率" }));
+
+    expect(screen.getByText("33%")).toBeInTheDocument();
+    expect(screen.getByText("6打席")).toBeInTheDocument();
+    expect(
+      screen.getByText("三振 2（空振り 1・見逃し 0・未入力 1）"),
+    ).toBeInTheDocument();
+  });
+
+  it("3x3 では隣接コースの打数・安打を合算してから打率を出す", async () => {
+    const user = userEvent.setup();
+    await openPitcherTab(
+      user,
+      pitcherDataWith({
+        1: { atBats: 2, hits: 2 },
+        7: { atBats: 4, hits: 0 },
+      }),
+    );
+    expect(screen.getByText("1.000")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "3x3" }));
+
+    expect(screen.getByText(".333")).toBeInTheDocument();
+    expect(screen.getByText("6打数")).toBeInTheDocument();
+    expect(screen.queryByText("1.000")).not.toBeInTheDocument();
+  });
+
+  it("最低母数未満のセルは半透明にし、畳んで母数が揃えば通常表示にする", async () => {
+    const user = userEvent.setup();
+    await openPitcherTab(
+      user,
+      pitcherDataWith({
+        1: { atBats: 2, hits: 1 },
+        2: { atBats: 2, hits: 0 },
+      }),
+    );
+    expect(screen.getByText(".500").parentElement).toHaveStyle({
+      opacity: "0.5",
+    });
+
+    await user.click(screen.getByRole("button", { name: "3x3" }));
+
+    expect(screen.getByText(".250").parentElement).toHaveStyle({
+      opacity: "1",
+    });
+  });
+
+  it("高低・内外では1打席を高低と内外の両方に数える", async () => {
+    const user = userEvent.setup();
+    await openPitcherTab(
+      user,
+      pitcherDataWith({
+        1: { atBats: 2, hits: 1 },
+        13: { atBats: 2, hits: 0 },
+      }),
+    );
+
+    await user.click(screen.getByRole("button", { name: "打席分布" }));
+    await user.click(screen.getByRole("button", { name: "高低・内外" }));
+
+    expect(screen.getByText("高め")).toBeInTheDocument();
+    expect(screen.getByText("三塁側")).toBeInTheDocument();
+    expect(screen.getAllByText("2打席")).toHaveLength(2);
+    expect(screen.getAllByText("50%")).toHaveLength(2);
+  });
+
+  it("コース別タブのゾーン内外ではゾーン別サマリーを重ねて出さない", async () => {
+    const user = userEvent.setup();
+    render(
+      <PitchCourseCard
+        data={buildCourseData({
+          13: { atBats: 4, hits: 1 },
+          1: { atBats: 2, hits: 2 },
+        })}
+      />,
+    );
+    expect(screen.getByText("ボールゾーン")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "ゾーン内外" }));
+
+    expect(screen.getByText("ストライクゾーン")).toBeInTheDocument();
+    expect(screen.getByText(".250")).toBeInTheDocument();
+    expect(screen.getByText("1.000")).toBeInTheDocument();
+  });
+
+  it("指標と粒度はタブを切り替えても保持する", async () => {
+    const user = userEvent.setup();
+    render(
+      <PitchCourseCard
+        data={COURSE_DATA}
+        loadPitcherCross={async () =>
+          pitcherDataWith({
+            7: { atBats: 3, hits: 1, plateAppearances: 4, strikeouts: 1 },
+          })
+        }
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "三振率" }));
+    await user.click(screen.getByRole("button", { name: "3x3" }));
+    await user.click(screen.getByRole("button", { name: "投手別" }));
+    await screen.findByRole("combobox", { name: "対戦投手" });
+
+    expect(screen.getByRole("button", { name: "三振率" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "3x3" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByText("25%")).toBeInTheDocument();
   });
 });
