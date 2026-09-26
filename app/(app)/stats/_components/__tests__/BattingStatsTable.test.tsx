@@ -115,7 +115,7 @@ describe("打撃成績テーブルの得点圏打率列", () => {
     );
 
     expect(screen.getAllByText("-")).toHaveLength(2);
-    expect(screen.queryByText("0.000")).not.toBeInTheDocument();
+    expect(screen.queryByText(".000")).not.toBeInTheDocument();
   });
 
   it("dashWhenMissing を付けていない列は未返却を従来どおり 0 として表示する", () => {
@@ -125,7 +125,18 @@ describe("打撃成績テーブルの得点圏打率列", () => {
       />,
     );
 
-    expect(screen.getByText("0.000")).toBeInTheDocument();
+    expect(screen.getByText(".000")).toBeInTheDocument();
     expect(screen.getAllByText("-")).toHaveLength(1);
+  });
+});
+
+describe("打撃成績テーブルの率系の表示", () => {
+  it("打率 0 も他の画面と同じく .000 と表示する", () => {
+    render(
+      <BattingStatsTable rows={[buildRow({ hit: 0, batting_average: 0 })]} />,
+    );
+
+    expect(screen.getByText(".000")).toBeInTheDocument();
+    expect(screen.queryByText("0.000")).not.toBeInTheDocument();
   });
 });

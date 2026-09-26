@@ -19,7 +19,8 @@ export type CalculatorField = {
   label: string;
   placeholder?: string;
   min?: number;
-  step?: number;
+  /** 1 のフィールドは CalculatorForm で整数以外の入力をエラーにする */
+  step: number;
 };
 
 export type CalculatorOutput = {
