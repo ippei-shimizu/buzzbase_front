@@ -38,6 +38,21 @@ const loadModules = async (
   return { analytics, posthog };
 };
 
+const PLATE_APPEARANCE_COMPLETED_PROPERTIES = {
+  is_edit: false,
+  has_hit_direction: true,
+  has_detail: true,
+  has_pitcher: true,
+  has_count: false,
+  has_situation: true,
+  has_first_pitch_swing: false,
+  has_contact_quality: true,
+  has_timing: false,
+  has_pitch_type: true,
+  has_pitch_course: true,
+  has_memo: false,
+};
+
 /**
  * mobile（buzzbase_mobile/utils/analytics.ts）が送っているイベント名とプロパティ。
  * Web / アプリでファネルを横断集計するため、この表からずれてはならない。
@@ -83,13 +98,9 @@ const MOBILE_EVENT_CASES: {
   },
   {
     event: "plate appearance completed",
-    properties: { is_edit: false, has_pitcher: true, has_detail: false },
+    properties: PLATE_APPEARANCE_COMPLETED_PROPERTIES,
     run: (a) =>
-      a.trackPlateAppearanceCompleted({
-        is_edit: false,
-        has_pitcher: true,
-        has_detail: false,
-      }),
+      a.trackPlateAppearanceCompleted(PLATE_APPEARANCE_COMPLETED_PROPERTIES),
   },
   {
     event: "plate appearance canceled",
@@ -216,6 +227,33 @@ const MOBILE_EVENT_CASES: {
     properties: { feature: "unlimited_practice_menus" },
     run: (a) => a.trackFreeLimitReached("unlimited_practice_menus"),
   },
+  {
+    event: "onboarding step viewed",
+    properties: { step_index: 1, illustration: "ranking" },
+    run: (a) =>
+      a.trackOnboardingStepViewed({ step_index: 1, illustration: "ranking" }),
+  },
+  {
+    event: "onboarding completed",
+    properties: { skipped: true, last_step_index: 0 },
+    run: (a) =>
+      a.trackOnboardingCompleted({ skipped: true, last_step_index: 0 }),
+  },
+  {
+    event: "profile setup viewed",
+    properties: undefined,
+    run: (a) => a.trackProfileSetupViewed(),
+  },
+  {
+    event: "profile setup completed",
+    properties: { skipped: false, has_team: true, position_count: 2 },
+    run: (a) =>
+      a.trackProfileSetupCompleted({
+        skipped: false,
+        has_team: true,
+        position_count: 2,
+      }),
+  },
 ];
 
 /**
@@ -285,6 +323,10 @@ describe("analytics", () => {
         PURCHASE_COMPLETED: "purchase completed",
         PURCHASE_FAILED: "purchase failed",
         FREE_LIMIT_REACHED: "free limit reached",
+        ONBOARDING_STEP_VIEWED: "onboarding step viewed",
+        ONBOARDING_COMPLETED: "onboarding completed",
+        PROFILE_SETUP_VIEWED: "profile setup viewed",
+        PROFILE_SETUP_COMPLETED: "profile setup completed",
       });
     });
 

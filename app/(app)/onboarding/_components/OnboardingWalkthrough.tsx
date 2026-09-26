@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ONBOARDING_STEPS } from "@app/constants/onboarding";
+import {
+  trackOnboardingCompleted,
+  trackOnboardingStepViewed,
+} from "@app/utils/analytics";
 import OnboardingSlide from "./OnboardingSlide";
 import PageIndicator from "./PageIndicator";
 
@@ -18,8 +22,24 @@ interface Props {
 export default function OnboardingWalkthrough({ onFinish }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
   const touchStartXRef = useRef<number | null>(null);
+  const hasFinishedRef = useRef(false);
 
   const isLastStep = stepIndex === LAST_STEP_INDEX;
+
+  // ボタン・キー・スワイプのどの経路で切り替わっても1回だけ送るため、表示中のステップに同期させる
+  useEffect(() => {
+    trackOnboardingStepViewed({
+      step_index: stepIndex,
+      illustration: ONBOARDING_STEPS[stepIndex].illustration,
+    });
+  }, [stepIndex]);
+
+  const finish = (skipped: boolean) => {
+    if (hasFinishedRef.current) return;
+    hasFinishedRef.current = true;
+    trackOnboardingCompleted({ skipped, last_step_index: stepIndex });
+    onFinish();
+  };
 
   // 全画面表示なので、どこにフォーカスがあっても左右キーで送れるよう window で拾う
   useEffect(() => {
@@ -73,7 +93,7 @@ export default function OnboardingWalkthrough({ onFinish }: Props) {
         )}
         <button
           type="button"
-          onClick={onFinish}
+          onClick={() => finish(true)}
           className="rounded-full px-2 py-1 text-sm font-semibold text-zic-400"
         >
           スキップ
@@ -92,7 +112,7 @@ export default function OnboardingWalkthrough({ onFinish }: Props) {
         {isLastStep ? (
           <button
             type="button"
-            onClick={onFinish}
+            onClick={() => finish(false)}
             className="mx-auto block w-full max-w-[420px] rounded-full bg-[#d08000] py-3 text-base font-bold text-white"
           >
             はじめる

@@ -15,6 +15,7 @@ export const INVITE_CARD_DISMISSED_STORAGE_KEY = `${ONBOARDING_STORAGE_PREFIX}in
 /** 初回ウォークスルー（3ステップのスライド）を見終えたか。 */
 export const WALKTHROUGH_COMPLETED_STORAGE_KEY = `${ONBOARDING_STORAGE_PREFIX}walkthroughCompleted`;
 
+// 値は PostHog の `onboarding step viewed` の illustration として Web / アプリで共有するため、イラストを差し替えてもキーはリネームしない
 export type OnboardingIllustration = "autoCalc" | "ranking" | "growth";
 
 export interface OnboardingStep {

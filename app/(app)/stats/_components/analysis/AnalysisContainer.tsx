@@ -363,7 +363,7 @@ export function AnalysisContainer({
             loadPitcherCross={loadPitcherCross}
           />
         ) : canViewPitchCourses ? (
-          <ProSectionPlaceholder label="コース別の打率" />
+          <ProSectionPlaceholder label="コース別分析" />
         ) : (
           <ProSampleSection feature="pitch_course_average">
             <PitchCourseCard

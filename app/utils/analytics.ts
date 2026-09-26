@@ -1,3 +1,4 @@
+import type { OnboardingIllustration } from "@app/constants/onboarding";
 import type { GoalKind, GoalPeriodType } from "@app/types/goal";
 import type { PlanType, Platform, ProFeature } from "@app/types/pro";
 import type { ScheduleEventType } from "@app/types/schedule";
@@ -37,6 +38,10 @@ export const ANALYTICS_EVENTS = {
   PURCHASE_COMPLETED: "purchase completed",
   PURCHASE_FAILED: "purchase failed",
   FREE_LIMIT_REACHED: "free limit reached",
+  ONBOARDING_STEP_VIEWED: "onboarding step viewed",
+  ONBOARDING_COMPLETED: "onboarding completed",
+  PROFILE_SETUP_VIEWED: "profile setup viewed",
+  PROFILE_SETUP_COMPLETED: "profile setup completed",
 } as const;
 
 type LoginType = "email" | "google" | "apple";
@@ -88,15 +93,47 @@ export const trackUserFollowed = (followedUserId: number) =>
 export const trackProfileUpdated = () =>
   capture(ANALYTICS_EVENTS.PROFILE_UPDATED);
 
+/** 登録直後の任意プロフィール入力の表示。 */
+export const trackProfileSetupViewed = () =>
+  capture(ANALYTICS_EVENTS.PROFILE_SETUP_VIEWED);
+
+/**
+ * 登録直後の任意プロフィール入力の終了。スキップと保存の両方で送り、`skipped` で区別する。
+ * どの項目が埋まったかは、試合記録フォームの初期値に効く項目に絞って持たせる。
+ */
+export const trackProfileSetupCompleted = (props: {
+  skipped: boolean;
+  has_team: boolean;
+  position_count: number;
+}) => capture(ANALYTICS_EVENTS.PROFILE_SETUP_COMPLETED, props);
+
+/**
+ * 打席の任意詳細を項目別に入力したかどうか。
+ * `has_detail` は既存データと連続して読むための互換値で、打球方向以外の項目の OR。
+ */
+export type PlateAppearanceDetailFlags = {
+  has_detail: boolean;
+  has_pitcher: boolean;
+  has_count: boolean;
+  has_situation: boolean;
+  has_first_pitch_swing: boolean;
+  has_contact_quality: boolean;
+  has_timing: boolean;
+  has_pitch_type: boolean;
+  has_pitch_course: boolean;
+  has_memo: boolean;
+};
+
 /**
  * 打席記録ウィザードの作成 / 更新完了。`is_edit` で新規・編集を区別する。
- * `has_pitcher` / `has_detail` は任意の詳細入力がどれだけ使われたかの計測用。
+ * 詳細フラグは任意の詳細入力がどの項目でどれだけ使われたかの計測用。
  */
-export const trackPlateAppearanceCompleted = (props: {
-  is_edit: boolean;
-  has_pitcher: boolean;
-  has_detail: boolean;
-}) => capture(ANALYTICS_EVENTS.PLATE_APPEARANCE_COMPLETED, props);
+export const trackPlateAppearanceCompleted = (
+  props: PlateAppearanceDetailFlags & {
+    is_edit: boolean;
+    has_hit_direction: boolean;
+  },
+) => capture(ANALYTICS_EVENTS.PLATE_APPEARANCE_COMPLETED, props);
 
 /** 打席記録ウィザードの途中離脱（完了せずに画面を離れた）。 */
 export const trackPlateAppearanceCanceled = (props: { is_edit: boolean }) =>
@@ -219,3 +256,19 @@ export const trackFreeLimitReached = (
   feature: ProFeature,
   props?: { source?: FreeLimitSource; detection?: "client" | "server" },
 ) => capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature, ...props });
+
+/**
+ * 初回ウォークスルーのスライド表示。1枚目の初期表示も含み、戻る操作で往復すると
+ * 再送されるため、スライド別通過率はユニークユーザー数で集計する。
+ * mobile は登録前、Web はユーザー名登録後に表示するため、横断集計は `$lib` で分ける。
+ */
+export const trackOnboardingStepViewed = (props: {
+  step_index: number;
+  illustration: OnboardingIllustration;
+}) => capture(ANALYTICS_EVENTS.ONBOARDING_STEP_VIEWED, props);
+
+/** 初回ウォークスルーの終了。スキップと「はじめる」の両方で送り、`skipped` で区別する。 */
+export const trackOnboardingCompleted = (props: {
+  skipped: boolean;
+  last_step_index: number;
+}) => capture(ANALYTICS_EVENTS.ONBOARDING_COMPLETED, props);

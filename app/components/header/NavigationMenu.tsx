@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import HeaderUserMenu from "@app/components/header/HeaderUserMenu";
+import { isRegistrationFlowPath } from "@app/constants/registrationFlow";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 import { useGroupNavBadge } from "@app/hooks/onboarding/useGroupNavBadge";
 import { showAuthRequiredToast } from "@app/utils/showAuthRequiredToast";
@@ -43,7 +44,7 @@ export default function NavigationMenu() {
     }
   };
 
-  const shouldHideNavigationMenu = pathName.includes("/register-username");
+  const shouldHideNavigationMenu = isRegistrationFlowPath(pathName);
 
   // 未ログイン時はモバイルのタブバーを出さない。各項目はログイン要求に誘導するだけで導線価値が低く、
   // 下端を fixed 要素で塞ぐと AdSense がアンカー広告を配信しないため。
