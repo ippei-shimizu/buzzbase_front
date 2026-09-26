@@ -84,8 +84,9 @@ interface AnalysisContainerProps {
   monthOptions: FilterOption[];
 }
 
-/** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
 const loadSamplePitcherCross = async () => SAMPLE_PITCHER_FACEOFF_COURSES;
+
+/** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
 
 export function AnalysisContainer({
   initialData,
