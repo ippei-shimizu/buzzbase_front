@@ -79,13 +79,30 @@ export const pitchCourseCenter = (course: number): PitchCoursePoint => ({
   y: trackCenter(pitchCourseRow(course)),
 });
 
-/** 高さ方向のラベル（行 1-2: 高め / 3: 真ん中 / 4-5: 低め）。 */
-export const pitchCourseHeightLabel = (course: number): string => {
-  const row = pitchCourseRow(course);
-  if (row <= 2) return "高め";
-  if (row === 3) return "真ん中";
-  return "低め";
+/** 行・列番号 (1〜5) → 3 バンドの番号（0: 1-2 / 1: 3 / 2: 4-5）。高低・内外の区分の唯一の基準。 */
+export const pitchCourseBand = (track: number): 0 | 1 | 2 => {
+  if (track <= 2) return 0;
+  if (track === 3) return 1;
+  return 2;
 };
+
+/** pitchCourseBand の行バンドごとの高さラベル。 */
+export const PITCH_COURSE_HEIGHT_BAND_LABELS = [
+  "高め",
+  "真ん中",
+  "低め",
+] as const;
+
+/** pitchCourseBand の列バンドごとの捕手目線ラベル。捕手目線では左（列1-2）が三塁側。 */
+export const PITCH_COURSE_SIDE_BAND_LABELS = [
+  "三塁側",
+  "真ん中",
+  "一塁側",
+] as const;
+
+/** 高さ方向のラベル（行 1-2: 高め / 3: 真ん中 / 4-5: 低め）。 */
+export const pitchCourseHeightLabel = (course: number): string =>
+  PITCH_COURSE_HEIGHT_BAND_LABELS[pitchCourseBand(pitchCourseRow(course))];
 
 /**
  * 横方向のラベル。打席（batting_side）が分かるときだけ内角/外角で表現し、
@@ -96,12 +113,12 @@ export const pitchCourseSideLabel = (
   course: number,
   battingSide: BattingSide | null = null,
 ): string => {
-  const col = pitchCourseCol(course);
-  if (col === 3) return "真ん中";
-  const isThirdBaseSide = col <= 2;
+  const band = pitchCourseBand(pitchCourseCol(course));
+  if (band === 1) return "真ん中";
+  const isThirdBaseSide = band === 0;
   if (battingSide === "right") return isThirdBaseSide ? "内角" : "外角";
   if (battingSide === "left") return isThirdBaseSide ? "外角" : "内角";
-  return isThirdBaseSide ? "三塁側" : "一塁側";
+  return PITCH_COURSE_SIDE_BAND_LABELS[band];
 };
 
 /**
