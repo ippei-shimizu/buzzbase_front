@@ -286,6 +286,8 @@ export const readPitchCourseMetric = (
       const rate =
         (metric === "slugging" ? counts.total_bases : counts.hits) /
         counts.at_bats;
+      // back が塁打・三振を返す前のレスポンスでは undefined になり NaN を表示してしまう。
+      if (!Number.isFinite(rate)) return NO_DATA_READING;
       return {
         value: formatBattingAverage(rate, counts.at_bats),
         detail: `${counts.at_bats}打数`,
@@ -299,6 +301,7 @@ export const readPitchCourseMetric = (
     case "strikeout_rate": {
       if (counts.plate_appearances === 0) return NO_DATA_READING;
       const rate = counts.strikeouts / counts.plate_appearances;
+      if (!Number.isFinite(rate)) return NO_DATA_READING;
       return {
         value: formatPercent(rate),
         detail: `${counts.plate_appearances}打席`,
@@ -326,11 +329,17 @@ export const reliabilityNote = (
   }
 };
 
-/** 三振の内訳。振り逃げは空振り/見逃しを持たないため、差分を「未入力」として出す。 */
-export const formatStrikeoutBreakdown = (counts: PitchCourseCounts): string => {
-  const unrecorded = Math.max(
-    0,
-    counts.strikeouts - counts.swinging_strikeouts - counts.looking_strikeouts,
-  );
-  return `三振 ${counts.strikeouts}（空振り ${counts.swinging_strikeouts}・見逃し ${counts.looking_strikeouts}・未入力 ${unrecorded}）`;
+/**
+ * 三振の内訳。振り逃げは空振り/見逃しを持たないため、差分を「未入力」として出す。
+ * 三振数そのものが無い（back が未対応の）ときは null。
+ */
+export const formatStrikeoutBreakdown = (
+  counts: PitchCourseCounts,
+): string | null => {
+  if (!Number.isFinite(counts.strikeouts)) return null;
+  const countOrZero = (value: number) => (Number.isFinite(value) ? value : 0);
+  const swinging = countOrZero(counts.swinging_strikeouts);
+  const looking = countOrZero(counts.looking_strikeouts);
+  const unrecorded = Math.max(0, counts.strikeouts - swinging - looking);
+  return `三振 ${counts.strikeouts}（空振り ${swinging}・見逃し ${looking}・未入力 ${unrecorded}）`;
 };

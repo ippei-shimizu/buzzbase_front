@@ -236,12 +236,15 @@ function CourseHeatmap({
     }
   };
 
+  const strikeoutBreakdown =
+    metric === "strikeout_rate" ? formatStrikeoutBreakdown(total) : null;
+
   return (
     <div className="mx-auto w-full max-w-[300px]">
       {renderView()}
-      {metric === "strikeout_rate" ? (
+      {strikeoutBreakdown ? (
         <p className="mt-2 text-center text-[11px] text-[#A1A1AA]">
-          {formatStrikeoutBreakdown(total)}
+          {strikeoutBreakdown}
         </p>
       ) : null}
     </div>

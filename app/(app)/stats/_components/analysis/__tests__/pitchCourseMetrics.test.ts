@@ -330,6 +330,43 @@ describe("readPitchCourseMetric", () => {
   });
 });
 
+describe("塁打・三振を返さない旧レスポンス", () => {
+  const legacyZone = {
+    plate_appearances: 6,
+    at_bats: 5,
+    hits: 2,
+  } as unknown as PitchCourseCounts;
+  const legacyCounts = sumPitchCourseCounts([legacyZone, legacyZone]);
+
+  it("長打率・三振率は NaN ではなく '-' にし、打率は計算できる", () => {
+    for (const metric of ["slugging", "strikeout_rate"] as const) {
+      expect(readPitchCourseMetric(metric, legacyCounts, CONTEXT)).toEqual({
+        value: "-",
+        detail: null,
+        color: null,
+        isReliable: true,
+      });
+    }
+    expect(
+      readPitchCourseMetric("batting_average", legacyCounts, CONTEXT).value,
+    ).toBe(".400");
+  });
+
+  it("三振の内訳は出さない", () => {
+    expect(formatStrikeoutBreakdown(legacyCounts)).toBeNull();
+  });
+
+  it("空振り・見逃しだけ欠けていれば未入力として数える", () => {
+    expect(
+      formatStrikeoutBreakdown({
+        ...counts({ strikeouts: 2 }),
+        swinging_strikeouts: undefined,
+        looking_strikeouts: undefined,
+      } as unknown as PitchCourseCounts),
+    ).toBe("三振 2（空振り 0・見逃し 0・未入力 2）");
+  });
+});
+
 describe("reliabilityNote", () => {
   it("指標ごとの最低母数を案内し、打席分布では出さない", () => {
     expect(reliabilityNote("batting_average", 3)).toBe(
