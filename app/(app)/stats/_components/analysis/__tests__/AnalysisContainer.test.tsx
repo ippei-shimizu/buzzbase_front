@@ -53,6 +53,7 @@ jest.mock("../../../analysisActions", () => ({
   getPitchTypes: jest.fn(),
   getPitchCourses: jest.fn(),
   getPitchCoursePitchTypes: jest.fn(),
+  getPitcherFaceoffCourses: jest.fn(),
   getPitcherFaceoffs: jest.fn(),
 }));
 
@@ -77,8 +78,10 @@ import {
   getHeadlineStats,
   getHitDirections,
   getHitLocations,
+  getPitchCoursePitchTypes,
   getPitchCourses,
   getPitcherAttributeSummary,
+  getPitcherFaceoffCourses,
   getPitcherFaceoffs,
   getPitchTypes,
   getPlateAppearanceBreakdown,
@@ -483,6 +486,57 @@ describe("AnalysisContainer の Pro 出し分け", () => {
       expect(mockGetPitcherFaceoffs).toHaveBeenCalledTimes(1);
     });
 
+    it("フィルタを変えると投手別タブは新しい条件で取り直す", async () => {
+      const mockGetPitcherFaceoffCourses =
+        getPitcherFaceoffCourses as jest.MockedFunction<
+          typeof getPitcherFaceoffCourses
+        >;
+      const buildPitcherRow = (label: string) => ({
+        id: 1,
+        label,
+        team_name: null,
+        plate_appearances: 3,
+        zones: REAL_PITCH_COURSES.zones,
+      });
+      mockGetPitcherFaceoffCourses
+        .mockResolvedValueOnce({
+          status: "ok",
+          data: {
+            rows: [buildPitcherRow("通算の投手")],
+            total_target_pa: 3,
+            min_at_bats: 3,
+            min_plate_appearances: 3,
+          },
+        })
+        .mockResolvedValueOnce({
+          status: "ok",
+          data: {
+            rows: [buildPitcherRow("今年の投手")],
+            total_target_pa: 3,
+            min_at_bats: 3,
+            min_plate_appearances: 3,
+          },
+        });
+      const user = userEvent.setup();
+
+      await renderContainer({
+        initialProData: SSR_PRO_DATA,
+        initialProFeatures: ALL_PRO_FEATURES,
+      });
+      await user.click(screen.getByRole("button", { name: "投手別" }));
+      expect(
+        await screen.findByRole("option", { name: "通算の投手 3打席" }),
+      ).toBeInTheDocument();
+
+      await changeYearFilter();
+      await user.click(screen.getByRole("button", { name: "投手別" }));
+
+      expect(
+        await screen.findByRole("option", { name: "今年の投手 3打席" }),
+      ).toBeInTheDocument();
+      expect(mockGetPitcherFaceoffCourses).toHaveBeenCalledTimes(2);
+    });
+
     it("サーバーで Pro 判定できなかった場合は読み込み中を出してから実データに差し替える", async () => {
       const pending = deferred<{
         status: "ok";
@@ -541,6 +595,22 @@ describe("AnalysisContainer の Pro 出し分け", () => {
         screen.getByRole("button", { name: /投手 A/ }),
       ).toBeInTheDocument();
       expect(screen.queryByText("20打数 8安打")).not.toBeInTheDocument();
+    });
+
+    it("コース別カードの球種別タブもサンプルで開け、API は呼ばない", async () => {
+      const mockGetPitchCoursePitchTypes =
+        getPitchCoursePitchTypes as jest.MockedFunction<
+          typeof getPitchCoursePitchTypes
+        >;
+      const user = userEvent.setup();
+      await renderContainer();
+
+      await user.click(await screen.findByRole("button", { name: "球種別" }));
+
+      expect(
+        await screen.findByRole("button", { name: "スライダー (21)" }),
+      ).toBeInTheDocument();
+      expect(mockGetPitchCoursePitchTypes).not.toHaveBeenCalled();
     });
 
     it("方向別を含む5ブロックすべてでサンプルであることを明示する", async () => {

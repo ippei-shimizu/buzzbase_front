@@ -19,6 +19,7 @@ import {
   type CountSituations,
   type PitchCourseData,
   type PitchCoursePitchTypeData,
+  type PitcherFaceoffCourseData,
   type PitcherFaceoffData,
   type PitchTypeData,
   getAdditionalStats,
@@ -31,6 +32,7 @@ import {
   getPitchCoursePitchTypes,
   getPitchCourses,
   getPitcherAttributeSummary,
+  getPitcherFaceoffCourses,
   getPitcherFaceoffs,
   getPitchTypes,
   getPlateAppearanceBreakdown,
@@ -54,7 +56,9 @@ import {
   SAMPLE_COUNT_SITUATIONS,
   SAMPLE_HIT_DIRECTIONS,
   SAMPLE_PITCH_COURSES,
+  SAMPLE_PITCH_TYPE_COURSES,
   SAMPLE_PITCH_TYPES,
+  SAMPLE_PITCHER_FACEOFF_COURSES,
   SAMPLE_PITCHER_FACEOFFS,
 } from "./proStatsSampleData";
 import { RunnersSituationCard } from "./RunnersSituationCard";
@@ -81,7 +85,11 @@ interface AnalysisContainerProps {
   monthOptions: FilterOption[];
 }
 
+const loadSamplePitchTypeCross = async () => SAMPLE_PITCH_TYPE_COURSES;
+const loadSamplePitcherCross = async () => SAMPLE_PITCHER_FACEOFF_COURSES;
+
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
+
 export function AnalysisContainer({
   initialData,
   initialProData,
@@ -169,6 +177,11 @@ export function AnalysisContainer({
   const loadPitchTypeCross =
     async (): Promise<PitchCoursePitchTypeData | null> => {
       const result = await getPitchCoursePitchTypes(filters);
+      return unwrap("pitch_course_average", result);
+    };
+  const loadPitcherCross =
+    async (): Promise<PitcherFaceoffCourseData | null> => {
+      const result = await getPitcherFaceoffCourses(filters);
       return unwrap("pitch_course_average", result);
     };
 
@@ -343,14 +356,21 @@ export function AnalysisContainer({
         )}
         {pitchCourses ? (
           <PitchCourseCard
+            // 遅延取得したクロス集計は前のフィルタの値なので、フィルタが変わったらカードごと作り直す
+            key={JSON.stringify(filters)}
             data={pitchCourses}
             loadPitchTypeCross={loadPitchTypeCross}
+            loadPitcherCross={loadPitcherCross}
           />
         ) : canViewPitchCourses ? (
           <ProSectionPlaceholder label="コース別の打率" />
         ) : (
           <ProSampleSection feature="pitch_course_average">
-            <PitchCourseCard data={SAMPLE_PITCH_COURSES} />
+            <PitchCourseCard
+              data={SAMPLE_PITCH_COURSES}
+              loadPitchTypeCross={loadSamplePitchTypeCross}
+              loadPitcherCross={loadSamplePitcherCross}
+            />
           </ProSampleSection>
         )}
         {pitcherFaceoffs ? (

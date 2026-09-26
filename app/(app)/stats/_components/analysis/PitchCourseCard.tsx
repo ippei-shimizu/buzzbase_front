@@ -3,9 +3,10 @@ import type {
   PitchCourseData,
   PitchCoursePitchTypeData,
   PitchCourseZone,
+  PitcherFaceoffCourseData,
 } from "../../analysisActions";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { PitchCourseGrid } from "@app/components/baseball/PitchCourseGrid";
 import { formatBattingAverage } from "@app/utils/formatStats";
 
@@ -16,9 +17,40 @@ interface PitchCourseCardProps {
    * クロス集計は最大 250 セルと大きいため常時取得しない。未指定ならタブ自体を出さない。
    */
   loadPitchTypeCross?: () => Promise<PitchCoursePitchTypeData | null>;
+  /**
+   * 「投手別」タブを最初に開いたときに呼ぶ遅延ローダ。
+   * 投手数×25 セルと大きいため常時取得しない。未指定ならタブ自体を出さない。
+   */
+  loadPitcherCross?: () => Promise<PitcherFaceoffCourseData | null>;
 }
 
-type PitchCourseTab = "course" | "pitch_type";
+type PitchCourseTab = "course" | "pitch_type" | "pitcher";
+
+interface LazyCross<T> {
+  data: T | null;
+  isLoading: boolean;
+  load: () => void;
+}
+
+function useLazyCross<T>(
+  loader: (() => Promise<T | null>) | undefined,
+  onLoaded: (data: T) => void,
+): LazyCross<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const load = () => {
+    if (data !== null || isLoading || !loader) return;
+    setIsLoading(true);
+    void loader()
+      .then((result) => {
+        setData(result);
+        if (result) onLoaded(result);
+      })
+      .catch(() => setData(null))
+      .finally(() => setIsLoading(false));
+  };
+  return { data, isLoading, load };
+}
 
 /**
  * 固定閾値の色スケール。データ内 min/max の相対スケールにすると、フィルタを
@@ -102,31 +134,47 @@ function ZoneHeatmap({
 }
 
 /** ヒートマップ下の注記。参考値の閾値は back が返す min_at_bats に合わせる。 */
-function Notes({ minAtBats }: { minAtBats: number }) {
+function Notes({
+  minAtBats,
+  children,
+}: {
+  minAtBats: number;
+  children?: ReactNode;
+}) {
   return (
     <div className="mt-3 flex flex-col gap-y-0.5">
       <p className="text-[11px] text-[#71717A]">
         打数が{minAtBats}未満のコースは参考値です
       </p>
       <p className="text-[11px] text-[#71717A]">捕手目線で表示しています</p>
+      {children}
     </div>
   );
 }
 
 /**
- * コース別の打率カード（Pro）。コース別 / 球種別の2タブ構成で、
- * 球種別のクロス集計はタブを開いたときにだけ取得する。
+ * コース別の打率カード（Pro）。コース別 / 球種別 / 投手別の3タブ構成で、
+ * 球種別・投手別のクロス集計はタブを開いたときにだけ取得する。
  */
 export function PitchCourseCard({
   data,
   loadPitchTypeCross,
+  loadPitcherCross,
 }: PitchCourseCardProps) {
   const [tab, setTab] = useState<PitchCourseTab>("course");
-  const [cross, setCross] = useState<PitchCoursePitchTypeData | null>(null);
-  const [isCrossLoading, setIsCrossLoading] = useState(false);
   const [selectedPitchTypeId, setSelectedPitchTypeId] = useState<number | null>(
     null,
   );
+  const [selectedPitcherId, setSelectedPitcherId] = useState<number | null>(
+    null,
+  );
+  const pitchTypeCross = useLazyCross(loadPitchTypeCross, (result) => {
+    const firstActive = result.rows.find((row) => row.plate_appearances > 0);
+    setSelectedPitchTypeId(firstActive?.id ?? result.rows[0]?.id ?? null);
+  });
+  const pitcherCross = useLazyCross(loadPitcherCross, (result) => {
+    setSelectedPitcherId(result.rows[0]?.id ?? null);
+  });
 
   if (data.total_target_pa === 0) {
     return (
@@ -149,28 +197,30 @@ export function PitchCourseCard({
 
   const handleTabChange = (next: PitchCourseTab) => {
     setTab(next);
-    if (
-      next === "pitch_type" &&
-      cross === null &&
-      !isCrossLoading &&
-      loadPitchTypeCross
-    ) {
-      setIsCrossLoading(true);
-      void loadPitchTypeCross().then((result) => {
-        setCross(result);
-        if (result) {
-          const firstActive = result.rows.find(
-            (row) => row.plate_appearances > 0,
-          );
-          setSelectedPitchTypeId(firstActive?.id ?? result.rows[0]?.id ?? null);
-        }
-        setIsCrossLoading(false);
-      });
-    }
+    if (next === "pitch_type") pitchTypeCross.load();
+    if (next === "pitcher") pitcherCross.load();
   };
 
+  const cross = pitchTypeCross.data;
   const selectedRow =
     cross?.rows.find((row) => row.id === selectedPitchTypeId) ?? null;
+  const pitchers = pitcherCross.data;
+  const selectedPitcherRow =
+    pitchers?.rows.find((row) => row.id === selectedPitcherId) ?? null;
+  const tabs = [
+    { key: "course", label: "コース別", isAvailable: true },
+    {
+      key: "pitch_type",
+      label: "球種別",
+      isAvailable: loadPitchTypeCross !== undefined,
+    },
+    {
+      key: "pitcher",
+      label: "投手別",
+      isAvailable: loadPitcherCross !== undefined,
+    },
+  ] as const;
+  const availableTabs = tabs.filter((item) => item.isAvailable);
 
   return (
     <section className="rounded-xl bg-[#3A3A3A] p-4">
@@ -180,17 +230,13 @@ export function PitchCourseCard({
           対象 {data.total_target_pa} 打席
         </span>
       </div>
-      {loadPitchTypeCross ? (
+      {availableTabs.length > 1 ? (
         <div className="mt-3 flex gap-x-1 rounded-lg bg-[#27272A] p-1">
-          {(
-            [
-              { key: "course", label: "コース別" },
-              { key: "pitch_type", label: "球種別" },
-            ] as const
-          ).map(({ key, label }) => (
+          {availableTabs.map(({ key, label }) => (
             <button
               key={key}
               type="button"
+              aria-pressed={tab === key}
               className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-colors ${
                 tab === key
                   ? "bg-[#d08000] text-white"
@@ -235,9 +281,9 @@ export function PitchCourseCard({
           </div>
           <Notes minAtBats={data.min_at_bats} />
         </div>
-      ) : (
+      ) : tab === "pitch_type" ? (
         <div className="mt-4">
-          {isCrossLoading ? (
+          {pitchTypeCross.isLoading ? (
             <p className="py-8 text-center text-sm text-[#A1A1AA]">
               読み込み中...
             </p>
@@ -276,6 +322,57 @@ export function PitchCourseCard({
                 </div>
               ) : null}
               <Notes minAtBats={cross.min_at_bats} />
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="mt-4">
+          {pitcherCross.isLoading ? (
+            <p className="py-8 text-center text-sm text-[#A1A1AA]">
+              読み込み中...
+            </p>
+          ) : pitchers === null ? (
+            <p className="py-8 text-center text-sm text-[#A1A1AA]">
+              投手別のデータを取得できませんでした
+            </p>
+          ) : pitchers.rows.length === 0 ? (
+            <p className="py-8 text-center text-sm text-[#A1A1AA]">
+              コースを記録した対戦が{pitchers.min_plate_appearances}
+              打席以上の投手がいません
+            </p>
+          ) : (
+            <>
+              <select
+                aria-label="対戦投手"
+                className="w-full rounded-lg border border-zinc-500 bg-[#27272A] px-3 py-2 text-sm text-[#F4F4F4] outline-none focus:border-[#d08000]"
+                value={selectedPitcherId ?? ""}
+                onChange={(event) =>
+                  setSelectedPitcherId(Number(event.target.value))
+                }
+              >
+                {pitchers.rows.map((row) => (
+                  <option key={row.id} value={row.id}>
+                    {row.team_name
+                      ? `${row.label}（${row.team_name}）`
+                      : row.label}
+                    {` ${row.plate_appearances}打席`}
+                  </option>
+                ))}
+              </select>
+              {selectedPitcherRow ? (
+                <div className="mt-3">
+                  <ZoneHeatmap
+                    zones={selectedPitcherRow.zones}
+                    minAtBats={pitchers.min_at_bats}
+                  />
+                </div>
+              ) : null}
+              <Notes minAtBats={pitchers.min_at_bats}>
+                <p className="text-[11px] text-[#71717A]">
+                  コースを記録した対戦が{pitchers.min_plate_appearances}
+                  打席以上の投手のみ表示しています
+                </p>
+              </Notes>
             </>
           )}
         </div>
