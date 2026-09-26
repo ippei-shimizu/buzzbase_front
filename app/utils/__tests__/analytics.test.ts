@@ -216,6 +216,21 @@ const MOBILE_EVENT_CASES: {
     properties: { feature: "unlimited_practice_menus" },
     run: (a) => a.trackFreeLimitReached("unlimited_practice_menus"),
   },
+  {
+    event: "profile setup viewed",
+    properties: undefined,
+    run: (a) => a.trackProfileSetupViewed(),
+  },
+  {
+    event: "profile setup completed",
+    properties: { skipped: false, has_team: true, position_count: 2 },
+    run: (a) =>
+      a.trackProfileSetupCompleted({
+        skipped: false,
+        has_team: true,
+        position_count: 2,
+      }),
+  },
 ];
 
 /**
@@ -285,6 +300,8 @@ describe("analytics", () => {
         PURCHASE_COMPLETED: "purchase completed",
         PURCHASE_FAILED: "purchase failed",
         FREE_LIMIT_REACHED: "free limit reached",
+        PROFILE_SETUP_VIEWED: "profile setup viewed",
+        PROFILE_SETUP_COMPLETED: "profile setup completed",
       });
     });
 
