@@ -3,6 +3,7 @@ import {
   ArtCanvas,
   BODY,
   BRAND,
+  BRAND_SOFT,
   Card,
   CARD_BG,
   Confetti,
@@ -214,7 +215,7 @@ export default function AutoCalcIllustration() {
                 width={METRIC_CARD.width}
                 height={METRIC_CARD.height}
                 rx={12}
-                fill="rgba(208, 128, 0, 0.18)"
+                fill={BRAND_SOFT}
                 stroke={BRAND}
                 strokeWidth={1.5}
               />

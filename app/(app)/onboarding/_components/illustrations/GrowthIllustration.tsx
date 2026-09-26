@@ -1,6 +1,7 @@
 import {
   ArtCanvas,
   BRAND,
+  BRAND_SOFT,
   Card,
   Confetti,
   INK,
@@ -65,14 +66,7 @@ export default function GrowthIllustration() {
       <text x={38} y={50} fill={SUB_INK} fontSize={10}>
         打率の推移
       </text>
-      <rect
-        x={96}
-        y={40}
-        width={34}
-        height={15}
-        rx={7.5}
-        fill="rgba(208, 128, 0, 0.18)"
-      />
+      <rect x={96} y={40} width={34} height={15} rx={7.5} fill={BRAND_SOFT} />
       <text
         x={113}
         y={51}

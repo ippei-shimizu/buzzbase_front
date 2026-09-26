@@ -6,6 +6,7 @@ const CANVAS_WIDTH = 280;
 const CANVAS_HEIGHT = 190;
 
 export const BRAND = "#d08000";
+export const BRAND_SOFT = "rgba(208, 128, 0, 0.18)";
 export const CARD_BG = "#27272A";
 export const CARD_EDGE = "#3F3F46";
 export const BODY = "#3F3F46";
