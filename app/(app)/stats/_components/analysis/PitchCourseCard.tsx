@@ -408,13 +408,21 @@ export function PitchCourseCard({
     },
   ] as const;
   const availableTabs = tabs.filter((item) => item.isAvailable);
-  const readSummary = (summary: PitchCourseZoneSummary, courseCount: number) =>
-    readPitchCourseMetric(metric, summary, {
+  const readSummary = (
+    summary: PitchCourseZoneSummary,
+    courseCount: number,
+  ): PitchCourseMetricReading => {
+    const reading = readPitchCourseMetric(metric, summary, {
       minAtBats: data.min_at_bats,
       totalPlateAppearances:
         data.strike_zone.plate_appearances + data.ball_zone.plate_appearances,
       courseCount,
     });
+    // 打率のサマリーは従来どおり安打数まで読めるよう (打数-安打) で出す。
+    return metric === "batting_average" && summary.at_bats > 0
+      ? { ...reading, detail: `(${summary.at_bats}-${summary.hits})` }
+      : reading;
+  };
 
   return (
     <section className="rounded-xl bg-[#3A3A3A] p-4">

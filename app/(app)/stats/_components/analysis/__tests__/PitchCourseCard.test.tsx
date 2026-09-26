@@ -416,6 +416,26 @@ describe("PitchCourseCard の指標・粒度切替", () => {
     ).toBeInTheDocument();
   });
 
+  it("ゾーン別サマリーは打率なら (打数-安打)、他の指標では分母を添える", async () => {
+    const user = userEvent.setup();
+    render(
+      <PitchCourseCard
+        data={buildCourseData({
+          13: { atBats: 4, hits: 1 },
+          1: { atBats: 2, hits: 2 },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("(4-1)")).toBeInTheDocument();
+    expect(screen.getByText("(2-2)")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "長打率" }));
+
+    expect(screen.queryByText("(4-1)")).not.toBeInTheDocument();
+    expect(screen.getAllByText("4打数")).toHaveLength(2);
+  });
+
   it("ゾーン別サマリーも最低母数未満なら半透明にする", () => {
     render(
       <PitchCourseCard
