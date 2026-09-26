@@ -173,6 +173,13 @@ export interface getUserPositions {
   userId: string;
 }
 
+export interface Team {
+  id: number;
+  name: string;
+  category_id: number | null;
+  prefecture_id: number | null;
+}
+
 export interface teamData {
   team: {
     name: string;

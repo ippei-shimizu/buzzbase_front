@@ -40,6 +40,8 @@ export const ANALYTICS_EVENTS = {
   FREE_LIMIT_REACHED: "free limit reached",
   ONBOARDING_STEP_VIEWED: "onboarding step viewed",
   ONBOARDING_COMPLETED: "onboarding completed",
+  PROFILE_SETUP_VIEWED: "profile setup viewed",
+  PROFILE_SETUP_COMPLETED: "profile setup completed",
 } as const;
 
 type LoginType = "email" | "google" | "apple";
@@ -90,6 +92,20 @@ export const trackUserFollowed = (followedUserId: number) =>
 
 export const trackProfileUpdated = () =>
   capture(ANALYTICS_EVENTS.PROFILE_UPDATED);
+
+/** 登録直後の任意プロフィール入力の表示。 */
+export const trackProfileSetupViewed = () =>
+  capture(ANALYTICS_EVENTS.PROFILE_SETUP_VIEWED);
+
+/**
+ * 登録直後の任意プロフィール入力の終了。スキップと保存の両方で送り、`skipped` で区別する。
+ * どの項目が埋まったかは、試合記録フォームの初期値に効く項目に絞って持たせる。
+ */
+export const trackProfileSetupCompleted = (props: {
+  skipped: boolean;
+  has_team: boolean;
+  position_count: number;
+}) => capture(ANALYTICS_EVENTS.PROFILE_SETUP_COMPLETED, props);
 
 /**
  * 打席の任意詳細を項目別に入力したかどうか。

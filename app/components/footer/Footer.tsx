@@ -3,13 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { XIcon } from "@app/components/icon/XIcon";
+import { isRegistrationFlowPath } from "@app/constants/registrationFlow";
 import { useAuthContext } from "@app/contexts/useAuthContext";
 
 export default function Footer() {
   const { isLoggedIn } = useAuthContext();
   const pathName = usePathname();
 
-  const shouldHideFooter = pathName.includes("/register-username");
+  const shouldHideFooter = isRegistrationFlowPath(pathName);
   return (
     <>
       {!shouldHideFooter && (
