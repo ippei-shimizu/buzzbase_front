@@ -478,6 +478,46 @@ describe("相手チームの入力", () => {
     );
   });
 
+  it("編集で開いた自チームの名前を解決できなくても、既存試合の自チームの id で保存できる", async () => {
+    mockCheckExistingMatchResults.mockResolvedValueOnce({
+      id: 10,
+      date_and_time: "2026-09-01T00:00:00+09:00",
+      match_type: "regular",
+      tournament_id: null,
+      my_team_id: 7,
+      my_team_score: 3,
+      opponent_team_score: 2,
+      batting_order: "1",
+      memo: null,
+      opponent_team_id: 2,
+      defensive_position: "1",
+      inning_format: 9,
+      appearance_type: "no_play",
+    });
+    const user = userEvent.setup();
+    render(<GameRecord />);
+
+    const opponentTeamInput = await screen.findByRole("combobox", {
+      name: /相手チーム/,
+    });
+    await waitFor(() => expect(opponentTeamInput).toHaveValue("テスト高校B"));
+    expect(screen.getByRole("combobox", { name: /自チーム/ })).toHaveValue("");
+
+    await user.click(screen.getByRole("button", { name: /試合結果まとめ/ }));
+
+    await waitFor(() => {
+      expect(mockCreateMatchResults).toHaveBeenCalled();
+    });
+    expect(mockCreateMatchResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        match_result: expect.objectContaining({
+          my_team_id: 7,
+          opponent_team_id: 2,
+        }),
+      }),
+    );
+  });
+
   it("編集で復元した同名チームは、候補に無いまま入力に触れても別の同名チームにすり替わらない", async () => {
     mockTeams = [...defaultTeams, buildTeam(3, "テスト高校B")];
     mockCheckExistingMatchResults.mockResolvedValueOnce({

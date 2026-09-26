@@ -616,7 +616,8 @@ export default function GameRecord() {
       setIsMatchDate(true);
     }
 
-    if (!myTeam.trim()) {
+    // 名前の解決に失敗しても id で確定していれば入力済みとみなす（相手チームと同じ基準）。
+    if (!myTeam.trim() && !myTeamId) {
       setIsMyTeamValid(false);
       isValid = false;
       newErrors.push("自チーム名が未入力です。");
