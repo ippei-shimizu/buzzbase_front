@@ -328,35 +328,46 @@ export const SAMPLE_HIT_DIRECTIONS: HitDirection[] = HIT_DIRECTION_SEEDS.map(
 );
 
 // コース別サンプル。真ん中〜内寄りが得意、外角低めが苦手という分かりやすい傾向を作る。
-// [course, at_bats, hits] のみ持ち、残りは幾何から導出する。
-const SAMPLE_PITCH_COURSE_SEEDS: ReadonlyArray<[number, number, number]> = [
+// [course, at_bats, hits, extras?] のみ持ち、残りは幾何から導出する。
+interface SampleZoneExtras {
+  totalBases?: number;
+  /** 振り逃げなど空振り/見逃しを持たない三振の数。 */
+  unrecordedStrikeouts?: number;
+}
+
+type SampleZoneSeed = readonly [number, number, number, SampleZoneExtras?];
+
+// 真ん中付近は長打が多く、長打率が打率の比例にならないことを見せる。
+const SAMPLE_PITCH_COURSE_SEEDS: ReadonlyArray<SampleZoneSeed> = [
   [7, 6, 2],
   [8, 8, 3],
   [9, 5, 1],
-  [12, 10, 4],
-  [13, 14, 6],
+  [12, 10, 4, { totalBases: 8 }],
+  [13, 14, 6, { totalBases: 13 }],
   [14, 8, 2],
   [17, 9, 3],
-  [18, 12, 4],
-  [19, 7, 1],
+  [18, 12, 4, { totalBases: 4 }],
+  [19, 7, 1, { unrecordedStrikeouts: 1 }],
   [2, 3, 1],
   [10, 2, 0],
   [16, 4, 1],
-  [22, 2, 0],
+  [22, 2, 0, { unrecordedStrikeouts: 1 }],
   [24, 1, 0],
 ];
 
 const buildSampleZones = (
-  seeds: ReadonlyArray<[number, number, number]>,
+  seeds: ReadonlyArray<SampleZoneSeed>,
 ): PitchCourseZone[] =>
   PITCH_COURSES.map((course) => {
     const seed = seeds.find(([seedCourse]) => seedCourse === course);
     const atBats = seed?.[1] ?? 0;
     const hits = seed?.[2] ?? 0;
+    const extras = seed?.[3];
     const isStrikeZone = isStrikeZoneCourse(course);
     // ボール球は手を出すと三振しやすい、という傾向をゾーン内外の割合差で出す。
     const strikeouts = Math.floor((atBats - hits) / (isStrikeZone ? 3 : 2));
-    const swingingStrikeouts = Math.ceil(strikeouts / 2);
+    const recordedStrikeouts = strikeouts - (extras?.unrecordedStrikeouts ?? 0);
+    const swingingStrikeouts = Math.ceil(recordedStrikeouts / 2);
     return {
       course,
       row: pitchCourseRow(course),
@@ -366,10 +377,10 @@ const buildSampleZones = (
       at_bats: atBats,
       hits,
       batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
-      total_bases: hits + Math.floor(hits / 2),
+      total_bases: extras?.totalBases ?? hits + Math.floor(hits / 2),
       strikeouts,
       swinging_strikeouts: swingingStrikeouts,
-      looking_strikeouts: strikeouts - swingingStrikeouts,
+      looking_strikeouts: recordedStrikeouts - swingingStrikeouts,
       is_reliable: atBats >= 3,
     };
   });
