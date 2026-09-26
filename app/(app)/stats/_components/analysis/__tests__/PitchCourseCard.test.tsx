@@ -1,5 +1,6 @@
 import type {
   PitchCourseData,
+  PitchCoursePitchTypeData,
   PitchCourseZone,
   PitcherFaceoffCourseData,
 } from "../../../analysisActions";
@@ -162,5 +163,66 @@ describe("PitchCourseCard の投手別タブ", () => {
     expect(
       screen.queryByRole("button", { name: "投手別" }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("PitchCourseCard の球種別タブ", () => {
+  const PITCH_TYPE_DATA: PitchCoursePitchTypeData = {
+    rows: [
+      {
+        id: 1,
+        label: "ストレート系",
+        plate_appearances: 0,
+        zones: buildZones({}),
+      },
+      {
+        id: 2,
+        label: "スライダー系",
+        plate_appearances: 4,
+        zones: buildZones({ 13: { atBats: 4, hits: 3 } }),
+      },
+    ],
+    total_target_pa: 4,
+    min_at_bats: 3,
+  };
+
+  it("打席のある先頭の球種を初期選択する", async () => {
+    const user = userEvent.setup();
+    render(
+      <PitchCourseCard
+        data={COURSE_DATA}
+        loadPitchTypeCross={async () => PITCH_TYPE_DATA}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "球種別" }));
+
+    expect(
+      await screen.findByRole("button", { name: "スライダー系 (4)" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(".750")).toBeInTheDocument();
+  });
+
+  it("タブを往復しても取得は1回だけ", async () => {
+    const user = userEvent.setup();
+    const loadPitchTypeCross = jest.fn().mockResolvedValue(PITCH_TYPE_DATA);
+    const loadPitcherCross = jest.fn().mockResolvedValue(PITCHER_DATA);
+    render(
+      <PitchCourseCard
+        data={COURSE_DATA}
+        loadPitchTypeCross={loadPitchTypeCross}
+        loadPitcherCross={loadPitcherCross}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "球種別" }));
+    await screen.findByRole("button", { name: "スライダー系 (4)" });
+    await user.click(screen.getByRole("button", { name: "投手別" }));
+    await screen.findByRole("combobox", { name: "対戦投手" });
+    await user.click(screen.getByRole("button", { name: "球種別" }));
+    await user.click(screen.getByRole("button", { name: "投手別" }));
+
+    expect(loadPitchTypeCross).toHaveBeenCalledTimes(1);
+    expect(loadPitcherCross).toHaveBeenCalledTimes(1);
   });
 });
