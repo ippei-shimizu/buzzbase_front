@@ -51,9 +51,13 @@ export default function ProfileSetup() {
     resolveNextPath(searchParams.get("next")),
   )}`;
 
+  const hasTrackedViewRef = useRef(false);
+  // 未ログインで /signup へ飛ばされる場合は画面を見ていないので、表示数に数えない。
   useEffect(() => {
+    if (isLoggedIn !== true || hasTrackedViewRef.current) return;
+    hasTrackedViewRef.current = true;
     trackProfileSetupViewed();
-  }, []);
+  }, [isLoggedIn]);
 
   const { data: user, error: userError } = useSWR<CurrentUser>(
     isLoggedIn === true ? "/api/v1/user" : null,

@@ -14,8 +14,9 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams("next=/mypage/taro"),
 }));
 
+let mockIsLoggedIn: boolean | null = true;
 jest.mock("@app/contexts/useAuthContext", () => ({
-  useAuthContext: () => ({ isLoggedIn: true }),
+  useAuthContext: () => ({ isLoggedIn: mockIsLoggedIn }),
 }));
 
 jest.mock("@sentry/nextjs", () => ({
@@ -106,6 +107,7 @@ const ONBOARDING_PATH = `/onboarding?next=${encodeURIComponent("/mypage/taro")}`
 describe("登録直後のプロフィール入力", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsLoggedIn = true;
     mockGetUserData.mockResolvedValue(buildUser());
     mockUpdateProfile.mockResolvedValue({ data: { success: true } });
     mockUpdateUserPositions.mockResolvedValue(undefined);
@@ -113,6 +115,13 @@ describe("登録直後のプロフィール入力", () => {
       Promise.resolve(TEAMS.filter((team) => team.name.includes(query))),
     );
     mockCreateOrUpdateTeam.mockResolvedValue({ data: { id: 99 } });
+  });
+
+  it("未ログインで開いたときは profile setup viewed を送らない", () => {
+    mockIsLoggedIn = false;
+    renderPage();
+
+    expect(mockCapture).not.toHaveBeenCalledWith("profile setup viewed");
   });
 
   it("表示を profile setup viewed で送る", async () => {
