@@ -8,7 +8,7 @@ interface Props {
 export default function OnboardingSlide({ step }: Props) {
   return (
     <div className="flex max-w-[420px] flex-col items-center text-center">
-      <div className="aspect-[280/190] w-full max-w-[320px]">
+      <div className="aspect-[280/190] w-full max-w-[260px] sm:max-w-[320px]">
         <OnboardingIllustrationView name={step.illustration} />
       </div>
       <h2 className="mt-10 text-xl font-bold leading-8 text-white sm:text-2xl">
