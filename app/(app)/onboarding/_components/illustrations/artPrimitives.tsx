@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 
 // モバイルアプリの components/pro/paywall/artPrimitives.tsx と同じ座標系・配色で描き、
 // Web / アプリのオンボーディングの図の座標をそのまま対応させる。
@@ -92,14 +92,21 @@ export function Card({ x, y, width, height, opacity = 1 }: CardProps) {
 
 /** 280x190 の座標系で図を描く SVG。表示幅いっぱいに縦横比を保って広がる。 */
 export function ArtCanvas({ children }: { children: ReactNode }) {
+  const canvasClipId = useId();
   return (
     <svg
       viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
       fill="none"
       aria-hidden="true"
-      className="h-full w-full overflow-hidden"
+      className="h-full w-full"
     >
-      {children}
+      {/* overflow: hidden は viewport で切るため、枠が縦長になると viewBox 外の描画がレターボックスに漏れる */}
+      <defs>
+        <clipPath id={canvasClipId}>
+          <rect x={0} y={0} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#${canvasClipId})`}>{children}</g>
     </svg>
   );
 }
