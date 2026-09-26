@@ -134,6 +134,86 @@ describe("打席記録ウィザードの計測", () => {
     );
   });
 
+  it.each([
+    ["final_balls", { final_balls: 2 }, "has_count"],
+    ["final_strikes", { final_strikes: 1 }, "has_count"],
+    ["final_outs", { final_outs: 2 }, "has_count"],
+    ["runners_state", { runners_state: "first" }, "has_situation"],
+    ["inning", { inning: 3 }, "has_situation"],
+    [
+      "appearance_situation",
+      { appearance_situation: { id: 1, name: "先発" } },
+      "has_situation",
+    ],
+    [
+      "first_pitch_swing",
+      { first_pitch_swing: false },
+      "has_first_pitch_swing",
+    ],
+    [
+      "contact_quality",
+      { contact_quality: { id: 1, name: "芯" } },
+      "has_contact_quality",
+    ],
+    ["timing", { timing: { id: 2, name: "早い" } }, "has_timing"],
+    ["pitch_type", { pitch_type: { id: 3, name: "直球" } }, "has_pitch_type"],
+    ["pitch_course", { pitch_course: 5 }, "has_pitch_course"],
+    ["pitcher", { pitcher: { id: 9, name: "投手" } }, "has_pitcher"],
+    [
+      "self_analysis_memo",
+      { self_analysis_memo: "初球から振れた" },
+      "has_memo",
+    ],
+  ] as const)(
+    "%s だけ入力されていると %s と has_detail だけ true で送る",
+    async (_field, overrides, flag) => {
+      const user = userEvent.setup();
+      render(
+        <PlateAppearanceWizard
+          gameResultId={1}
+          batterBoxNumber={1}
+          onCompleted={jest.fn()}
+          editingPlateAppearance={buildEditingPlateAppearance(
+            overrides as Partial<PlateAppearanceV2>,
+          )}
+        />,
+      );
+
+      await user.click(screen.getByText("この打席を更新"));
+
+      await waitFor(() =>
+        expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
+          ...NO_DETAIL_PROPERTIES,
+          has_detail: true,
+          [flag]: true,
+        }),
+      );
+    },
+  );
+
+  it("メモが空文字なら未入力として has_memo / has_detail を false で送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          self_analysis_memo: "",
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith(
+        "plate appearance completed",
+        NO_DETAIL_PROPERTIES,
+      ),
+    );
+  });
+
   it("コースだけ入力されていても has_detail は true で送る", async () => {
     const user = userEvent.setup();
     render(
