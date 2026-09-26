@@ -204,6 +204,29 @@ describe("OnboardingWalkthrough", () => {
       ]);
     });
 
+    it("最後のステップで進めてもステップ表示イベントを再送しない", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}");
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+        { step_index: 2, illustration: "growth" },
+      ]);
+    });
+
+    it("スワイプでの移動でもステップ表示イベントを送る", () => {
+      renderWalkthrough();
+
+      swipe(200, 40);
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+      ]);
+    });
+
     it("スキップで skipped: true の完了イベントを送る", async () => {
       const { user } = renderWalkthrough();
 
