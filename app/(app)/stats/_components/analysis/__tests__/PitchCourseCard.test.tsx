@@ -410,6 +410,9 @@ describe("PitchCourseCard の指標・粒度切替", () => {
     expect(screen.getByText("三塁側")).toBeInTheDocument();
     expect(screen.getAllByText("2打席")).toHaveLength(2);
     expect(screen.getAllByText("50%")).toHaveLength(2);
+    expect(
+      screen.getByText("真ん中の1行・1列はどちらにも含めていません"),
+    ).toBeInTheDocument();
   });
 
   it("コース別タブのゾーン内外ではゾーン別サマリーを重ねて出さない", async () => {

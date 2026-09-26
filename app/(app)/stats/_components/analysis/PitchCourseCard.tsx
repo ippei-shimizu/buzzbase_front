@@ -228,6 +228,9 @@ function CourseHeatmap({
               <p className="mb-1 text-[11px] text-[#A1A1AA]">内外</p>
               <TilePair cells={side} read={read} />
             </div>
+            <p className="text-[11px] text-[#71717A]">
+              真ん中の1行・1列はどちらにも含めていません
+            </p>
           </div>
         );
       }
