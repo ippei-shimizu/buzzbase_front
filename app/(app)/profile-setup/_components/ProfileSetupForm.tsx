@@ -50,9 +50,8 @@ export default function ProfileSetupForm({
 }: Props) {
   const { mutate } = useSWRConfig();
   const [teamName, setTeamName] = useState(initialValues.team?.name ?? "");
-  const [confirmedTeam, setConfirmedTeam] = useState<ConfirmedTeam | null>(
-    initialValues.team,
-  );
+  const [lastSelectedTeam, setLastSelectedTeam] =
+    useState<ConfirmedTeam | null>(initialValues.team);
   const [selectedPositionIds, setSelectedPositionIds] = useState(
     initialValues.positionIds,
   );
@@ -62,6 +61,12 @@ export default function ProfileSetupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const trimmedTeamName = teamName.trim();
+  // 選んだチームの名前と入力が一致する間だけ、その id で確定する。名前で引き直すと
+  // 同名チームの先頭にすり替わるため、打ち直して同じ名前に戻った場合も選んだ id を使う。
+  const confirmedTeam =
+    lastSelectedTeam && lastSelectedTeam.name.trim() === trimmedTeamName
+      ? lastSelectedTeam
+      : null;
   const [teamSearchQuery, setTeamSearchQuery] = useState(trimmedTeamName);
   // IME の変換途中でも入力が変わるため、打ち止めてから検索して 1 文字ごとのリクエストを避ける。
   useEffect(() => {
@@ -91,15 +96,6 @@ export default function ProfileSetupForm({
     position_count: selectedPositionIds.length,
   });
 
-  const handleTeamNameChange = (value: string) => {
-    setTeamName(value);
-    // 候補選択の直後にも同じ名前で呼ばれる。名前で引き直すと同名チームの先頭にすり替わるため、
-    // 確定済みチームの名前と一致する間はその id を維持する。
-    setConfirmedTeam((current) =>
-      current && current.name.trim() === value.trim() ? current : null,
-    );
-  };
-
   // allowsCustomValue では blur / Enter でも null が飛ぶが、それはクリアではないので無視する。
   const handleTeamSelectionChange = (key: Key | null) => {
     if (key == null) return;
@@ -107,7 +103,7 @@ export default function ProfileSetupForm({
       (team) => String(team.id) === String(key),
     );
     if (!selectedTeam) return;
-    setConfirmedTeam({ id: selectedTeam.id, name: selectedTeam.name });
+    setLastSelectedTeam({ id: selectedTeam.id, name: selectedTeam.name });
     setTeamName(selectedTeam.name);
   };
 
@@ -180,7 +176,7 @@ export default function ProfileSetupForm({
         throwHand={throwHand}
         battingSide={battingSide}
         isSubmitting={isSubmitting}
-        onTeamNameChange={handleTeamNameChange}
+        onTeamNameChange={setTeamName}
         onTeamSelectionChange={handleTeamSelectionChange}
         onPositionsChange={setSelectedPositionIds}
         onThrowHandChange={setThrowHand}

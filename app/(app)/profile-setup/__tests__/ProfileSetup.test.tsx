@@ -300,7 +300,9 @@ describe("登録直後のプロフィール入力", () => {
       });
       await selectTeamSuggestion(user, teamInput, "ブルーソックス");
       await user.clear(teamInput);
-      await user.type(teamInput, "レッドスターズ {Escape}");
+      // 末尾スペース付きでも、保存時と同じ trim() 後の名前で引き当てる。
+      await user.type(teamInput, "レッドスターズ ");
+      await user.keyboard("{Escape}");
       await user.click(
         screen.getByRole("button", { name: "保存してはじめる" }),
       );
@@ -314,6 +316,40 @@ describe("登録直後のプロフィール入力", () => {
         },
       });
       expect(lastSavedProfile().team_id).toBe("99");
+    });
+
+    it("候補を選んだ後に 1 文字消して打ち直しても、選んだチームの id を維持する", async () => {
+      // 同名チームが先頭に来る状態。名前で引き直すと id 12 にすり替わる。
+      mockSearchTeams.mockResolvedValue([
+        {
+          id: 12,
+          name: "ブルーソックス",
+          category_id: null,
+          prefecture_id: null,
+        },
+        ...TEAMS,
+      ]);
+      const user = userEvent.setup();
+      renderPage();
+
+      const teamInput = await screen.findByRole("combobox", {
+        name: "所属チーム",
+      });
+      await user.type(teamInput, "ブルー");
+      const options = await screen.findAllByRole("option", {
+        name: "ブルーソックス",
+        hidden: true,
+      });
+      await user.click(options[1]);
+      await user.type(teamInput, "{Backspace}ス");
+      await user.keyboard("{Escape}");
+      await user.click(
+        screen.getByRole("button", { name: "保存してはじめる" }),
+      );
+
+      await waitFor(() => expect(mockReplace).toHaveBeenCalled());
+      expect(lastSavedProfile().team_id).toBe("11");
+      expect(mockCreateOrUpdateTeam).not.toHaveBeenCalled();
     });
 
     it("候補を選んだ後に入力を全消しして保存すると、所属チームなしで保存する", async () => {
