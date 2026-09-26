@@ -6,6 +6,7 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import SignIn from "@app/components/auth/SignIn";
 import ToastSuccess from "@app/components/toast/ToastSuccess";
 import { useAuthContext } from "@app/contexts/useAuthContext";
+import EmailConfirmationAutoLogin from "./_components/EmailConfirmationAutoLogin";
 import SignUpCompletionTracker from "./_components/SignUpCompletionTracker";
 
 function SignInContent() {
@@ -13,14 +14,24 @@ function SignInContent() {
   const [toastTimedOut, setToastTimedOut] = useState(false);
   const confirmationUrl = searchParams.get("account_confirmation_success");
   const logoutParams = searchParams.get("logout");
+  const confirmationAccessToken = searchParams.get("access-token");
+  const confirmationClient = searchParams.get("client");
+  const confirmationUid = searchParams.get("uid");
   const router = useRouter();
   const { isLoggedIn } = useAuthContext();
   const prevIsLoggedInRef = useRef(isLoggedIn);
+
+  const hasConfirmationTokens = Boolean(
+    confirmationAccessToken && confirmationClient && confirmationUid,
+  );
 
   const logoutSuccess = logoutParams === "success" && !toastTimedOut;
   const message = logoutSuccess ? "ログアウトしました" : "";
 
   useEffect(() => {
+    // メール確認のトークンで自動ログインする場合は、遷移先を
+    // EmailConfirmationAutoLogin 側が決めるためここでは動かさない
+    if (hasConfirmationTokens) return;
     // セッション復元で既にログイン済みの場合のみリダイレクト
     // このページ上でログインした場合（false→true）はリダイレクトしない
     // （GoogleLoginButtonやSignInが自前でナビゲーションを行うため）
@@ -28,7 +39,7 @@ function SignInContent() {
       router.push("/");
     }
     prevIsLoggedInRef.current = isLoggedIn;
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, hasConfirmationTokens]);
 
   useEffect(() => {
     if (logoutParams !== "success") return;
@@ -41,6 +52,11 @@ function SignInContent() {
   return (
     <>
       <SignUpCompletionTracker triggered={confirmationUrl === "true"} />
+      <EmailConfirmationAutoLogin
+        accessToken={confirmationAccessToken}
+        client={confirmationClient}
+        uid={confirmationUid}
+      />
       {logoutSuccess && <ToastSuccess text={message} />}
       <Image
         src="/images/logo-bg.png"
@@ -51,7 +67,7 @@ function SignInContent() {
       />
       <div className="h-full flex flex-col items-center justify-center px-4">
         <div className="w-11/12 max-w-[720px] mx-auto lg:m-[0_auto_0_28%]">
-          {confirmationUrl && (
+          {confirmationUrl && !hasConfirmationTokens && (
             <p className="mb-10 text-sm text-yellow-500 lg:text-base">
               メールアドレスの認証が成功しました！
               <br />
