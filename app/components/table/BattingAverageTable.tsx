@@ -111,8 +111,12 @@ export default function BattingAverageTable({ aggregate, calculated }: Props) {
             </span>
           </div>
           <div className={styleTableBox} aria-hidden="true">
-            <p className={`${styleTableTitle} rounded-bl-md`}>&nbsp;</p>
-            <span className={styleTableData}>&nbsp;</span>
+            <p className="border-b-1 border-b-zinc-500 py-2.5 text-sm rounded-bl-md">
+              &nbsp;
+            </p>
+            <span className="border-b-1 border-b-zinc-500 py-2.5 text-sm">
+              &nbsp;
+            </span>
           </div>
         </div>
 
