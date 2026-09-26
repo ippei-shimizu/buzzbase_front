@@ -252,6 +252,28 @@ describe("登録直後のプロフィール入力", () => {
       expect(mockSearchTeams.mock.calls).toEqual([["ブルー"]]);
     });
 
+    it("候補をクリックせず既存チーム名を打ち切って保存しても、作成せず既存の id を送る", async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      const teamInput = await screen.findByRole("combobox", {
+        name: "所属チーム",
+      });
+      await user.type(teamInput, "ブルーソックス ");
+      await screen.findByRole("option", {
+        name: "ブルーソックス",
+        hidden: true,
+      });
+      await user.keyboard("{Escape}");
+      await user.click(
+        screen.getByRole("button", { name: "保存してはじめる" }),
+      );
+
+      await waitFor(() => expect(mockReplace).toHaveBeenCalled());
+      expect(lastSavedProfile().team_id).toBe("11");
+      expect(mockCreateOrUpdateTeam).not.toHaveBeenCalled();
+    });
+
     it("候補から選んだまま保存すると、新規作成せず選んだチームの id を送る", async () => {
       const user = userEvent.setup();
       renderPage();

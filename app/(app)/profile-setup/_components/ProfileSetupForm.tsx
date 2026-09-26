@@ -110,10 +110,15 @@ export default function ProfileSetupForm({
     setTeamName(selectedTeam.name);
   };
 
-  // 候補から選ばずに打ち切った名前は、back が同名チームを引き当てるか新規作成する。
+  // 候補から選ばずに既存チーム名を打ち切った場合も、候補に同名があれば作成リクエストを飛ばさない。
+  // 候補が届いていなければ、back が同名チームを引き当てるか新規作成する。
   const resolveTeamId = async (): Promise<number | null> => {
     if (!trimmedTeamName) return null;
     if (confirmedTeam) return confirmedTeam.id;
+    const matchedTeam = teamSuggestions.find(
+      (team) => team.name.trim() === trimmedTeamName,
+    );
+    if (matchedTeam) return matchedTeam.id;
     const response = await createOrUpdateTeam({
       team: {
         name: trimmedTeamName,
