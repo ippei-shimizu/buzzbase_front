@@ -415,6 +415,24 @@ describe("PitchCourseCard の指標・粒度切替", () => {
     ).toBeInTheDocument();
   });
 
+  it("ゾーン別サマリーも最低母数未満なら半透明にする", () => {
+    render(
+      <PitchCourseCard
+        data={buildCourseData({
+          13: { atBats: 4, hits: 1 },
+          1: { atBats: 2, hits: 2 },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("ボールゾーン").parentElement).toHaveStyle({
+      opacity: "0.5",
+    });
+    expect(screen.getByText("ストライクゾーン").parentElement).toHaveStyle({
+      opacity: "1",
+    });
+  });
+
   it("コース別タブのゾーン内外ではゾーン別サマリーを重ねて出さない", async () => {
     const user = userEvent.setup();
     render(

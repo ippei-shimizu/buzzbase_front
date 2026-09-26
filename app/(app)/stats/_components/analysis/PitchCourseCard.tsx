@@ -262,7 +262,10 @@ function ZoneSummaryTile({
   reading: PitchCourseMetricReading;
 }) {
   return (
-    <div className="rounded-lg bg-[#27272A] px-3 py-2">
+    <div
+      className="rounded-lg bg-[#27272A] px-3 py-2"
+      style={{ opacity: reading.isReliable ? 1 : 0.5 }}
+    >
       <p className="text-[11px] text-[#A1A1AA]">{label}</p>
       <p className="text-lg font-extrabold text-[#F4F4F4]">{reading.value}</p>
       {reading.detail ? (
