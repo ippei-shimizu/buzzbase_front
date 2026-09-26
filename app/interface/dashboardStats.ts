@@ -36,6 +36,11 @@ export interface BattingStatsCalculated {
   on_base_percentage: number;
   slugging_percentage: number;
   ops: number;
+  /**
+   * 得点圏打率。得点圏での打数が 0 のときは null。
+   * 古いバックエンドを向いているときはキー自体が返らない。
+   */
+  scoring_position_batting_average?: number | null;
   iso: number;
   bb_per_k: number;
   isod: number;

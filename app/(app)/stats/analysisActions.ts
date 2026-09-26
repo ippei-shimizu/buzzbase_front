@@ -10,6 +10,7 @@ import {
   EMPTY_PITCH_COURSE_PITCH_TYPES,
   EMPTY_PITCH_COURSES,
   EMPTY_PITCH_TYPES,
+  EMPTY_PITCHER_FACEOFF_COURSES,
   EMPTY_PITCHER_FACEOFFS,
 } from "./analysisFallbacks";
 
@@ -220,6 +221,17 @@ export interface PitchCoursePitchTypeData {
   rows: PitchCoursePitchTypeRow[];
   total_target_pa: number;
   min_at_bats: number;
+}
+
+export interface PitcherFaceoffCourseRow extends PitchCoursePitchTypeRow {
+  team_name: string | null;
+}
+
+export interface PitcherFaceoffCourseData {
+  rows: PitcherFaceoffCourseRow[];
+  total_target_pa: number;
+  min_at_bats: number;
+  min_plate_appearances: number;
 }
 
 export interface PitcherFaceoff {
@@ -513,6 +525,21 @@ export async function getPitchCoursePitchTypes(
     filters,
     "getPitchCoursePitchTypes",
     EMPTY_PITCH_COURSE_PITCH_TYPES,
+  );
+}
+
+/**
+ * 対戦投手×コースのクロス集計（pitch_course_average の entitlement が必要）。
+ * 投手数×25 セルと大きいため、「投手別」タブを開いたときにだけ呼び出す。
+ */
+export async function getPitcherFaceoffCourses(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitcherFaceoffCourseData>> {
+  return fetchProGatedAnalysis<PitcherFaceoffCourseData>(
+    "pitcher_faceoff_courses",
+    filters,
+    "getPitcherFaceoffCourses",
+    EMPTY_PITCHER_FACEOFF_COURSES,
   );
 }
 
