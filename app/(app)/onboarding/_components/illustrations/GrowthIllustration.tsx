@@ -47,6 +47,7 @@ export default function GrowthIllustration() {
   const latestMonth = MONTHLY_AVERAGES[MONTHLY_AVERAGES.length - 1];
   const latestX = xFor(MONTHLY_AVERAGES.length - 1);
   const latestY = yFor(latestMonth.average);
+  const calloutX = latestX - 30;
   const areaPath = `M ${xFor(0)} ${CHART.bottom} L ${points.join(" L ")} L ${latestX} ${CHART.bottom} Z`;
 
   return (
@@ -123,7 +124,7 @@ export default function GrowthIllustration() {
       />
 
       <g>
-        <rect x={180} y={10} width={76} height={36} rx={12} fill={BRAND} />
+        <rect x={calloutX} y={10} width={76} height={36} rx={12} fill={BRAND} />
         <polygon
           points={`${latestX - 6},46 ${latestX + 6},46 ${latestX},53`}
           fill={BRAND}
@@ -137,11 +138,17 @@ export default function GrowthIllustration() {
           strokeWidth={1.5}
           opacity={0.6}
         />
-        <text x={190} y={25} fill={ON_BRAND_INK} fontSize={9} fontWeight="bold">
+        <text
+          x={calloutX + 10}
+          y={25}
+          fill={ON_BRAND_INK}
+          fontSize={9}
+          fontWeight="bold"
+        >
           {`${latestMonth.month}の打率`}
         </text>
         <text
-          x={190}
+          x={calloutX + 10}
           y={40}
           fill={ON_BRAND_INK}
           fontSize={14}
@@ -149,7 +156,10 @@ export default function GrowthIllustration() {
         >
           {latestMonth.average.toFixed(3).replace(/^0/, "")}
         </text>
-        <polygon points="236,40 242,29 248,40" fill={ON_BRAND_INK} />
+        <polygon
+          points={`${calloutX + 56},40 ${calloutX + 62},29 ${calloutX + 68},40`}
+          fill={ON_BRAND_INK}
+        />
       </g>
       <Sparkle x={266} y={58} size={6} />
       <Sparkle x={170} y={16} size={4} color={INK} />
