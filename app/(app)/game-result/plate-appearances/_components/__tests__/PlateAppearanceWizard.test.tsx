@@ -261,6 +261,34 @@ describe("打席記録ウィザードの計測", () => {
     );
   });
 
+  it("方向だけ持つ打席を方向なしの結果に選び直すと has_hit_direction を false で送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          hit_direction_id: 3,
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("四球"));
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith(
+        "plate appearance completed",
+        NO_DETAIL_PROPERTIES,
+      ),
+    );
+    expect(mockUpdate).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ hit_direction_id: null }),
+    );
+  });
+
   it("詳細と対戦投手が入力済みなら has_pitcher / has_detail を true で送る", async () => {
     const user = userEvent.setup();
     render(
