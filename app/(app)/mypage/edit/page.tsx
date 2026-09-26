@@ -43,9 +43,8 @@ import {
 } from "@app/services/positionService";
 import { getPrefectures } from "@app/services/prefectureService";
 import {
-  TEAM_SEARCH_MAX_LIMIT,
   createOrUpdateTeam,
-  getTeamName,
+  getMyTeam,
   searchTeams,
   updateTeam,
 } from "@app/services/teamsService";
@@ -73,26 +72,6 @@ type BaseballCategory = {
   hiragana: string;
   katakana: string;
   alphabet: string;
-};
-
-/**
- * id からチームを引き、所属カテゴリー / 地域も含めて返す。
- * @param teamId 引きたいチームの id
- * @returns 見つかったチーム。名前も引けなければ null
- */
-const findTeamById = async (teamId: number): Promise<SearchedTeam | null> => {
-  const name: string = await getTeamName(teamId);
-  if (!name) return null;
-  // id 指定の取得 API はカテゴリー / 地域を返さないため、名前で検索して id で絞る。
-  const sameNameTeams = await searchTeams(name, TEAM_SEARCH_MAX_LIMIT);
-  return (
-    sameNameTeams.find((team) => team.id === teamId) ?? {
-      id: teamId,
-      name,
-      category_id: null,
-      prefecture_id: null,
-    }
-  );
 };
 
 export default function ProfileEdit() {
@@ -183,16 +162,22 @@ export default function ProfileEdit() {
 
       // チーム初期値設定
       if (data.team_id) {
-        const userTeam = await findTeamById(data.team_id);
+        // 名前検索では件数上限から漏れうるため、サーバー側で解決済みの所属チームを使い名前からマスタの id に引き当てる。
+        const userTeam = await getMyTeam(String(data.user_id));
         if (userTeam) {
-          confirmedTeam.current = { id: userTeam.id, name: userTeam.name };
+          confirmedTeam.current = { id: data.team_id, name: userTeam.name };
           setTeamName(userTeam.name);
-          setSelectedTeamId(userTeam.id);
-          setSelectedCategoryId(userTeam.category_id ?? undefined);
-          setSelectedPrefectureId(userTeam.prefecture_id ?? undefined);
+          setSelectedTeamId(data.team_id);
           const category = baseballCategoryData.find(
-            (category: { id: number }) => category.id === userTeam.category_id,
+            (category: BaseballCategory) =>
+              category.name === userTeam.category_name,
           );
+          const prefecture = prefectureData.find(
+            (prefecture: Prefecture) =>
+              prefecture.name === userTeam.prefecture_name,
+          );
+          setSelectedCategoryId(category?.id);
+          setSelectedPrefectureId(prefecture?.id);
           if (category) {
             setBaseballCategoryValue(category.name);
           }

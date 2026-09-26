@@ -1,4 +1,4 @@
-import type { SearchedTeam, teamData } from "@app/interface";
+import type { MyTeam, SearchedTeam, teamData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getTeamName = async (id: number) => {
@@ -27,6 +27,29 @@ export const searchTeams = async (
     params: { q, limit },
   });
   return response.data;
+};
+
+/**
+ * ユーザーの所属チームを、カテゴリー名・地域名まで解決済みの形で取得する。
+ * @param userId ユーザーの公開 ID（`user_id`）
+ * @returns 所属チーム。所属チームが無い・取得に失敗したときは null
+ */
+export const getMyTeam = async (userId: string): Promise<MyTeam | null> => {
+  try {
+    const response = await axiosInstance.get<Partial<MyTeam>>(
+      `/api/v1/teams/${encodeURIComponent(userId)}/my_team`,
+    );
+    const { name, category_name, prefecture_name } = response.data;
+    return name
+      ? {
+          name,
+          category_name: category_name ?? null,
+          prefecture_name: prefecture_name ?? null,
+        }
+      : null;
+  } catch {
+    return null;
+  }
 };
 
 export const createOrUpdateTeam = async (teamData: teamData) => {

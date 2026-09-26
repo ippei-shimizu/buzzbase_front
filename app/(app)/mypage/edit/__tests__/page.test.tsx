@@ -78,23 +78,31 @@ const mockTeams = [
   { id: 1, name: "テスト高校A", category_id: 1, prefecture_id: 13 },
   { id: 2, name: "テスト高校B", category_id: 1, prefecture_id: 13 },
 ];
+let mockProfileTeamId: number | null = null;
 type TeamsRequestConfig = { params?: { q?: string; limit?: number } };
-const mockAxiosGet = jest.fn(
-  (url: string, config?: TeamsRequestConfig): Promise<{ data: unknown }> => {
-    if (url === "/api/v1/teams") {
-      const query = config?.params?.q ?? "";
-      return Promise.resolve({
-        data: mockTeams.filter((team) => team.name.includes(query)),
-      });
-    }
-    const teamNameMatch = url.match(/^\/api\/v1\/teams\/(\d+)\/team_name$/);
-    const team = teamNameMatch
-      ? mockTeams.find((candidate) => candidate.id === Number(teamNameMatch[1]))
-      : undefined;
-    if (team) return Promise.resolve({ data: { name: team.name } });
-    return Promise.reject(new Error(`unexpected GET ${url}`));
-  },
-);
+const respondToAxiosGet = (
+  url: string,
+  config?: TeamsRequestConfig,
+): Promise<{ data: unknown }> => {
+  if (url === "/api/v1/teams") {
+    const query = config?.params?.q ?? "";
+    return Promise.resolve({
+      data: mockTeams.filter((team) => team.name.includes(query)),
+    });
+  }
+  if (url === "/api/v1/teams/test-user/my_team") {
+    const team = mockTeams.find(
+      (candidate) => candidate.id === mockProfileTeamId,
+    );
+    return Promise.resolve({
+      data: team
+        ? { name: team.name, category_name: "高校", prefecture_name: "東京都" }
+        : { message: "チームが見つかりません。" },
+    });
+  }
+  return Promise.reject(new Error(`unexpected GET ${url}`));
+};
+const mockAxiosGet = jest.fn(respondToAxiosGet);
 const mockAxiosPost = jest.fn((_url: string, _body?: unknown) =>
   Promise.resolve({ data: { id: 99 } }),
 );
@@ -111,16 +119,19 @@ jest.mock("@app/utils/axiosInstance", () => ({
   },
 }));
 
-const userDataWithTeam = (teamId: number) => ({
-  id: 1,
-  name: "テスト太郎",
-  user_id: "test-user",
-  introduction: "",
-  image: { url: "" },
-  is_private: false,
-  positions: [],
-  team_id: teamId,
-});
+const userDataWithTeam = (teamId: number) => {
+  mockProfileTeamId = teamId;
+  return {
+    id: 1,
+    name: "テスト太郎",
+    user_id: "test-user",
+    introduction: "",
+    image: { url: "" },
+    is_private: false,
+    positions: [],
+    team_id: teamId,
+  };
+};
 
 const savedTeamId = () => {
   const formData = mockUpdateProfile.mock.calls[0][0] as FormData;
@@ -169,6 +180,40 @@ describe("チーム設定", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUpdateProfile.mockResolvedValue({});
+    mockProfileTeamId = null;
+    mockAxiosGet.mockImplementation(respondToAxiosGet);
+  });
+
+  it("所属チーム名で検索しても候補に出ないチームでも、カテゴリー・地域を復元して保存できる", async () => {
+    mockGetUserData.mockResolvedValueOnce(userDataWithTeam(2));
+    // 所属チーム名を含むチームが上限件数を超え、検索結果に所属チーム自身が入らない状況
+    mockAxiosGet.mockImplementation((url: string) =>
+      url === "/api/v1/teams/test-user/my_team"
+        ? Promise.resolve({
+            data: {
+              name: "テスト高校B",
+              category_name: "高校",
+              prefecture_name: "東京都",
+            },
+          })
+        : url === "/api/v1/teams"
+          ? Promise.resolve({ data: [] })
+          : Promise.resolve({ data: { name: "テスト高校B" } }),
+    );
+    const user = userEvent.setup();
+    render(<MypageEdit />);
+
+    const teamInput = await screen.findByRole("combobox", {
+      name: "チーム名",
+    });
+    await waitFor(() => expect(teamInput).toHaveValue("テスト高校B"));
+    await user.click(screen.getByText("保存"));
+
+    await waitFor(() => expect(mockUpdateProfile).toHaveBeenCalled());
+    expect(savedTeamId()).toBe("2");
+    expect(mockAxiosPut).toHaveBeenCalledWith("/api/v1/teams/2", {
+      team: { name: "テスト高校B", category_id: 1, prefecture_id: 13 },
+    });
   });
 
   it("所属チームの id からチーム名が復元され、そのまま保存すると同じ id を送る", async () => {

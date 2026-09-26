@@ -180,6 +180,12 @@ export interface SearchedTeam {
   prefecture_id: number | null;
 }
 
+export interface MyTeam {
+  name: string;
+  category_name: string | null;
+  prefecture_name: string | null;
+}
+
 export interface teamData {
   team: {
     name: string;
