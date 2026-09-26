@@ -1,4 +1,4 @@
-import type { MyTeam, SearchedTeam, teamData } from "@app/interface";
+import type { MyTeam, Team, teamData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getTeamName = async (id: number) => {
@@ -12,22 +12,6 @@ export const getTeamName = async (id: number) => {
 
 /** GET /api/v1/teams の limit 上限（back の MAX_LIMIT と揃える）。 */
 export const TEAM_SEARCH_MAX_LIMIT = 100;
-
-/**
- * チーム名の部分一致でチームを検索する（名前・id 順）。
- * @param q 検索するチーム名
- * @param limit 取得件数。省略時は back の既定件数
- * @returns 一致したチーム（id / name / category_id / prefecture_id を含む）
- */
-export const searchTeams = async (
-  q: string,
-  limit?: number,
-): Promise<SearchedTeam[]> => {
-  const response = await axiosInstance.get<SearchedTeam[]>("/api/v1/teams", {
-    params: { q, limit },
-  });
-  return response.data;
-};
 
 /**
  * ユーザーの所属チームを、カテゴリー名・地域名まで解決済みの形で取得する。
@@ -50,6 +34,24 @@ export const getMyTeam = async (userId: string): Promise<MyTeam | null> => {
   } catch {
     return null;
   }
+};
+
+/**
+ * チーム名の部分一致検索。teams は全ユーザー共有で単調増加するマスタのため、
+ * 全件取得はせず必ず検索語と件数を付けて取得する。
+ *
+ * @param query 検索語（前後の空白は除いて送る）
+ * @param limit 取得件数（back 側の上限は 100）
+ * @returns 名前順のチーム一覧
+ */
+export const searchTeams = async (
+  query: string,
+  limit: number = 20,
+): Promise<Team[]> => {
+  const response = await axiosInstance.get<Team[]>("/api/v1/teams", {
+    params: { q: query.trim(), limit },
+  });
+  return response.data;
 };
 
 export const createOrUpdateTeam = async (teamData: teamData) => {

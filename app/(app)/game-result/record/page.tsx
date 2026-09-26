@@ -2,7 +2,7 @@
 import type {
   AppearanceType,
   InningFormat,
-  SearchedTeam,
+  Team,
   SeasonData,
   TournamentData,
 } from "@app/interface";
@@ -111,7 +111,7 @@ type userData = {
  * @returns 一致する既存チームの id。一致しなければ null（保存時に解決させる）
  */
 const resolveTeamIdByName = (
-  candidates: SearchedTeam[],
+  candidates: Team[],
   teamNamesById: Map<string, string>,
   confirmedId: number | null,
   value: string,
@@ -156,10 +156,10 @@ export default function GameRecord() {
   const [myTeam, setMyTeam] = useState("");
   // 自チームの id。既存チームが確定しているときだけ入り、手入力中は null。
   const [myTeamId, setMyTeamId] = useState<number | null>(null);
-  const [myTeamCandidates, setMyTeamCandidates] = useState<SearchedTeam[]>([]);
-  const [opponentTeamCandidates, setOpponentTeamCandidates] = useState<
-    SearchedTeam[]
-  >([]);
+  const [myTeamCandidates, setMyTeamCandidates] = useState<Team[]>([]);
+  const [opponentTeamCandidates, setOpponentTeamCandidates] = useState<Team[]>(
+    [],
+  );
   const [positionData, setPositionData] = useState<Position[]>([]);
   const [tournamentData, setTournamentData] = useState<TournamentData[]>([]);
   const [myPosition, setMyPosition] = useState("");
@@ -240,7 +240,7 @@ export default function GameRecord() {
     [],
   );
 
-  const rememberTeamNames = (teams: SearchedTeam[]) => {
+  const rememberTeamNames = (teams: Team[]) => {
     teams.forEach((team) => {
       teamNamesById.current.set(String(team.id), team.name);
     });
@@ -251,7 +251,7 @@ export default function GameRecord() {
     value: string,
     searchTimer: RefObject<ReturnType<typeof setTimeout> | null>,
     requestIdRef: RefObject<number>,
-    setCandidates: (teams: SearchedTeam[]) => void,
+    setCandidates: (teams: Team[]) => void,
   ) => {
     if (searchTimer.current) clearTimeout(searchTimer.current);
     const requestId = requestIdRef.current + 1;

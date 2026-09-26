@@ -1,5 +1,5 @@
 "use client";
-import type { AwardData, SearchedTeam, UserAwards } from "@app/interface";
+import type { AwardData, Team, UserAwards } from "@app/interface";
 import type { ThrowHand } from "@app/interface/pitcher";
 import type { SharedSelection } from "@heroui/system";
 import {
@@ -98,7 +98,7 @@ export default function ProfileEdit() {
     BaseballCategory[]
   >([]);
   const [baseballCategoryValue, setBaseballCategoryValue] = useState("");
-  const [teams, setTeams] = useState<SearchedTeam[] | undefined>(undefined);
+  const [teams, setTeams] = useState<Team[] | undefined>(undefined);
   const teamSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const teamRequestId = useRef(0);
   // 候補は検索ごとに入れ替わるため、確定済みチームの名前は候補とは別に持つ。

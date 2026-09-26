@@ -239,6 +239,21 @@ const MOBILE_EVENT_CASES: {
     run: (a) =>
       a.trackOnboardingCompleted({ skipped: true, last_step_index: 0 }),
   },
+  {
+    event: "profile setup viewed",
+    properties: undefined,
+    run: (a) => a.trackProfileSetupViewed(),
+  },
+  {
+    event: "profile setup completed",
+    properties: { skipped: false, has_team: true, position_count: 2 },
+    run: (a) =>
+      a.trackProfileSetupCompleted({
+        skipped: false,
+        has_team: true,
+        position_count: 2,
+      }),
+  },
 ];
 
 /**
@@ -310,6 +325,8 @@ describe("analytics", () => {
         FREE_LIMIT_REACHED: "free limit reached",
         ONBOARDING_STEP_VIEWED: "onboarding step viewed",
         ONBOARDING_COMPLETED: "onboarding completed",
+        PROFILE_SETUP_VIEWED: "profile setup viewed",
+        PROFILE_SETUP_COMPLETED: "profile setup completed",
       });
     });
 

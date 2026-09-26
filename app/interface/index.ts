@@ -173,7 +173,7 @@ export interface getUserPositions {
   userId: string;
 }
 
-export interface SearchedTeam {
+export interface Team {
   id: number;
   name: string;
   category_id: number | null;

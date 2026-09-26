@@ -82,10 +82,10 @@ export default function RegisterUserName() {
       const userData = await getUserData();
       if (userData && userData.user_id) {
         setIsLoggedIn(true);
-        // 必須項目の登録を終えてからウォークスルーを挟む。
+        // 入力フォーム（必須 → 任意のプロフィール）を終えてからウォークスルーを挟む。
         // 途中で挟むとフォーム離脱を招くため、順序は入れ替えない。
         router.push(
-          `/onboarding?next=${encodeURIComponent(`/mypage/${userData.user_id}`)}`,
+          `/profile-setup?next=${encodeURIComponent(`/mypage/${userData.user_id}`)}`,
         );
       }
     } catch (error: unknown) {
