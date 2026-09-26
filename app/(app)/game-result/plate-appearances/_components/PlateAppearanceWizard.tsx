@@ -27,7 +27,7 @@ import { roundHitLocation, type Point } from "@app/utils/groundZoneDetector";
 import { DetailDataForm } from "./detail/DetailDataForm";
 import {
   EMPTY_DETAIL,
-  hasDetailInput,
+  toDetailInputFlags,
   type DetailState,
 } from "./detail/detailState";
 import { GroundTapField } from "./GroundTapField";
@@ -259,8 +259,8 @@ export function PlateAppearanceWizard({
       isCompletedRef.current = true;
       trackPlateAppearanceCompleted({
         is_edit: isEdit,
-        has_pitcher: detail.pitcherId !== null,
-        has_detail: hasDetailInput(detail),
+        has_hit_direction: directionId !== null,
+        ...toDetailInputFlags(detail),
       });
       // onCompleted が遷移しなかった場合でもボタンが永続 disabled にならないよう先に解除する。
       setIsSubmitting(false);

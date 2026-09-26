@@ -1,5 +1,6 @@
 import type { PitchCoursePoint } from "@app/constants/pitchCourse";
 import type { RunnersState } from "@app/interface/plateAppearanceV2";
+import type { PlateAppearanceDetailFlags } from "@app/utils/analytics";
 
 // 打席詳細データ（すべて任意入力）。ウィザードが保持し PA ペイロードへ流す。
 export interface DetailState {
@@ -21,23 +22,35 @@ export interface DetailState {
 }
 
 /**
- * 任意項目である打席詳細が 1 つでも入力されているか。
- * 詳細入力の利用率を計測するために使う（メモは空文字を未入力として扱う）。
+ * 任意項目である打席詳細の入力有無を項目別に判定する（メモは空文字を未入力として扱う）。
+ * mobile（`buzzbase_mobile/stores/battingRecordStore.ts`）と同じ構成要素で判定する。
+ * @param detail ウィザードが保持する打席詳細
+ * @return 項目別フラグと、そのいずれかが立っているかを表す `has_detail`
  */
-export const hasDetailInput = (detail: DetailState): boolean =>
-  detail.finalBalls !== null ||
-  detail.finalStrikes !== null ||
-  detail.finalOuts !== null ||
-  detail.firstPitchSwing !== null ||
-  detail.runnersState !== null ||
-  detail.inning !== null ||
-  detail.contactQualityId !== null ||
-  detail.timingId !== null ||
-  detail.pitchTypeId !== null ||
-  detail.pitchCourse !== null ||
-  detail.pitcherId !== null ||
-  detail.appearanceSituationId !== null ||
-  (detail.selfAnalysisMemo !== null && detail.selfAnalysisMemo !== "");
+export const toDetailInputFlags = (
+  detail: DetailState,
+): PlateAppearanceDetailFlags => {
+  const itemFlags = {
+    has_pitcher: detail.pitcherId !== null,
+    has_count: detail.finalBalls !== null || detail.finalStrikes !== null,
+    has_situation:
+      detail.runnersState !== null ||
+      detail.inning !== null ||
+      detail.finalOuts !== null ||
+      detail.appearanceSituationId !== null,
+    has_first_pitch_swing: detail.firstPitchSwing !== null,
+    has_contact_quality: detail.contactQualityId !== null,
+    has_timing: detail.timingId !== null,
+    has_pitch_type: detail.pitchTypeId !== null,
+    has_pitch_course: detail.pitchCourse !== null,
+    has_memo:
+      detail.selfAnalysisMemo !== null && detail.selfAnalysisMemo !== "",
+  };
+  return {
+    ...itemFlags,
+    has_detail: Object.values(itemFlags).some(Boolean),
+  };
+};
 
 export const EMPTY_DETAIL: DetailState = {
   finalBalls: null,

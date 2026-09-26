@@ -49,6 +49,21 @@ const buildEditingPlateAppearance = (
     ...overrides,
   }) as PlateAppearanceV2;
 
+const NO_DETAIL_PROPERTIES = {
+  is_edit: true,
+  has_hit_direction: false,
+  has_detail: false,
+  has_pitcher: false,
+  has_count: false,
+  has_situation: false,
+  has_first_pitch_swing: false,
+  has_contact_quality: false,
+  has_timing: false,
+  has_pitch_type: false,
+  has_pitch_course: false,
+  has_memo: false,
+};
+
 describe("打席記録ウィザードの計測", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,11 +86,99 @@ describe("打席記録ウィザードの計測", () => {
     await user.click(screen.getByText("この打席を更新"));
 
     await waitFor(() => expect(onCompleted).toHaveBeenCalled());
-    expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
-      is_edit: true,
-      has_pitcher: false,
-      has_detail: false,
-    });
+    expect(mockCapture).toHaveBeenCalledWith(
+      "plate appearance completed",
+      NO_DETAIL_PROPERTIES,
+    );
+  });
+
+  it("入力した詳細の項目だけフラグを true にして送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          hit_direction_id: 3,
+          final_balls: 2,
+          first_pitch_swing: true,
+          contact_quality: {
+            id: 1,
+            name: "芯",
+          } as PlateAppearanceV2["contact_quality"],
+          timing: { id: 2, name: "早い" } as PlateAppearanceV2["timing"],
+          pitch_type: {
+            id: 3,
+            name: "直球",
+          } as PlateAppearanceV2["pitch_type"],
+          self_analysis_memo: "初球から振れた",
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
+        ...NO_DETAIL_PROPERTIES,
+        has_detail: true,
+        has_hit_direction: true,
+        has_count: true,
+        has_first_pitch_swing: true,
+        has_contact_quality: true,
+        has_timing: true,
+        has_pitch_type: true,
+        has_memo: true,
+      }),
+    );
+  });
+
+  it("コースだけ入力されていても has_detail は true で送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          pitch_course: 5,
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
+        ...NO_DETAIL_PROPERTIES,
+        has_detail: true,
+        has_pitch_course: true,
+      }),
+    );
+  });
+
+  it("打球方向だけ入力されていても has_detail は false のまま送る", async () => {
+    const user = userEvent.setup();
+    render(
+      <PlateAppearanceWizard
+        gameResultId={1}
+        batterBoxNumber={1}
+        onCompleted={jest.fn()}
+        editingPlateAppearance={buildEditingPlateAppearance({
+          hit_direction_id: 3,
+        })}
+      />,
+    );
+
+    await user.click(screen.getByText("この打席を更新"));
+
+    await waitFor(() =>
+      expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
+        ...NO_DETAIL_PROPERTIES,
+        has_hit_direction: true,
+      }),
+    );
   });
 
   it("詳細と対戦投手が入力済みなら has_pitcher / has_detail を true で送る", async () => {
@@ -96,9 +199,10 @@ describe("打席記録ウィザードの計測", () => {
 
     await waitFor(() =>
       expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
-        is_edit: true,
+        ...NO_DETAIL_PROPERTIES,
         has_pitcher: true,
         has_detail: true,
+        has_situation: true,
       }),
     );
   });
@@ -120,7 +224,7 @@ describe("打席記録ウィザードの計測", () => {
 
     await waitFor(() =>
       expect(mockCapture).toHaveBeenCalledWith("plate appearance completed", {
-        is_edit: true,
+        ...NO_DETAIL_PROPERTIES,
         has_pitcher: true,
         has_detail: true,
       }),
