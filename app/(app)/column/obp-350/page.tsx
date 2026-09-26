@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -29,6 +31,8 @@ export default function Obp350ColumnPage() {
         path="/column/obp-350"
         breadcrumbLeafName="出塁率 .350"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -41,6 +45,10 @@ export default function Obp350ColumnPage() {
       <h1 className="text-2xl font-bold">
         出塁率 .350 とは？中堅レギュラー上位ラインの意味と達成条件
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="mt-4 text-sm text-zinc-300 leading-6">
         出塁率 <strong>.350</strong> は、NPB

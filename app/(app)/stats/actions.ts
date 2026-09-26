@@ -15,6 +15,11 @@ export interface BattingStatsRow {
   two_base_hit: number;
   three_base_hit: number;
   home_run: number;
+  /**
+   * 走本塁打（ランニング本塁打）の本数。home_run の内数。
+   * 古いバックエンドを向いているときはキー自体が返らない。
+   */
+  inside_the_park_home_run?: number;
   total_bases: number;
   runs_batted_in: number;
   run: number;
@@ -32,6 +37,11 @@ export interface BattingStatsRow {
   iso: number;
   bb_per_k: number;
   babip: number;
+  /**
+   * 得点圏打率。得点圏の打数が 0 の行は null。
+   * 古いバックエンドを向いているときはキー自体が返らない。
+   */
+  scoring_position_batting_average?: number | null;
 }
 
 export interface PitchingStatsRow {

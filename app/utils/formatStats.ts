@@ -1,23 +1,23 @@
 /**
  * 率系の成績値（打率・出塁率・OPS等）をフォーマットする
- * 1未満の場合は先頭の0を除去（例: 0.583 → .583）
+ * 1未満の場合は先頭の0を除去（例: 0.583 → .583 / 0 → .000）
  */
 export function formatRate(value: number): string {
   const formatted = value.toFixed(3);
-  if (value !== 0 && value < 1 && value > -1) {
-    return formatted.replace(/^0/, "");
+  if (value < 1 && value > -1) {
+    return formatted.replace(/^(-?)0/, "$1");
   }
   return formatted;
 }
 
 /**
  * 勝率など小数2桁の率系成績値をフォーマットする
- * 1未満の場合は先頭の0を除去（例: 0.67 → .67）
+ * 1未満の場合は先頭の0を除去（例: 0.67 → .67 / 0 → .00）
  */
 export function formatRate2(value: number): string {
   const formatted = value.toFixed(2);
-  if (value !== 0 && value < 1 && value > -1) {
-    return formatted.replace(/^0/, "");
+  if (value < 1 && value > -1) {
+    return formatted.replace(/^(-?)0/, "$1");
   }
   return formatted;
 }
@@ -47,4 +47,22 @@ export function formatBattingAverage(ratio: number, atBats: number): string {
 export function formatStatRate(value: number, denominator: number): string {
   if (denominator <= 0) return ".---";
   return value.toFixed(3).replace(/^0\./, ".");
+}
+
+/**
+ * 本塁打数に走本塁打（ランニング本塁打）の内数を添えてフォーマットする。
+ * 本塁打は走本塁打を含んだ総数のままで、走本塁打があるときだけ内数を付ける。
+ *
+ * @example
+ *   formatHomeRunWithInsideThePark(4, 1)  // "4（走1）"
+ *   formatHomeRunWithInsideThePark(4, 0)  // "4"
+ */
+export function formatHomeRunWithInsideThePark(
+  homeRun: number,
+  insideTheParkHomeRun: number | undefined,
+): string {
+  if (!insideTheParkHomeRun || insideTheParkHomeRun <= 0) {
+    return String(homeRun);
+  }
+  return `${homeRun}（走${insideTheParkHomeRun}）`;
 }

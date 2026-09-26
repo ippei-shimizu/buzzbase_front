@@ -32,20 +32,16 @@ Google AdSense自動広告と併用しつつ、確実に表示させたい枠を
 
 ### 新規追加一覧
 
-| ページ                 | パス                       | 配置位置                          | adSlotキー（案）             |
-| ---------------------- | -------------------------- | --------------------------------- | ---------------------------- |
-| マイページ             | `/mypage/[slug]`           | フッターと成績+試合セクションの間 | `mypageBottomInFeed`         |
-| マイページ             | `/mypage/[slug]`           | 試合タブの一覧の間に紛れて配置    | `mypageMatchListInFeed`      |
-| ダッシュボード         | `/dashboard`               | 投手成績と直近の試合の間          | `dashboardMiddleInFeed`      |
-| 試合結果一覧           | `/game-result/lists`       | 試合一覧の中に紛れて配置          | `gameResultListMiddleInFeed` |
-| 試合結果サマリー       | `/game-result/summary`     | サマリーコンテンツ下              | `gameResultSummaryInFeed`    |
-| グループ詳細           | `/groups/[slug]`           | ランキングテーブル群の末尾        | `groupDetailInFeed`          |
-| グループ一覧           | `/groups`                  | ページ最下部                      | `groupListInFeed`            |
-| ノート一覧             | `/note`                    | 末尾                              | `noteListInFeed`             |
-| ノート詳細             | `/note/[slug]`             | 末尾                              | `noteDetailInFeed`           |
-| フォロワー一覧         | `/mypage/[slug]/followers` | ユーザーリスト下                  | `followersInFeed`            |
-| フォロー一覧           | `/mypage/[slug]/following` | ユーザーリスト下                  | `followingInFeed`            |
-| 運営からのお知らせ一覧 | `/notice-from-management`  | お知らせリスト下                  | `noticeListInFeed`           |
+| ページ           | パス                   | 配置位置                          | adSlotキー（案）             |
+| ---------------- | ---------------------- | --------------------------------- | ---------------------------- |
+| マイページ       | `/mypage/[slug]`       | フッターと成績+試合セクションの間 | `mypageBottomInFeed`         |
+| マイページ       | `/mypage/[slug]`       | 試合タブの一覧の間に紛れて配置    | `mypageMatchListInFeed`      |
+| ダッシュボード   | `/dashboard`           | 投手成績と直近の試合の間          | `dashboardMiddleInFeed`      |
+| 試合結果一覧     | `/game-result/lists`   | 試合一覧の中に紛れて配置          | `gameResultListMiddleInFeed` |
+| 試合結果サマリー | `/game-result/summary` | サマリーコンテンツ下              | `gameResultSummaryInFeed`    |
+| グループ詳細     | `/groups/[slug]`       | ランキングテーブル群の末尾        | `groupDetailInFeed`          |
+| グループ一覧     | `/groups`              | ページ最下部                      | `groupListInFeed`            |
+| ノート詳細       | `/note/[slug]`         | 末尾                              | `noteDetailInFeed`           |
 
 ---
 
@@ -114,12 +110,8 @@ export const adSlots = {
   mypageInFeed: "取得したスロットID",
   /** グループ詳細 インフィード広告 */
   groupDetailInFeed: "取得したスロットID",
-  /** ノート一覧 インフィード広告 */
-  noteListInFeed: "取得したスロットID",
   /** グループ一覧 インフィード広告 */
   groupListInFeed: "取得したスロットID",
-  /** 運営お知らせ一覧 インフィード広告 */
-  noticeListInFeed: "取得したスロットID",
 } as const;
 ```
 
@@ -144,10 +136,6 @@ import { adSlots } from "@app/components/ad/adConfig";
 **グループ詳細** (`/groups/[slug]/page.tsx`):
 
 - `GroupBattingRankingTable` / `GroupPitchingRankingTable` の下、各Tabコンテンツの末尾
-
-**ノート一覧** (`/note/page.tsx`):
-
-- `NoteListComponent` の下、`NoteAddButton` の前
 
 ### layoutKey について
 
@@ -189,43 +177,49 @@ MAU 70-90の段階では広告収益は限定的（月数百円程度の見込�
 
 ---
 
-## 9. 横長ディスプレイ広告（ページ最下部）
+## 9. ツール・コラム系ページのディスプレイ広告
 
-計算ツール系ページの最下部に横長ディスプレイ広告（`format="horizontal"`）を追加する。
+計算ツール系・コラム系ページに追加したディスプレイ広告。`AdBanner` のデフォルト（`format="auto"`）で描画される。
 
 ### 配置一覧
 
-| ページ     | パス                     | 配置位置                     | adSlotキー（案）        |
-| ---------- | ------------------------ | ---------------------------- | ----------------------- |
-| ツール詳細 | `/tools/[slug]`          | RelatedTools の下            | `toolsDetailHorizontal` |
-| ツール一覧 | `/tools`                 | 既存 `toolsListBottom` の下  | `toolsListHorizontal`   |
-| 成績算出   | `/calculation-of-grades` | 既存 `calcGradesBottom` の下 | `calcGradesHorizontal`  |
+| ページ     | パス                     | 配置位置                                             | adSlotキー                |
+| ---------- | ------------------------ | ---------------------------------------------------- | ------------------------- |
+| ツール詳細 | `/tools/[slug]`          | RelatedTools の下                                    | `toolsDetailFooter`       |
+| ツール一覧 | `/tools`                 | 投手指標セクションの下（`toolsListTeamBottom` の上） | `toolsListPitchingBottom` |
+| 成績算出   | `/calculation-of-grades` | 目次の下（ページ上部）                               | `calcGradesTop`           |
+| コラム     | `/column/*`              | 最下部 CTA の下                                      | `columnFooter`            |
 
 ### 既存のディスプレイ広告との位置関係
 
 ```
 【ツール詳細ページ】
-CTA② → toolsDetailBottom → RelatedTools → toolsDetailHorizontal（横長）
+CTA② → RelatedTools → toolsDetailFooter
 
 【ツール一覧ページ】
-チーム指標セクション → toolsListBottom → toolsListHorizontal（横長）
+打撃指標セクション → toolsListBattingBottom → 投手指標セクション → toolsListPitchingBottom
+→ チーム指標セクション → toolsListTeamBottom
 
 【成績算出ページ】
-投手成績セクション → calcGradesBottom → calcGradesHorizontal（横長）
+目次 → calcGradesTop → 打撃成績セクション → calcGradesMiddle → 投手成績セクション → calcGradesBottom
+
+【コラムページ】
+本文 → columnMiddle → 本文 → columnBottom → 最下部 CTA → columnFooter
 ```
 
 ### 補足
 
-- ページ最下部のためユーザー体験への影響は小さい
-- ツール一覧・成績算出ページでは既存のディスプレイ広告と連続するが、ページ最下部であること、離脱直前のインプレッション確保が目的のため許容する
-- ツール詳細ページはRelatedToolsが間に入るため自然な配置
+- ツール一覧・成績算出はセクションの区切りに挟む形で、コラム・ツール詳細は読み終わり直後に置く
+- 当初はページ最下部の横長枠（`format="horizontal"`）として設計したが、レスポンシブのほうが表示率が高いため `format` 指定を外し、配置も一部ページ上部・中間へ移した
 
 ---
 
 ## 更新履歴
 
-| 日付       | 内容                                                 |
-| ---------- | ---------------------------------------------------- |
-| 2026-03-18 | 初版作成                                             |
-| 2026-03-18 | 横長ディスプレイ広告（ページ最下部）の配置戦略を追加 |
-| 2026-03-18 | インフィード広告の配置一覧をユーザー指定の12枠に更新 |
+| 日付       | 内容                                                                                               |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| 2026-03-18 | 初版作成                                                                                           |
+| 2026-03-18 | 横長ディスプレイ広告（ページ最下部）の配置戦略を追加                                               |
+| 2026-03-18 | インフィード広告の配置一覧をユーザー指定の12枠に更新                                               |
+| 2026-09-24 | 収益ゼロのアプリ内インフィード枠4つ（ノート一覧・フォロワー・フォロー中・お知らせ一覧）を撤去      |
+| 2026-09-25 | 9章を実態に更新（横長→レスポンシブ、配置ベースのキー名へリネーム）。試合詳細のインフィード枠を撤去 |

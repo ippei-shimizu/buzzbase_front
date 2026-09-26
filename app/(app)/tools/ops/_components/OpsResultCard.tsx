@@ -16,6 +16,8 @@ type Level = {
   badgeClass: string;
 };
 
+// 閾値（1.000 / .900 / .800 / .700）は column/ops-criteria/_constants/benchmarks.ts の
+// OPS_BENCHMARKS と同期させること。片方だけ変えると計算ツールと目安記事で判定がずれる
 function classifyOps(ops: number): Level {
   if (ops >= 1.0) {
     return {

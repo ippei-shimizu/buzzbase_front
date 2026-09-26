@@ -45,7 +45,7 @@ export default function StatCard({
               href={columnUrl}
               className="inline-flex items-center gap-1 text-xs text-yellow-500 hover:text-yellow-400 font-bold transition-colors"
             >
-              詳しく見る &rarr;
+              {title}をもっと詳しく &rarr;
             </Link>
           ) : null}
         </div>

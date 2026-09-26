@@ -10,6 +10,7 @@ import {
   EMPTY_PITCH_COURSE_PITCH_TYPES,
   EMPTY_PITCH_COURSES,
   EMPTY_PITCH_TYPES,
+  EMPTY_PITCHER_FACEOFF_COURSES,
   EMPTY_PITCHER_FACEOFFS,
 } from "./analysisFallbacks";
 
@@ -190,6 +191,12 @@ export interface PitchCourseZone {
   at_bats: number;
   hits: number;
   batting_average: number;
+  total_bases: number;
+  /** 三振 + 振り逃げ。 */
+  strikeouts: number;
+  swinging_strikeouts: number;
+  /** 振り逃げは swing_type を持たないため、空振り + 見逃しが strikeouts に満たないことがある。 */
+  looking_strikeouts: number;
   /** 打数が min_at_bats 以上か。false は参考値（半透明表示）。 */
   is_reliable: boolean;
 }
@@ -199,6 +206,10 @@ export interface PitchCourseZoneSummary {
   at_bats: number;
   hits: number;
   batting_average: number;
+  total_bases: number;
+  strikeouts: number;
+  swinging_strikeouts: number;
+  looking_strikeouts: number;
 }
 
 export interface PitchCourseData {
@@ -220,6 +231,17 @@ export interface PitchCoursePitchTypeData {
   rows: PitchCoursePitchTypeRow[];
   total_target_pa: number;
   min_at_bats: number;
+}
+
+export interface PitcherFaceoffCourseRow extends PitchCoursePitchTypeRow {
+  team_name: string | null;
+}
+
+export interface PitcherFaceoffCourseData {
+  rows: PitcherFaceoffCourseRow[];
+  total_target_pa: number;
+  min_at_bats: number;
+  min_plate_appearances: number;
 }
 
 export interface PitcherFaceoff {
@@ -513,6 +535,21 @@ export async function getPitchCoursePitchTypes(
     filters,
     "getPitchCoursePitchTypes",
     EMPTY_PITCH_COURSE_PITCH_TYPES,
+  );
+}
+
+/**
+ * 対戦投手×コースのクロス集計（pitch_course_average の entitlement が必要）。
+ * 投手数×25 セルと大きいため、「投手別」タブを開いたときにだけ呼び出す。
+ */
+export async function getPitcherFaceoffCourses(
+  filters: AnalysisFilters = {},
+): Promise<ProGatedResult<PitcherFaceoffCourseData>> {
+  return fetchProGatedAnalysis<PitcherFaceoffCourseData>(
+    "pitcher_faceoff_courses",
+    filters,
+    "getPitcherFaceoffCourses",
+    EMPTY_PITCHER_FACEOFF_COURSES,
   );
 }
 

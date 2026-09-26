@@ -2,8 +2,10 @@ import type {
   CountSituations,
   HitDirection,
   PitchCourseData,
+  PitchCoursePitchTypeData,
   PitchCourseZone,
   PitcherFaceoff,
+  PitcherFaceoffCourseData,
   PitcherFaceoffData,
   PitchTypeData,
   PitchTypeRow,
@@ -326,54 +328,84 @@ export const SAMPLE_HIT_DIRECTIONS: HitDirection[] = HIT_DIRECTION_SEEDS.map(
 );
 
 // コース別サンプル。真ん中〜内寄りが得意、外角低めが苦手という分かりやすい傾向を作る。
-// [course, at_bats, hits] のみ持ち、残りは幾何から導出する。
-const SAMPLE_PITCH_COURSE_SEEDS: ReadonlyArray<[number, number, number]> = [
+// [course, at_bats, hits, extras?] のみ持ち、残りは幾何から導出する。
+interface SampleZoneExtras {
+  totalBases?: number;
+  /** 振り逃げなど空振り/見逃しを持たない三振の数。 */
+  unrecordedStrikeouts?: number;
+}
+
+type SampleZoneSeed = readonly [number, number, number, SampleZoneExtras?];
+
+// 真ん中付近は長打が多く、長打率が打率の比例にならないことを見せる。
+const SAMPLE_PITCH_COURSE_SEEDS: ReadonlyArray<SampleZoneSeed> = [
   [7, 6, 2],
   [8, 8, 3],
   [9, 5, 1],
-  [12, 10, 4],
-  [13, 14, 6],
+  [12, 10, 4, { totalBases: 8 }],
+  [13, 14, 6, { totalBases: 13 }],
   [14, 8, 2],
   [17, 9, 3],
-  [18, 12, 4],
-  [19, 7, 1],
+  [18, 12, 4, { totalBases: 4 }],
+  [19, 7, 1, { unrecordedStrikeouts: 1 }],
   [2, 3, 1],
   [10, 2, 0],
   [16, 4, 1],
-  [22, 2, 0],
+  [22, 2, 0, { unrecordedStrikeouts: 1 }],
   [24, 1, 0],
 ];
 
-const SAMPLE_PITCH_COURSE_ZONES: PitchCourseZone[] = PITCH_COURSES.map(
-  (course) => {
-    const seed = SAMPLE_PITCH_COURSE_SEEDS.find(([c]) => c === course);
+const buildSampleZones = (
+  seeds: ReadonlyArray<SampleZoneSeed>,
+): PitchCourseZone[] =>
+  PITCH_COURSES.map((course) => {
+    const seed = seeds.find(([seedCourse]) => seedCourse === course);
     const atBats = seed?.[1] ?? 0;
     const hits = seed?.[2] ?? 0;
+    const extras = seed?.[3];
+    const isStrikeZone = isStrikeZoneCourse(course);
+    // ボール球は手を出すと三振しやすい、という傾向をゾーン内外の割合差で出す。
+    const strikeouts = Math.floor((atBats - hits) / (isStrikeZone ? 3 : 2));
+    const recordedStrikeouts = strikeouts - (extras?.unrecordedStrikeouts ?? 0);
+    const swingingStrikeouts = Math.ceil(recordedStrikeouts / 2);
     return {
       course,
       row: pitchCourseRow(course),
       col: pitchCourseCol(course),
-      is_strike_zone: isStrikeZoneCourse(course),
+      is_strike_zone: isStrikeZone,
       plate_appearances: atBats,
       at_bats: atBats,
       hits,
       batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
+      total_bases: extras?.totalBases ?? hits + Math.floor(hits / 2),
+      strikeouts,
+      swinging_strikeouts: swingingStrikeouts,
+      looking_strikeouts: recordedStrikeouts - swingingStrikeouts,
       is_reliable: atBats >= 3,
     };
-  },
-);
+  });
 
-const sumZones = (zones: PitchCourseZone[]) => ({
-  plate_appearances: zones.reduce((sum, z) => sum + z.plate_appearances, 0),
-  at_bats: zones.reduce((sum, z) => sum + z.at_bats, 0),
-  hits: zones.reduce((sum, z) => sum + z.hits, 0),
-});
+const SAMPLE_PITCH_COURSE_ZONES = buildSampleZones(SAMPLE_PITCH_COURSE_SEEDS);
+
+const sumZones = (zones: PitchCourseZone[]) => {
+  const sumOf = (pick: (zone: PitchCourseZone) => number) =>
+    zones.reduce((sum, zone) => sum + pick(zone), 0);
+  return {
+    plate_appearances: sumOf((zone) => zone.plate_appearances),
+    at_bats: sumOf((zone) => zone.at_bats),
+    hits: sumOf((zone) => zone.hits),
+    total_bases: sumOf((zone) => zone.total_bases),
+    strikeouts: sumOf((zone) => zone.strikeouts),
+    swinging_strikeouts: sumOf((zone) => zone.swinging_strikeouts),
+    looking_strikeouts: sumOf((zone) => zone.looking_strikeouts),
+  };
+};
 
 const sampleStrike = sumZones(
-  SAMPLE_PITCH_COURSE_ZONES.filter((z) => z.is_strike_zone),
+  SAMPLE_PITCH_COURSE_ZONES.filter((zone) => zone.is_strike_zone),
 );
 const sampleBall = sumZones(
-  SAMPLE_PITCH_COURSE_ZONES.filter((z) => !z.is_strike_zone),
+  SAMPLE_PITCH_COURSE_ZONES.filter((zone) => !zone.is_strike_zone),
 );
 
 export const SAMPLE_PITCH_COURSES: PitchCourseData = {
@@ -391,4 +423,96 @@ export const SAMPLE_PITCH_COURSES: PitchCourseData = {
   total_target_pa:
     sampleStrike.plate_appearances + sampleBall.plate_appearances,
   min_at_bats: 3,
+};
+
+// 球種×コースのサンプル。球種ごとに得意コースが違う（ストレートは高め、変化球は低めに弱い）ことを見せる。
+export const SAMPLE_PITCH_TYPE_COURSES: PitchCoursePitchTypeData = {
+  rows: [
+    {
+      id: 1,
+      label: "ストレート",
+      plate_appearances: 32,
+      zones: buildSampleZones([
+        [7, 4, 2],
+        [8, 5, 3],
+        [9, 3, 1],
+        [12, 5, 2],
+        [13, 6, 3],
+        [14, 3, 1],
+        [18, 3, 1],
+        [3, 3, 1],
+      ]),
+    },
+    {
+      id: 2,
+      label: "スライダー",
+      plate_appearances: 21,
+      zones: buildSampleZones([
+        [13, 4, 2],
+        [14, 3, 1],
+        [19, 5, 0],
+        [20, 3, 0],
+        [24, 3, 0],
+        [18, 3, 1],
+      ]),
+    },
+    {
+      id: 3,
+      label: "カーブ",
+      plate_appearances: 12,
+      zones: buildSampleZones([
+        [12, 3, 1],
+        [17, 4, 1],
+        [22, 3, 0],
+        [18, 2, 1],
+      ]),
+    },
+    {
+      id: 4,
+      label: "チェンジアップ",
+      plate_appearances: 8,
+      zones: buildSampleZones([
+        [18, 3, 1],
+        [19, 3, 0],
+        [23, 2, 0],
+      ]),
+    },
+  ],
+  total_target_pa: 73,
+  min_at_bats: 3,
+};
+
+// 対戦投手×コースのサンプル。投手ごとに攻められ方が違う（C は外角低め中心、D は内角中心）ことを見せる。
+const SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_C = buildSampleZones([
+  [13, 2, 1],
+  [14, 2, 0],
+  [19, 4, 0],
+  [20, 2, 1],
+]);
+const SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_D = buildSampleZones([
+  [7, 3, 2],
+  [12, 3, 1],
+  [17, 1, 0],
+]);
+
+export const SAMPLE_PITCHER_FACEOFF_COURSES: PitcherFaceoffCourseData = {
+  rows: [
+    {
+      id: 3,
+      label: "投手 C",
+      team_name: "□□高校",
+      plate_appearances: 10,
+      zones: SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_C,
+    },
+    {
+      id: 4,
+      label: "投手 D",
+      team_name: "◇◇高校",
+      plate_appearances: 7,
+      zones: SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_D,
+    },
+  ],
+  total_target_pa: 17,
+  min_at_bats: 3,
+  min_plate_appearances: 3,
 };

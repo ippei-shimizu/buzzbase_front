@@ -23,6 +23,24 @@ const setAuthCookies = (
   Cookies.set("uid", headers["uid"], options);
 };
 
+/**
+ * メール確認のリダイレクトで受け取った認証トークンを cookie に保存する。
+ * back が確認成功時のリダイレクト URL に載せる値を使うため、確認後の手動再ログインが不要になる。
+ *
+ * @param tokens リダイレクト URL のクエリから取り出した devise_token_auth の3点
+ */
+export const setAuthCookiesFromConfirmation = (tokens: {
+  accessToken: string;
+  client: string;
+  uid: string;
+}) => {
+  setAuthCookies({
+    "access-token": tokens.accessToken,
+    client: tokens.client,
+    uid: tokens.uid,
+  });
+};
+
 export const signUp = async (data: SignUpData) => {
   const response = await axiosInstance.post("/api/v1/auth", {
     email: data.email,

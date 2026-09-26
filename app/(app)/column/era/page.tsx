@@ -3,7 +3,14 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import EraColumnJsonLd from "./_components/EraColumnJsonLd";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+  ERA_COLUMN_DESCRIPTION,
+  ERA_COLUMN_TITLE,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -56,7 +63,15 @@ const faqItems = [
 export default function EraColumnPage() {
   return (
     <>
-      <EraColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline={ERA_COLUMN_TITLE}
+        description={ERA_COLUMN_DESCRIPTION}
+        path="/column/era"
+        breadcrumbLeafName="防御率とは"
+        faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
@@ -65,9 +80,11 @@ export default function EraColumnPage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold">
-        防御率（ERA）とは？計算方法・目安値・良い数値の基準を解説
-      </h1>
+      <h1 className="text-2xl font-bold">{ERA_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">
@@ -496,11 +513,7 @@ export default function EraColumnPage() {
         body="BUZZ BASEアプリなら試合結果を入力するだけで、防御率を含む全投手指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
-      <AdBanner
-        slot={adSlots.columnHorizontal}
-        format="horizontal"
-        className="mt-8"
-      />
+      <AdBanner slot={adSlots.columnFooter} className="mt-8" />
     </>
   );
 }

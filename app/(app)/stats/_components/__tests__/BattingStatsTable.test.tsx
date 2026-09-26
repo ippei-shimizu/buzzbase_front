@@ -1,0 +1,142 @@
+import type { BattingStatsRow } from "../../actions";
+import { render, screen } from "@testing-library/react";
+import BattingStatsTable, { getBattingColumns } from "../BattingStatsTable";
+
+const buildRow = (
+  overrides: Partial<BattingStatsRow> = {},
+): BattingStatsRow => ({
+  label: "2026",
+  games: 10,
+  plate_appearances: 40,
+  at_bats: 36,
+  hit: 12,
+  two_base_hit: 2,
+  three_base_hit: 0,
+  home_run: 3,
+  inside_the_park_home_run: 0,
+  total_bases: 20,
+  runs_batted_in: 8,
+  run: 6,
+  strike_out: 7,
+  base_on_balls: 3,
+  hit_by_pitch: 1,
+  sacrifice_hit: 0,
+  sacrifice_fly: 0,
+  stealing_base: 1,
+  caught_stealing: 0,
+  error: 1,
+  batting_average: 0.333,
+  slugging_percentage: 0.5,
+  ops: 0.9,
+  iso: 0.167,
+  bb_per_k: 0.43,
+  babip: 0.35,
+  ...overrides,
+});
+
+// ヘッダーは 1 文字ずつ改行した縦書きで描画され、Testing Library は空白を 1 つに正規化して照合する。
+const VERTICAL_INSIDE_THE_PARK_LABEL = /^走\s本$/;
+
+describe("打撃成績テーブルの走本塁打列", () => {
+  it("走本塁打が 1 本以上ある行があれば本塁打の右隣に走本列を出す", () => {
+    const rows = [
+      buildRow({ label: "2025", home_run: 2, inside_the_park_home_run: 1 }),
+      buildRow({ label: "2026", home_run: 1, inside_the_park_home_run: 0 }),
+      buildRow({ label: "通算", home_run: 3, inside_the_park_home_run: 1 }),
+    ];
+
+    const keys = getBattingColumns(rows).map((column) => column.key);
+    expect(keys.indexOf("inside_the_park_home_run")).toBe(
+      keys.indexOf("home_run") + 1,
+    );
+
+    render(<BattingStatsTable rows={rows} />);
+    expect(
+      screen.getByText(VERTICAL_INSIDE_THE_PARK_LABEL),
+    ).toBeInTheDocument();
+  });
+
+  it("全行で走本塁打が 0 なら走本列を出さない", () => {
+    const rows = [
+      buildRow({ label: "2026", home_run: 3, inside_the_park_home_run: 0 }),
+      buildRow({ label: "通算", home_run: 3, inside_the_park_home_run: 0 }),
+    ];
+
+    expect(getBattingColumns(rows).map((column) => column.key)).not.toContain(
+      "inside_the_park_home_run",
+    );
+
+    render(<BattingStatsTable rows={rows} />);
+    expect(
+      screen.queryByText(VERTICAL_INSIDE_THE_PARK_LABEL),
+    ).not.toBeInTheDocument();
+  });
+
+  it("古いバックエンドで内数が返らないときも走本列を出さない", () => {
+    const rows = [buildRow({ inside_the_park_home_run: undefined })];
+
+    expect(getBattingColumns(rows).map((column) => column.key)).not.toContain(
+      "inside_the_park_home_run",
+    );
+  });
+});
+
+// ヘッダーは 1 文字ずつ改行した縦書きで描画される。
+const VERTICAL_SCORING_POSITION_LABEL = /^得\s点\s圏\s打\s率$/;
+
+describe("打撃成績テーブルの得点圏打率列", () => {
+  it("得点圏打率を OPS の右隣に 3 桁の打率表記で表示する", () => {
+    const rows = [buildRow({ scoring_position_batting_average: 0.25 })];
+
+    const keys = getBattingColumns(rows).map((column) => column.key);
+    expect(keys.indexOf("scoring_position_batting_average")).toBe(
+      keys.indexOf("ops") + 1,
+    );
+
+    render(<BattingStatsTable rows={rows} />);
+
+    expect(
+      screen.getByText(VERTICAL_SCORING_POSITION_LABEL),
+    ).toBeInTheDocument();
+    expect(screen.getByText(".250")).toBeInTheDocument();
+  });
+
+  it("得点圏の打数が無い行は .000 ではなく「-」を表示する", () => {
+    render(
+      <BattingStatsTable
+        rows={[
+          buildRow({ label: "2025", scoring_position_batting_average: null }),
+          buildRow({
+            label: "2026",
+            scoring_position_batting_average: undefined,
+          }),
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByText("-")).toHaveLength(2);
+    expect(screen.queryByText(".000")).not.toBeInTheDocument();
+  });
+
+  it("dashWhenMissing を付けていない列は未返却を従来どおり 0 として表示する", () => {
+    render(
+      <BattingStatsTable
+        rows={[buildRow({ babip: undefined, error: undefined })]}
+      />,
+    );
+
+    expect(screen.getByText(".000")).toBeInTheDocument();
+    expect(screen.getAllByText("-")).toHaveLength(1);
+  });
+});
+
+describe("打撃成績テーブルの率系の表示", () => {
+  it("打率 0 も他の画面と同じく .000 と表示する", () => {
+    render(
+      <BattingStatsTable rows={[buildRow({ hit: 0, batting_average: 0 })]} />,
+    );
+
+    expect(screen.getByText(".000")).toBeInTheDocument();
+    expect(screen.queryByText("0.000")).not.toBeInTheDocument();
+  });
+});

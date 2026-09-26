@@ -21,8 +21,6 @@ import axios from "axios";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { adSlots } from "@app/components/ad/adConfig";
-import AdInFeed from "@app/components/ad/AdInFeed";
 import AuthRequiredOverlay from "@app/components/auth/AuthRequiredOverlay";
 import AppearanceTypeBadge from "@app/components/chip/AppearanceTypeBadge";
 import HeaderGameDetail from "@app/components/header/HeaderGameDetail";
@@ -585,10 +583,6 @@ export default function ResultsSummary() {
             <div className="flex justify-center">
               <ResultShareComponent matchResult={matchResult} id={id} />
             </div>
-            <AdInFeed
-              slot={adSlots.gameResultDetailInFeed}
-              layoutKey="-6t+ed+2i-1n-4w"
-            />
           </div>
           {currentUserPage === true ? (
             <>

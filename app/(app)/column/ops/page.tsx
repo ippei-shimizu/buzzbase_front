@@ -3,7 +3,14 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
-import OpsColumnJsonLd from "./_components/OpsColumnJsonLd";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
+import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import {
+  COLUMN_PUBLISHED_AT,
+  COLUMN_UPDATED_AT,
+  OPS_COLUMN_DESCRIPTION,
+  OPS_COLUMN_TITLE,
+} from "./_constants/meta";
 
 const faqItems = [
   {
@@ -61,7 +68,15 @@ const faqItems = [
 export default function OpsColumnPage() {
   return (
     <>
-      <OpsColumnJsonLd faq={faqItems} />
+      <ColumnArticleJsonLd
+        headline={OPS_COLUMN_TITLE}
+        description={OPS_COLUMN_DESCRIPTION}
+        path="/column/ops"
+        breadcrumbLeafName="OPSとは"
+        faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
+      />
       <Breadcrumbs
         items={[
           { label: "BUZZ BASE", href: "/" },
@@ -70,9 +85,11 @@ export default function OpsColumnPage() {
         ]}
       />
 
-      <h1 className="text-2xl font-bold">
-        OPSとは？意味・計算方法・高校野球/プロ野球の目安を解説
-      </h1>
+      <h1 className="text-2xl font-bold">{OPS_COLUMN_TITLE}</h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       {/* リード文 */}
       <p className="text-sm text-zinc-300 leading-6 mt-4">
@@ -436,7 +453,7 @@ export default function OpsColumnPage() {
             </p>
           </Link>
           <Link
-            href="/column/ops-800"
+            href="/column/ops-criteria#ops-800"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
             <p className="font-bold text-sm">OPS .800 はどのレベル？</p>
@@ -468,11 +485,7 @@ export default function OpsColumnPage() {
         body="BUZZ BASEアプリなら試合結果を入力するだけで、OPSを含む全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
-      <AdBanner
-        slot={adSlots.columnHorizontal}
-        format="horizontal"
-        className="mt-8"
-      />
+      <AdBanner slot={adSlots.columnFooter} className="mt-8" />
     </>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 type RankingRow = {
   rank: number;
@@ -91,6 +93,8 @@ export default function OpsRankingMlbColumnPage() {
         path="/column/ops-ranking-mlb"
         breadcrumbLeafName="MLB OPS歴代TOP"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -103,6 +107,10 @@ export default function OpsRankingMlbColumnPage() {
       <h1 className="text-2xl font-bold">
         MLB OPS歴代TOP｜バリー・ボンズから現役まで歴代シーズン最高OPS
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         MLB（メジャーリーグ）歴代シーズンOPSの上位を整理しました。
@@ -216,7 +224,7 @@ export default function OpsRankingMlbColumnPage() {
             </p>
           </Link>
           <Link
-            href="/column/ops-max"
+            href="/column/ops-criteria#ops-max"
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 hover:border-yellow-600/50 hover:bg-zinc-800 transition-colors px-4 py-3"
           >
             <p className="font-bold text-sm">OPSの最大値（マックス）</p>

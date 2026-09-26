@@ -19,7 +19,8 @@ export type CalculatorField = {
   label: string;
   placeholder?: string;
   min?: number;
-  step?: number;
+  /** 1 のフィールドは CalculatorForm で整数以外の入力をエラーにする */
+  step: number;
 };
 
 export type CalculatorOutput = {
@@ -31,6 +32,13 @@ export type CalculatorOutput = {
 export type FaqItem = {
   question: string;
   answer: string;
+};
+
+/** 計算ツールの解説直下から誘導する解説コラムへのリンク */
+export type RelatedColumn = {
+  label: string;
+  href: `/column/${string}`;
+  description: string;
 };
 
 export type CalculatorDefinition = {
@@ -51,6 +59,11 @@ export type CalculatorDefinition = {
   ) => number | Record<string, number | null> | null;
   faq: FaqItem[];
   relatedSlugs: string[];
+  /**
+   * 解説セクションの直下に表示する対応コラム。ツールページはサイト内で最も評価が高く、
+   * 本文からリンクして解説記事へ評価を流すために置く（関連ツール欄とは別）。
+   */
+  relatedColumns?: RelatedColumn[];
   cta?: {
     heading: string;
     body: string;

@@ -3,7 +3,9 @@ import AdBanner from "@app/components/ad/AdBanner";
 import { adSlots } from "@app/components/ad/adConfig";
 import CtaBanner from "../../_components/CtaBanner";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -90,6 +92,8 @@ export default function BattingAverageCriteriaColumnPage() {
         path="/column/batting-average-criteria"
         breadcrumbLeafName="打率の目安・基準"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -102,6 +106,10 @@ export default function BattingAverageCriteriaColumnPage() {
       <h1 className="text-2xl font-bold">
         打率はいくつから良い？レベル別の目安・基準を野球指標で解説
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         打率（AVG）の良し悪しを判断する目安は、
@@ -338,11 +346,7 @@ export default function BattingAverageCriteriaColumnPage() {
         body="BUZZ BASEアプリなら試合結果を入力するだけで、打率を含む全29指標を自動算出。チームメイトとランキング形式で成績を共有できます。完全無料。"
       />
 
-      <AdBanner
-        slot={adSlots.columnHorizontal}
-        format="horizontal"
-        className="mt-8"
-      />
+      <AdBanner slot={adSlots.columnFooter} className="mt-8" />
     </>
   );
 }

@@ -46,10 +46,17 @@ export default function NavigationMenu() {
 
   const shouldHideNavigationMenu = isRegistrationFlowPath(pathName);
 
+  // 未ログイン時はモバイルのタブバーを出さない。各項目はログイン要求に誘導するだけで導線価値が低く、
+  // 下端を fixed 要素で塞ぐと AdSense がアンカー広告を配信しないため。
+  // 認証確定前も隠し、表示してから消えるちらつきを避ける。
+  const shouldHideOnMobile = isLoggedIn !== true;
+
   return (
     <>
       {!shouldHideNavigationMenu && (
-        <nav className="fixed bottom-0 w-full bg-main pt-2.5 pb-1.5 border-t border-t-zinc-500 z-100 lg:w-56 lg:bottom-0 lg:left-0 lg:top-[var(--top-banner-offset,0px)] lg:h-full lg:border-t-0 lg:pl-6 lg:pt-16 lg:border-r-1 lg:border-r-zinc-500 lg:z-50">
+        <nav
+          className={`fixed bottom-0 w-full bg-main pt-2.5 pb-1.5 border-t border-t-zinc-500 z-100 lg:w-56 lg:bottom-0 lg:left-0 lg:top-[var(--top-banner-offset,0px)] lg:h-full lg:border-t-0 lg:pl-6 lg:pt-16 lg:border-r-1 lg:border-r-zinc-500 lg:z-50 ${shouldHideOnMobile ? "hidden lg:block" : ""}`}
+        >
           <Link
             href={isLoggedIn ? "/dashboard" : "/"}
             className="hidden lg:block"

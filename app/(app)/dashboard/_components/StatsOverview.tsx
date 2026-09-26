@@ -13,12 +13,18 @@ import PeriodRangeFilter, {
   type PeriodRange,
 } from "@app/components/filter/PeriodRangeFilter";
 import StatTooltipLabel from "@app/components/table/StatTooltipLabel";
+import { SCORING_POSITION_BATTING_AVERAGE_TOOLTIP } from "@app/constants/battingTooltips";
 import { INNING_FORMAT_TOOLTIP } from "@app/constants/pitchingTooltips";
 import {
   monthOptionsFromRecorded,
   type MonthOption,
 } from "@app/utils/buildMonthOptions";
-import { formatRate, formatRate2, formatEra } from "@app/utils/formatStats";
+import {
+  formatRate,
+  formatRate2,
+  formatEra,
+  formatHomeRunWithInsideThePark,
+} from "@app/utils/formatStats";
 import {
   normalizeBattingStats,
   normalizePitchingStats,
@@ -286,9 +292,17 @@ function BattingTable({ battingStats }: { battingStats: BattingStats }) {
             </span>
           </div>
           <div className={styleTableBox}>
-            <p className={`${styleTableTitle} rounded-bl-md`}>ISOD</p>
+            <p className={styleTableTitle}>ISOD</p>
             <span className={styleTableData}>
               {displayFormattedValue(calc?.isod)}
+            </span>
+          </div>
+          <div className={styleTableBox} aria-hidden="true">
+            <p className="border-b-1 border-b-zinc-500 py-2.5 text-sm rounded-bl-md">
+              &nbsp;
+            </p>
+            <span className="border-b-1 border-b-zinc-500 py-2.5 text-sm">
+              &nbsp;
             </span>
           </div>
         </div>
@@ -313,7 +327,12 @@ function BattingTable({ battingStats }: { battingStats: BattingStats }) {
           <div className={styleTableBox}>
             <p className={styleTableTitle}>本塁打</p>
             <span className={styleTableData}>
-              {displayValue(agg?.home_run)}
+              {agg?.home_run == null
+                ? "-"
+                : formatHomeRunWithInsideThePark(
+                    agg.home_run,
+                    agg.inside_the_park_home_run,
+                  )}
             </span>
           </div>
           <div className={styleTableBox}>
@@ -350,6 +369,16 @@ function BattingTable({ battingStats }: { battingStats: BattingStats }) {
             <p className={styleTableTitle}>長打率</p>
             <span className={styleTableData}>
               {displayFormattedValue(calc?.slugging_percentage)}
+            </span>
+          </div>
+          <div className={styleTableBox}>
+            <StatTooltipLabel
+              label="得点圏打率"
+              tooltip={SCORING_POSITION_BATTING_AVERAGE_TOOLTIP}
+              className={`${styleTableTitle} whitespace-nowrap`}
+            />
+            <span className={styleTableData}>
+              {displayFormattedValue(calc?.scoring_position_batting_average)}
             </span>
           </div>
           <div className={styleTableBox}>

@@ -1,5 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  BATTING_AVERAGE_COLUMN_DESCRIPTION,
+  BATTING_AVERAGE_COLUMN_TITLE,
+} from "./batting-average/_constants/meta";
+import {
+  ERA_COLUMN_DESCRIPTION,
+  ERA_COLUMN_TITLE,
+} from "./era/_constants/meta";
+import {
+  KBB_COLUMN_CARD_DESCRIPTION,
+  KBB_COLUMN_TITLE,
+} from "./k-bb/_constants/meta";
+import {
+  OPS_COLUMN_DESCRIPTION,
+  OPS_COLUMN_TITLE,
+} from "./ops/_constants/meta";
+import {
+  WINNING_PERCENTAGE_COLUMN_CARD_DESCRIPTION,
+  WINNING_PERCENTAGE_COLUMN_TITLE,
+} from "./winning-percentage/_constants/meta";
 
 export const metadata: Metadata = {
   title: "コラム一覧｜野球の指標・用語をわかりやすく解説",
@@ -47,9 +67,8 @@ const categories: Category[] = [
             articles: [
               {
                 slug: "ops",
-                title: "OPSとは（オーピーエス）？意味・計算方法・目安を解説",
-                description:
-                  "OPSの読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値を一覧表で掲載。",
+                title: OPS_COLUMN_TITLE,
+                description: OPS_COLUMN_DESCRIPTION,
               },
             ],
           },
@@ -68,28 +87,10 @@ const categories: Category[] = [
             label: "数値別解説",
             articles: [
               {
-                slug: "ops-800",
-                title: "OPS .800 はどのレベル？プロ・高校野球での意味",
-                description:
-                  "クリーンアップを任される好打者の目安。リーグ平均との比較や、達成するための OBP / SLG バランスを解説。",
-              },
-              {
                 slug: "ops-1000",
                 title: "OPS 1.000 を超える選手の特徴と「1超え」の意味",
                 description:
                   "OPS 1超えの難易度、達成に必要な OBP / SLG、NPB・MLB 歴代の 1.000 超えスラッガーを整理。",
-              },
-              {
-                slug: "ops-700",
-                title: "OPS .700 は平均？高校野球・プロ野球での位置づけ",
-                description:
-                  "リーグ平均水準でレギュラー定着の最低ライン。プロ・高校野球での意味と .700 を超えるための課題を解説。",
-              },
-              {
-                slug: "ops-max",
-                title: "OPS の最大値（マックス）は？理論値と歴代最高記録",
-                description:
-                  "OPS の理論上の最大値（5.000）と実戦での天井、NPB・MLB 歴代シーズン最高 OPS を整理。",
               },
             ],
           },
@@ -141,10 +142,8 @@ const categories: Category[] = [
             articles: [
               {
                 slug: "batting-average",
-                title:
-                  "打率（AVG・だりつ）とは？計算方法・打率の出し方・目安値を解説",
-                description:
-                  "打率の読み方・意味・計算式・打率の出し方を解説。NPB・MLB・高校野球・中学野球の目安値、ポジション別の基準も掲載。",
+                title: BATTING_AVERAGE_COLUMN_TITLE,
+                description: BATTING_AVERAGE_COLUMN_DESCRIPTION,
               },
             ],
           },
@@ -400,10 +399,8 @@ const categories: Category[] = [
             articles: [
               {
                 slug: "era",
-                title:
-                  "防御率（ERA・ぼうぎょりつ）とは？計算方法・目安値を解説",
-                description:
-                  "防御率の読み方・意味・計算式・評価基準を解説。NPB・MLB・高校野球・中学野球の目安値、先発・中継ぎ別の基準も掲載。",
+                title: ERA_COLUMN_TITLE,
+                description: ERA_COLUMN_DESCRIPTION,
               },
             ],
           },
@@ -504,6 +501,45 @@ const categories: Category[] = [
                   "失点率（RA）はいくつから良い？目安・計算方法・防御率との違い",
                 description:
                   "失点率（RA）の計算方法、レベル別の目安、防御率との使い分けを整理。",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "K/BB",
+        description:
+          "奪三振 ÷ 与四球で制球力と奪三振能力のバランスを示す指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "k-bb",
+                title: KBB_COLUMN_TITLE,
+                description: KBB_COLUMN_CARD_DESCRIPTION,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: "チーム指標",
+    description: "チームの成績評価に使う指標群（勝率など）",
+    stats: [
+      {
+        name: "勝率",
+        description: "勝利数 ÷（勝利数＋敗戦数）で順位を決める基本指標。",
+        groups: [
+          {
+            label: "基本",
+            articles: [
+              {
+                slug: "winning-percentage",
+                title: WINNING_PERCENTAGE_COLUMN_TITLE,
+                description: WINNING_PERCENTAGE_COLUMN_CARD_DESCRIPTION,
               },
             ],
           },

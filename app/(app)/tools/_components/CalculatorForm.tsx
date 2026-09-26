@@ -3,6 +3,8 @@
 import { Input, Button } from "@heroui/react";
 import Link from "next/link";
 import { useState, useCallback } from "react";
+import AdBanner from "@app/components/ad/AdBanner";
+import { adSlots } from "@app/components/ad/adConfig";
 import {
   type CalculatorField,
   type CalculatorOutput,
@@ -55,6 +57,9 @@ export default function CalculatorForm({
     number | Record<string, number | null> | null
   >(null);
   const [error, setError] = useState<string | null>(null);
+  // 計算成功後は広告枠を出しっぱなしにする。results を条件にすると入力エラーのたびに
+  // ins が DOM から消え、処理待ちの adsbygoogle.push が充填先を失う
+  const [hasCalculated, setHasCalculated] = useState(false);
 
   const handleChange = useCallback((name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -73,8 +78,13 @@ export default function CalculatorForm({
         return;
       }
       const num = parseFloat(val);
-      if (isNaN(num) || num < 0) {
+      if (!Number.isFinite(num) || num < 0) {
         setError(`${field.label}には0以上の数値を入力してください`);
+        return;
+      }
+      // input の step は spinner にしか効かず、直接入力された小数は弾けない
+      if (field.step === 1 && !Number.isInteger(num)) {
+        setError(`${field.label}には0以上の整数を入力してください`);
         return;
       }
       numericValues[field.name] = num;
@@ -104,6 +114,7 @@ export default function CalculatorForm({
       setResults(formatted);
     }
     setRawResult(calculated);
+    setHasCalculated(true);
     trackEvent(
       "tool_calculate",
       analyticsSourceTool ? { tool: analyticsSourceTool } : undefined,
@@ -174,6 +185,17 @@ export default function CalculatorForm({
             </div>
           ))}
         </div>
+      ) : null}
+
+      {/* 計算結果を見た直後は注目度が最も高いため、結果カードと CTA の間に広告枠を置く。
+          高さを確保しておかないと広告読み込み時に CTA が押し下げられて CLS になる。
+          rectangle は固定幅のため中央寄せし、未充填が確定したら高さ予約を解除して空白を残さない。 */}
+      {hasCalculated ? (
+        <AdBanner
+          slot={adSlots.toolsResultRectangle}
+          format="rectangle"
+          className="flex justify-center min-h-[280px] has-[[data-ad-status='unfilled']]:min-h-0 has-[[data-ad-status='unfilled']]:my-0"
+        />
       ) : null}
 
       {results.length > 0 ? (

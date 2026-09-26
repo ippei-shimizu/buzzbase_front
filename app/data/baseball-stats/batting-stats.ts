@@ -17,6 +17,7 @@ export const battingStats: BattingStat[] = [
       "打者がどれだけの確率で出塁するかを示します。安打・四球・死球から簡単に計算できます。",
     ],
     slug: "obp",
+    columnUrl: "/column/obp",
   },
   {
     title: "長打率",
@@ -25,6 +26,7 @@ export const battingStats: BattingStat[] = [
       "打者が打席に立った際に平均してどれだけの塁打数を稼ぐかを示す指標です。塁打数と打数から簡単に計算できます。",
     ],
     slug: "slugging",
+    columnUrl: "/column/slg",
   },
   {
     title: "OPS",
@@ -34,6 +36,14 @@ export const battingStats: BattingStat[] = [
     ],
     slug: "ops",
     columnUrl: "/column/ops",
+  },
+  {
+    title: "得点圏打率",
+    equation: "得点圏での安打 ÷ 得点圏での打数",
+    descriptions: [
+      "二塁または三塁に走者がいる場面に限った打率です。チャンスでどれだけ安打を打てたかを示します。",
+    ],
+    slug: "risp-batting-average",
   },
   {
     title: "ISO",

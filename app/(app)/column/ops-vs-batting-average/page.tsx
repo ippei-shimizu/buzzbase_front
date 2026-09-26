@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -29,6 +31,8 @@ export default function OpsVsBattingAverageColumnPage() {
         path="/column/ops-vs-batting-average"
         breadcrumbLeafName="OPSと打率の違い"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -41,6 +45,10 @@ export default function OpsVsBattingAverageColumnPage() {
       <h1 className="text-2xl font-bold">
         OPSと打率・出塁率・長打率の違いをわかりやすく解説
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="text-sm text-zinc-300 leading-6 mt-4">
         OPS・打率（AVG）・出塁率（OBP）・長打率（SLG）はどれも打撃を評価する指標ですが、

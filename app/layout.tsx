@@ -3,6 +3,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
+import { APP_STORE_APP_ID, APP_STORE_PROVIDER_TOKEN } from "@app/constants/app";
 import { notoSansJP } from "@app/font";
 
 const siteName = "BUZZ BASE 野球の個人成績をランキング形式で共有できるアプリ";
@@ -49,7 +50,11 @@ export default function RootLayout({
       <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
       <meta name="apple-mobile-web-app-title" content="BUZZ BASE" />
       <meta name="application-name" content="BUZZ BASE" />
-      <meta name="apple-itunes-app" content="app-id=6761011816" />
+      {/* 独自の SmartAppBanner が ct=smart_banner を使うため、iOS Safari 標準バナーは別の campaign で集計する */}
+      <meta
+        name="apple-itunes-app"
+        content={`app-id=${APP_STORE_APP_ID}, affiliate-data=pt=${APP_STORE_PROVIDER_TOKEN}&ct=smart_banner_native`}
+      />
       <meta name="google-adsense-account" content="ca-pub-2173577862865148" />
       {/* AdSense 本体スクリプトは Pro 判定が要るため (app)/layout.tsx の AdsenseScript が読み込む。
           読み込み開始がハイドレーション後になる分を、接続だけ先に張って埋める */}

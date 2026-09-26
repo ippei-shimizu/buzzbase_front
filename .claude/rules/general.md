@@ -13,6 +13,7 @@
 - すべての新しいファイルにはTypeScriptを使用
 - ESLint + Prettierに準拠（`yarn lint`, `yarn format`）
 - 型定義は`app/interface/index.ts`に集約
+- **コード上の識別子（定数キー・スロット名・slug など）をリネーム・削除したら、`docs/` 配下も grep して追随させる**。`docs/strategy/*.md` は次に同じ領域を触る人が根拠にするため、実態とずれると同じ乖離が再生産される
 
 ## 認証
 

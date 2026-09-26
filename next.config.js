@@ -14,6 +14,26 @@ const nextConfig = {
     qualities: [75],
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
   },
+  async redirects() {
+    // 数値別コラムを目安記事に統合したため、旧 URL は該当セクションへ恒久リダイレクトする
+    return [
+      {
+        source: "/column/ops-700",
+        destination: "/column/ops-criteria#ops-700",
+        permanent: true,
+      },
+      {
+        source: "/column/ops-800",
+        destination: "/column/ops-criteria#ops-800",
+        permanent: true,
+      },
+      {
+        source: "/column/ops-max",
+        destination: "/column/ops-criteria#ops-max",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

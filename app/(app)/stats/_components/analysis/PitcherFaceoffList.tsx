@@ -1,8 +1,8 @@
 "use client";
 import type { PitcherFaceoff } from "../../analysisActions";
-import { useState } from "react";
 import { formatBattingAverage } from "@app/utils/formatStats";
 import { PitcherStatsDetailGrid } from "./PitcherStatsDetailGrid";
+import { useExpandedIds } from "./useExpandedIds";
 
 interface PitcherFaceoffListProps {
   rows: PitcherFaceoff[];
@@ -18,13 +18,13 @@ const formatThrowHand = (
   return null;
 };
 
-/** 対戦投手別の打撃成績一覧。各行タップで詳細グリッドを展開する。 */
+/** 対戦投手別の打撃成績一覧。各行タップで詳細グリッドを展開する（複数行を同時に展開できる）。 */
 export function PitcherFaceoffList({
   rows,
   minPlateAppearances,
   totalTargetPa,
 }: PitcherFaceoffListProps) {
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { expandedIds, toggleExpanded } = useExpandedIds();
 
   if (rows.length === 0) {
     return (
@@ -53,7 +53,8 @@ export function PitcherFaceoffList({
       </div>
 
       {rows.map((row) => {
-        const isExpanded = expandedId === row.pitcher_id;
+        const isExpanded = expandedIds.has(row.pitcher_id);
+        const detailId = `pitcher-faceoff-detail-${row.pitcher_id}`;
         const attributes = [
           row.team_name,
           formatThrowHand(row.throw_hand),
@@ -64,13 +65,15 @@ export function PitcherFaceoffList({
           <div key={row.pitcher_id}>
             <button
               type="button"
-              onClick={() => setExpandedId(isExpanded ? null : row.pitcher_id)}
+              onClick={() => toggleExpanded(row.pitcher_id)}
               aria-expanded={isExpanded}
+              aria-controls={isExpanded ? detailId : undefined}
               className="flex w-full items-center border-b border-[#27272A] py-2.5 text-left"
             >
               <div className="flex-1 overflow-hidden">
                 <p className="mb-0.5 truncate text-sm font-semibold text-[#F4F4F4]">
-                  {isExpanded ? "▼" : "▶"} {row.pitcher_name}
+                  <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span>{" "}
+                  {row.pitcher_name}
                 </p>
                 {attributes.length > 0 ? (
                   <p className="mb-0.5 truncate text-[11px] text-[#A1A1AA]">
@@ -91,7 +94,7 @@ export function PitcherFaceoffList({
               </div>
             </button>
             {isExpanded ? (
-              <div className="mb-1">
+              <div id={detailId} className="mb-1">
                 <PitcherStatsDetailGrid
                   plateAppearances={row.plate_appearances}
                   atBats={row.at_bats}

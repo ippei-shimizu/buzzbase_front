@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Breadcrumbs from "../../tools/_components/Breadcrumbs";
+import ColumnArticleDates from "../_components/ColumnArticleDates";
 import ColumnArticleJsonLd from "../_components/ColumnArticleJsonLd";
+import { COLUMN_PUBLISHED_AT, COLUMN_UPDATED_AT } from "./_constants/meta";
 
 const faqItems = [
   {
@@ -100,6 +102,8 @@ export default function SlgCriteriaColumnPage() {
         path="/column/slg-criteria"
         breadcrumbLeafName="長打率の目安・基準"
         faq={faqItems}
+        datePublished={COLUMN_PUBLISHED_AT}
+        dateModified={COLUMN_UPDATED_AT}
       />
       <Breadcrumbs
         items={[
@@ -112,6 +116,10 @@ export default function SlgCriteriaColumnPage() {
       <h1 className="text-2xl font-bold">
         長打率はいくつから良い？レベル別の目安・基準・ポジション別を解説
       </h1>
+      <ColumnArticleDates
+        publishedAt={COLUMN_PUBLISHED_AT}
+        updatedAt={COLUMN_UPDATED_AT}
+      />
 
       <p className="mt-4 text-sm text-zinc-300 leading-6">
         長打率（SLG）は打者の長打力を示す指標で、NPB のリーグ平均が概ね

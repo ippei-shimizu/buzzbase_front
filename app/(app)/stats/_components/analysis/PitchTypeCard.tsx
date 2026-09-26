@@ -1,8 +1,8 @@
 "use client";
 import type { PitchTypeRow } from "../../analysisActions";
-import { useState } from "react";
 import { formatBattingAverage } from "@app/utils/formatStats";
 import { PitcherStatsDetailGrid } from "./PitcherStatsDetailGrid";
+import { useExpandedIds } from "./useExpandedIds";
 
 interface PitchTypeCardProps {
   rows: PitchTypeRow[];
@@ -15,11 +15,13 @@ function InsightRow({
   row,
   highlightColor,
   isExpanded,
+  detailId,
   onToggle,
 }: {
   row: PitchTypeRow;
   highlightColor: string;
   isExpanded: boolean;
+  detailId: string;
   onToggle: () => void;
 }) {
   return (
@@ -27,10 +29,11 @@ function InsightRow({
       type="button"
       onClick={onToggle}
       aria-expanded={isExpanded}
+      aria-controls={isExpanded ? detailId : undefined}
       className="mb-1 flex w-full items-center justify-between rounded-lg bg-[#27272A] px-2.5 py-2 text-left"
     >
       <span className="flex-1 text-[13px] font-semibold text-[#F4F4F4]">
-        {isExpanded ? "▼" : "▶"} {row.label}
+        <span aria-hidden="true">{isExpanded ? "▼" : "▶"}</span> {row.label}
       </span>
       <span className="flex items-baseline gap-1.5">
         <span
@@ -49,10 +52,10 @@ function InsightRow({
 
 /**
  * 球種別の打率カード。打数1以上を打率降順に並べ、上位を「得意」下位を「苦手」として
- * ハイライトし、0打数の球種は「その他 N 球種」に集約する。行タップで詳細グリッドを展開。
+ * ハイライトし、0打数の球種は「その他 N 球種」に集約する。行タップで詳細グリッドを展開（複数行を同時に展開できる）。
  */
 export function PitchTypeCard({ rows, totalTargetPa }: PitchTypeCardProps) {
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { expandedIds, toggleExpanded } = useExpandedIds();
 
   if (totalTargetPa === 0) {
     return (
@@ -84,17 +87,19 @@ export function PitchTypeCard({ rows, totalTargetPa }: PitchTypeCardProps) {
   const zeroCount = rows.length - activeRows.length;
 
   const renderRow = (row: PitchTypeRow, highlightColor: string) => {
-    const isExpanded = expandedId === row.id;
+    const isExpanded = expandedIds.has(row.id);
+    const detailId = `pitch-type-detail-${row.id}`;
     return (
       <div key={row.id}>
         <InsightRow
           row={row}
           highlightColor={highlightColor}
           isExpanded={isExpanded}
-          onToggle={() => setExpandedId(isExpanded ? null : row.id)}
+          detailId={detailId}
+          onToggle={() => toggleExpanded(row.id)}
         />
         {isExpanded ? (
-          <div className="mb-1.5">
+          <div id={detailId} className="mb-1.5">
             <PitcherStatsDetailGrid
               plateAppearances={row.plate_appearances}
               atBats={row.at_bats}
