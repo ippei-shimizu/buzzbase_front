@@ -1,3 +1,4 @@
+import type { OnboardingIllustration } from "@app/constants/onboarding";
 import type { GoalKind, GoalPeriodType } from "@app/types/goal";
 import type { PlanType, Platform, ProFeature } from "@app/types/pro";
 import type { ScheduleEventType } from "@app/types/schedule";
@@ -37,6 +38,8 @@ export const ANALYTICS_EVENTS = {
   PURCHASE_COMPLETED: "purchase completed",
   PURCHASE_FAILED: "purchase failed",
   FREE_LIMIT_REACHED: "free limit reached",
+  ONBOARDING_STEP_VIEWED: "onboarding step viewed",
+  ONBOARDING_COMPLETED: "onboarding completed",
 } as const;
 
 type LoginType = "email" | "google" | "apple";
@@ -219,3 +222,19 @@ export const trackFreeLimitReached = (
   feature: ProFeature,
   props?: { source?: FreeLimitSource; detection?: "client" | "server" },
 ) => capture(ANALYTICS_EVENTS.FREE_LIMIT_REACHED, { feature, ...props });
+
+/**
+ * 初回ウォークスルーのスライド表示。1枚目の初期表示も含み、戻る操作で往復すると
+ * 再送されるため、スライド別通過率はユニークユーザー数で集計する。
+ * mobile は登録前、Web はユーザー名登録後に表示するため、横断集計は `$lib` で分ける。
+ */
+export const trackOnboardingStepViewed = (props: {
+  step_index: number;
+  illustration: OnboardingIllustration;
+}) => capture(ANALYTICS_EVENTS.ONBOARDING_STEP_VIEWED, props);
+
+/** 初回ウォークスルーの終了。スキップと「はじめる」の両方で送り、`skipped` で区別する。 */
+export const trackOnboardingCompleted = (props: {
+  skipped: boolean;
+  last_step_index: number;
+}) => capture(ANALYTICS_EVENTS.ONBOARDING_COMPLETED, props);
