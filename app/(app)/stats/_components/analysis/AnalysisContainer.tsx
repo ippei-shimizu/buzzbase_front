@@ -19,6 +19,7 @@ import {
   type CountSituations,
   type PitchCourseData,
   type PitchCoursePitchTypeData,
+  type PitcherFaceoffCourseData,
   type PitcherFaceoffData,
   type PitchTypeData,
   getAdditionalStats,
@@ -31,6 +32,7 @@ import {
   getPitchCoursePitchTypes,
   getPitchCourses,
   getPitcherAttributeSummary,
+  getPitcherFaceoffCourses,
   getPitcherFaceoffs,
   getPitchTypes,
   getPlateAppearanceBreakdown,
@@ -55,6 +57,7 @@ import {
   SAMPLE_HIT_DIRECTIONS,
   SAMPLE_PITCH_COURSES,
   SAMPLE_PITCH_TYPES,
+  SAMPLE_PITCHER_FACEOFF_COURSES,
   SAMPLE_PITCHER_FACEOFFS,
 } from "./proStatsSampleData";
 import { RunnersSituationCard } from "./RunnersSituationCard";
@@ -82,6 +85,8 @@ interface AnalysisContainerProps {
 }
 
 /** 打撃成績分析（基本指標 + 打球チャート + 打球方向）のコンテナ。 */
+const loadSamplePitcherCross = async () => SAMPLE_PITCHER_FACEOFF_COURSES;
+
 export function AnalysisContainer({
   initialData,
   initialProData,
@@ -169,6 +174,11 @@ export function AnalysisContainer({
   const loadPitchTypeCross =
     async (): Promise<PitchCoursePitchTypeData | null> => {
       const result = await getPitchCoursePitchTypes(filters);
+      return unwrap("pitch_course_average", result);
+    };
+  const loadPitcherCross =
+    async (): Promise<PitcherFaceoffCourseData | null> => {
+      const result = await getPitcherFaceoffCourses(filters);
       return unwrap("pitch_course_average", result);
     };
 
@@ -345,12 +355,16 @@ export function AnalysisContainer({
           <PitchCourseCard
             data={pitchCourses}
             loadPitchTypeCross={loadPitchTypeCross}
+            loadPitcherCross={loadPitcherCross}
           />
         ) : canViewPitchCourses ? (
           <ProSectionPlaceholder label="コース別の打率" />
         ) : (
           <ProSampleSection feature="pitch_course_average">
-            <PitchCourseCard data={SAMPLE_PITCH_COURSES} />
+            <PitchCourseCard
+              data={SAMPLE_PITCH_COURSES}
+              loadPitcherCross={loadSamplePitcherCross}
+            />
           </ProSampleSection>
         )}
         {pitcherFaceoffs ? (

@@ -7,6 +7,8 @@ import type {
   PitchCourseZone,
   PitchCourseZoneSummary,
   PitcherFaceoff,
+  PitcherFaceoffCourseData,
+  PitcherFaceoffCourseRow,
   PitcherFaceoffData,
   PitchTypeData,
   PitchTypeRow,
@@ -90,4 +92,15 @@ export const EMPTY_PITCH_COURSE_PITCH_TYPES: PitchCoursePitchTypeData =
     rows: NO_PITCH_COURSE_PITCH_TYPE_ROWS,
     total_target_pa: 0,
     min_at_bats: 3,
+  });
+
+const NO_PITCHER_FACEOFF_COURSE_ROWS: PitcherFaceoffCourseRow[] = [];
+Object.freeze(NO_PITCHER_FACEOFF_COURSE_ROWS);
+
+export const EMPTY_PITCHER_FACEOFF_COURSES: PitcherFaceoffCourseData =
+  Object.freeze({
+    rows: NO_PITCHER_FACEOFF_COURSE_ROWS,
+    total_target_pa: 0,
+    min_at_bats: 3,
+    min_plate_appearances: 3,
   });

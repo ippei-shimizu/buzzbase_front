@@ -4,6 +4,7 @@ import type {
   PitchCourseData,
   PitchCourseZone,
   PitcherFaceoff,
+  PitcherFaceoffCourseData,
   PitcherFaceoffData,
   PitchTypeData,
   PitchTypeRow,
@@ -344,9 +345,11 @@ const SAMPLE_PITCH_COURSE_SEEDS: ReadonlyArray<[number, number, number]> = [
   [24, 1, 0],
 ];
 
-const SAMPLE_PITCH_COURSE_ZONES: PitchCourseZone[] = PITCH_COURSES.map(
-  (course) => {
-    const seed = SAMPLE_PITCH_COURSE_SEEDS.find(([c]) => c === course);
+const buildSampleZones = (
+  seeds: ReadonlyArray<[number, number, number]>,
+): PitchCourseZone[] =>
+  PITCH_COURSES.map((course) => {
+    const seed = seeds.find(([c]) => c === course);
     const atBats = seed?.[1] ?? 0;
     const hits = seed?.[2] ?? 0;
     return {
@@ -360,8 +363,9 @@ const SAMPLE_PITCH_COURSE_ZONES: PitchCourseZone[] = PITCH_COURSES.map(
       batting_average: atBats > 0 ? Number((hits / atBats).toFixed(3)) : 0,
       is_reliable: atBats >= 3,
     };
-  },
-);
+  });
+
+const SAMPLE_PITCH_COURSE_ZONES = buildSampleZones(SAMPLE_PITCH_COURSE_SEEDS);
 
 const sumZones = (zones: PitchCourseZone[]) => ({
   plate_appearances: zones.reduce((sum, z) => sum + z.plate_appearances, 0),
@@ -391,4 +395,39 @@ export const SAMPLE_PITCH_COURSES: PitchCourseData = {
   total_target_pa:
     sampleStrike.plate_appearances + sampleBall.plate_appearances,
   min_at_bats: 3,
+};
+
+// 対戦投手×コースのサンプル。投手ごとに攻められ方が違う（C は外角低め中心、D は内角中心）ことを見せる。
+const SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_C = buildSampleZones([
+  [13, 2, 1],
+  [14, 2, 0],
+  [19, 4, 0],
+  [20, 2, 1],
+]);
+const SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_D = buildSampleZones([
+  [7, 3, 2],
+  [12, 3, 1],
+  [17, 1, 0],
+]);
+
+export const SAMPLE_PITCHER_FACEOFF_COURSES: PitcherFaceoffCourseData = {
+  rows: [
+    {
+      id: 3,
+      label: "投手 C",
+      team_name: "□□高校",
+      plate_appearances: 10,
+      zones: SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_C,
+    },
+    {
+      id: 4,
+      label: "投手 D",
+      team_name: "◇◇高校",
+      plate_appearances: 7,
+      zones: SAMPLE_PITCHER_FACEOFF_COURSE_ZONES_D,
+    },
+  ],
+  total_target_pa: 17,
+  min_at_bats: 3,
+  min_plate_appearances: 3,
 };
