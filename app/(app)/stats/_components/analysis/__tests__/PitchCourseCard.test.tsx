@@ -122,6 +122,33 @@ describe("PitchCourseCard の投手別タブ", () => {
     ).toBeInTheDocument();
   });
 
+  it("取得に失敗しても読み込み中のまま止まらず、押し直すと再取得する", async () => {
+    const user = userEvent.setup();
+    const loadPitcherCross = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(PITCHER_DATA);
+    render(
+      <PitchCourseCard
+        data={COURSE_DATA}
+        loadPitcherCross={loadPitcherCross}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "投手別" }));
+    expect(
+      await screen.findByText("投手別のデータを取得できませんでした"),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "コース別" }));
+    await user.click(screen.getByRole("button", { name: "投手別" }));
+
+    expect(
+      await screen.findByRole("combobox", { name: "対戦投手" }),
+    ).toBeInTheDocument();
+    expect(loadPitcherCross).toHaveBeenCalledTimes(2);
+  });
+
   it("ローダが無ければタブを出さない", () => {
     render(<PitchCourseCard data={COURSE_DATA} />);
 

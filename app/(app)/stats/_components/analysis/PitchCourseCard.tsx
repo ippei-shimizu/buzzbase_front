@@ -41,11 +41,13 @@ function useLazyCross<T>(
   const load = () => {
     if (data !== null || isLoading || !loader) return;
     setIsLoading(true);
-    void loader().then((result) => {
-      setData(result);
-      if (result) onLoaded(result);
-      setIsLoading(false);
-    });
+    void loader()
+      .then((result) => {
+        setData(result);
+        if (result) onLoaded(result);
+      })
+      .catch(() => setData(null))
+      .finally(() => setIsLoading(false));
   };
   return { data, isLoading, load };
 }
