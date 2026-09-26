@@ -1,4 +1,5 @@
 import type { BattingStatsRow } from "../actions";
+import { SCORING_POSITION_BATTING_AVERAGE_TOOLTIP } from "@app/constants/battingTooltips";
 import StatsTable, { type Column, fmt3, fmtInt } from "./StatsTable";
 
 const BATTING_COLUMNS: Column<BattingStatsRow>[] = [
@@ -27,8 +28,7 @@ const BATTING_COLUMNS: Column<BattingStatsRow>[] = [
     key: "scoring_position_batting_average",
     label: "得点圏打率",
     format: fmt3,
-    tooltip:
-      "二塁または三塁に走者がいる場面（得点圏。一・二塁や満塁も含みます）での打率です。走者状況を記録した打席が対象で、得点圏での打数が 0 のときは「-」と表示します。",
+    tooltip: SCORING_POSITION_BATTING_AVERAGE_TOOLTIP,
     dashWhenMissing: true,
   },
   { key: "iso", label: "ISO", format: fmt3 },
