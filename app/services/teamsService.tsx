@@ -1,4 +1,4 @@
-import type { teamData } from "@app/interface";
+import type { SearchedTeam, teamData } from "@app/interface";
 import axiosInstance from "@app/utils/axiosInstance";
 
 export const getTeamName = async (id: number) => {
@@ -18,6 +18,25 @@ export const getTeams = async () => {
     console.error(error);
     throw error;
   }
+};
+
+/** GET /api/v1/teams の limit 上限（back の MAX_LIMIT と揃える）。 */
+export const TEAM_SEARCH_MAX_LIMIT = 100;
+
+/**
+ * チーム名の部分一致でチームを検索する（名前・id 順）。
+ * @param q 検索するチーム名
+ * @param limit 取得件数。省略時は back の既定件数
+ * @returns 一致したチーム（id / name / category_id / prefecture_id を含む）
+ */
+export const searchTeams = async (
+  q: string,
+  limit?: number,
+): Promise<SearchedTeam[]> => {
+  const response = await axiosInstance.get<SearchedTeam[]>("/api/v1/teams", {
+    params: { q, limit },
+  });
+  return response.data;
 };
 
 export const createOrUpdateTeam = async (teamData: teamData) => {
