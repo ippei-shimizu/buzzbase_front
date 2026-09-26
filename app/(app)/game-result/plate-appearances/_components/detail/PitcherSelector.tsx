@@ -74,7 +74,12 @@ export function PitcherSelector({
       if (requestedTeamIds.current.has(teamId)) return;
       requestedTeamIds.current.add(teamId);
       getTeamName(pitcher.team_id).then((name: string) => {
-        if (name) setTeamNames((prev) => ({ ...prev, [teamId]: name }));
+        // 失敗時は "" が返る。記録を戻して開き直したときに再取得させる。
+        if (!name) {
+          requestedTeamIds.current.delete(teamId);
+          return;
+        }
+        setTeamNames((prev) => ({ ...prev, [teamId]: name }));
       });
     });
   }, [isPickerOpen, pitchers]);
