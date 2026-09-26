@@ -32,11 +32,13 @@ export const toDetailInputFlags = (
 ): PlateAppearanceDetailFlags => {
   const itemFlags = {
     has_pitcher: detail.pitcherId !== null,
-    has_count: detail.finalBalls !== null || detail.finalStrikes !== null,
+    has_count:
+      detail.finalBalls !== null ||
+      detail.finalStrikes !== null ||
+      detail.finalOuts !== null,
     has_situation:
       detail.runnersState !== null ||
       detail.inning !== null ||
-      detail.finalOuts !== null ||
       detail.appearanceSituationId !== null,
     has_first_pitch_swing: detail.firstPitchSwing !== null,
     has_contact_quality: detail.contactQualityId !== null,
