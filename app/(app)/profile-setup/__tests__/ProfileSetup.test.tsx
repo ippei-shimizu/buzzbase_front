@@ -215,19 +215,25 @@ describe("登録直後のプロフィール入力", () => {
     expect(screen.getByText("current user: 7")).toBeInTheDocument();
   });
 
-  it("既存の所属チーム名を解決できないときは保存させない", async () => {
-    mockGetUserData.mockResolvedValue(buildUser({ team_id: 10 }));
-    mockGetTeamName.mockResolvedValue("");
-    renderPage();
+  it.each([
+    { label: "取得に失敗した（空文字）", resolvedName: "" },
+    { label: "応答に name が無い（undefined）", resolvedName: undefined },
+  ])(
+    "既存の所属チーム名を解決できない（$label）ときは保存させない",
+    async ({ resolvedName }) => {
+      mockGetUserData.mockResolvedValue(buildUser({ team_id: 10 }));
+      mockGetTeamName.mockResolvedValue(resolvedName);
+      renderPage();
 
-    expect(
-      await screen.findByText(/プロフィールを読み込めませんでした/),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "保存してはじめる" }),
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "スキップ" })).toBeEnabled();
-  });
+      expect(
+        await screen.findByText(/プロフィールを読み込めませんでした/),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "保存してはじめる" }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "スキップ" })).toBeEnabled();
+    },
+  );
 
   describe("所属チームの入力", () => {
     it("1 文字ごとではなく、入力が止まってから検索する", async () => {

@@ -68,8 +68,9 @@ export default function ProfileSetup() {
     getPositions,
   );
   const teamId = user?.team_id ?? null;
-  // getTeamName は失敗時に空文字を返すので、空文字は「解決できなかった」として扱う。
-  const { data: teamName } = useSWR(
+  // getTeamName は失敗時に空文字を返し、応答に name が無ければ undefined を返す。
+  // 値では読み込み中と区別できないため、判定はロード状態で行う。
+  const { data: teamName, isLoading: isTeamNameLoading } = useSWR(
     teamId === null ? null : ["profile-setup/team-name", teamId],
     ([, id]) => getTeamName(id),
   );
@@ -81,7 +82,8 @@ export default function ProfileSetup() {
     router.replace(onboardingPath);
   };
 
-  const isTeamNameUnresolved = teamId !== null && teamName === "";
+  const isTeamNameUnresolved =
+    teamId !== null && !isTeamNameLoading && !teamName;
   if (userError || positionsError || isTeamNameUnresolved) {
     return (
       <ProfileSetupLayout onSkip={() => leave(SKIPPED_BEFORE_LOAD)}>
@@ -94,7 +96,7 @@ export default function ProfileSetup() {
 
   // 既存の所属チームは表示名まで揃ってからフォームを出す。名前が空のまま保存すると
   // 未入力扱いになり、既存の所属チームを消してしまう。
-  const isTeamNameReady = teamId === null || teamName !== undefined;
+  const isTeamNameReady = teamId === null || !isTeamNameLoading;
   if (!user || !positions || !isTeamNameReady) {
     return (
       <ProfileSetupLayout onSkip={() => leave(SKIPPED_BEFORE_LOAD)}>
