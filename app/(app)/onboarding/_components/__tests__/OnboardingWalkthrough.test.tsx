@@ -2,6 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OnboardingWalkthrough from "../OnboardingWalkthrough";
 
+const mockCapture = jest.fn();
+jest.mock("@app/utils/posthog", () => ({
+  capture: (...args: unknown[]) => mockCapture(...args),
+}));
+
 const STEP_TITLES = [
   "打者も投手も、入力するだけで自動計算",
   "チームメイトとランキングで競う",
@@ -30,6 +35,15 @@ const swipe = (fromX: number, toX: number) => {
   fireEvent.touchStart(region, { changedTouches: [{ clientX: fromX }] });
   fireEvent.touchEnd(region, { changedTouches: [{ clientX: toX }] });
 };
+
+const capturedEvents = (event: string) =>
+  mockCapture.mock.calls
+    .filter(([capturedEvent]) => capturedEvent === event)
+    .map(([, properties]) => properties);
+
+beforeEach(() => {
+  mockCapture.mockClear();
+});
 
 describe("OnboardingWalkthrough", () => {
   it("1ステップ目のタイトルと説明を表示する", () => {
@@ -164,5 +178,99 @@ describe("OnboardingWalkthrough", () => {
     unmount();
 
     await expect(user.keyboard("{ArrowRight}")).resolves.not.toThrow();
+  });
+
+  describe("計測", () => {
+    it("初期表示と各ステップへの移動でステップ表示イベントを送る", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+        { step_index: 2, illustration: "growth" },
+      ]);
+    });
+
+    // 往復ぶんの再送は許容する仕様（通過率はユニークユーザー数で集計する前提）なので、重複排除を入れたら落ちるよう固定する
+    it("戻って進み直したときは同じステップを再送する", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+      await user.click(screen.getByRole("button", { name: "戻る" }));
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+        { step_index: 0, illustration: "autoCalc" },
+      ]);
+    });
+
+    it("端で押し戻してステップが変わらないときは再送しない", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.keyboard("{ArrowLeft}");
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+      ]);
+    });
+
+    it("最後のステップで進めてもステップ表示イベントを再送しない", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}");
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+        { step_index: 2, illustration: "growth" },
+      ]);
+    });
+
+    it("スワイプでの移動でもステップ表示イベントを送る", () => {
+      renderWalkthrough();
+
+      swipe(200, 40);
+
+      expect(capturedEvents("onboarding step viewed")).toEqual([
+        { step_index: 0, illustration: "autoCalc" },
+        { step_index: 1, illustration: "ranking" },
+      ]);
+    });
+
+    it("スキップで skipped: true の完了イベントを送る", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+      await user.click(screen.getByRole("button", { name: "スキップ" }));
+
+      expect(capturedEvents("onboarding completed")).toEqual([
+        { skipped: true, last_step_index: 1 },
+      ]);
+    });
+
+    it("「はじめる」で skipped: false の完了イベントを送る", async () => {
+      const { user } = renderWalkthrough();
+
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+      await user.click(screen.getByRole("button", { name: "次へ" }));
+      await user.click(screen.getByRole("button", { name: "はじめる" }));
+
+      expect(capturedEvents("onboarding completed")).toEqual([
+        { skipped: false, last_step_index: 2 },
+      ]);
+    });
+
+    it("連続で押しても完了イベントと onFinish は1回だけ", async () => {
+      const { user, onFinish } = renderWalkthrough();
+
+      await user.dblClick(screen.getByRole("button", { name: "スキップ" }));
+
+      expect(capturedEvents("onboarding completed")).toHaveLength(1);
+      expect(onFinish).toHaveBeenCalledTimes(1);
+    });
   });
 });
